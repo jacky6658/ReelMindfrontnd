@@ -13239,20 +13239,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 檢測是否為手機版
           const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
           
-          if (isMobile) {
-            // 手機版：直接跳轉到Google登入頁面
-            console.log('DEBUG: Mobile detected, redirecting to Google auth page');
-            window.location.href = authUrl;
-            return;
-          }
-          
-            // 桌面版：使用彈跳視窗
-          console.log('DEBUG: Desktop detected, preparing popup login');
-            
-            // 顯示彈跳視窗覆蓋層
-            showPopupOverlay('正在開啟 Google 登入視窗...');
-          
-          // 先註冊監聽器，再開彈窗（確保訊息不會遺漏）
+          // 一律採用主視窗跳轉（避免彈窗被擋與體驗不一致）
+          console.log('DEBUG: Redirecting to Google auth (main window)');
+          window.location.href = authUrl;
+          return;
+
+          // 以下舊的彈窗流程保留於歷史，不再執行
           let popup = null;
           let popupTimeout = null;
           
@@ -16697,9 +16689,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }catch(_){ window.location.hash = '#' + id; }
     }
     function goLogin(){
-      if (typeof startGoogleLogin === 'function') { startGoogleLogin(); return; }
-      if (typeof login === 'function') { login(); return; }
-      window.location.href = 'https://aivideobackend.zeabur.app/api/auth/google';
+      // 一律使用主視窗跳轉（fb=前端基底網址）
+      try{
+        var fb = encodeURIComponent(window.location.origin);
+        window.location.href = 'https://aivideobackend.zeabur.app/api/auth/google?fb=' + fb;
+      }catch(_){
+        window.location.href = 'https://aivideobackend.zeabur.app/api/auth/google';
+      }
     }
     document.addEventListener('click', function(e){
       var t = e.target;
