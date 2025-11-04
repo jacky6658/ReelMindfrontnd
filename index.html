@@ -11096,15 +11096,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             // 自動調整高度
             messageInput.addEventListener('input', autoResizeTextarea);
             
-            // 鍵盤事件：Enter換行，Ctrl+Enter發送
+            // 鍵盤事件：Enter發送，Shift+Enter換行
             messageInput.addEventListener('keydown', (e) => {
-              if (e.key === 'Enter' && e.ctrlKey) {
-                e.preventDefault();
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // 阻止默認的換行行為
                 const message = messageInput.value.trim();
                 if (message) {
                   sendMessage(message);
                 }
               }
+              // Shift+Enter 會讓默認換行行為生效，不需要特別處理
             });
           }
           
@@ -15156,7 +15157,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           };
         };
         inject('mode2', 'ai_advisor');
-        inject('mode3', 'ip_planning');
+        // inject('mode3', 'ip_planning'); // 已移除 IP人設規劃的三個功能按鈕
       });
 
       function checkAndUpdateResults(aiText) {
