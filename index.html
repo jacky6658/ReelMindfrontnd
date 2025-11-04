@@ -2320,8 +2320,13 @@
         }
         
         .mode2.fig1 .quick-buttons { 
-          gap: 6px !important; 
-          padding: 8px 12px !important; /* 手機版較小的 padding */
+          gap: 4px !important; 
+          padding: 6px 8px !important; /* 手機版較小的 padding */
+        }
+        
+        .mode2.fig1 .quick-btn {
+          padding: 4px 8px !important; /* 手機版快速按鈕變小 */
+          font-size: 11px !important; /* 手機版快速按鈕字體變小 */
         }
         
         .mode2.fig1 .input-row {
@@ -2337,12 +2342,63 @@
         .mode2.fig1 .chat-input { 
           font-size: 15px !important; 
         }
+        
+        /* Mode3 手機版快速按鈕變小 */
+        .mode3.fig1 .quick-buttons {
+          gap: 4px !important;
+          padding: 6px 8px !important;
+        }
+        
+        .mode3.fig1 .quick-btn {
+          padding: 4px 8px !important; /* 手機版快速按鈕變小 */
+          font-size: 11px !important; /* 手機版快速按鈕字體變小 */
+        }
+        
+        /* Mode3 手機版輸入和送出按鈕樣式修復 */
+        .mode3.fig1 .input-row {
+          position: static !important;
+          bottom: auto !important;
+          left: auto !important;
+          right: auto !important;
+          padding: 8px 12px 16px 12px !important;
+          flex-direction: column !important;
+          flex-shrink: 0 !important;
+        }
+        
+        .mode3.fig1 .input-container {
+          display: flex !important;
+          flex-direction: row !important;
+          gap: 8px !important;
+          align-items: center !important;
+          width: 100% !important;
+        }
+        
+        .mode3.fig1 #mode3-message-input {
+          flex: 1 !important;
+          min-height: 40px !important;
+          max-height: 100px !important;
+          padding: 8px 12px !important;
+          font-size: 15px !important;
+          border-radius: 20px !important;
+        }
+        
+        .mode3.fig1 #mode3-send-btn {
+          height: 40px !important;
+          min-width: 40px !important;
+          width: 40px !important;
+          padding: 0 !important;
+          border-radius: 50% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
       }
 
       /* fig1 強制覆寫（提高優先級） */
-      /* 鎖住整頁滾動：當 mode2.fig1 存在時，頁面不捲動，只讓對話框捲動 */
+      /* 鎖住整頁滾動：當 mode2.fig1 或 mode3.fig1 存在時，頁面不捲動，只讓對話框捲動 */
       /* 確保 body 和 html 不滾動 */
-      body.mode2-active, html.mode2-active {
+      body.mode2-active, html.mode2-active,
+      body.mode3-active, html.mode3-active {
         overflow: hidden !important;
         height: 100% !important;
         position: fixed !important;
@@ -2389,6 +2445,63 @@
         overscroll-behavior: contain !important;
         touch-action: pan-y !important;
         overflow-y: auto !important; /* chat list 滾動，這是唯一可滾動的區域 */
+        position: relative !important;
+        z-index: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      
+      /* Mode3 固定佈局 - 與 Mode2 相同 */
+      .mode3.fig1 {
+        height: 100dvh !important;
+        overflow: hidden !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        z-index: 1 !important;
+      }
+
+      .mode3.fig1 .mode3-page {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        padding-top: 80px !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        position: relative !important;
+      }
+
+      .mode3.fig1 .mode3-chat-container {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        position: relative !important;
+      }
+
+      .mode3.fig1 #mode3-chat-messages {
+        margin: 0 !important;
+        padding: 16px 24px !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        height: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: contain !important;
+        touch-action: pan-y !important;
+        overflow-y: auto !important;
         position: relative !important;
         z-index: 1 !important;
         width: 100% !important;
@@ -9083,15 +9196,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }
         }
         
-        // 移除所有頁面的 mode2-active 類（防止 body 滾動被鎖定）
-        document.body.classList.remove('mode2-active');
-        document.documentElement.classList.remove('mode2-active');
+        // 移除所有頁面的 mode2-active 和 mode3-active 類（防止 body 滾動被鎖定）
+        document.body.classList.remove('mode2-active', 'mode3-active');
+        document.documentElement.classList.remove('mode2-active', 'mode3-active');
         
         // 隱藏所有頁面
         document.querySelectorAll('.page').forEach(page => {
           page.classList.remove('active');
-          // 移除 mode2 頁面的 fig1 類（如果存在）
-          if (page.id === 'mode2') {
+          // 移除 mode2 和 mode3 頁面的 fig1 類（如果存在）
+          if (page.id === 'mode2' || page.id === 'mode3') {
             page.classList.remove('fig1');
           }
         });
@@ -9149,6 +9262,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             if (sendBtn) {
               sendBtn.removeAttribute('style');
             }
+          }
+          
+          // 如果是 mode3，添加 mode3-active 類並確保有 fig1 類
+          if (pageId === 'mode3') {
+            targetPage.classList.add('fig1');
+            document.body.classList.add('mode3-active');
+            document.documentElement.classList.add('mode3-active');
+            console.log('Mode3 activated, body scroll locked');
           }
         } else {
           console.error('Page not found:', pageId);
