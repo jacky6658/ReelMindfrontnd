@@ -9002,8 +9002,97 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         `;
       }
       
+      // 定期檢查 token 狀態（每分鐘檢查一次）
+      function startTokenMonitor() {
+        setInterval(() => {
+          const token = localStorage.getItem('ipPlanningToken');
+          if (token) {
+            // 檢查是否過期
+            if (isTokenExpired(token)) {
+              // Token 已過期，嘗試刷新（會自動登出如果刷新失敗）
+              tryRefreshTokenSafe().catch(err => {
+                console.error('自動刷新 Token 失敗:', err);
+              });
+            }
+          }
+        }, 60000); // 每分鐘檢查一次
+      }
+
+      // 統一的安全 fetch 函數（用於需要認證的 API 呼叫）
+      async function safeFetch(url, options = {}) {
+        const token = localStorage.getItem('ipPlanningToken');
+        
+        // 檢查 token 是否存在
+        if (!token) {
+          // 如果沒有 token，但用戶認為已登入，可能需要登出
+          if (ipPlanningUser) {
+            forceLogout('請先登入');
+          }
+          throw new Error('需要登入');
+        }
+        
+        // 檢查 token 是否過期
+        if (isTokenExpired(token)) {
+          // Token 已過期，嘗試刷新
+          const refreshed = await tryRefreshTokenSafe();
+          if (!refreshed) {
+            // 刷新失敗，已自動登出
+            throw new Error('Token 已過期且無法刷新');
+          }
+        }
+        
+        // 準備 headers
+        const headers = {
+          ...options.headers,
+          'Authorization': `Bearer ${localStorage.getItem('ipPlanningToken')}`
+        };
+        
+        try {
+          const response = await fetch(url, { ...options, headers });
+          
+          // 如果收到 401 或 403，嘗試刷新或登出
+          if (response.status === 401) {
+            const refreshed = await tryRefreshTokenSafe();
+            if (refreshed) {
+              // 刷新成功，使用新 token 重試
+              headers['Authorization'] = `Bearer ${localStorage.getItem('ipPlanningToken')}`;
+              return await fetch(url, { ...options, headers });
+            }
+            // 刷新失敗，已自動登出
+            throw new Error('認證失敗');
+          }
+          
+          if (response.status === 403) {
+            let errorMessage = '認證失敗，請重新登入';
+            try {
+              const errorData = await response.clone().json();
+              if (errorData.detail) {
+                errorMessage = errorData.detail;
+              }
+            } catch (e) {
+              // 如果無法解析 JSON，使用預設訊息
+            }
+            forceLogout(errorMessage);
+            throw new Error(errorMessage);
+          }
+          
+          return response;
+        } catch (error) {
+          // 如果是網路錯誤，不要登出（可能是暫時的網路問題）
+          if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            throw error;
+          }
+          
+          // 其他錯誤（包括我們自己拋出的）繼續傳播
+          throw error;
+        }
+      }
+
       // 初始化頁面
       document.addEventListener('DOMContentLoaded', function() {
+        // 啟動 token 監控（每分鐘檢查一次）
+        startTokenMonitor();
+        
         // 檢查 URL 參數中是否有 token（OAuth callback fallback）
         const urlParams = new URLSearchParams(window.location.search);
         const tokenParam = urlParams.get('token');
@@ -9241,8 +9330,19 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 根據登入狀態更新 UI
         if (ipPlanningToken && ipPlanningUser) {
-          // 在更新 UI 之前，先檢查並主動刷新 token（如果即將過期）
-          await proactiveRefreshToken();
+          // 檢查 token 是否已過期
+          if (isTokenExpired(ipPlanningToken)) {
+            // Token 已過期，嘗試刷新
+            console.log('Token 已過期，嘗試刷新...');
+            const refreshed = await tryRefreshTokenSafe();
+            if (!refreshed) {
+              // 刷新失敗，已自動登出（在 tryRefreshTokenSafe 中處理）
+              return;
+            }
+          } else if (isTokenExpiringSoon(ipPlanningToken)) {
+            // Token 即將過期，主動刷新
+            await proactiveRefreshToken();
+          }
           updateUserInfo();
         } else {
           // 未登入時顯示登入按鈕
@@ -13734,10 +13834,24 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 headers: { 'Authorization': `Bearer ${ipPlanningToken}` }
               });
             } else {
-              // Token 刷新失敗，保留本地用戶資訊
-              console.warn('Token 刷新失敗，使用本地儲存的資訊');
+              // Token 刷新失敗，已自動登出（在 tryRefreshTokenSafe 中處理）
               return;
             }
+          }
+          
+          // 如果收到 403，直接登出
+          if (response.status === 403) {
+            let errorMessage = '認證失敗，請重新登入';
+            try {
+              const errorData = await response.clone().json();
+              if (errorData.detail) {
+                errorMessage = errorData.detail;
+              }
+            } catch (e) {
+              // 如果無法解析 JSON，使用預設訊息
+            }
+            forceLogout(errorMessage);
+            return;
           }
         
         if (response.ok) {
@@ -14684,6 +14798,29 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         } catch (_) { /* 靜默失敗，不影響使用者體驗 */ }
       }
 
+      // 檢查 token 是否已過期
+      function isTokenExpired(token) {
+        if (!token) return true;
+        try {
+          // 解析 JWT token（簡單格式：header.payload.signature）
+          const parts = token.split('.');
+          if (parts.length !== 3) return true;
+          
+          // 解碼 payload
+          const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+          
+          // 檢查過期時間
+          if (payload.exp) {
+            const now = Math.floor(Date.now() / 1000);
+            return payload.exp < now; // 已過期
+          }
+          return true; // 如果沒有 exp，認為已過期
+        } catch (e) {
+          console.error('檢查 token 過期時出錯:', e);
+          return true; // 如果無法解析，視為過期
+        }
+      }
+
       // 檢查 token 是否即將過期或已過期
       function isTokenExpiringSoon(token) {
         if (!token) return true;
@@ -14707,6 +14844,31 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 解析失敗，認為已過期
           return true;
         }
+      }
+
+      // 強制登出並清除所有狀態
+      function forceLogout(reason = '登入已過期，請重新登入') {
+        // 清除 token 和用戶資料
+        ipPlanningToken = null;
+        ipPlanningUser = null;
+        localStorage.removeItem('ipPlanningToken');
+        localStorage.removeItem('ipPlanningUser');
+        localStorage.removeItem('subscriptionStatus');
+        
+        // 更新 UI
+        updateAuthUI(false);
+        showLoginButton();
+        
+        // 顯示提示
+        showToast(reason || '登入已過期，請重新登入', 5000);
+        
+        // 關閉用戶抽屜
+        closeUserDrawer();
+        
+        // 更新訂閱狀態
+        document.body.dataset.subscribed = 'false';
+        
+        console.log('已自動登出:', reason);
       }
 
       // 主動刷新 token（在頁面載入時調用）
@@ -14748,9 +14910,20 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           if (!r.ok) {
             // 401 代表 refresh 失效（token 已過期且無法刷新）
-            // 靜默處理，不輸出錯誤日誌（避免控制台噪音）
-            // 但不在這裡清除 token（避免影響正在進行的對話）
+            // 嘗試從回應中獲取錯誤訊息
+            let errorMessage = '登入已過期，請重新登入';
+            try {
+              const errorData = await r.clone().json();
+              if (errorData.detail) {
+                errorMessage = errorData.detail;
+              }
+            } catch (e) {
+              // 如果無法解析 JSON，使用預設訊息
+            }
+            
+            // Token 無法刷新，強制登出
             isRefreshingToken = false;
+            forceLogout(errorMessage);
             return false;
           }
           
@@ -14766,8 +14939,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           isRefreshingToken = false;
           return false;
         } catch (error) {
-          // 網路錯誤等異常，靜默處理
+          // 網路錯誤：如果是網路錯誤，不登出（可能是暫時的連線問題）
+          if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            isRefreshingToken = false;
+            return false;
+          }
+          
+          // 其他錯誤：強制登出
           isRefreshingToken = false;
+          forceLogout('刷新登入狀態失敗，請重新登入');
           return false;
         }
       }
