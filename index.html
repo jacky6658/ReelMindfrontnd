@@ -2183,10 +2183,11 @@
         box-sizing: border-box !important;
       }
 
-      .mode2.fig1 .quick-buttons {
+      .mode2.fig1 #chatMessages .quick-buttons {
         gap: 8px !important;
-        padding: 8px 24px !important; /* 左右 padding 與對話內容對齊 */
+        padding: 12px 0 16px 0 !important; /* 上下 padding，左右不設以與對話內容對齊 */
         margin: 0 !important;
+        margin-top: auto !important; /* 推到底部 */
         display: grid !important;
         grid-template-columns: repeat(3, 1fr) !important;
         align-items: stretch !important;
@@ -2195,6 +2196,9 @@
         background: transparent !important;
         flex-shrink: 0 !important; /* 固定在底部，不允許縮小 */
         box-sizing: border-box !important;
+        position: sticky !important;
+        bottom: 0 !important;
+        z-index: 10 !important;
       }
 
       .mode2.fig1 .input-row {
@@ -8172,13 +8176,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               <!-- 聊天訊息區域 -->
               <div id="chatMessages" class="chat-messages">
                 <!-- 聊天訊息將在這裡動態插入 -->
-              </div>
-              
-              <!-- 快速按鈕區域 -->
-              <div class="quick-buttons" id="quickButtons">
-                <button class="quick-btn" data-text="我要如何開始？">我要如何開始？</button>
-                <button class="quick-btn" data-text="我要怎麼帳號定位">我要怎麼帳號定位</button>
-                <button class="quick-btn" data-text="什麼是腳本選題">什麼是腳本選題</button>
+                
+                <!-- 快速按鈕區域 - 放在對話框內 -->
+                <div class="quick-buttons" id="quickButtons">
+                  <button class="quick-btn" data-text="我要如何開始？">我要如何開始？</button>
+                  <button class="quick-btn" data-text="我要怎麼帳號定位">我要怎麼帳號定位</button>
+                  <button class="quick-btn" data-text="什麼是腳本選題">什麼是腳本選題</button>
+                </div>
               </div>
               
               <!-- 輸入區域 -->
@@ -10781,7 +10785,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 添加用戶訊息
         const userMessage = createChatGPTMessage('user', message);
         chatMessages.appendChild(userMessage);
-        try { await recordConversationMessage('ip_planning', 'user', message); } catch (_) {}
+        // 記錄長期記憶
+        console.log('📝 準備儲存長期記憶 (IP 人設規劃 - user)');
+        try { 
+          await recordConversationMessage('ip_planning', 'user', message); 
+        } catch (error) {
+          console.error('❌ 長期記憶儲存異常 (IP 人設規劃 - user):', error);
+        }
         
         // 添加載入動畫
         const typingIndicator = createTypingIndicator();
@@ -10857,7 +10867,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   if (fullContent) {
                     checkIfScriptRequest(fullContent);
                   }
-                  try { await recordConversationMessage('ip_planning', 'assistant', fullContent); } catch (_) {}
+                  // 記錄長期記憶
+                  console.log('📝 準備儲存長期記憶 (IP 人設規劃 - assistant)');
+                  try { 
+                    await recordConversationMessage('ip_planning', 'assistant', fullContent); 
+                  } catch (error) {
+                    console.error('❌ 長期記憶儲存異常 (IP 人設規劃 - assistant):', error);
+                  }
                   return;
                 }
                 
@@ -14212,7 +14228,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (!canSubmit()) return;
         lastMessage = message;
         const userNode = append('user', message);
-        try { await recordConversationMessage('ai_advisor', 'user', message); } catch (_) {}
+        // 記錄長期記憶
+        console.log('📝 準備儲存長期記憶 (AI 顧問 - user)');
+        try { 
+          await recordConversationMessage('ai_advisor', 'user', message); 
+        } catch (error) {
+          console.error('❌ 長期記憶儲存異常 (AI 顧問 - user):', error);
+        }
         const assistantNode = append('assistant', '');
 
         // 顯示 AI 回覆中的載入狀態
@@ -14325,7 +14347,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 } else if (evt.type === 'end') {
                   history.push({ role: 'user', content: message });
                   history.push({ role: 'assistant', content: aiText });
-                  try { await recordConversationMessage('ai_advisor', 'assistant', aiText); } catch (_) {}
+                  // 記錄長期記憶
+                  console.log('📝 準備儲存長期記憶 (AI 顧問 - assistant)');
+                  try { 
+                    await recordConversationMessage('ai_advisor', 'assistant', aiText); 
+                  } catch (error) {
+                    console.error('❌ 長期記憶儲存異常 (AI 顧問 - assistant):', error);
+                  }
                   
                   // 檢查是否包含腳本結果，自動顯示結果區塊
                   checkAndUpdateResults(aiText);
@@ -14918,9 +14946,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
 
       async function recordConversationMessage(conversationType, role, content) {
+        console.log('🔍 recordConversationMessage 函數被調用:', { conversationType, role, hasContent: !!content, contentLength: content?.length || 0 });
         try {
           if (!content) {
-            console.warn('長期記憶儲存跳過：內容為空');
+            console.warn('⚠️ 長期記憶儲存跳過：內容為空');
             return;
           }
           
