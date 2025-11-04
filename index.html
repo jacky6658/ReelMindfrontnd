@@ -1383,12 +1383,12 @@
       #mode3.active .mode3-chat-container .input-row {
         display: flex !important;
         flex-direction: column !important;
-        padding: 16px;
+        padding: 16px 24px; /* 左右 padding 與對話內容對齊 */
         margin-top: 0;
         border-top: 1px solid #e5e7eb;
         background: transparent;
         border-radius: 0;
-        gap: 12px;
+        gap: 12px; /* 輸入框和快速按鈕之間的間距 */
       }
       
       #mode2.active .input-container,
@@ -1517,16 +1517,16 @@
       /* 優化輸入框樣式 */
       #messageInput {
         flex: 1;
-        min-height: 44px; /* 最小高度 */
+        min-height: 60px; /* 放大最小高度 */
         max-height: 200px; /* 最大高度，允許調整 */
-        padding: 12px 16px;
+        padding: 16px 20px; /* 增大內邊距 */
         border: 1px solid #e5e7eb;
-        border-radius: 22px;
+        border-radius: 12px; /* 稍微增大圓角 */
         font-size: 15px;
         resize: vertical; /* 允許垂直調整高度 */
         outline: none;
         transition: border-color 0.2s;
-        line-height: 1.5;
+        line-height: 1.6; /* 增加行高 */
         overflow-y: auto; /* 內容超出時顯示滾動條 */
       }
       
@@ -1536,16 +1536,20 @@
       }
       
       #sendBtn {
-        padding: 12px 20px;
+        height: 60px; /* 與輸入框高度一致 */
+        min-width: 60px; /* 稍微增大 */
+        padding: 0 24px; /* 增大內邊距 */
         background: #3b82f6;
         color: white;
         border: none;
-        border-radius: 22px;
+        border-radius: 12px; /* 與輸入框圓角一致 */
         cursor: pointer;
         font-size: 14px;
         font-weight: 500;
         transition: background-color 0.2s;
-        min-width: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       
       #sendBtn:hover {
@@ -2105,26 +2109,26 @@
 
       .mode2.fig1 .chat-input {
         flex: 1;
-        min-height: 44px;
+        min-height: 60px; /* 放大最小高度 */
         max-height: 200px; /* 允許調整高度 */
         border: 1px solid #d1d5db;
-        border-radius: 10px;
-        padding: 10px 12px;
-        font-size: 14px;
+        border-radius: 12px; /* 稍微增大圓角 */
+        padding: 16px 20px; /* 增大內邊距，讓輸入框更大 */
+        font-size: 15px; /* 稍微增大字體 */
         background: #ffffff;
         resize: vertical; /* 允許垂直調整 */
         overflow-y: auto; /* 內容超出時顯示滾動條 */
-        line-height: 1.5;
+        line-height: 1.6; /* 增加行高，讓文字更舒適 */
       }
 
       .mode2.fig1 .send-btn {
-        height: 44px;
-        min-width: 44px;
-        border-radius: 10px;
+        height: 60px; /* 與輸入框高度一致 */
+        min-width: 60px; /* 稍微增大 */
+        border-radius: 12px; /* 與輸入框圓角一致 */
         background: #3b82f6;
         color: #ffffff;
         border: none;
-        padding: 0 18px;
+        padding: 0 24px; /* 增大內邊距 */
       }
 
       /* 手機版微調 */
@@ -2222,10 +2226,10 @@
         box-sizing: border-box !important;
       }
 
-      /* 快速按鈕放在輸入欄位內 - 電腦版 */
+      /* 快速按鈕放在輸入欄位底部 - 電腦版 */
       .mode2.fig1 .input-row .quick-buttons {
         gap: 8px !important;
-        padding: 0 !important;
+        padding: 8px 0 0 0 !important; /* 在輸入框下方，留一點間距 */
         margin: 0 !important;
         display: flex !important;
         flex-wrap: wrap !important;
@@ -8279,18 +8283,17 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               
               <!-- 輸入區域 -->
               <div class="input-row">
-                <!-- 快速按鈕區域 - 放在輸入欄位內 -->
-                <div class="quick-buttons" id="quickButtons">
-                  <button class="quick-btn" data-text="我要如何開始？">我要如何開始？</button>
-                  <button class="quick-btn" data-text="我要怎麼帳號定位">我要怎麼帳號定位</button>
-                  <button class="quick-btn" data-text="什麼是腳本選題">什麼是腳本選題</button>
-                </div>
-                
                 <div class="input-container">
                   <textarea id="messageInput" class="chat-input" placeholder="向AI顧問提問..." rows="1"></textarea>
                   <button id="sendBtn" class="send-btn" disabled>
                     <i class="fas fa-paper-plane"></i>
                   </button>
+                </div>
+                <!-- 快速按鈕區域 - 放在輸入欄位底部 -->
+                <div class="quick-buttons" id="quickButtons">
+                  <button class="quick-btn" data-text="我要如何開始？">我要如何開始？</button>
+                  <button class="quick-btn" data-text="我要怎麼帳號定位">我要怎麼帳號定位</button>
+                  <button class="quick-btn" data-text="什麼是腳本選題">什麼是腳本選題</button>
                 </div>
               </div>
               
@@ -16335,7 +16338,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 添加用戶訊息
         addMode3Message('user', messageText);
-        try { await recordConversationMessage('ip_planning', 'user', messageText); } catch (_) {}
+        // 記錄長期記憶（用戶訊息）
+        console.log('📝 準備儲存長期記憶 (IP 人設規劃 - user)');
+        try { 
+          await recordConversationMessage('ip_planning', 'user', messageText); 
+        } catch (error) {
+          console.error('❌ 長期記憶儲存異常 (IP 人設規劃 - user):', error);
+        }
         
         // 添加載入訊息
         const loadingId = addMode3LoadingMessage();
@@ -16383,7 +16392,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           while (true) {
             const { done, value } = await reader.read();
-            if (done) break;
+            if (done) {
+              // 串流結束，儲存完整的 AI 回覆到長期記憶
+              if (assistantMessage) {
+                console.log('📝 串流完成，準備儲存長期記憶 (IP 人設規劃 - assistant)');
+                try { 
+                  await recordConversationMessage('ip_planning', 'assistant', assistantMessage); 
+                } catch (error) {
+                  console.error('❌ 長期記憶儲存異常 (IP 人設規劃 - assistant):', error);
+                }
+              }
+              break;
+            }
             
             const chunk = decoder.decode(value);
             console.log('收到串流數據:', chunk);
@@ -16393,7 +16413,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               if (line.startsWith('data: ')) {
                 const data = line.slice(6);
                 console.log('解析數據:', data);
-                if (data === '[DONE]') continue;
+                if (data === '[DONE]') {
+                  // 收到 [DONE] 標記，儲存完整的 AI 回覆到長期記憶
+                  if (assistantMessage) {
+                    console.log('📝 收到 [DONE] 標記，準備儲存長期記憶 (IP 人設規劃 - assistant)');
+                    try { 
+                      await recordConversationMessage('ip_planning', 'assistant', assistantMessage); 
+                    } catch (error) {
+                      console.error('❌ 長期記憶儲存異常 (IP 人設規劃 - assistant):', error);
+                    }
+                  }
+                  continue;
+                }
                 
                 try {
                   const parsed = JSON.parse(data);
@@ -16407,11 +16438,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                     assistantMessage += parsed.content;
                     console.log('更新訊息內容:', assistantMessage);
                     updateMode3Message(messageId, assistantMessage);
-                  } else if (data === '[DONE]') {
-                    // AI 回覆完成，儲存到長期記憶
-                    if (assistantMessage) {
-                      try { await recordConversationMessage('ip_planning', 'assistant', assistantMessage); } catch (_) {}
-                    }
                   }
                 } catch (e) {
                   console.error('JSON 解析錯誤:', e, '數據:', data);
