@@ -2063,106 +2063,96 @@
 
       /* 手機版微調 */
       @media (max-width: 768px) {
-        .mode2.fig1 .mode2-page {
-          padding-left: 12px !important;
-          padding-right: 12px !important;
-        }
         .mode2.fig1 #chatMessages {
-          padding: 12px !important; /* 移除底部 padding，由輸入欄的 sticky 處理 */
-          border-radius: 8px !important;
-          width: 100% !important; /* 對話框滿版顯示 */
-          max-width: 100% !important; /* 移除寬度限制 */
-          margin: 0 !important; /* 移除置中對齊 */
+          padding: 12px !important; /* 手機版較小的 padding */
         }
         .mode2.fig1 .quick-buttons { 
           gap: 6px !important; 
-          width: 100% !important; /* 快速按鈕滿版顯示 */
-          max-width: 100% !important; /* 移除寬度限制 */
-          margin: 0 !important; /* 移除置中對齊 */
-          padding: 8px 0 !important; /* 保持一致的 padding */
+          padding: 8px 12px !important; /* 手機版較小的 padding */
         }
         .mode2.fig1 .input-row {
-          width: 100% !important; /* 輸入欄位滿版顯示 */
-          max-width: 100% !important; /* 移除寬度限制 */
-          margin: 0 !important; /* 移除置中對齊 */
-          padding: 8px 0 !important; /* 保持一致的 padding */
+          padding: 8px 12px 16px 12px !important; /* 手機版較小的 padding */
         }
         .mode2.fig1 .chat-input { font-size: 15px !important; }
       }
 
       /* fig1 強制覆寫（提高優先級） */
-      /* 鎖住整頁滾動：當 mode2.fig1 存在時，頁面不捲動，只讓聊天框捲動 */
+      /* 鎖住整頁滾動：當 mode2.fig1 存在時，頁面不捲動，只讓對話框捲動 */
       .mode2.fig1 {
         height: 100dvh !important; /* 整頁固定高度 */
         overflow: hidden !important; /* 鎖住整頁，只讓對話框滾動 */
         position: fixed !important;
-        top: 0 !important;
+        top: 0 !important; /* 從頂部開始，header 會覆蓋在上面 */
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
         width: 100% !important;
+        display: flex !important; /* 最外層容器直接使用 flex */
+        flex-direction: column !important;
+        z-index: 1 !important; /* 確保在 header 下方（header z-index: 100） */
       }
 
       .mode2.fig1 .mode2-page {
         display: flex !important;
         flex-direction: column !important;
-        height: 100% !important; /* 跟隨父層100dvh */
+        flex: 1 !important; /* 占滿剩餘空間（header下方） */
+        min-height: 0 !important; /* 允許子元素正確捲動 */
         overflow: hidden !important; /* 只讓對話框滾動 */
-        padding-top: 0 !important; /* chat container 貼齊 header */
-        padding-left: 24px !important;
-        padding-right: 24px !important;
-        padding-bottom: 0 !important; /* 移除底部 padding，讓輸入欄固定 */
+        padding: 0 !important; /* 移除所有 padding，讓內容直接貼邊 */
+        padding-top: 80px !important; /* 為 header 預留空間（約 60px + padding） */
+        margin: 0 !important;
         box-sizing: border-box !important;
-        gap: 0 !important; /* 移除 gap，使用 flex-1 填充 */
         position: relative !important;
       }
 
       .mode2.fig1 #chatMessages {
-        margin-top: 0 !important;
-        padding: 16px !important; /* 移除底部 padding，由輸入欄的 sticky 處理 */
-        background: #ffffff !important;
-        border: 1px solid #e5e7eb !important;
-        border-radius: 8px !important;
+        margin: 0 !important;
+        padding: 16px 24px !important; /* 左右 padding，讓內容不貼邊 */
+        background: transparent !important; /* 移除白色背景，直接顯示在最外層 */
+        border: none !important; /* 移除邊框 */
+        border-radius: 0 !important;
         flex: 1 !important; /* 占滿剩餘高度 */
         min-height: 0 !important; /* 允許子元素正確捲動 */
         height: auto !important; /* 由flex決定高度 */
         -webkit-overflow-scrolling: touch !important; /* iOS 慣性捲動 */
         overscroll-behavior: contain !important;
         touch-action: pan-y !important;
-        overflow-y: auto !important; /* chat list 滾動 */
+        overflow-y: auto !important; /* chat list 滾動，這是唯一可滾動的區域 */
         position: relative !important;
         z-index: 1 !important;
-        width: 100% !important; /* 對話框滿版顯示 */
-        max-width: 100% !important; /* 移除寬度限制 */
-        margin: 0 auto !important; /* 置中對齊 */
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
       }
 
       .mode2.fig1 .quick-buttons {
         gap: 8px !important;
-        padding: 8px 0 !important; /* 調整 padding */
-        margin: 0 !important; /* 移除置中對齊，讓按鈕貼邊 */
+        padding: 8px 24px !important; /* 左右 padding 與對話內容對齊 */
+        margin: 0 !important;
         display: grid !important;
         grid-template-columns: repeat(3, 1fr) !important;
         align-items: stretch !important;
-        width: 100% !important; /* 快速按鈕滿版顯示 */
-        max-width: 100% !important; /* 移除寬度限制 */
-        background: transparent !important; /* 背景透明，使用父層背景 */
-        flex-shrink: 0 !important; /* 不允許縮小，固定在底部 */
+        width: 100% !important;
+        max-width: 100% !important;
+        background: transparent !important;
+        flex-shrink: 0 !important; /* 固定在底部，不允許縮小 */
+        box-sizing: border-box !important;
       }
 
       .mode2.fig1 .input-row {
         background: transparent !important;
         border: none !important;
-        padding: 8px 0 !important; /* 調整 padding */
+        padding: 8px 24px 16px 24px !important; /* 左右 padding 與對話內容對齊，底部多一點空間 */
         gap: 12px !important;
         align-items: center !important;
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        width: 100% !important; /* 輸入欄位滿版顯示 */
-        max-width: 100% !important; /* 移除寬度限制 */
-        margin: 0 !important; /* 移除置中對齊，讓輸入欄位貼邊 */
-        flex-shrink: 0 !important; /* 不允許縮小，固定在底部 */
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        flex-shrink: 0 !important; /* 固定在底部，不允許縮小 */
+        box-sizing: border-box !important;
       }
 
       .mode2.fig1 .chat-input {
@@ -14762,6 +14752,22 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       async function recordConversationMessage(conversationType, role, content) {
         try {
           if (!content) return;
+          
+          // 獲取 token（優先使用 ipPlanningToken，如果沒有則從 localStorage 獲取）
+          let token = ipPlanningToken;
+          if (!token) {
+            token = localStorage.getItem('ipPlanningToken');
+          }
+          if (!token && typeof window.Auth !== 'undefined' && window.Auth.getToken) {
+            token = window.Auth.getToken();
+          }
+          
+          // 如果還是沒有 token，嘗試獲取用戶資訊但不儲存（因為需要認證）
+          if (!token) {
+            console.warn('長期記憶儲存失敗：未找到有效的認證 token');
+            return;
+          }
+          
           // 兼容舊資料：若 user_id 未就緒但有 id，或完全沒有則臨時產生
           if (!ipPlanningUser) ipPlanningUser = {};
           if (!ipPlanningUser.user_id) {
@@ -14769,15 +14775,29 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               ipPlanningUser.user_id = ipPlanningUser.id;
             } else if (typeof generateUserId === 'function') {
               ipPlanningUser.user_id = generateUserId();
+            } else {
+              // 如果完全沒有 user_id，嘗試從 token 中解析（JWT payload）
+              try {
+                const parts = token.split('.');
+                if (parts.length === 3) {
+                  const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                  if (payload.sub) {
+                    ipPlanningUser.user_id = payload.sub;
+                  }
+                }
+              } catch (e) {
+                console.warn('無法從 token 解析 user_id:', e);
+              }
             }
             try { localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser)); } catch(_) {}
           }
+          
           const sessionId = getCurrentSessionId(conversationType);
           const res = await fetch('https://aivideobackend.zeabur.app/api/memory/long-term', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              ...(ipPlanningToken ? { 'Authorization': `Bearer ${ipPlanningToken}` } : {})
+              'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
               conversation_type: conversationType,
@@ -14786,15 +14806,25 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               message_content: content
             })
           });
+          
           if (!res.ok && res.status !== 422) {
             // 不處理 422，其他錯誤嘗試刷新
             if (res.status === 401) {
               const ok = await tryRefreshTokenSafe();
-              if (ok) return recordConversationMessage(conversationType, role, content);
+              if (ok) {
+                // 刷新成功後重新獲取 token 並重試
+                const newToken = localStorage.getItem('ipPlanningToken') || (window.Auth && window.Auth.getToken ? window.Auth.getToken() : null);
+                if (newToken) {
+                  return recordConversationMessage(conversationType, role, content);
+                }
+              }
             }
-            console.warn('記憶儲存失敗:', res.status);
+            console.warn('記憶儲存失敗:', res.status, await res.text().catch(() => ''));
           }
-        } catch (_) { /* 靜默失敗，不影響使用者體驗 */ }
+        } catch (error) {
+          // 記錄錯誤但不影響使用者體驗
+          console.warn('長期記憶儲存時發生錯誤:', error);
+        }
       }
 
       // 檢查 token 是否已過期
