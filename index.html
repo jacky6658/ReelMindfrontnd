@@ -11450,6 +11450,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         const userMessage = createMessage('user', message);
         chatMessages.appendChild(userMessage);
         
+        // 記錄長期記憶（用戶訊息）
+        console.log('📝📝📝 準備儲存長期記憶 (AI 顧問 - user) - sendMessage 函數 📝📝📝');
+        console.log('📝 訊息內容:', message);
+        console.log('📝 調用 recordConversationMessage...');
+        try { 
+          await recordConversationMessage('ai_advisor', 'user', message); 
+          console.log('📝 recordConversationMessage 調用完成');
+        } catch (error) {
+          console.error('❌❌❌ 長期記憶儲存異常 (AI 顧問 - user) ❌❌❌', error);
+          console.error('錯誤堆疊:', error.stack);
+        }
+        
         // 隱藏快速按鈕
         if (quickButtons) {
           quickButtons.style.display = 'none';
@@ -11527,6 +11539,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               if (line.startsWith('data: ')) {
                 const data = line.slice(6);
                 if (data === '[DONE]') {
+                  // 記錄長期記憶（AI 回覆）
+                  console.log('📝📝📝 準備儲存長期記憶 (AI 顧問 - assistant) - sendMessage 函數 📝📝📝');
+                  console.log('📝 AI 回覆內容長度:', fullContent.length);
+                  console.log('📝 調用 recordConversationMessage...');
+                  try { 
+                    await recordConversationMessage('ai_advisor', 'assistant', fullContent); 
+                    console.log('📝 recordConversationMessage 調用完成');
+                  } catch (error) {
+                    console.error('❌❌❌ 長期記憶儲存異常 (AI 顧問 - assistant) ❌❌❌', error);
+                    console.error('錯誤堆疊:', error.stack);
+                  }
+                  
                   // 檢查是否需要顯示結果區塊
                   if (fullContent) {
                     checkIfScriptRequest(fullContent);
@@ -14622,11 +14646,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         lastMessage = message;
         const userNode = append('user', message);
         // 記錄長期記憶
-        console.log('📝 準備儲存長期記憶 (AI 顧問 - user)');
+        console.log('📝📝📝 準備儲存長期記憶 (AI 顧問 - user) 📝📝📝');
+        console.log('📝 訊息內容:', message);
+        console.log('📝 調用 recordConversationMessage...');
         try { 
           await recordConversationMessage('ai_advisor', 'user', message); 
+          console.log('📝 recordConversationMessage 調用完成');
         } catch (error) {
-          console.error('❌ 長期記憶儲存異常 (AI 顧問 - user):', error);
+          console.error('❌❌❌ 長期記憶儲存異常 (AI 顧問 - user) ❌❌❌', error);
+          console.error('錯誤堆疊:', error.stack);
         }
         const assistantNode = append('assistant', '');
 
@@ -14741,11 +14769,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   history.push({ role: 'user', content: message });
                   history.push({ role: 'assistant', content: aiText });
                   // 記錄長期記憶
-                  console.log('📝 準備儲存長期記憶 (AI 顧問 - assistant)');
+                  console.log('📝📝📝 準備儲存長期記憶 (AI 顧問 - assistant) 📝📝📝');
+                  console.log('📝 AI 回覆內容長度:', aiText.length);
+                  console.log('📝 調用 recordConversationMessage...');
                   try { 
                     await recordConversationMessage('ai_advisor', 'assistant', aiText); 
+                    console.log('📝 recordConversationMessage 調用完成');
                   } catch (error) {
-                    console.error('❌ 長期記憶儲存異常 (AI 顧問 - assistant):', error);
+                    console.error('❌❌❌ 長期記憶儲存異常 (AI 顧問 - assistant) ❌❌❌', error);
+                    console.error('錯誤堆疊:', error.stack);
                   }
                   
                   // 檢查是否包含腳本結果，自動顯示結果區塊
@@ -15339,10 +15371,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
 
       async function recordConversationMessage(conversationType, role, content) {
-        console.log('🔍 recordConversationMessage 函數被調用:', { conversationType, role, hasContent: !!content, contentLength: content?.length || 0 });
+        // 強制輸出日誌，確保函數被調用時一定會看到
+        console.log('🔍🔍🔍 recordConversationMessage 函數被調用 🔍🔍🔍');
+        console.log('📋 參數:', { conversationType, role, hasContent: !!content, contentLength: content?.length || 0 });
+        console.log('📋 內容預覽:', content ? content.substring(0, 50) + '...' : '無內容');
+        
         try {
           if (!content) {
             console.warn('⚠️ 長期記憶儲存跳過：內容為空');
+            console.log('❌ 函數提前返回：內容為空');
             return;
           }
           
@@ -15361,11 +15398,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 如果還是沒有 token，無法儲存長期記憶
           if (!token) {
-            console.warn('長期記憶儲存失敗：未找到有效的認證 token', {
+            console.error('❌❌❌ 長期記憶儲存失敗：未找到有效的認證 token ❌❌❌');
+            console.error('詳細資訊:', {
               conversationType,
               role,
-              contentLength: content.length
+              contentLength: content.length,
+              localStorageToken: !!localStorage.getItem('ipPlanningToken'),
+              windowAuth: typeof window.Auth !== 'undefined',
+              globalToken: !!ipPlanningToken
             });
+            console.log('❌ 函數提前返回：沒有 token');
             return;
           }
           
@@ -16679,14 +16721,17 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const messageDiv = addMode3Message('assistant', '');
           const messageId = messageDiv.id;
           
+          let hasSavedMemory = false; // 防止重複儲存
+          
           while (true) {
             const { done, value } = await reader.read();
             if (done) {
-              // 串流結束，儲存完整的 AI 回覆到長期記憶
-              if (assistantMessage) {
+              // 串流結束，如果還沒有儲存過，則儲存完整的 AI 回覆到長期記憶
+              if (assistantMessage && !hasSavedMemory) {
                 console.log('📝 串流完成，準備儲存長期記憶 (IP 人設規劃 - assistant)');
                 try { 
                   await recordConversationMessage('ip_planning', 'assistant', assistantMessage); 
+                  hasSavedMemory = true;
                 } catch (error) {
                   console.error('❌ 長期記憶儲存異常 (IP 人設規劃 - assistant):', error);
                 }
@@ -16703,11 +16748,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 const data = line.slice(6);
                 console.log('解析數據:', data);
                 if (data === '[DONE]') {
-                  // 收到 [DONE] 標記，儲存完整的 AI 回覆到長期記憶
-                  if (assistantMessage) {
+                  // 收到 [DONE] 標記，儲存完整的 AI 回覆到長期記憶（只儲存一次）
+                  if (assistantMessage && !hasSavedMemory) {
                     console.log('📝 收到 [DONE] 標記，準備儲存長期記憶 (IP 人設規劃 - assistant)');
                     try { 
                       await recordConversationMessage('ip_planning', 'assistant', assistantMessage); 
+                      hasSavedMemory = true;
                     } catch (error) {
                       console.error('❌ 長期記憶儲存異常 (IP 人設規劃 - assistant):', error);
                     }
