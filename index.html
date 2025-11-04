@@ -2063,24 +2063,29 @@
 
       /* 手機版微調 */
       @media (max-width: 768px) {
+        .mode2.fig1 .mode2-page {
+          padding-left: 12px !important;
+          padding-right: 12px !important;
+        }
         .mode2.fig1 #chatMessages {
-          padding: 12px 12px 250px 12px !important; /* 進一步增加底部內距，確保手機版用戶訊息完全可見 */
+          padding: 12px !important; /* 移除底部 padding，由輸入欄的 sticky 處理 */
           border-radius: 8px !important;
           width: 100% !important; /* 對話框滿版顯示 */
           max-width: 100% !important; /* 移除寬度限制 */
           margin: 0 !important; /* 移除置中對齊 */
-          scroll-padding-bottom: 250px !important; /* 滾動到底時保留底部空間 */
         }
         .mode2.fig1 .quick-buttons { 
           gap: 6px !important; 
           width: 100% !important; /* 快速按鈕滿版顯示 */
           max-width: 100% !important; /* 移除寬度限制 */
           margin: 0 !important; /* 移除置中對齊 */
+          padding: 8px 0 !important; /* 保持一致的 padding */
         }
         .mode2.fig1 .input-row {
           width: 100% !important; /* 輸入欄位滿版顯示 */
           max-width: 100% !important; /* 移除寬度限制 */
           margin: 0 !important; /* 移除置中對齊 */
+          padding: 8px 0 !important; /* 保持一致的 padding */
         }
         .mode2.fig1 .chat-input { font-size: 15px !important; }
       }
@@ -2103,31 +2108,28 @@
         flex-direction: column !important;
         height: 100% !important; /* 跟隨父層100dvh */
         overflow: hidden !important; /* 只讓對話框滾動 */
-        padding-top: 88px !important; /* 讓內容從頁首下方開始（上方稍微縮短） */
+        padding-top: 0 !important; /* chat container 貼齊 header */
         padding-left: 24px !important;
         padding-right: 24px !important;
-        padding-bottom: 12px !important;
+        padding-bottom: 0 !important; /* 移除底部 padding，讓輸入欄固定 */
         box-sizing: border-box !important;
-        gap: 8px !important;
+        gap: 0 !important; /* 移除 gap，使用 flex-1 填充 */
         position: relative !important;
       }
 
       .mode2.fig1 #chatMessages {
         margin-top: 0 !important;
-        padding: 16px 16px 250px 16px !important; /* 進一步增加底部內距，確保電腦版用戶訊息完全可見 */
+        padding: 16px !important; /* 移除底部 padding，由輸入欄的 sticky 處理 */
         background: #ffffff !important;
         border: 1px solid #e5e7eb !important;
         border-radius: 8px !important;
-        flex: 1 1 auto !important; /* 填滿中間高度 */
+        flex: 1 !important; /* 占滿剩餘高度 */
         min-height: 0 !important; /* 允許子元素正確捲動 */
         height: auto !important; /* 由flex決定高度 */
         -webkit-overflow-scrolling: touch !important; /* iOS 慣性捲動 */
         overscroll-behavior: contain !important;
         touch-action: pan-y !important;
-        scroll-padding-top: 16px !important; /* 滾動到頂時保留可視區 */
-        scroll-padding-bottom: 250px !important; /* 滾動到底時保留底部空間 */
-        overflow-y: auto !important;
-        max-height: calc(100vh - 200px) !important; /* 限制最大高度，確保不會超出視窗 */
+        overflow-y: auto !important; /* chat list 滾動 */
         position: relative !important;
         z-index: 1 !important;
         width: 100% !important; /* 對話框滿版顯示 */
@@ -2137,33 +2139,30 @@
 
       .mode2.fig1 .quick-buttons {
         gap: 8px !important;
-        padding: 0 0 4px 0 !important;
+        padding: 8px 0 !important; /* 調整 padding */
         margin: 0 !important; /* 移除置中對齊，讓按鈕貼邊 */
-        position: static !important; /* 與對話框/輸入欄位綁在一起 */
-        left: auto !important; right: auto !important; bottom: auto !important;
-        z-index: auto !important;
         display: grid !important;
         grid-template-columns: repeat(3, 1fr) !important;
         align-items: stretch !important;
         width: 100% !important; /* 快速按鈕滿版顯示 */
         max-width: 100% !important; /* 移除寬度限制 */
+        background: transparent !important; /* 背景透明，使用父層背景 */
+        flex-shrink: 0 !important; /* 不允許縮小，固定在底部 */
       }
 
       .mode2.fig1 .input-row {
         background: transparent !important;
         border: none !important;
-        padding: 0 !important;
+        padding: 8px 0 !important; /* 調整 padding */
         gap: 12px !important;
         align-items: center !important;
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        position: static !important; /* 回文流，置於最底 */
-        left: auto !important; right: auto !important; bottom: auto !important;
-        z-index: auto !important;
         width: 100% !important; /* 輸入欄位滿版顯示 */
         max-width: 100% !important; /* 移除寬度限制 */
         margin: 0 !important; /* 移除置中對齊，讓輸入欄位貼邊 */
+        flex-shrink: 0 !important; /* 不允許縮小，固定在底部 */
       }
 
       .mode2.fig1 .chat-input {
