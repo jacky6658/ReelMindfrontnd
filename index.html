@@ -1374,20 +1374,50 @@
         }
       }
       
-      /* 輸入欄位：預設隱藏，只在 mode2 頁面顯示 */
+      /* 輸入欄位：預設隱藏，只在 mode2 和 mode3 頁面顯示 */
       .input-row {
         display: none !important;
       }
       
-      #mode2.active .input-row {
+      #mode2.active .input-row,
+      #mode3.active .mode3-chat-container .input-row {
         display: flex !important;
+        flex-direction: column !important;
         padding: 16px;
         margin-top: 0;
         border-top: 1px solid #e5e7eb;
         background: transparent;
         border-radius: 0;
         gap: 12px;
+      }
+      
+      #mode2.active .input-container,
+      #mode3.active .mode3-chat-container .input-container {
+        display: flex !important;
+        gap: 12px;
         align-items: flex-end;
+        width: 100%;
+      }
+      
+      /* Mode3 快速按鈕和輸入框：預設隱藏，只在 mode3 頁面顯示 */
+      #mode3-quickButtons,
+      #mode3-message-input,
+      #mode3-send-btn {
+        display: none !important;
+      }
+      
+      #mode3.active #mode3-quickButtons,
+      #mode3.active #mode3-message-input,
+      #mode3.active #mode3-send-btn {
+        display: flex !important;
+      }
+      
+      #mode3.active #mode3-message-input {
+        display: block !important;
+      }
+      
+      #mode3.active #mode3-send-btn {
+        display: flex !important;
       }
       
       /* 優化聊天訊息樣式 */
@@ -1487,17 +1517,17 @@
       /* 優化輸入框樣式 */
       #messageInput {
         flex: 1;
-        height: 44px; /* 固定高度與送出按鈕一致 */
-        min-height: 44px;
-        max-height: 44px; /* 限制最大高度與最小高度一致 */
+        min-height: 44px; /* 最小高度 */
+        max-height: 200px; /* 最大高度，允許調整 */
         padding: 12px 16px;
         border: 1px solid #e5e7eb;
         border-radius: 22px;
         font-size: 15px;
-        resize: none;
+        resize: vertical; /* 允許垂直調整高度 */
         outline: none;
         transition: border-color 0.2s;
-        line-height: 1.2; /* 調整行高確保文字垂直居中 */
+        line-height: 1.5;
+        overflow-y: auto; /* 內容超出時顯示滾動條 */
       }
       
       #messageInput:focus {
@@ -1855,7 +1885,7 @@
       .message.user .message-content {
         flex: 1;
         background: #dbeafe !important;
-        padding: 12px 16px;
+        padding: 20px 40px; /* 與 AI 回覆框一樣的 padding */
         border-radius: 12px;
         border: 1px solid #3b82f6;
         color: #1e40af !important;
@@ -2060,22 +2090,31 @@
       .mode2.fig1 .input-row {
         background: transparent;
         border: none;
-        padding: 0; /* 由外層留白控制 */
+        padding: 8px 24px 16px 24px; /* 左右 padding 與對話內容對齊 */
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .mode2.fig1 .input-container {
         display: flex;
         gap: 12px;
-        align-items: center;
+        align-items: flex-end;
+        width: 100%;
       }
 
       .mode2.fig1 .chat-input {
         flex: 1;
-        height: 44px;
         min-height: 44px;
-        max-height: 44px;
+        max-height: 200px; /* 允許調整高度 */
         border: 1px solid #d1d5db;
         border-radius: 10px;
         padding: 10px 12px;
         font-size: 14px;
         background: #ffffff;
+        resize: vertical; /* 允許垂直調整 */
+        overflow-y: auto; /* 內容超出時顯示滾動條 */
+        line-height: 1.5;
       }
 
       .mode2.fig1 .send-btn {
@@ -2183,38 +2222,43 @@
         box-sizing: border-box !important;
       }
 
-      .mode2.fig1 #chatMessages .quick-buttons {
+      /* 快速按鈕放在輸入欄位內 - 電腦版 */
+      .mode2.fig1 .input-row .quick-buttons {
         gap: 8px !important;
-        padding: 12px 0 16px 0 !important; /* 上下 padding，左右不設以與對話內容對齊 */
+        padding: 0 !important;
         margin: 0 !important;
-        margin-top: auto !important; /* 推到底部 */
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important;
-        align-items: stretch !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        background: transparent !important;
-        flex-shrink: 0 !important; /* 固定在底部，不允許縮小 */
-        box-sizing: border-box !important;
-        position: sticky !important;
-        bottom: 0 !important;
-        z-index: 10 !important;
-      }
-
-      .mode2.fig1 .input-row {
-        background: transparent !important;
-        border: none !important;
-        padding: 8px 24px 16px 24px !important; /* 左右 padding 與對話內容對齊，底部多一點空間 */
-        gap: 12px !important;
-        align-items: center !important;
         display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
+        flex-wrap: wrap !important;
+        justify-content: flex-start !important;
         width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        flex-shrink: 0 !important; /* 固定在底部，不允許縮小 */
+        background: transparent !important;
         box-sizing: border-box !important;
+      }
+      
+      .mode2.fig1 .input-row .quick-btn {
+        background: transparent !important;
+        border: 1px solid #d1d5db !important;
+        color: #374151 !important;
+        padding: 8px 16px !important;
+        border-radius: 16px !important;
+        font-size: 14px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        white-space: nowrap !important;
+        font-weight: 400 !important;
+        box-shadow: none !important;
+        width: auto !important; /* 自動寬度，不填滿 */
+        min-width: fit-content !important;
+        flex-shrink: 0 !important;
+        display: inline-flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+      }
+      
+      .mode2.fig1 .input-row .quick-btn:hover {
+        background: #3b82f6 !important;
+        border-color: #3b82f6 !important;
+        color: white !important;
       }
 
       .mode2.fig1 .chat-input {
@@ -4214,90 +4258,144 @@
         overflow: hidden;
       }
       
-      .mode3-chat-messages {
+      /* Mode3 使用與 Mode2 相同的樣式結構 */
+      .mode3-chat-container {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+      }
+      
+      #mode3-chat-messages {
         flex: 1;
         overflow-y: auto;
-        padding: 0 0 5px 0;
-        margin-bottom: 5px;
-      }
-      
-      .mode3-quick-buttons {
-        display: flex;
-        gap: 6px;
-        margin-bottom: 8px;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      
-      .mode3-quick-btn {
-        padding: 6px 12px;
-        background: #e5e7eb;
+        padding: 16px 24px;
+        margin: 0;
+        background: transparent;
         border: none;
+        border-radius: 0;
+        min-height: 0;
+        height: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+      
+      /* Mode3 輸入區域使用與 Mode2 相同的樣式 */
+      .mode3-chat-container .input-row {
+        background: transparent;
+        border: none;
+        padding: 8px 24px 16px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .mode3-chat-container .input-container {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        width: 100%;
+      }
+      
+      /* Mode3 快速按鈕使用與 Mode2 相同的樣式（電腦版） */
+      .mode3-chat-container .quick-buttons {
+        gap: 8px;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        width: 100%;
+        background: transparent;
+        box-sizing: border-box;
+      }
+      
+      .mode3-chat-container .quick-btn {
+        background: transparent;
+        border: 1px solid #d1d5db;
+        color: #374151;
+        padding: 8px 16px;
         border-radius: 16px;
-        font-size: 13px;
+        font-size: 14px;
         cursor: pointer;
         transition: all 0.2s ease;
         white-space: nowrap;
-        flex: 1;
-        min-width: 0;
+        font-weight: 400;
+        box-shadow: none;
+        width: auto;
+        min-width: fit-content;
+        flex-shrink: 0;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
       }
       
-      .mode3-quick-btn:hover {
-        background: #d1d5db;
-        transform: translateY(-1px);
-      }
-      
-      .mode3-input-container {
-        position: sticky;
-        bottom: 0;
-        background: white;
-        padding: 12px 20px 15px 20px;
-        border-top: 1px solid #e5e7eb;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-        margin-bottom: 0;
-      }
-      
-      .mode3-input-wrapper {
-        display: flex;
-        gap: 10px;
-        align-items: flex-end;
-      }
-      
-      .mode3-message-input {
-        flex: 1;
-        padding: 8px 16px;
-        border: 1px solid #d1d5db;
-        border-radius: 20px;
-        font-size: 14px;
-        resize: none;
-        outline: none;
-        transition: border-color 0.2s ease;
-        min-height: 36px;
-        max-height: 80px;
-      }
-      
-      .mode3-message-input:focus {
-        border-color: #4f46e5;
-      }
-      
-      .mode3-send-btn {
-        padding: 12px;
-        background: #4f46e5;
+      .mode3-chat-container .quick-btn:hover {
+        background: #3b82f6;
+        border-color: #3b82f6;
         color: white;
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        width: 44px;
+      }
+      
+      /* Mode3 輸入框使用與 Mode2 相同的樣式 */
+      #mode3-message-input {
+        flex: 1;
+        min-height: 44px;
+        max-height: 200px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+        background: #ffffff;
+        resize: vertical;
+        overflow-y: auto;
+        line-height: 1.5;
+      }
+      
+      #mode3-message-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+      }
+      
+      #mode3-send-btn {
         height: 44px;
+        min-width: 44px;
+        border-radius: 10px;
+        background: #3b82f6;
+        color: #ffffff;
+        border: none;
+        padding: 0 18px;
+        cursor: pointer;
+        transition: background-color 0.2s;
         display: flex;
         align-items: center;
         justify-content: center;
       }
       
-      .mode3-send-btn:hover {
-        background: #4338ca;
-        transform: translateY(-1px);
+      #mode3-send-btn:hover {
+        background: #2563eb;
+      }
+      
+      #mode3-send-btn:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+      }
+      
+      /* 保留舊的 mode3 樣式作為備用（但會被新樣式覆蓋） */
+      .mode3-input-container {
+        position: sticky;
+        bottom: 0;
+      }
+      
+      /* Mode3 訊息框樣式 - 與 Mode2 一致 */
+      #mode3-chat-messages .message.user .message-content {
+        padding: 20px 40px !important; /* 與 AI 回覆框一樣的 padding */
       }
       
       /* 使用說明步驟指南樣式 */
@@ -6213,6 +6311,7 @@
           min-width: 200px !important;
           position: relative !important;
           z-index: 11 !important;
+          padding: 20px 40px !important; /* 與 AI 回覆框一樣的 padding */
         }
         
         /* 確保AI訊息文字可見 */
@@ -8176,21 +8275,23 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               <!-- 聊天訊息區域 -->
               <div id="chatMessages" class="chat-messages">
                 <!-- 聊天訊息將在這裡動態插入 -->
-                
-                <!-- 快速按鈕區域 - 放在對話框內 -->
+              </div>
+              
+              <!-- 輸入區域 -->
+              <div class="input-row">
+                <!-- 快速按鈕區域 - 放在輸入欄位內 -->
                 <div class="quick-buttons" id="quickButtons">
                   <button class="quick-btn" data-text="我要如何開始？">我要如何開始？</button>
                   <button class="quick-btn" data-text="我要怎麼帳號定位">我要怎麼帳號定位</button>
                   <button class="quick-btn" data-text="什麼是腳本選題">什麼是腳本選題</button>
                 </div>
-              </div>
-              
-              <!-- 輸入區域 -->
-              <div class="input-row">
-                <textarea id="messageInput" class="chat-input" placeholder="向AI顧問提問..." rows="1"></textarea>
-                <button id="sendBtn" class="send-btn" disabled>
-                  <i class="fas fa-paper-plane"></i>
-                </button>
+                
+                <div class="input-container">
+                  <textarea id="messageInput" class="chat-input" placeholder="向AI顧問提問..." rows="1"></textarea>
+                  <button id="sendBtn" class="send-btn" disabled>
+                    <i class="fas fa-paper-plane"></i>
+                  </button>
+                </div>
               </div>
               
               </div>
@@ -8216,12 +8317,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 </button>
                   </div>
 
-                  <!-- 聊天區域 -->
+                  <!-- 聊天區域 - 使用與 mode2 相同的結構 -->
                   <div class="mode3-chat-container">
-                    <div class="mode3-chat-messages" id="mode3-chat-messages">
-                      <div class="mode3-message mode3-assistant-message">
-                        <div class="mode3-message-avatar">🤖</div>
-                        <div class="mode3-message-content">
+                    <div id="mode3-chat-messages" class="chat-messages">
+                      <div class="message assistant">
+                        <div class="message-avatar">🤖</div>
+                        <div class="message-content">
                           <p>您好！我是您的IP人設規劃顧問。讓我們開始建立您的個人品牌檔案吧！</p>
                           <p>請告訴我：</p>
                           <ul>
@@ -8234,29 +8335,29 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                       </div>
                     </div>
 
-                    <!-- 快速按鈕 -->
-                    <div class="mode3-quick-buttons">
-                      <button class="mode3-quick-btn" onclick="sendMode3Message('我想分享我的專業經驗')">專業經驗</button>
-                      <button class="mode3-quick-btn" onclick="sendMode3Message('我想建立個人品牌')">個人品牌</button>
-                      <button class="mode3-quick-btn" onclick="sendMode3Message('我想分享生活故事')">生活故事</button>
-                      <button class="mode3-quick-btn" onclick="sendMode3Message('我想做知識分享')">知識分享</button>
-                    </div>
-
-                    <!-- 輸入區域 -->
-                    <div class="mode3-input-container">
-                      <div class="mode3-input-wrapper">
+                    <!-- 輸入區域 - 使用與 mode2 相同的結構 -->
+                    <div class="input-row">
+                      <!-- 快速按鈕區域 - 放在輸入欄位內 -->
+                      <div class="quick-buttons" id="mode3-quickButtons">
+                        <button class="quick-btn" onclick="sendMode3Message('我想分享我的專業經驗')">專業經驗</button>
+                        <button class="quick-btn" onclick="sendMode3Message('我想建立個人品牌')">個人品牌</button>
+                        <button class="quick-btn" onclick="sendMode3Message('我想分享生活故事')">生活故事</button>
+                        <button class="quick-btn" onclick="sendMode3Message('我想做知識分享')">知識分享</button>
+                      </div>
+                      
+                      <div class="input-container">
                         <textarea 
                           id="mode3-message-input" 
-                          class="mode3-message-input" 
+                          class="chat-input" 
                           placeholder="請描述您的背景、專長、價值觀或目標..."
-                          rows="2"
+                          rows="1"
                         ></textarea>
-                        <button class="mode3-send-btn" onclick="sendMode3Message()">
+                        <button class="send-btn" id="mode3-send-btn" onclick="sendMode3Message()">
                           <i class="fas fa-paper-plane"></i>
                         </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -16326,11 +16427,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       }
 
-      // 添加訊息到聊天區域
+      // 添加訊息到聊天區域 - 使用與 mode2 相同的結構
       function addMode3Message(sender, content) {
         const messagesContainer = document.getElementById('mode3-chat-messages');
         const messageDiv = document.createElement('div');
-        messageDiv.className = `mode3-message mode3-${sender}-message`;
+        messageDiv.className = `message ${sender}`;
         
         // 為助手訊息添加 ID
         if (sender === 'assistant') {
@@ -16340,7 +16441,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 創建頭像元素
         const avatarDiv = document.createElement('div');
-        avatarDiv.className = 'mode3-message-avatar';
+        avatarDiv.className = 'message-avatar';
         
         if (sender === 'user') {
           // 用戶頭像：使用 Gmail 頭像或默認頭像
@@ -16362,10 +16463,22 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           avatarDiv.textContent = '🤖';
         }
         
-        // 創建訊息內容元素
+        // 創建訊息內容元素 - 使用與 mode2 相同的類名和處理
         const contentDiv = document.createElement('div');
-        contentDiv.className = 'mode3-message-content';
-        contentDiv.innerHTML = `<p>${content}</p>`;
+        contentDiv.className = 'message-content';
+        
+        if (sender === 'assistant' && content) {
+          // AI 回覆使用 markdown 渲染
+          contentDiv.innerHTML = renderMarkdown(content);
+          // 對代碼塊進行語法高亮
+          if (typeof hljs !== 'undefined') {
+            contentDiv.querySelectorAll('pre code').forEach((block) => {
+              hljs.highlightElement(block);
+            });
+          }
+        } else if (sender === 'user') {
+          contentDiv.textContent = content;
+        }
         
         messageDiv.appendChild(avatarDiv);
         messageDiv.appendChild(contentDiv);
@@ -16375,23 +16488,23 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         return messageDiv;
       }
 
-      // 添加載入訊息
+      // 添加載入訊息 - 使用與 mode2 相同的結構
       function addMode3LoadingMessage() {
         const messagesContainer = document.getElementById('mode3-chat-messages');
         const messageDiv = document.createElement('div');
         const messageId = 'loading-' + Date.now();
         messageDiv.id = messageId;
-        messageDiv.className = 'mode3-message mode3-assistant-message';
+        messageDiv.className = 'message assistant';
         
         messageDiv.innerHTML = `
-          <div class="mode3-message-avatar">🤖</div>
-          <div class="mode3-message-content">
-            <div class="mode3-loading">
+          <div class="message-avatar">🤖</div>
+          <div class="message-content">
+            <div class="typing-indicator">
               <span>AI正在思考中</span>
-              <div class="mode3-loading-dots">
-                <div class="mode3-loading-dot"></div>
-                <div class="mode3-loading-dot"></div>
-                <div class="mode3-loading-dot"></div>
+              <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
               </div>
             </div>
           </div>
@@ -16411,15 +16524,20 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       }
       
-      // 更新訊息內容
+      // 更新訊息內容 - 使用與 mode2 相同的結構
       function updateMode3Message(messageId, content) {
         const messageDiv = document.getElementById(messageId);
         if (messageDiv) {
-          const contentDiv = messageDiv.querySelector('.mode3-message-content');
+          const contentDiv = messageDiv.querySelector('.message-content');
           if (contentDiv) {
-            // 使用cleanMarkdownFormat處理內容
-            const formattedContent = cleanMarkdownFormat(content);
-            contentDiv.innerHTML = formattedContent;
+            // 使用 renderMarkdown 處理內容（與 mode2 相同）
+            contentDiv.innerHTML = renderMarkdown(content);
+            // 對代碼塊進行語法高亮
+            if (typeof hljs !== 'undefined') {
+              contentDiv.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+              });
+            }
             const messagesContainer = document.getElementById('mode3-chat-messages');
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
           }
