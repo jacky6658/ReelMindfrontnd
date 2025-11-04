@@ -14919,7 +14919,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
 
       async function recordConversationMessage(conversationType, role, content) {
         try {
-          if (!content) return;
+          if (!content) {
+            console.warn('長期記憶儲存跳過：內容為空');
+            return;
+          }
           
           // 優先從 localStorage 獲取最新的 token（確保使用當前登入用戶的 token）
           let token = localStorage.getItem('ipPlanningToken');
@@ -14936,9 +14939,21 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 如果還是沒有 token，無法儲存長期記憶
           if (!token) {
-            console.warn('長期記憶儲存失敗：未找到有效的認證 token');
+            console.warn('長期記憶儲存失敗：未找到有效的認證 token', {
+              conversationType,
+              role,
+              contentLength: content.length
+            });
             return;
           }
+          
+          // 調試：記錄 token 獲取情況
+          console.log('長期記憶儲存開始:', {
+            conversationType,
+            role,
+            hasToken: !!token,
+            tokenPrefix: token ? token.substring(0, 20) + '...' : '無'
+          });
           
           // 同步更新全局變數（確保一致性）
           if (token !== ipPlanningToken) {
@@ -14965,16 +14980,22 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (!user.user_id) {
             if (user.id) {
               user.user_id = user.id;
+              console.log('從 user.id 獲取 user_id:', user.user_id);
             } else {
               // 嘗試從 token 中解析 user_id（JWT payload）
               try {
                 const parts = token.split('.');
                 if (parts.length === 3) {
                   const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                  console.log('JWT Payload:', payload);
                   if (payload.sub) {
                     user.user_id = payload.sub;
+                    console.log('從 payload.sub 獲取 user_id:', user.user_id);
                   } else if (payload.user_id) {
                     user.user_id = payload.user_id;
+                    console.log('從 payload.user_id 獲取 user_id:', user.user_id);
+                  } else {
+                    console.warn('JWT payload 中沒有找到 user_id，payload keys:', Object.keys(payload));
                   }
                 }
               } catch (e) {
@@ -14984,7 +15005,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             
             // 如果還是沒有 user_id，無法儲存
             if (!user.user_id) {
-              console.warn('長期記憶儲存失敗：無法獲取 user_id');
+              console.error('長期記憶儲存失敗：無法獲取 user_id', {
+                conversationType,
+                role,
+                user: user,
+                hasToken: !!token
+              });
               return;
             }
             
@@ -14993,6 +15019,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             try {
               localStorage.setItem('ipPlanningUser', JSON.stringify(user));
             } catch (_) {}
+          } else {
+            console.log('使用現有的 user_id:', user.user_id);
           }
           
           const sessionId = getCurrentSessionId(conversationType);
@@ -15012,8 +15040,28 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             })
           });
           
+          // 調試：記錄 API 請求詳情
+          console.log('長期記憶 API 請求:', {
+            url: 'https://aivideobackend.zeabur.app/api/memory/long-term',
+            conversationType,
+            role,
+            sessionId,
+            user_id: user.user_id,
+            contentLength: content.length
+          });
+          
           if (!res.ok && res.status !== 422) {
             // 不處理 422（重複記錄），其他錯誤嘗試處理
+            const errorText = await res.text().catch(() => '');
+            console.error('長期記憶儲存失敗:', {
+              status: res.status,
+              statusText: res.statusText,
+              error: errorText,
+              conversationType,
+              role,
+              user_id: user.user_id
+            });
+            
             if (res.status === 401) {
               // Token 可能已過期，嘗試刷新
               console.log('長期記憶儲存失敗：Token 可能已過期，嘗試刷新...');
@@ -15027,20 +15075,33 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   return recordConversationMessage(conversationType, role, content);
                 }
               } else {
-                console.warn('長期記憶儲存失敗：Token 刷新失敗');
+                console.error('長期記憶儲存失敗：Token 刷新失敗');
               }
-            } else {
-              // 其他錯誤（403, 500 等）
-              const errorText = await res.text().catch(() => '');
-              console.warn('長期記憶儲存失敗:', res.status, errorText);
+            } else if (res.status === 403) {
+              console.error('長期記憶儲存失敗：權限不足 (403)');
+            } else if (res.status >= 500) {
+              console.error('長期記憶儲存失敗：伺服器錯誤 (500+)');
             }
           } else if (res.ok) {
             // 成功儲存
-            console.log('長期記憶儲存成功:', conversationType, role);
+            console.log('✅ 長期記憶儲存成功:', {
+              conversationType,
+              role,
+              user_id: user.user_id,
+              sessionId
+            });
+          } else if (res.status === 422) {
+            // 422 表示重複記錄，這是正常的
+            console.log('長期記憶儲存：重複記錄 (422)，已跳過');
           }
         } catch (error) {
           // 記錄錯誤但不影響使用者體驗
-          console.warn('長期記憶儲存時發生錯誤:', error);
+          console.error('長期記憶儲存時發生錯誤:', {
+            error: error.message,
+            stack: error.stack,
+            conversationType,
+            role
+          });
         }
       }
 
