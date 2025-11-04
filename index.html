@@ -2063,21 +2063,52 @@
 
       /* 手機版微調 */
       @media (max-width: 768px) {
+        /* 確保手機版 body 不滾動 */
+        body.mode2-active, html.mode2-active {
+          overflow: hidden !important;
+          height: 100% !important;
+          position: fixed !important;
+          width: 100% !important;
+        }
+        
+        .mode2.fig1 .mode2-page {
+          padding-top: 70px !important; /* 手機版 header 較小 */
+        }
+        
         .mode2.fig1 #chatMessages {
           padding: 12px !important; /* 手機版較小的 padding */
         }
+        
         .mode2.fig1 .quick-buttons { 
           gap: 6px !important; 
           padding: 8px 12px !important; /* 手機版較小的 padding */
         }
+        
         .mode2.fig1 .input-row {
+          position: static !important; /* 強制覆蓋手機版的 fixed 定位 */
+          bottom: auto !important;
+          left: auto !important;
+          right: auto !important;
           padding: 8px 12px 16px 12px !important; /* 手機版較小的 padding */
+          flex-direction: row !important; /* 橫向排列 */
+          flex-shrink: 0 !important; /* 固定在底部 */
         }
-        .mode2.fig1 .chat-input { font-size: 15px !important; }
+        
+        .mode2.fig1 .chat-input { 
+          font-size: 15px !important; 
+        }
       }
 
       /* fig1 強制覆寫（提高優先級） */
       /* 鎖住整頁滾動：當 mode2.fig1 存在時，頁面不捲動，只讓對話框捲動 */
+      /* 確保 body 和 html 不滾動 */
+      body.mode2-active, html.mode2-active {
+        overflow: hidden !important;
+        height: 100% !important;
+        position: fixed !important;
+        width: 100% !important;
+      }
+      
       .mode2.fig1 {
         height: 100dvh !important; /* 整頁固定高度 */
         overflow: hidden !important; /* 鎖住整頁，只讓對話框滾動 */
@@ -6166,7 +6197,33 @@
           z-index: 6 !important;
         }
         
-        .mode2 .input-row {
+        /* 覆蓋舊的手機版固定定位規則，改用 flex 布局 */
+        .mode2.fig1 .input-row {
+          position: static !important; /* 改為 static，使用 flex 布局 */
+          bottom: auto !important;
+          left: auto !important;
+          right: auto !important;
+          z-index: auto !important;
+          min-height: auto !important;
+          background: transparent !important;
+          border: none !important;
+          padding: 8px 12px 16px 12px !important; /* 使用統一的 padding */
+          flex-direction: row !important; /* 橫向排列 */
+          gap: 12px !important;
+          box-shadow: none !important;
+          margin: 0 !important;
+          height: auto !important;
+          border-radius: 0 !important;
+          max-height: none !important;
+          flex-shrink: 0 !important; /* 固定在底部 */
+          display: flex !important;
+          align-items: center !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+        }
+        
+        /* 保留舊規則給沒有 fig1 的情況 */
+        .mode2:not(.fig1) .input-row {
           min-height: auto !important;
           background: transparent !important;
           border: none !important;
@@ -6180,9 +6237,9 @@
           z-index: 1001 !important;
           box-shadow: none !important;
           margin: 0 !important;
-          height: auto !important; /* 完全自適應高度 */
+          height: auto !important;
           border-radius: 0 !important;
-          max-height: none !important; /* 移除最大高度限制 */
+          max-height: none !important;
         }
         
         .mode2 .input-container {
@@ -8713,6 +8770,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }
         }
         
+        // 移除所有頁面的 mode2-active 類（防止 body 滾動被鎖定）
+        document.body.classList.remove('mode2-active');
+        document.documentElement.classList.remove('mode2-active');
+        
         // 隱藏所有頁面
         document.querySelectorAll('.page').forEach(page => {
           page.classList.remove('active');
@@ -8723,6 +8784,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (targetPage) {
           targetPage.classList.add('active');
           console.log('Switched to page:', pageId);
+          
+          // 如果是 mode2，添加 mode2-active 類並確保有 fig1 類
+          if (pageId === 'mode2') {
+            targetPage.classList.add('fig1');
+            document.body.classList.add('mode2-active');
+            document.documentElement.classList.add('mode2-active');
+            console.log('Mode2 activated, body scroll locked');
+          }
         } else {
           console.error('Page not found:', pageId);
         }
