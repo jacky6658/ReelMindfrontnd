@@ -1395,8 +1395,105 @@
       #mode3.active .mode3-chat-container .input-container {
         display: flex !important;
         gap: 12px;
-        align-items: flex-end;
+        align-items: flex-start;
         width: 100%;
+      }
+      
+      /* 輸入框包裝器（用於容納快速按鈕） */
+      .input-wrapper {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 120px; /* 放大整體高度，容納快速按鈕 */
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 12px;
+        padding: 12px;
+        gap: 8px;
+      }
+      
+      .input-wrapper:focus-within {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      
+      /* 輸入框和發送按鈕在同一行 */
+      .input-row-inner {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        flex: 1;
+      }
+      
+      .input-wrapper .chat-input {
+        flex: 1;
+        min-height: 44px; /* 恢復到較小高度 */
+        max-height: 100px;
+        padding: 10px 12px;
+        border: 1px solid transparent;
+        background: transparent;
+        border-radius: 8px;
+        font-size: 14px;
+        resize: vertical;
+        outline: none;
+        line-height: 1.5;
+      }
+      
+      .input-wrapper .chat-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+      }
+      
+      .input-wrapper .send-btn {
+        height: 44px; /* 與輸入框高度一致 */
+        min-width: 44px;
+        padding: 0 18px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .input-wrapper .send-btn:hover {
+        background: #2563eb;
+      }
+      
+      /* 快速按鈕在輸入框內底部 */
+      .input-wrapper .quick-buttons {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px 0 0 0;
+        margin: 0;
+        border-top: 1px solid #e5e7eb;
+        background: transparent;
+      }
+      
+      .input-wrapper .quick-btn {
+        background: transparent;
+        border: 1px solid #d1d5db;
+        color: #374151;
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+      }
+      
+      .input-wrapper .quick-btn:hover {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: white;
       }
       
       /* Mode3 快速按鈕和輸入框：預設隱藏，只在 mode3 頁面顯示 */
@@ -1514,19 +1611,19 @@
         color: #6b7280;
       }
       
-      /* 優化輸入框樣式 */
+      /* 優化輸入框樣式 - 恢復到較小高度 */
       #messageInput {
         flex: 1;
-        min-height: 60px; /* 放大最小高度 */
-        max-height: 200px; /* 最大高度，允許調整 */
-        padding: 16px 20px; /* 增大內邊距 */
+        min-height: 44px; /* 恢復到較小高度 */
+        max-height: 100px; /* 最大高度，允許調整 */
+        padding: 10px 12px;
         border: 1px solid #e5e7eb;
-        border-radius: 12px; /* 稍微增大圓角 */
-        font-size: 15px;
+        border-radius: 8px;
+        font-size: 14px;
         resize: vertical; /* 允許垂直調整高度 */
         outline: none;
         transition: border-color 0.2s;
-        line-height: 1.6; /* 增加行高 */
+        line-height: 1.5;
         overflow-y: auto; /* 內容超出時顯示滾動條 */
       }
       
@@ -1536,13 +1633,13 @@
       }
       
       #sendBtn {
-        height: 60px; /* 與輸入框高度一致 */
-        min-width: 60px; /* 稍微增大 */
-        padding: 0 24px; /* 增大內邊距 */
+        height: 44px; /* 與輸入框高度一致 */
+        min-width: 44px;
+        padding: 0 18px;
         background: #3b82f6;
         color: white;
         border: none;
-        border-radius: 12px; /* 與輸入框圓角一致 */
+        border-radius: 8px;
         cursor: pointer;
         font-size: 14px;
         font-weight: 500;
@@ -1863,8 +1960,8 @@
         background: white;
         border-radius: 12px;
         padding: 16px;
-        min-height: 400px;
-        max-height: 600px;
+        min-height: 500px; /* 向上拉高：從 400px 增加到 500px */
+        max-height: 700px; /* 向上拉高：從 600px 增加到 700px */
         overflow-y: auto;
         border: 1px solid #e5e7eb;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -2107,28 +2204,101 @@
         width: 100%;
       }
 
-      .mode2.fig1 .chat-input {
+      /* Mode2 輸入框包裝器樣式 */
+      .mode2.fig1 .input-wrapper {
+        position: relative;
         flex: 1;
-        min-height: 60px; /* 放大最小高度 */
-        max-height: 200px; /* 允許調整高度 */
-        border: 1px solid #d1d5db;
-        border-radius: 12px; /* 稍微增大圓角 */
-        padding: 16px 20px; /* 增大內邊距，讓輸入框更大 */
-        font-size: 15px; /* 稍微增大字體 */
+        display: flex;
+        flex-direction: column;
+        min-height: 120px; /* 放大整體高度，容納快速按鈕 */
         background: #ffffff;
-        resize: vertical; /* 允許垂直調整 */
-        overflow-y: auto; /* 內容超出時顯示滾動條 */
-        line-height: 1.6; /* 增加行高，讓文字更舒適 */
+        border: 1px solid #d1d5db;
+        border-radius: 12px;
+        padding: 12px;
+        gap: 8px;
+      }
+      
+      .mode2.fig1 .input-wrapper:focus-within {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      
+      /* Mode2 輸入框和發送按鈕在同一行 */
+      .mode2.fig1 .input-row-inner {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        flex: 1;
+      }
+      
+      .mode2.fig1 .input-wrapper .chat-input {
+        flex: 1;
+        min-height: 44px; /* 恢復到較小高度 */
+        max-height: 100px;
+        padding: 10px 12px;
+        border: 1px solid transparent;
+        background: transparent;
+        border-radius: 8px;
+        font-size: 14px;
+        resize: vertical;
+        outline: none;
+        line-height: 1.5;
+      }
+      
+      .mode2.fig1 .input-wrapper .chat-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
       }
 
-      .mode2.fig1 .send-btn {
-        height: 60px; /* 與輸入框高度一致 */
-        min-width: 60px; /* 稍微增大 */
-        border-radius: 12px; /* 與輸入框圓角一致 */
+      .mode2.fig1 .input-wrapper .send-btn {
+        height: 44px; /* 恢復到較小高度 */
+        min-width: 44px;
+        border-radius: 8px;
         background: #3b82f6;
         color: #ffffff;
         border: none;
-        padding: 0 24px; /* 增大內邊距 */
+        padding: 0 18px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .mode2.fig1 .input-wrapper .send-btn:hover {
+        background: #2563eb;
+      }
+      
+      /* Mode2 快速按鈕在輸入框內底部 */
+      .mode2.fig1 .input-wrapper .quick-buttons {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px 0 0 0;
+        margin: 0;
+        border-top: 1px solid #e5e7eb;
+        background: transparent;
+      }
+      
+      .mode2.fig1 .input-wrapper .quick-btn {
+        background: transparent;
+        border: 1px solid #d1d5db;
+        color: #374151;
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+      }
+      
+      .mode2.fig1 .input-wrapper .quick-btn:hover {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: white;
       }
 
       /* 手機版微調 */
@@ -8284,16 +8454,22 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               <!-- 輸入區域 -->
               <div class="input-row">
                 <div class="input-container">
-                  <textarea id="messageInput" class="chat-input" placeholder="向AI顧問提問..." rows="1"></textarea>
-                  <button id="sendBtn" class="send-btn" disabled>
-                    <i class="fas fa-paper-plane"></i>
-                  </button>
-                </div>
-                <!-- 快速按鈕區域 - 放在輸入欄位底部 -->
-                <div class="quick-buttons" id="quickButtons">
-                  <button class="quick-btn" data-text="我要如何開始？">我要如何開始？</button>
-                  <button class="quick-btn" data-text="我要怎麼帳號定位">我要怎麼帳號定位</button>
-                  <button class="quick-btn" data-text="什麼是腳本選題">什麼是腳本選題</button>
+                  <!-- 輸入框包裝器（用於放置快速按鈕） -->
+                  <div class="input-wrapper">
+                    <!-- 輸入框和發送按鈕在同一行 -->
+                    <div class="input-row-inner">
+                      <textarea id="messageInput" class="chat-input" placeholder="向AI顧問提問..." rows="1"></textarea>
+                      <button id="sendBtn" class="send-btn" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                      </button>
+                    </div>
+                    <!-- 快速按鈕區域 - 放在輸入框內底部 -->
+                    <div class="quick-buttons" id="quickButtons">
+                      <button class="quick-btn" data-text="我要如何開始？">我要如何開始？</button>
+                      <button class="quick-btn" data-text="我要怎麼帳號定位">我要怎麼帳號定位</button>
+                      <button class="quick-btn" data-text="什麼是腳本選題">什麼是腳本選題</button>
+                    </div>
+                  </div>
                 </div>
               </div>
               
