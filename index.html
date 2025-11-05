@@ -18121,14 +18121,20 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
   (function() {
     const API_BASE_URL = 'https://aivideobackend.zeabur.app';
     let currentMode3ConversationType = 'ip_planning';
+    let isMode3Sending = false; // 防止重複發送
     
-    // 初始化 Mode3 聊天功能
+    // 初始化 Mode3 聊天功能（防止重複綁定）
+    let mode3ChatInitialized = false;
     function initMode3Chat() {
       const messageInput = document.getElementById('mode3-messageInput');
       const sendBtn = document.getElementById('mode3-sendBtn');
       const quickButtons = document.getElementById('mode3-quickButtons');
       
       if (!messageInput || !sendBtn || !quickButtons) return;
+      
+      // 如果已經初始化過，跳過
+      if (mode3ChatInitialized) return;
+      mode3ChatInitialized = true;
       
       // 輸入框自動調整高度
       messageInput.addEventListener('input', function() {
@@ -18156,21 +18162,32 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       });
       
-      // 快速按鈕
-      quickButtons.querySelectorAll('.quick-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+      // 快速按鈕 - 使用事件委託避免重複綁定
+      quickButtons.addEventListener('click', (e) => {
+        const btn = e.target.closest('.quick-btn');
+        if (btn) {
+          e.preventDefault();
+          e.stopPropagation();
           const text = btn.getAttribute('data-text');
           if (text) {
             sendMode3Message(text, 'ip_planning');
           }
-        });
+        }
       });
     }
     
     // 發送 Mode3 訊息
     async function sendMode3Message(message, conversationType = 'ip_planning') {
+      // 防止重複發送
+      if (isMode3Sending) {
+        console.log('訊息發送中，請稍候...');
+        return;
+      }
+      
       currentMode3ConversationType = conversationType;
       if (!message || !message.trim()) return;
+      
+      isMode3Sending = true;
       
       const chatMessages = document.getElementById('mode3-chatMessages');
       const messageInput = document.getElementById('mode3-messageInput');
@@ -18295,15 +18312,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         const errorMessage = createMode3Message('assistant', `抱歉，發生了錯誤：${error.message}`);
         chatMessages.appendChild(errorMessage);
+      } finally {
+        // 恢復輸入框和按鈕
+        messageInput.disabled = false;
+        sendBtn.disabled = false;
+        if (quickButtons) {
+          quickButtons.style.display = 'flex';
+        }
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // 重置發送狀態
+        isMode3Sending = false;
       }
-      
-      // 恢復輸入框和按鈕
-      messageInput.disabled = false;
-      sendBtn.disabled = false;
-      if (quickButtons) {
-        quickButtons.style.display = 'flex';
-      }
-      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
     // 創建 Mode3 訊息元素
