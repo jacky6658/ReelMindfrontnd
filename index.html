@@ -4719,9 +4719,12 @@
         bottom: 0;
       }
       
-      /* Mode3 訊息框樣式 - 與 Mode2 一致 */
+      /* Mode3 訊息框樣式 - 與 Mode2 一致，確保用戶對話在右邊 */
+      #mode3 .message.user,
       #mode3-chatMessages .message.user,
-      #mode3-chat-messages .message.user {
+      #mode3-chat-messages .message.user,
+      #mode3 .message.user.message,
+      #mode3-chatMessages .message.user.message {
         display: flex !important;
         flex-direction: row-reverse !important; /* 確保用戶對話在右邊 */
         align-items: flex-start !important;
@@ -4729,6 +4732,7 @@
         background: transparent !important;
       }
       
+      #mode3 .message.user .message-content,
       #mode3-chatMessages .message.user .message-content,
       #mode3-chat-messages .message.user .message-content {
         flex: 1 !important;
@@ -4741,6 +4745,7 @@
       }
       
       /* Mode3 用戶頭像樣式 - 確保在右邊 */
+      #mode3 .message.user .message-avatar,
       #mode3-chatMessages .message.user .message-avatar,
       #mode3-chat-messages .message.user .message-avatar {
         width: 32px !important;
@@ -4757,6 +4762,7 @@
         overflow: hidden !important;
       }
       
+      #mode3 .message.user .message-avatar img,
       #mode3-chatMessages .message.user .message-avatar img,
       #mode3-chat-messages .message.user .message-avatar img {
         width: 100% !important;
@@ -4766,6 +4772,7 @@
         display: block !important;
       }
       
+      #mode3 .message.user .message-avatar:has(img),
       #mode3-chatMessages .message.user .message-avatar:has(img),
       #mode3-chat-messages .message.user .message-avatar:has(img) {
         background: transparent !important;
@@ -7739,8 +7746,7 @@
         <div class="page-content">
           <!-- 首頁 -->
           <div id="homepage" class="page active">
-            <!-- 未登入用戶（訪客）視圖 -->
-            <div id="homepage-guest" class="homepage-view" style="display: none;">
+            <div class="homepage">
               <!-- Hero Section: 白＋藍冷系｜滿版全出血 -->
               <section class="rm-hero" style="background: #F8FAFC; position: relative; overflow: hidden; padding: 80px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw;">
                 <!-- 背景淡藍光暈 -->
@@ -8208,20 +8214,6 @@
 
 
             </div>
-            <!-- 未登入視圖結束 -->
-
-            <!-- 已登入用戶（未訂閱）視圖 -->
-            <div id="homepage-unsubscribed" class="homepage-view" style="display: none;">
-              <!-- 內容與未登入視圖相同，使用 index_unsubscribed.html 的內容 -->
-              <!-- 注意：此視圖的內容與未登入視圖相同，但會顯示給已登入但未訂閱的用戶 -->
-            </div>
-            <!-- 已登入未訂閱視圖結束 -->
-
-            <!-- 已登入用戶（已訂閱）視圖 -->
-            <div id="homepage-subscribed" class="homepage-view" style="display: none;">
-              <!-- 內容使用 index_subscribed.html 的內容 -->
-            </div>
-            <!-- 已登入已訂閱視圖結束 -->
           </div>
 
           <!-- 論壇介紹 & 聯絡方式頁面 -->
@@ -10135,12 +10127,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 控制訂閱鎖定浮層顯示
         updateSubscriptionLock();
-        
-        // 根據用戶權限顯示對應的首頁視圖
-        updateHomepageView();
-        
-        // 複製未登入視圖內容到已登入未訂閱視圖（兩者內容相同）
-        copyGuestViewToUnsubscribedView();
       });
 
       // ===== 訂閱封鎖與導購：未訂閱使用者禁止進入三大模式 =====
@@ -10229,90 +10215,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               }
             }
           }
-        }
-      }
-
-      // 根據用戶權限顯示對應的首頁視圖
-      function updateHomepageView() {
-        try {
-          // 獲取三個視圖容器
-          const guestView = document.getElementById('homepage-guest');
-          const unsubscribedView = document.getElementById('homepage-unsubscribed');
-          const subscribedView = document.getElementById('homepage-subscribed');
-          
-          if (!guestView || !unsubscribedView || !subscribedView) {
-            console.warn('首頁視圖容器不存在');
-            return;
-          }
-          
-          // 檢查登入狀態
-          const token = localStorage.getItem('ipPlanningToken');
-          const userStr = localStorage.getItem('ipPlanningUser');
-          const isLoggedIn = !!(token && userStr);
-          
-          // 檢查訂閱狀態
-          let userSubscribed = false;
-          if (isLoggedIn && userStr) {
-            try {
-              const user = JSON.parse(userStr);
-              userSubscribed = !!(user && (user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1'));
-            } catch (e) {
-              console.warn('解析用戶資訊失敗:', e);
-            }
-          }
-          
-          // 隱藏所有視圖
-          guestView.style.display = 'none';
-          unsubscribedView.style.display = 'none';
-          subscribedView.style.display = 'none';
-          
-          // 根據權限顯示對應視圖
-          if (!isLoggedIn) {
-            // 未登入用戶（訪客）
-            guestView.style.display = 'block';
-          } else if (isLoggedIn && !userSubscribed) {
-            // 已登入但未訂閱
-            unsubscribedView.style.display = 'block';
-          } else if (isLoggedIn && userSubscribed) {
-            // 已登入且已訂閱
-            subscribedView.style.display = 'block';
-          }
-          
-          console.log('首頁視圖已更新:', {
-            isLoggedIn,
-            userSubscribed,
-            activeView: isLoggedIn ? (userSubscribed ? 'subscribed' : 'unsubscribed') : 'guest'
-          });
-        } catch (error) {
-          console.error('更新首頁視圖時發生錯誤:', error);
-        }
-      }
-      
-      // 監聽 localStorage 變化，自動更新視圖
-      window.addEventListener('storage', function(e) {
-        if (e.key === 'ipPlanningToken' || e.key === 'ipPlanningUser') {
-          updateHomepageView();
-        }
-      });
-      
-      // 監聽自定義事件（當登入狀態改變時）
-      window.addEventListener('userStatusChanged', function() {
-        updateHomepageView();
-      });
-      
-      // 複製未登入視圖內容到已登入未訂閱視圖（兩者內容相同）
-      function copyGuestViewToUnsubscribedView() {
-        try {
-          const guestView = document.getElementById('homepage-guest');
-          const unsubscribedView = document.getElementById('homepage-unsubscribed');
-          
-          if (guestView && unsubscribedView && !unsubscribedView.innerHTML.trim()) {
-            // 複製內容（深複製）
-            unsubscribedView.innerHTML = guestView.innerHTML;
-            console.log('已將未登入視圖內容複製到已登入未訂閱視圖');
-          }
-        } catch (error) {
-          console.error('複製視圖內容時發生錯誤:', error);
         }
       }
       
@@ -12166,8 +12068,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             });
           }
           
-          // 載入歷史對話記錄
-          loadMode2History();
+          // 不自動載入歷史對話記錄（重新整理時已清空，用戶可通過按鈕主動載入）
+          // loadMode2History();
           
           // 設置快速按鈕事件 - 只綁定到 mode2 的快速按鈕容器
           const quickButtons = document.getElementById('quickButtons');
@@ -14294,6 +14196,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 事件監聽器
       document.addEventListener('DOMContentLoaded', async () => {
+        // 頁面重新整理時，清空聊天區域（但後端長期記憶會保留）
+        const chatMessages = document.getElementById('chatMessages');
+        const mode3ChatMessages = document.getElementById('mode3-chatMessages');
+        if (chatMessages) {
+          chatMessages.innerHTML = '';
+          console.log('頁面重新整理：已清空 AI 顧問聊天區域');
+        }
+        if (mode3ChatMessages) {
+          mode3ChatMessages.innerHTML = '';
+          console.log('頁面重新整理：已清空 IP 人設規劃聊天區域');
+        }
+        
         // 確保抽屜初始狀態為關閉
         closeUserDrawer();
         
