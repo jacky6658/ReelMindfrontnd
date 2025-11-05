@@ -1968,7 +1968,8 @@
       .message.user .message-content {
         flex: 1;
         background: #dbeafe !important;
-        padding: 20px 40px; /* 與 AI 回覆框一樣的 padding */
+        padding: 20px 40px; /* 與 AI 回覆框一樣的 padding，與 Mode3 一致 */
+        padding-left: 50px; /* 增加左邊 padding，避免文字太貼邊界 */
         border-radius: 12px;
         border: 1px solid #3b82f6 !important;
         color: #1e40af !important;
@@ -4719,9 +4720,15 @@
       }
       
       /* Mode3 訊息框樣式 - 與 Mode2 一致 */
+      #mode3-chatMessages .message.user,
+      #mode3-chat-messages .message.user {
+        flex-direction: row-reverse !important; /* 確保用戶對話在右邊 */
+      }
+      
       #mode3-chatMessages .message.user .message-content,
       #mode3-chat-messages .message.user .message-content {
-        padding: 20px 40px !important; /* 與 AI 回覆框一樣的 padding */
+        padding: 20px 40px !important; /* 與 AI 回覆框一樣的 padding，與 Mode2 一致 */
+        padding-left: 50px !important; /* 增加左邊 padding，避免文字太貼邊界 */
         line-height: 1.6 !important; /* 與 Mode2 一致的行高 */
         text-align: right !important; /* 用戶對話泡泡靠右對齊 */
       }
@@ -4813,14 +4820,14 @@
       .mode3-instructions-btn-container {
         position: fixed;
         top: 75px;
-        right: 20px;
+        left: 20px; /* 改到左邊 */
         z-index: 1001;
       }
       
       .mode3-results-btn-container {
         position: fixed;
         top: 75px;
-        right: 120px;
+        left: 120px; /* 改到左邊 */
         z-index: 1001;
       }
       
@@ -5119,12 +5126,14 @@
         
         .mode3-instructions-btn-container {
           top: 65px;
-          right: 15px;
+          left: 15px; /* 改到左邊 */
+          right: auto; /* 取消右邊定位 */
         }
         
         .mode3-results-btn-container {
           top: 65px;
-          right: 80px;
+          left: 80px; /* 改到左邊 */
+          right: auto; /* 取消右邊定位 */
         }
         
         .mode3-instructions-btn,
