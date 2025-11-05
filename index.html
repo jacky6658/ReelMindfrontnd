@@ -1966,10 +1966,10 @@
       
       .message.user .message-content {
         flex: 1;
-        background: #dbeafe !important;
+        background: transparent !important;
         padding: 20px 40px; /* 與 AI 回覆框一樣的 padding */
         border-radius: 12px;
-        border: 1px solid #3b82f6;
+        border: 2px solid #3b82f6 !important;
         color: #1e40af !important;
         margin-right: 12px;
       }
@@ -1980,12 +1980,14 @@
         align-items: flex-start;
       }
       
-      .message.ai .message-content {
+      .message.ai .message-content,
+      .message.assistant .message-content {
         flex: 1;
-        background: #f8fafc !important;
-        padding: 12px 16px;
+        background: transparent !important;
+        padding: 20px 40px;
         border-radius: 12px;
-        border: 1px solid #e5e7eb;
+        border: 2px solid #e5e7eb !important;
+        color: #1f2937 !important;
         margin-left: 12px;
       }
       
@@ -2276,8 +2278,7 @@
         background: transparent;
       }
       
-      .mode2.fig1 .input-wrapper .quick-btn,
-      .mode3.fig1 .input-wrapper .quick-btn {
+      .mode2.fig1 .input-wrapper .quick-btn {
         background: transparent;
         border: 1px solid #d1d5db;
         color: #374151;
@@ -2289,11 +2290,29 @@
         white-space: nowrap;
       }
       
-      .mode2.fig1 .input-wrapper .quick-btn:hover,
-      .mode3.fig1 .input-wrapper .quick-btn:hover {
+      .mode3.fig1 .input-wrapper .quick-btn {
+        background: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        color: #1f2937 !important;
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        font-weight: 500;
+      }
+      
+      .mode2.fig1 .input-wrapper .quick-btn:hover {
         background: #3b82f6;
         border-color: #3b82f6;
         color: white;
+      }
+      
+      .mode3.fig1 .input-wrapper .quick-btn:hover {
+        background: #f3f4f6 !important;
+        border-color: #3b82f6 !important;
+        color: #1f2937 !important;
       }
 
       /* 手機版微調 */
@@ -2324,10 +2343,17 @@
         }
         
         /* Mode2 和 Mode3 手機版快速按鈕變得更小（像圖2那樣） */
-        .mode2.fig1 .quick-btn,
+        .mode2.fig1 .quick-btn {
+          padding: 3px 6px !important; /* 手機版快速按鈕變得更小 */
+          font-size: 10px !important; /* 手機版快速按鈕字體變得更小 */
+        }
+        
         .mode3.fig1 .quick-btn {
           padding: 3px 6px !important; /* 手機版快速按鈕變得更小 */
           font-size: 10px !important; /* 手機版快速按鈕字體變得更小 */
+          background: #ffffff !important;
+          color: #1f2937 !important;
+          border: 1px solid #d1d5db !important;
         }
         
         /* Mode2 和 Mode3 手機版輸入區域樣式統一 */
@@ -7332,7 +7358,7 @@
       #mode3-chatMessages {
         margin: 0 !important;
         padding: 16px 24px !important;
-        background: transparent !important;
+        background: #ffffff !important;
         border: none !important;
         border-radius: 0 !important;
         flex: 1 !important;
@@ -7459,9 +7485,9 @@
       
       #mode3 .quick-btn,
       #mode3.active .quick-btn {
-        background: transparent;
-        border: 1px solid #d1d5db;
-        color: #374151;
+        background: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        color: #1f2937 !important;
         padding: 6px 12px;
         border-radius: 16px;
         font-size: 13px;
@@ -7472,13 +7498,14 @@
         width: auto !important;
         min-width: fit-content !important;
         flex-shrink: 0;
+        font-weight: 500;
       }
       
       #mode3 .quick-btn:hover,
       #mode3.active .quick-btn:hover {
-        background: #3b82f6;
-        border-color: #3b82f6;
-        color: white;
+        background: #f3f4f6 !important;
+        border-color: #3b82f6 !important;
+        color: #1f2937 !important;
       }
       
       /* Mode3 桌面版樣式 - 確保快速按鈕大小合適 */
@@ -8884,14 +8911,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             <div class="mode3-page">
               <!-- 聊天訊息區域 -->
               <div id="mode3-chatMessages" class="chat-messages">
-                <!-- 歡迎訊息 -->
-                <div class="message assistant">
-                  <div class="message-avatar">🤖</div>
-                  <div class="message-content">
-                    <p>您好！我是您的AI顧問。</p>
-                    <p>請告訴我您想要討論的主題，或使用下方的快速按鈕開始對話！</p>
-                  </div>
-                </div>
+                <!-- 歡迎訊息已移除 -->
               </div>
               
               <!-- 輸入區域 -->
