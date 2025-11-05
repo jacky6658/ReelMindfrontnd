@@ -34,6 +34,10 @@
 - ✅ 500 錯誤修復：後端補齊資料表欄位，所有功能正常運作
 - ✅ 首頁功能正常：一鍵生成、AI顧問、IP人設等所有模式皆可正常使用
 - ✅ **長期記憶整合**：所有對話自動儲存到長期記憶系統
+  - ✅ **mode2（AI 顧問）**：修復 `sendMessage()` 函數，現在會正確儲存長期記憶
+  - ✅ **mode3（IP 人設規劃）**：修復重複儲存問題，確保只儲存一次
+  - ✅ **獨立頁面**：修復 `index-ai-consultant.html` 的長期記憶儲存功能
+  - ✅ **日誌輸出**：添加詳細日誌，方便調試和問題排查
 - ✅ **會話管理功能**：新增會話列表、歷史載入、會話切換功能
 - ✅ **對話歷史載入**：支援載入和查看歷史對話記錄
 
@@ -157,6 +161,137 @@ ReelMindfrontnd-main/
 **重要**：部署時必須包含整個 `auth` 資料夾，因為後端會 redirect 到 `/auth/popup-callback.html`。
 
 ## 更新日誌
+
+### 2025-11-04 - 長期記憶儲存功能完整修復
+
+#### 🚨 問題描述
+- **症狀**：只有 IP 人設規劃（mode3）有長期記憶儲存，AI 顧問（mode2）完全沒有儲存長期記憶
+- **錯誤類型**：`sendMessage()` 函數沒有調用 `recordConversationMessage`
+- **影響範圍**：mode2 的對話記錄無法儲存到長期記憶資料庫
+
+#### 🔍 問題診斷
+1. **函數實現不完整**：
+   - `sendMessage()` 函數（ChatGPT 風格，約 11441 行）沒有調用長期記憶儲存
+   - `send()` 函數（原生風格，約 14619 行）有正確調用長期記憶儲存
+   - mode2 的 ChatGPT 風格聊天界面使用的是 `sendMessage()` 函數
+
+2. **mode3 重複儲存問題**：
+   - 在串流結束（`done === true`）和收到 `[DONE]` 標記時都會儲存
+   - 可能導致重複儲存長期記憶
+
+3. **`index-ai-consultant.html` 實現問題**：
+   - 使用簡化版的 `recordConversationMessage` 函數
+   - 只檢查 `ipPlanningToken` 全局變數，如果未設置就不會儲存
+   - 使用錯誤的 API 端點 `/api/user/memory` 而不是 `/api/memory/long-term`
+
+#### ✅ 解決方案
+
+**1. 修復 `sendMessage()` 函數**（約 11453-11463 行）：
+- 添加用戶訊息儲存：發送訊息後立即調用 `recordConversationMessage('ai_advisor', 'user', message)`
+- 添加 AI 回覆儲存：串流完成後調用 `recordConversationMessage('ai_advisor', 'assistant', fullContent)`
+- 添加詳細的日誌輸出，方便調試
+
+**2. 修復 mode3 重複儲存問題**（約 16682-16720 行）：
+- 添加 `hasSavedMemory` 標記防止重複儲存
+- 在 `done === true` 和 `[DONE]` 標記處理中都檢查標記，確保只儲存一次
+
+**3. 修復 `index-ai-consultant.html`**：
+- 替換為完善的 `recordConversationMessage` 函數實現
+- 添加 `getCurrentSessionId()` 函數
+- 添加 `tryRefreshTokenSafe()` 函數
+- 使用正確的 API 端點 `/api/memory/long-term`
+- 添加多種 token 獲取方式（localStorage、window.Auth、全局變數）
+
+**4. 加強日誌輸出**：
+- 在 `recordConversationMessage` 函數開頭添加強制日誌
+- 即使函數提前返回也會輸出日誌
+- 添加詳細的錯誤診斷資訊
+
+#### 🛠️ 技術修改
+
+**檔案：index.html**
+
+**1. `sendMessage()` 函數修復**：
+```javascript
+// 用戶訊息儲存（約 11453 行）
+console.log('📝📝📝 準備儲存長期記憶 (AI 顧問 - user) - sendMessage 函數 📝📝📝');
+await recordConversationMessage('ai_advisor', 'user', message);
+
+// AI 回覆儲存（約 11542 行）
+if (data === '[DONE]') {
+  console.log('📝📝📝 準備儲存長期記憶 (AI 顧問 - assistant) - sendMessage 函數 📝📝📝');
+  await recordConversationMessage('ai_advisor', 'assistant', fullContent);
+}
+```
+
+**2. mode3 重複儲存修復**：
+```javascript
+let hasSavedMemory = false; // 防止重複儲存
+
+if (done) {
+  if (assistantMessage && !hasSavedMemory) {
+    await recordConversationMessage('ip_planning', 'assistant', assistantMessage);
+    hasSavedMemory = true;
+  }
+}
+
+if (data === '[DONE]') {
+  if (assistantMessage && !hasSavedMemory) {
+    await recordConversationMessage('ip_planning', 'assistant', assistantMessage);
+    hasSavedMemory = true;
+  }
+}
+```
+
+**3. `recordConversationMessage` 函數加強**：
+- 添加強制日誌輸出（開頭即輸出，確保函數被調用時一定會看到）
+- 改進 token 獲取邏輯（多種方式嘗試）
+- 添加詳細的錯誤診斷資訊
+
+**檔案：index-ai-consultant.html**
+
+**1. 完全替換 `recordConversationMessage` 函數**：
+- 使用與 `index.html` 相同的完善實現
+- 多種 token 獲取方式
+- 正確的 API 端點
+- 完整的錯誤處理和 token 刷新機制
+
+**2. 添加輔助函數**：
+- `getCurrentSessionId()`：管理會話 ID
+- `tryRefreshTokenSafe()`：安全刷新 token 機制
+
+#### 🎯 測試結果
+
+所有功能已驗證正常：
+- ✅ **mode2 長期記憶儲存**：`sendMessage()` 函數現在會正確儲存長期記憶
+- ✅ **mode3 長期記憶儲存**：修復重複儲存問題，確保只儲存一次
+- ✅ **獨立頁面修復**：`index-ai-consultant.html` 現在也能正確儲存長期記憶
+- ✅ **日誌輸出**：添加詳細日誌，方便調試和問題排查
+- ✅ **錯誤處理**：完善的錯誤處理和 token 刷新機制
+
+#### 📝 設計邏輯確認
+
+根據系統設計：
+1. **IP 人設規劃（mode3）**：
+   - 用戶先完成 IP 人設規劃
+   - 對話記錄會儲存到長期記憶
+   - AI 會使用這些記憶來了解用戶的背景和偏好
+
+2. **AI 顧問（mode2）**：
+   - 用戶在完成 IP 人設規劃後，使用 AI 顧問功能
+   - AI 顧問會讀取 IP 人設規劃的長期記憶
+   - **現在也會儲存新的對話記錄到長期記憶**
+   - 這樣可以持續累積用戶的對話歷史
+
+#### 📝 經驗總結
+
+1. **函數一致性**：確保所有發送訊息的函數都調用長期記憶儲存
+2. **重複儲存防護**：使用標記防止在同一個會話中重複儲存
+3. **日誌重要性**：詳細的日誌輸出是調試和問題排查的關鍵
+4. **Token 獲取策略**：多種方式嘗試獲取 token，提高成功率
+5. **獨立頁面維護**：確保獨立頁面使用與主頁面相同的實現邏輯
+
+---
 
 ### 2025-10-27 - 新增論壇介紹與實戰指南頁面
 
