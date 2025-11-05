@@ -8573,9 +8573,7 @@
                   <div style="font-size: 0.9rem; color: #94A3B8; font-weight: 500; text-align: center; width: 100%; margin-bottom: 16px;">
                     ReelMind — 為亞洲創作者打造的 AI 短影音智能體
                   </div>
-                  <div style="font-size: 0.85rem; color: #64748B; font-weight: 400; text-align: center; width: 100%;">
-                    2025 AIJob學院版權所有
-                  </div>
+                  
                 </div>
               </section>
 
@@ -8882,9 +8880,7 @@
                     <div style="font-size: 0.9rem; color: #94A3B8; font-weight: 500; text-align: center; width: 100%; margin-bottom: 16px;">
                       ReelMind — 為亞洲創作者打造的 AI 短影音智能體
                     </div>
-                    <div style="font-size: 0.85rem; color: #64748B; font-weight: 400; text-align: center; width: 100%;">
-                      2025 AIJob學院版權所有
-                    </div>
+                    
                   </div>
                 </section>
 
@@ -10204,7 +10200,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         </div>
       </div>
       
-      <div class="small">2025 AIJob學院版權所有</div>
+      
     </div>
 
     <!-- 彈出提示框 -->
@@ -18021,7 +18017,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
 
       // 生成IP Profile
-      async function generateMode3IPProfile() {
+      window.generateMode3IPProfile = async function() {
         const resultBlock = document.getElementById('mode3-profile-result');
         const button = resultBlock.querySelector('.mode3-generate-btn');
         
@@ -18090,7 +18086,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
 
       // 生成14天規劃
-      async function generateMode314DayPlan() {
+      window.generateMode314DayPlan = async function() {
         const resultBlock = document.getElementById('mode3-plan-result');
         const button = resultBlock.querySelector('.mode3-generate-btn');
         
@@ -18157,7 +18153,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       }
       // 生成今日腳本
-      async function generateMode3TodayScripts() {
+      window.generateMode3TodayScripts = async function() {
         const resultBlock = document.getElementById('mode3-scripts-result');
         const button = resultBlock.querySelector('.mode3-generate-btn');
         
@@ -19315,18 +19311,25 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
     };
     
-    // 生成功能（佔位函數）
-    window.generateMode3IPProfile = function() {
-      console.log('生成IP Profile');
-    };
+    // 生成功能已在上面定義，這裡不需要重複定義
+    // 如果上面的函數未定義，則使用佔位函數
+    if (typeof generateMode3IPProfile === 'undefined') {
+      window.generateMode3IPProfile = function() {
+        console.log('生成IP Profile - 函數未定義');
+      };
+    }
     
-    window.generateMode314DayPlan = function() {
-      console.log('生成14天規劃');
-    };
+    if (typeof generateMode314DayPlan === 'undefined') {
+      window.generateMode314DayPlan = function() {
+        console.log('生成14天規劃 - 函數未定義');
+      };
+    }
     
-    window.generateMode3TodayScripts = function() {
-      console.log('生成今日腳本');
-    };
+    if (typeof generateMode3TodayScripts === 'undefined') {
+      window.generateMode3TodayScripts = function() {
+        console.log('生成今日腳本 - 函數未定義');
+      };
+    }
     
     window.saveMode3Result = function() {
       console.log('儲存結果');
