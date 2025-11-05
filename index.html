@@ -1962,31 +1962,34 @@
         margin-bottom: 16px;
         align-items: flex-start;
         flex-direction: row-reverse;
+        background: transparent !important;
       }
       
       .message.user .message-content {
         flex: 1;
-        background: transparent !important;
+        background: #dbeafe !important;
         padding: 20px 40px; /* 與 AI 回覆框一樣的 padding */
         border-radius: 12px;
-        border: 2px solid #3b82f6 !important;
+        border: 1px solid #3b82f6 !important;
         color: #1e40af !important;
         margin-right: 12px;
       }
       
-      .message.ai {
+      .message.ai,
+      .message.assistant {
         display: flex;
         margin-bottom: 16px;
         align-items: flex-start;
+        background: transparent !important;
       }
       
       .message.ai .message-content,
       .message.assistant .message-content {
         flex: 1;
-        background: transparent !important;
+        background: #f8fafc !important;
         padding: 20px 40px;
         border-radius: 12px;
-        border: 2px solid #e5e7eb !important;
+        border: 1px solid #e5e7eb !important;
         color: #1f2937 !important;
         margin-left: 12px;
       }
@@ -2008,11 +2011,25 @@
         color: white;
         margin-right: 0;
         margin-left: 12px;
+        overflow: hidden;
       }
       
-      .message.ai .message-avatar {
-        background: #f3f4f6;
-        color: #374151;
+      .message.user .message-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+      }
+      
+      .message.user .message-avatar:has(img) {
+        background: transparent !important;
+      }
+      
+      .message.ai .message-avatar,
+      .message.assistant .message-avatar {
+        background: #10a37f !important;
+        color: white !important;
       }
       
       .message-content p {
@@ -18353,7 +18370,29 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       const avatar = document.createElement('div');
       avatar.className = 'message-avatar';
-      avatar.textContent = role === 'user' ? 'U' : '🤖';
+      
+      // 獲取用戶頭像（從 Google 登入）
+      if (role === 'user') {
+        const userStr = localStorage.getItem('ipPlanningUser');
+        const user = userStr ? JSON.parse(userStr) : null;
+        if (user && user.picture) {
+          // 使用圖片作為頭像
+          const img = document.createElement('img');
+          img.src = user.picture;
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.borderRadius = '50%';
+          img.style.objectFit = 'cover';
+          avatar.appendChild(img);
+        } else {
+          // 如果沒有圖片，使用首字母
+          const userName = user?.name || 'U';
+          avatar.textContent = userName.charAt(0).toUpperCase();
+        }
+      } else {
+        // AI 頭像使用文字
+        avatar.textContent = '🤖';
+      }
       
       const contentDiv = document.createElement('div');
       contentDiv.className = 'message-content';
@@ -18361,8 +18400,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         contentDiv.innerHTML = renderMode3Markdown(content);
       }
       
-      messageDiv.appendChild(avatar);
-      messageDiv.appendChild(contentDiv);
+      // 用戶訊息使用 row-reverse，所以先添加內容再添加頭像
+      if (role === 'user') {
+        messageDiv.appendChild(contentDiv);
+        messageDiv.appendChild(avatar);
+      } else {
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(contentDiv);
+      }
       
       return messageDiv;
     }
