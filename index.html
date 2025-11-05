@@ -2057,16 +2057,17 @@
       .message.user .message-content {
         flex: 1;
         background: #dbeafe !important;
-        padding: 20px 40px; /* 與 AI 回覆框一樣的 padding，與 Mode3 一致 */
-        padding-left: 50px; /* 增加左邊 padding，避免文字太貼邊界 */
-        border-radius: 12px;
+        padding: 28px 40px !important; /* 上下間距增加到 28px，左右保持 40px */
+        padding-left: 50px !important; /* 增加左邊 padding，避免文字太貼邊界 */
+        border-radius: 12px !important;
         border: 1px solid #3b82f6 !important;
         color: #1e40af !important;
-        margin-right: 12px;
-        font-size: 16px; /* 用戶對話泡泡字體大小 */
-        line-height: 1.6; /* 行高 */
+        margin-right: 12px !important;
+        font-size: 16px !important; /* 用戶對話泡泡字體大小 */
+        line-height: 1.6 !important; /* 行高 */
         font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
-        text-align: right; /* 用戶對話泡泡靠右對齊 */
+        text-align: right !important; /* 用戶對話泡泡靠右對齊 */
+        box-sizing: border-box !important;
       }
       
       .message.ai,
