@@ -7350,7 +7350,8 @@
       }
       
       /* Mode3 輸入區域 */
-      #mode3 .input-row {
+      #mode3 .input-row,
+      #mode3.active .input-row {
         display: flex !important;
         flex-direction: column !important;
         padding: 16px 24px;
@@ -7358,24 +7359,27 @@
         background: transparent;
       }
       
-      #mode3 .input-container {
-        display: flex;
+      #mode3 .input-container,
+      #mode3.active .input-container {
+        display: flex !important;
         gap: 12px;
         align-items: flex-start;
         width: 100%;
       }
       
-      #mode3 .input-wrapper {
+      #mode3 .input-wrapper,
+      #mode3.active .input-wrapper {
         position: relative;
         flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 120px;
-        background: #ffffff;
-        border: 1px solid #d1d5db;
-        border-radius: 12px;
-        padding: 12px;
-        gap: 8px;
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 120px !important;
+        background: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 12px !important;
+        padding: 12px !important;
+        gap: 8px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       }
       
       #mode3 .input-wrapper:focus-within {
@@ -7383,20 +7387,22 @@
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
       }
       
-      #mode3 .input-row-inner {
-        display: flex;
+      #mode3 .input-row-inner,
+      #mode3.active .input-row-inner {
+        display: flex !important;
         gap: 12px;
         align-items: flex-end;
         flex: 1;
       }
       
-      #mode3 .chat-input {
+      #mode3 .chat-input,
+      #mode3.active .chat-input {
         flex: 1;
         min-height: 44px;
         max-height: 100px;
         padding: 10px 12px;
-        border: 1px solid transparent;
-        background: transparent;
+        border: 1px solid transparent !important;
+        background: transparent !important;
         border-radius: 8px;
         font-size: 14px;
         resize: vertical;
@@ -7405,12 +7411,14 @@
         font-family: inherit;
       }
       
-      #mode3 .chat-input:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+      #mode3 .chat-input:focus,
+      #mode3.active .chat-input:focus {
+        border-color: transparent !important;
+        box-shadow: none !important;
       }
       
-      #mode3 .send-btn {
+      #mode3 .send-btn,
+      #mode3.active .send-btn {
         height: 44px;
         min-width: 44px;
         padding: 0 18px;
@@ -7427,18 +7435,21 @@
         justify-content: center;
       }
       
-      #mode3 .send-btn:hover:not(:disabled) {
+      #mode3 .send-btn:hover:not(:disabled),
+      #mode3.active .send-btn:hover:not(:disabled) {
         background: #2563eb;
       }
       
-      #mode3 .send-btn:disabled {
+      #mode3 .send-btn:disabled,
+      #mode3.active .send-btn:disabled {
         background: #9ca3af;
         cursor: not-allowed;
       }
       
-      #mode3 .quick-buttons {
-        display: flex;
-        flex-wrap: wrap;
+      #mode3 .quick-buttons,
+      #mode3.active .quick-buttons {
+        display: flex !important;
+        flex-wrap: wrap !important;
         gap: 8px;
         padding: 8px 0 0 0;
         margin: 0;
@@ -7446,7 +7457,8 @@
         background: transparent;
       }
       
-      #mode3 .quick-btn {
+      #mode3 .quick-btn,
+      #mode3.active .quick-btn {
         background: transparent;
         border: 1px solid #d1d5db;
         color: #374151;
@@ -7457,12 +7469,34 @@
         transition: all 0.2s ease;
         white-space: nowrap;
         font-family: inherit;
+        width: auto !important;
+        min-width: fit-content !important;
+        flex-shrink: 0;
       }
       
-      #mode3 .quick-btn:hover {
+      #mode3 .quick-btn:hover,
+      #mode3.active .quick-btn:hover {
         background: #3b82f6;
         border-color: #3b82f6;
         color: white;
+      }
+      
+      /* Mode3 桌面版樣式 - 確保快速按鈕大小合適 */
+      @media (min-width: 769px) {
+        #mode3 .quick-buttons,
+        #mode3.active .quick-buttons {
+          display: flex !important;
+          flex-wrap: wrap !important;
+          gap: 8px !important;
+        }
+        
+        #mode3 .quick-btn,
+        #mode3.active .quick-btn {
+          width: auto !important;
+          min-width: fit-content !important;
+          max-width: none !important;
+          flex: 0 0 auto !important;
+        }
       }
       
       /* Mode3 手機版樣式 */
