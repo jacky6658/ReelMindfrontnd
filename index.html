@@ -6815,6 +6815,123 @@
           padding: 24px !important;
         }
         
+        /* 手機版：未訂閱用戶首頁 - 所有區塊對齊 */
+        /* 別人怎麼用區塊作為對齊基準 */
+        .user-story-section {
+          padding-left: 16px !important;
+          padding-right: 16px !important;
+        }
+        
+        .user-story-section > div {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          max-width: 100% !important;
+        }
+        
+        /* AI 短影音實戰指南區塊對齊 */
+        .rm-guide-section {
+          padding-left: 16px !important;
+          padding-right: 16px !important;
+        }
+        
+        .rm-guide-section > div {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          max-width: 100% !important;
+        }
+        
+        .rm-guide-section div[style*="grid-template-columns"] {
+          grid-template-columns: 1fr !important;
+          gap: 24px !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+        }
+        
+        .rm-guide-section a[onclick*="switchPage"] {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        
+        .rm-guide-section a[onclick*="switchPage"] > div {
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+        }
+        
+        /* 開始你的 AI 創作之旅區塊對齊 */
+        .rm-pricing {
+          padding-left: 16px !important;
+          padding-right: 16px !important;
+        }
+        
+        .rm-pricing > div {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          max-width: 100% !important;
+        }
+        
+        .rm-pricing-cards {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        
+        /* 頁尾對齊 */
+        .rm-footer {
+          padding-left: 16px !important;
+          padding-right: 16px !important;
+        }
+        
+        .rm-footer > div {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          max-width: 100% !important;
+        }
+        
+        /* 已訂閱用戶首頁 - 標題調整 */
+        /* "歡迎使用AIJob短影音智能體" 字體大小與"介紹如何開始"一致 */
+        #mode-cards .homepage-title {
+          font-size: clamp(2rem, 4vw, 2.8rem) !important;
+          font-weight: 800 !important;
+          margin-bottom: 16px !important;
+          margin-top: -30px !important;
+          color: #1E293B !important;
+          line-height: 1.2 !important;
+        }
+        
+        #mode-cards .homepage-subtitle {
+          font-size: clamp(1rem, 2vw, 1.1rem) !important;
+          margin-bottom: 48px !important;
+        }
+        
+        /* 確保"介紹如何開始"區塊的標題樣式一致 */
+        #introduction h2 {
+          font-size: clamp(2rem, 4vw, 2.8rem) !important;
+          font-weight: 800 !important;
+          margin-bottom: 16px !important;
+        }
+        
+        /* 三大功能卡片保持置中 */
+        #mode-cards .mode-cards {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+        }
+        
+        #mode-cards .mode-card {
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+        }
+        
       .mode2-page {
         width: 100% !important;
         max-width: 100vw !important;
@@ -8397,12 +8514,15 @@
               
               <!-- Footer（GEO＋SEO） -->
               <section class="rm-footer" style="background: #EFF6FF; padding: 60px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw;">
-                <div style="max-width: 1400px; margin: 0 auto; padding: 0 16px; text-align: center;">
-                  <div style="font-size: 1.1rem; font-weight: 600; color: #1E293B; margin-bottom: 12px;">
+                <div style="max-width: 1400px; margin: 0 auto; padding: 0 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                  <div style="font-size: 1.1rem; font-weight: 600; color: #1E293B; margin-bottom: 12px; text-align: center; width: 100%;">
                     AIJob 智能體 |  ReelMind |AIJob學院
                   </div>
-                  <div style="font-size: 0.9rem; color: #94A3B8; font-weight: 500;">
+                  <div style="font-size: 0.9rem; color: #94A3B8; font-weight: 500; text-align: center; width: 100%; margin-bottom: 16px;">
                     ReelMind — 為亞洲創作者打造的 AI 短影音智能體
+                  </div>
+                  <div style="font-size: 0.85rem; color: #64748B; font-weight: 400; text-align: center; width: 100%;">
+                    2025 AIJob學院版權所有
                   </div>
                 </div>
               </section>
@@ -8703,12 +8823,15 @@
                 
                 <!-- Footer（GEO＋SEO） -->
                 <section class="rm-footer" style="background: #EFF6FF; padding: 60px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw;">
-                  <div style="max-width: 1400px; margin: 0 auto; padding: 0 16px; text-align: center;">
-                    <div style="font-size: 1.1rem; font-weight: 600; color: #1E293B; margin-bottom: 12px;">
+                  <div style="max-width: 1400px; margin: 0 auto; padding: 0 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div style="font-size: 1.1rem; font-weight: 600; color: #1E293B; margin-bottom: 12px; text-align: center; width: 100%;">
                       AIJob 智能體 |  ReelMind |AIJob學院
                     </div>
-                    <div style="font-size: 0.9rem; color: #94A3B8; font-weight: 500;">
+                    <div style="font-size: 0.9rem; color: #94A3B8; font-weight: 500; text-align: center; width: 100%; margin-bottom: 16px;">
                       ReelMind — 為亞洲創作者打造的 AI 短影音智能體
+                    </div>
+                    <div style="font-size: 0.85rem; color: #64748B; font-weight: 400; text-align: center; width: 100%;">
+                      2025 AIJob學院版權所有
                     </div>
                   </div>
                 </section>
