@@ -7499,14 +7499,14 @@
         }
       }
       
-      /* Mode3 手機版樣式 */
+      /* Mode3 手機版樣式 - 與 Mode2 一致 */
       @media (max-width: 768px) {
         body.mode3-active, html.mode3-active {
           overflow: hidden !important;
         }
         
         .mode3.fig1 .mode3-page {
-          padding-top: 60px !important;
+          padding-top: 70px !important;
         }
         
         .mode3.fig1 #mode3-chatMessages {
@@ -7522,9 +7522,52 @@
           padding: 8px 12px 16px 12px !important;
         }
         
-        #mode3 .input-wrapper {
+        #mode3 .input-wrapper,
+        #mode3.active .input-wrapper {
           min-height: 100px !important;
           padding: 8px !important;
+        }
+        
+        /* Mode3 手機版輸入框樣式 - 與 Mode2 一致 */
+        #mode3 .chat-input,
+        #mode3.active .chat-input,
+        .mode3.fig1 #mode3-messageInput {
+          flex: 1 !important;
+          min-height: 44px !important;
+          max-height: 44px !important;
+          height: 44px !important;
+          border: 1px solid #d1d5db !important;
+          border-radius: 10px !important;
+          padding: 10px 12px !important;
+          font-size: 14px !important;
+          background: #ffffff !important;
+          resize: none !important;
+        }
+        
+        /* Mode3 手機版送出按鈕樣式 - 與 Mode2 一致 */
+        #mode3 .send-btn,
+        #mode3.active .send-btn,
+        .mode3.fig1 #mode3-sendBtn {
+          height: 44px !important;
+          min-width: 44px !important;
+          border-radius: 10px !important;
+          background: #3b82f6 !important;
+          color: #ffffff !important;
+          border: none !important;
+          padding: 0 18px !important;
+          width: auto !important;
+          flex-shrink: 0 !important;
+        }
+        
+        /* Mode3 手機版輸入區域內部布局 */
+        #mode3 .input-row-inner,
+        #mode3.active .input-row-inner,
+        .mode3.fig1 .input-row-inner {
+          display: flex !important;
+          flex-direction: row !important;
+          gap: 8px !important;
+          align-items: center !important;
+          width: 100% !important;
         }
       }
     </style>
@@ -8845,14 +8888,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 <div class="message assistant">
                   <div class="message-avatar">🤖</div>
                   <div class="message-content">
-                    <p>您好！我是您的AI顧問。我可以幫助您：</p>
-                    <ul>
-                      <li>🎯 帳號定位策略分析</li>
-                      <li>📝 內容選題建議</li>
-                      <li>✍️ 腳本創作指導</li>
-                      <li>📊 數據分析解讀</li>
-                      <li>🚀 爆款內容策略</li>
-                    </ul>
+                    <p>您好！我是您的AI顧問。</p>
                     <p>請告訴我您想要討論的主題，或使用下方的快速按鈕開始對話！</p>
                   </div>
                 </div>
