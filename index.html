@@ -11962,17 +11962,22 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 載入歷史對話記錄
           loadMode2History();
           
-          // 設置快速按鈕事件
+          // 設置快速按鈕事件 - 只綁定到 mode2 的快速按鈕容器
           const quickButtons = document.getElementById('quickButtons');
-          if (quickButtons) {
+          if (quickButtons && quickButtons.closest('#mode2')) {
             const quickBtns = quickButtons.querySelectorAll('.quick-btn');
             quickBtns.forEach(btn => {
-              btn.addEventListener('click', () => {
+              // 創建新的事件處理函數，確保只處理 mode2 的按鈕
+              const handler = (e) => {
+                e.stopPropagation(); // 防止事件冒泡
                 const text = btn.getAttribute('data-text');
                 if (text) {
                   sendMessage(text);
                 }
-              });
+              };
+              // 移除舊的事件監聽器（如果存在）
+              btn.removeEventListener('click', handler);
+              btn.addEventListener('click', handler);
             });
           }
         } catch (error) {
@@ -14134,11 +14139,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 初始化發送按鈕狀態
         autoResizeTextarea();
         
-        // 快速按鈕功能
-        document.querySelectorAll('.quick-btn').forEach(btn => {
+        // 快速按鈕功能 - 只綁定到 mode1 的快速按鈕（如果存在的話）
+        // 注意：mode2 和 mode3 的快速按鈕有各自獨立的事件監聽器
+        // 只處理 mode1 或沒有特定容器標記的快速按鈕
+        const mode1QuickButtons = document.querySelectorAll('#mode1 .quick-btn, .mode1-container .quick-btn');
+        mode1QuickButtons.forEach(btn => {
           btn.addEventListener('click', () => {
             const text = btn.getAttribute('data-text');
-            if (text) {
+            if (text && messageInput && sendMessage) {
               messageInput.value = text;
               messageInput.focus();
               
@@ -16964,138 +16972,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       }
 
-      // 發送訊息
-      async function sendMode3Message(message = null) {
-        const input = document.getElementById('mode3-message-input');
-        const messageText = message || input.value.trim();
-        
-        if (!messageText) return;
-        
-        // 清空輸入框
-        if (!message) {
-          input.value = '';
-        }
-        
-        // 添加用戶訊息
-        addMode3Message('user', messageText);
-        // 記錄長期記憶（用戶訊息）
-        console.log('📝 準備儲存長期記憶 (IP 人設規劃 - user)');
-        try { 
-          await recordConversationMessage('ip_planning', 'user', messageText); 
-        } catch (error) {
-          console.error('❌ 長期記憶儲存異常 (IP 人設規劃 - user):', error);
-        }
-        
-        // 添加載入訊息
-        const loadingId = addMode3LoadingMessage();
-        
-        try {
-          console.log('發送IP人設規劃訊息:', messageText);
-          console.log('用戶資料:', ipPlanningUser);
-          console.log('訪問令牌:', ipPlanningToken ? '已載入' : '未載入');
-          
-          // 發送到後端 API
-          const response = await fetch('https://aivideobackend.zeabur.app/api/chat/stream', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${ipPlanningToken}`
-            },
-            body: JSON.stringify({
-              message: messageText,
-              user_id: ipPlanningUser?.user_id || 'anonymous',
-              platform: '短影音平台',
-              profile: 'IP人設規劃專家',
-              topic: '個人品牌建立',
-              style: '專業訪談式對話，深度挖掘個人特色',
-              duration: '30'
-            })
-          });
-          
-          console.log('API 回應狀態:', response.status);
-          
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error('API 錯誤:', errorText);
-            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-          }
-          
-          // 處理串流回應
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
-          let assistantMessage = '';
-          let hasStarted = false;
-          
-          // 添加助手訊息容器
-          const messageDiv = addMode3Message('assistant', '');
-          const messageId = messageDiv.id;
-          
-          let hasSavedMemory = false; // 防止重複儲存
-          
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              // 串流結束，如果還沒有儲存過，則儲存完整的 AI 回覆到長期記憶
-              if (assistantMessage && !hasSavedMemory) {
-                console.log('📝 串流完成，準備儲存長期記憶 (IP 人設規劃 - assistant)');
-                try { 
-                  await recordConversationMessage('ip_planning', 'assistant', assistantMessage); 
-                  hasSavedMemory = true;
-                } catch (error) {
-                  console.error('❌ 長期記憶儲存異常 (IP 人設規劃 - assistant):', error);
-                }
-              }
-              break;
-            }
-            
-            const chunk = decoder.decode(value);
-            console.log('收到串流數據:', chunk);
-            const lines = chunk.split('\n');
-            
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                const data = line.slice(6);
-                console.log('解析數據:', data);
-                if (data === '[DONE]') {
-                  // 收到 [DONE] 標記，儲存完整的 AI 回覆到長期記憶（只儲存一次）
-                  if (assistantMessage && !hasSavedMemory) {
-                    console.log('📝 收到 [DONE] 標記，準備儲存長期記憶 (IP 人設規劃 - assistant)');
-                    try { 
-                      await recordConversationMessage('ip_planning', 'assistant', assistantMessage); 
-                      hasSavedMemory = true;
-                    } catch (error) {
-                      console.error('❌ 長期記憶儲存異常 (IP 人設規劃 - assistant):', error);
-                    }
-                  }
-                  continue;
-                }
-                
-                try {
-                  const parsed = JSON.parse(data);
-                  console.log('解析 JSON:', parsed);
-                  if (parsed.content) {
-                    // 第一次收到內容時移除載入訊息
-                    if (!hasStarted) {
-                      removeMode3LoadingMessage(loadingId);
-                      hasStarted = true;
-                    }
-                    assistantMessage += parsed.content;
-                    console.log('更新訊息內容:', assistantMessage);
-                    updateMode3Message(messageId, assistantMessage);
-                  }
-                } catch (e) {
-                  console.error('JSON 解析錯誤:', e, '數據:', data);
-                }
-              }
-            }
-          }
-          
-        } catch (error) {
-          console.error('發送訊息失敗:', error);
-          removeMode3LoadingMessage(loadingId);
-          addMode3Message('assistant', '抱歉，發生了錯誤。請稍後再試。');
-        }
-      }
+      // 舊的 sendMode3Message 函數已移除，請使用新的函數（在 line 18226）
 
       // 添加訊息到聊天區域 - 使用與 mode2 相同的結構
       function addMode3Message(sender, content) {
@@ -18199,12 +18076,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       });
       
-      // 快速按鈕 - 使用事件委託避免重複綁定
+      // 快速按鈕 - 使用事件委託避免重複綁定，確保只處理 mode3 的按鈕
       quickButtons.addEventListener('click', (e) => {
+        e.stopPropagation(); // 阻止事件冒泡到其他監聽器
         const btn = e.target.closest('.quick-btn');
-        if (btn) {
+        // 確保按鈕在 mode3 容器內，並且是 mode3 的快速按鈕容器
+        if (btn && btn.closest('#mode3') && quickButtons.id === 'mode3-quickButtons') {
           e.preventDefault();
-          e.stopPropagation();
           const text = btn.getAttribute('data-text');
           if (text) {
             sendMode3Message(text, 'ip_planning');
