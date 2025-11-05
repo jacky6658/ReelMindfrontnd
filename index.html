@@ -4722,23 +4722,39 @@
       /* Mode3 訊息框樣式 - 與 Mode2 一致 */
       #mode3-chatMessages .message.user,
       #mode3-chat-messages .message.user {
+        display: flex !important;
         flex-direction: row-reverse !important; /* 確保用戶對話在右邊 */
+        align-items: flex-start !important;
+        margin-bottom: 16px !important;
+        background: transparent !important;
       }
       
       #mode3-chatMessages .message.user .message-content,
       #mode3-chat-messages .message.user .message-content {
+        flex: 1 !important;
         padding: 20px 40px !important; /* 與 AI 回覆框一樣的 padding，與 Mode2 一致 */
         padding-left: 50px !important; /* 增加左邊 padding，避免文字太貼邊界 */
         line-height: 1.6 !important; /* 與 Mode2 一致的行高 */
         text-align: right !important; /* 用戶對話泡泡靠右對齊 */
         margin-right: 12px !important; /* 與 Mode2 一致 */
+        margin-left: 0 !important;
       }
       
       /* Mode3 用戶頭像樣式 - 確保在右邊 */
       #mode3-chatMessages .message.user .message-avatar,
       #mode3-chat-messages .message.user .message-avatar {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
         margin-right: 0 !important;
         margin-left: 12px !important; /* 確保頭像在右邊 */
+        background: #3b82f6 !important;
+        color: white !important;
+        overflow: hidden !important;
       }
       
       #mode3-chatMessages .message.user .message-avatar img,
@@ -9620,6 +9636,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               if (typeof initChatGPTFeatures === 'function') {
                 initChatGPTFeatures();
               }
+              // 載入歷史對話記錄
+              if (typeof loadMode2History === 'function') {
+                loadMode2History();
+              }
             }, 100);
           }
           
@@ -11122,6 +11142,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         localStorage.removeItem('ipPlanningUser');
         localStorage.removeItem('subscriptionStatus');
         
+        // 清空聊天記錄（但後端長期記憶會保留）
+        const chatMessages = document.getElementById('chatMessages');
+        if (chatMessages) {
+          chatMessages.innerHTML = '';
+        }
+        const mode3ChatMessages = document.getElementById('mode3-chatMessages');
+        if (mode3ChatMessages) {
+          mode3ChatMessages.innerHTML = '';
+        }
+        
         updateAuthUI(false);
         showToast('已登出', 3000);
         closeUserDrawer();
@@ -11970,8 +12000,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         // 恢復輸入框和按鈕
-        messageInput.disabled = false;
-        sendBtn.disabled = false;
+        if (messageInput) {
+          messageInput.disabled = false;
+          messageInput.value = ''; // 確保輸入框是空的
+          messageInput.style.height = 'auto'; // 重置高度
+          autoResizeTextarea(); // 重新調整高度
+        }
+        if (sendBtn) {
+          sendBtn.disabled = false;
+        }
         
         // 滾動到底部
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -17566,43 +17603,35 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         console.log('開始載入AI顧問歷史對話，用戶ID:', ipPlanningUser.user_id);
         
-        try {
-          // 載入對話記錄
-          const conversationsResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/conversations/${ipPlanningUser.user_id}`);
-          
-          if (conversationsResponse.ok) {
-            const conversationsData = await conversationsResponse.json();
-            console.log('載入的AI顧問對話記錄:', conversationsData);
-            
-            // 顯示歷史對話到聊天區域
-            if (conversationsData.conversations && conversationsData.conversations.length > 0) {
-              displayMode2History(conversationsData.conversations);
-            }
-          } else {
-            console.error('載入AI顧問對話記錄失敗:', conversationsResponse.status);
-          }
-        } catch (error) {
-          console.error('載入AI顧問歷史對話錯誤:', error);
-        }
-      }
-      
-      // 顯示歷史對話到AI顧問聊天區域
-      function displayMode2History(conversations) {
         const messagesContainer = document.getElementById('chatMessages');
         if (!messagesContainer) return;
         
-        // 清空現有的歡迎訊息
-        messagesContainer.innerHTML = '';
+        // 重新整理時不自動載入歷史對話（聊天區域已在 DOMContentLoaded 時清空）
+        // 用戶可以通過「🔄 載入本會話」按鈕主動載入歷史對話
+        console.log('注意：重新整理後聊天區域已清空，如需查看歷史對話，請點擊「🔄 載入本會話」按鈕');
+      }
+      
+      // 顯示歷史對話到AI顧問聊天區域
+      function displayMode2History(memories) {
+        const messagesContainer = document.getElementById('chatMessages');
+        if (!messagesContainer) return;
+        
+        // 如果已經有訊息，不要清空
+        if (messagesContainer.children.length > 0) {
+          console.log('聊天區域已有訊息，不顯示歷史對話');
+          return;
+        }
+        
+        // 按時間排序訊息
+        const sortedMemories = memories
+          .filter(mem => mem.conversation_type === 'ai_advisor')
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
         
         // 顯示歷史對話
-        conversations.forEach(conversation => {
-          if (conversation.messages && conversation.messages.length > 0) {
-            conversation.messages.forEach(message => {
-              if (message.role === 'user' || message.role === 'assistant') {
-                const messageDiv = createMessage(message.role, message.content);
-                messagesContainer.appendChild(messageDiv);
-              }
-            });
+        sortedMemories.forEach(memory => {
+          if (memory.message_role === 'user' || memory.message_role === 'assistant') {
+            const messageDiv = createMessage(memory.message_role, memory.message_content);
+            messagesContainer.appendChild(messageDiv);
           }
         });
         
