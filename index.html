@@ -108,6 +108,11 @@
         --safe-area-inset-left: env(safe-area-inset-left);
         --safe-area-inset-right: env(safe-area-inset-right);
       }
+      html {
+        overflow-x: hidden !important; /* 防止整個頁面左右滑動 */
+        width: 100%;
+        max-width: 100vw;
+      }
       body { 
         margin: 0; 
         font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; 
@@ -115,7 +120,7 @@
         color:#1a1a1a; 
         -webkit-text-size-adjust: 100%;
         -webkit-tap-highlight-color: transparent;
-        overflow-x: hidden; /* 防止整個頁面左右滑動 */
+        overflow-x: hidden !important; /* 防止整個頁面左右滑動 */
         width: 100%; /* 確保寬度固定 */
         max-width: 100vw; /* 限制最大寬度為視窗寬度 */
       }
@@ -124,6 +129,10 @@
       .app-container {
         display: flex;
         min-height: 100vh;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden !important;
+        box-sizing: border-box;
       }
       
       /* 主內容區域 */
@@ -132,6 +141,10 @@
         display: flex;
         flex-direction: column;
         transition: margin-right 0.3s ease;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden !important;
+        box-sizing: border-box;
       }
       
       .main-content.sidebar-open {
@@ -282,6 +295,18 @@
         justify-content: center;
         min-height: 60vh;
         text-align: center;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden !important; /* 防止首頁左右滑動 */
+        box-sizing: border-box;
+      }
+      
+      /* 首頁視圖容器 */
+      .homepage-view {
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden !important; /* 防止首頁視圖左右滑動 */
+        box-sizing: border-box;
       }
       
       .homepage-title {
@@ -917,6 +942,10 @@
       /* 頁面隱藏/顯示 */
       .page {
         display: none;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden !important; /* 防止頁面左右滑動 */
+        box-sizing: border-box;
       }
       
       .page.active {
@@ -6104,8 +6133,12 @@
         #homepage {
           height: 100%;
           overflow-y: auto;
+          overflow-x: hidden !important; /* 防止首頁左右滑動 */
           -webkit-overflow-scrolling: touch;
           padding: 20px 16px;
+          width: 100%;
+          max-width: 100vw;
+          box-sizing: border-box;
         }
         
         /* 首頁卡片容器調整 */
@@ -8133,7 +8166,7 @@
                           <div style="font-size: 0.9rem; color: #64748B;">使用 ReelMind 3 個月</div>
                         </div>
                       </div>
-                      <div style="font-size: 1rem; color: #475569; line-height: 1.8; margin-bottom: 20px; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-wrap: break-word; word-break: break-word;">
+                      <div style="font-size: 1rem; color: #475569; line-height: 1.8; margin-bottom: 20px;">
                         「之前每天要花 2-3 小時想腳本，現在用 ReelMind 一鍵生成，5 分鐘就搞定。最棒的是 AI 會記住我的品牌調性，每次生成的內容都很符合我的風格。上個月 IG Reels 的觀看次數提升了 180%！」
                       </div>
                       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -8152,7 +8185,7 @@
                           <div style="font-size: 0.9rem; color: #64748B;">使用 ReelMind 6 個月</div>
                         </div>
                       </div>
-                      <div style="font-size: 1rem; color: #475569; line-height: 1.8; margin-bottom: 20px; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-wrap: break-word; word-break: break-word;">
+                      <div style="font-size: 1rem; color: #475569; line-height: 1.8; margin-bottom: 20px;">
                         「IP 人設規劃功能幫我建立了完整的內容策略，14 天規劃讓我知道每天要發什麼。現在每週固定上片 5-7 支，粉絲互動率提升了 3 倍。最喜歡的是 AI 顧問功能，可以隨時討論內容方向，就像有個專業顧問在身邊。」
                       </div>
                       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
