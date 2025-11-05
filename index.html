@@ -6818,26 +6818,38 @@
         /* 手機版：未訂閱用戶首頁 - 所有區塊對齊 */
         /* 別人怎麼用區塊作為對齊基準 */
         .user-story-section {
-          padding-left: 16px !important;
-          padding-right: 16px !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          width: 100% !important;
+          max-width: 100vw !important;
         }
         
         .user-story-section > div {
-          padding-left: 0 !important;
-          padding-right: 0 !important;
+          padding-left: 16px !important;
+          padding-right: 16px !important;
           max-width: 100% !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
         }
         
         /* AI 短影音實戰指南區塊對齊 */
         .rm-guide-section {
-          padding-left: 16px !important;
-          padding-right: 16px !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          width: 100% !important;
+          max-width: 100vw !important;
         }
         
         .rm-guide-section > div {
-          padding-left: 0 !important;
-          padding-right: 0 !important;
+          padding-left: 16px !important;
+          padding-right: 16px !important;
           max-width: 100% !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
         }
         
         .rm-guide-section div[style*="grid-template-columns"] {
@@ -6847,6 +6859,8 @@
           max-width: 100% !important;
           padding-left: 0 !important;
           padding-right: 0 !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
         }
         
         .rm-guide-section a[onclick*="switchPage"] {
@@ -6862,14 +6876,20 @@
         
         /* 開始你的 AI 創作之旅區塊對齊 */
         .rm-pricing {
-          padding-left: 16px !important;
-          padding-right: 16px !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          width: 100% !important;
+          max-width: 100vw !important;
         }
         
         .rm-pricing > div {
-          padding-left: 0 !important;
-          padding-right: 0 !important;
+          padding-left: 16px !important;
+          padding-right: 16px !important;
           max-width: 100% !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
         }
         
         .rm-pricing-cards {
@@ -6877,18 +6897,50 @@
           padding-right: 0 !important;
           width: 100% !important;
           max-width: 100% !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
         }
         
-        /* 頁尾對齊 */
-        .rm-footer {
+        /* 所有使用 margin: -20px calc(-50vw + 50%) 的區塊在手機版都要重置 */
+        section[style*="calc(-50vw + 50%)"] {
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          width: 100% !important;
+          max-width: 100vw !important;
+        }
+        
+        section[style*="calc(-50vw + 50%)"] > div {
           padding-left: 16px !important;
           padding-right: 16px !important;
         }
         
-        .rm-footer > div {
+        /* 頁尾對齊 */
+        .rm-footer {
           padding-left: 0 !important;
           padding-right: 0 !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          width: 100% !important;
+          max-width: 100vw !important;
+        }
+        
+        .rm-footer > div {
+          padding-left: 16px !important;
+          padding-right: 16px !important;
           max-width: 100% !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          text-align: center !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        
+        .rm-footer > div > div {
+          width: 100% !important;
+          max-width: 100% !important;
+          text-align: center !important;
         }
         
         /* 已訂閱用戶首頁 - 標題調整 */
