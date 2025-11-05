@@ -4731,6 +4731,28 @@
         padding-left: 50px !important; /* 增加左邊 padding，避免文字太貼邊界 */
         line-height: 1.6 !important; /* 與 Mode2 一致的行高 */
         text-align: right !important; /* 用戶對話泡泡靠右對齊 */
+        margin-right: 12px !important; /* 與 Mode2 一致 */
+      }
+      
+      /* Mode3 用戶頭像樣式 - 確保在右邊 */
+      #mode3-chatMessages .message.user .message-avatar,
+      #mode3-chat-messages .message.user .message-avatar {
+        margin-right: 0 !important;
+        margin-left: 12px !important; /* 確保頭像在右邊 */
+      }
+      
+      #mode3-chatMessages .message.user .message-avatar img,
+      #mode3-chat-messages .message.user .message-avatar img {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 50% !important;
+        object-fit: cover !important;
+        display: block !important;
+      }
+      
+      #mode3-chatMessages .message.user .message-avatar:has(img),
+      #mode3-chat-messages .message.user .message-avatar:has(img) {
+        background: transparent !important;
       }
       
       #mode3-chatMessages .message.ai .message-content,
@@ -6657,6 +6679,7 @@
           position: relative !important;
           z-index: 11 !important;
           padding: 20px 40px !important; /* 與 AI 回覆框一樣的 padding */
+          padding-left: 50px !important; /* 增加左邊 padding，避免文字太貼邊界，與 Mode3 一致 */
         }
         
         /* 確保AI訊息文字可見 */
