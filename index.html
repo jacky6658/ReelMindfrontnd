@@ -434,6 +434,59 @@
         background-size: 200% 200%;
       }
       
+      /* 深色模式：Discord 區塊紫色調整，與深色背景更協調 */
+      .theme-dark .discord-share-section,
+      .theme-dark [style*="background: linear-gradient(to bottom right, #8B5CF6"],
+      .theme-dark [style*="background:linear-gradient(to bottom right, #8B5CF6"] {
+        background: linear-gradient(135deg, #3d2a5f 0%, #4c1d95 50%, #5b21b6 100%) !important;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      /* Discord 區塊添加微妙的發光效果 */
+      .theme-dark .discord-share-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+        animation: darkModeGradient 8s ease infinite;
+        pointer-events: none;
+      }
+      
+      /* Discord 區塊內的卡片樣式調整 */
+      .theme-dark .discord-share-section [style*="background: rgba(255,255,255,0.15)"],
+      .theme-dark .discord-share-section [style*="background:rgba(255,255,255,0.15)"] {
+        background: rgba(30, 38, 64, 0.6) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(139, 92, 246, 0.3) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(139, 92, 246, 0.2) !important;
+      }
+      
+      /* Discord 按鈕樣式調整（白色按鈕改為深色模式友好） */
+      .theme-dark .discord-share-section a[style*="background: white"],
+      .theme-dark .discord-share-section a[style*="background:white"] {
+        background: linear-gradient(135deg, #5865F2 0%, #4752C4 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 20px rgba(88, 101, 242, 0.3) !important;
+        transition: all 0.3s ease !important;
+        border: 1px solid rgba(139, 92, 246, 0.3) !important;
+      }
+      
+      .theme-dark .discord-share-section a[style*="background: white"]:hover,
+      .theme-dark .discord-share-section a[style*="background:white"]:hover {
+        transform: translateY(-2px) scale(1.05) !important;
+        box-shadow: 0 6px 30px rgba(88, 101, 242, 0.5) !important;
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+      }
+      
+      /* Discord 區塊內的圖標顏色調整 */
+      .theme-dark .discord-share-section i.fab.fa-discord {
+        color: white !important;
+      }
+      
       .theme-dark .menu-item:not(.active) {
         color: var(--text-secondary) !important;
       }
@@ -529,6 +582,271 @@
       .theme-dark [style*="color: #475569"],
       .theme-dark [style*="color:#475569"] {
         color: var(--text-secondary) !important;
+      }
+      
+      /* ========== 深色模式：Mode1 一鍵生成模式 ========== */
+      .theme-dark .mode1-left,
+      .theme-dark .mode1-right {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+      }
+      
+      .theme-dark .mode1-left input,
+      .theme-dark .mode1-left select,
+      .theme-dark .mode1-left textarea,
+      .theme-dark .mode1-right input,
+      .theme-dark .mode1-right select,
+      .theme-dark .mode1-right textarea {
+        background: var(--input-bg) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--input-border) !important;
+      }
+      
+      .theme-dark .mode1-left label,
+      .theme-dark .mode1-right label {
+        color: var(--text-primary) !important;
+      }
+      
+      /* Mode1 LLM 輸出文字顏色 */
+      .theme-dark .result-body,
+      .theme-dark .result-body.has-content,
+      .theme-dark .result-content,
+      .theme-dark .result-content.has-content {
+        color: var(--text-primary) !important;
+        background: var(--card-bg) !important;
+      }
+      
+      .theme-dark .result-header h3 {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .result-actions {
+        border-top-color: var(--border-color) !important;
+      }
+      
+      /* ========== 深色模式：Mode2 AI顧問模式 - LLM 輸出文字 ========== */
+      .theme-dark .message.ai .message-content,
+      .theme-dark .message.assistant .message-content {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark .message.ai .message-content p,
+      .theme-dark .message.assistant .message-content p,
+      .theme-dark .message.ai .message-content li,
+      .theme-dark .message.assistant .message-content li,
+      .theme-dark .message.ai .message-content h1,
+      .theme-dark .message.ai .message-content h2,
+      .theme-dark .message.ai .message-content h3,
+      .theme-dark .message.ai .message-content h4,
+      .theme-dark .message.ai .message-content h5,
+      .theme-dark .message.ai .message-content h6,
+      .theme-dark .message.ai .message-content strong,
+      .theme-dark .message.ai .message-content em,
+      .theme-dark .message.ai .message-content code,
+      .theme-dark .message.ai .message-content pre {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .message.ai .message-content pre {
+        background: var(--bg-secondary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark .message.user .message-content {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%) !important;
+        color: #dbeafe !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+      }
+      
+      .theme-dark .chat-messages {
+        background: var(--bg-secondary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      /* ========== 深色模式：Mode3 IP人設規劃模式 - LLM 輸出文字 ========== */
+      .theme-dark #mode3 .message.ai .message-content,
+      .theme-dark #mode3-chatMessages .message.ai .message-content,
+      .theme-dark #mode3-chat-messages .message.ai .message-content,
+      .theme-dark #mode3 .message.assistant .message-content,
+      .theme-dark #mode3-chatMessages .message.assistant .message-content,
+      .theme-dark #mode3-chat-messages .message.assistant .message-content {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark #mode3 .message.ai .message-content p,
+      .theme-dark #mode3-chatMessages .message.ai .message-content p,
+      .theme-dark #mode3-chat-messages .message.ai .message-content p,
+      .theme-dark #mode3 .message.assistant .message-content p,
+      .theme-dark #mode3-chatMessages .message.assistant .message-content p,
+      .theme-dark #mode3-chat-messages .message.assistant .message-content p,
+      .theme-dark #mode3 .message.ai .message-content li,
+      .theme-dark #mode3 .message.ai .message-content h1,
+      .theme-dark #mode3 .message.ai .message-content h2,
+      .theme-dark #mode3 .message.ai .message-content h3,
+      .theme-dark #mode3 .message.ai .message-content strong,
+      .theme-dark #mode3 .message.ai .message-content code {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark #mode3 .message.user .message-content {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%) !important;
+        color: #dbeafe !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+      }
+      
+      .theme-dark #mode3-chatMessages,
+      .theme-dark #mode3-chat-messages {
+        background: var(--bg-secondary) !important;
+      }
+      
+      .theme-dark .mode3-result-content {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .mode3-result-content h1,
+      .theme-dark .mode3-result-content h2,
+      .theme-dark .mode3-result-content h3,
+      .theme-dark .mode3-result-content h4,
+      .theme-dark .mode3-result-content p {
+        color: var(--text-primary) !important;
+      }
+      
+      /* ========== 深色模式：創作者資料庫 - LLM 輸出文字 ========== */
+      .theme-dark .script-item,
+      .theme-dark .script-content,
+      .theme-dark .script-header {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark .script-content p,
+      .theme-dark .script-content div,
+      .theme-dark .script-content span,
+      .theme-dark .script-content strong,
+      .theme-dark .script-content em {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .topic-item,
+      .theme-dark .topic-content,
+      .theme-dark .ip-planning-item,
+      .theme-dark .ip-planning-content-item {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .topic-content p,
+      .theme-dark .topic-content div,
+      .theme-dark .ip-planning-content-item p,
+      .theme-dark .ip-planning-content-item div {
+        color: var(--text-primary) !important;
+      }
+      
+      /* ========== 深色模式：實戰指南和論壇介紹頁面 ========== */
+      .theme-dark .rm-guide-section,
+      .theme-dark #guide,
+      .theme-dark #forum {
+        background: var(--gradient-primary) !important;
+      }
+      
+      .theme-dark .rm-guide-section [style*="background: white"],
+      .theme-dark #guide [style*="background: white"],
+      .theme-dark #forum [style*="background: white"] {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark .step-guide,
+      .theme-dark .guide-article {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .step-guide h1,
+      .theme-dark .step-guide h2,
+      .theme-dark .step-guide h3,
+      .theme-dark .step-guide p,
+      .theme-dark .guide-article h1,
+      .theme-dark .guide-article h2,
+      .theme-dark .guide-article p {
+        color: var(--text-primary) !important;
+      }
+      
+      /* ========== 深色模式：輸入框和按鈕 ========== */
+      .theme-dark #messageInput,
+      .theme-dark #mode3-message-input,
+      .theme-dark .input-wrapper input,
+      .theme-dark .input-wrapper textarea {
+        background: var(--input-bg) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--input-border) !important;
+      }
+      
+      .theme-dark .suggestion-btn,
+      .theme-dark .quick-btn {
+        background: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark .suggestion-btn:hover,
+      .theme-dark .quick-btn:hover {
+        background: var(--bg-tertiary) !important;
+        border-color: var(--accent-blue) !important;
+      }
+      
+      /* ========== 深色模式：Modal 和彈窗 ========== */
+      .theme-dark .detail-modal {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .detail-modal-header,
+      .theme-dark .detail-modal-body {
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark .detail-modal-header h3,
+      .theme-dark .detail-content {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .detail-info span {
+        color: var(--text-secondary) !important;
+      }
+      
+      .theme-dark .detail-info strong {
+        color: var(--text-primary) !important;
+      }
+      
+      /* ========== 深色模式：論壇介紹頁面特殊樣式 ========== */
+      .theme-dark #forum [style*="background: linear-gradient(135deg, #eff6ff"],
+      .theme-dark #forum [style*="background:linear-gradient(135deg, #eff6ff"] {
+        background: var(--gradient-primary) !important;
+      }
+      
+      .theme-dark #forum [style*="background: rgba(255,255,255,0.15)"],
+      .theme-dark #forum [style*="background:rgba(255,255,255,0.15)"] {
+        background: rgba(30, 38, 64, 0.6) !important;
+        backdrop-filter: blur(10px) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      /* 代碼示例區塊 */
+      .theme-dark pre,
+      .theme-dark code,
+      .theme-dark [class*="code"],
+      .theme-dark [style*="background"][style*="code"] {
+        background: var(--bg-secondary) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
       }
       
       /* 頁面容器 */
@@ -3694,8 +4012,10 @@
         border-radius: 4px;
         font-size: 12px;
         font-weight: bold;
-        min-width: 40px;
+        min-width: 50px;
         text-align: center;
+        white-space: nowrap;
+        display: inline-block;
       }
       
       .script-name {
@@ -13736,11 +14056,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        // 按時間排序：由新到舊（最新的在最上面）
+        // 按時間排序：由舊到新（最早的為編號01，最新的編號最大）
         const sortedScripts = [...scripts].sort((a, b) => {
           const timeA = new Date(a.created_at || a.id || 0).getTime();
           const timeB = new Date(b.created_at || b.id || 0).getTime();
-          return timeB - timeA; // 降序：大的（新的）在前
+          return timeA - timeB; // 升序：小的（舊的）在前，編號01是最早的
         });
         
         container.innerHTML = sortedScripts.map((script, index) => `
