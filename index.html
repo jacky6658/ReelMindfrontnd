@@ -13620,14 +13620,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 初始化頁面
       document.addEventListener('DOMContentLoaded', function() {
-        // 啟動打字機動畫
-        if (typeof initTypewriterAnimation === 'function') {
-          initTypewriterAnimation();
-        }
-        
-        // 啟動 token 監控（每分鐘檢查一次）
-        startTokenMonitor();
-        
+        // ⚠️ 優先處理授權連結（必須在其他初始化之前）
         // 檢查 URL 參數中是否有 activation_token（授權連結）
         const urlParams = new URLSearchParams(window.location.search);
         const hashParams = new URLSearchParams(window.location.hash.slice(1));
@@ -13653,11 +13646,31 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                                  window.location.pathname === '/' ||
                                  window.location.pathname === '';
           
-          // 如果是授權連結，處理它
+          // 如果是授權連結，立即處理（優先於其他初始化邏輯）
           if (isActivatePath) {
-            handleActivationToken(activationToken);
+            // 檢查是否已登入
+            const currentToken = localStorage.getItem('ipPlanningToken');
+            if (!currentToken) {
+              // 未登入，立即跳轉到登入頁（不執行其他初始化）
+              console.log('🔐 檢測到授權連結但未登入，立即跳轉到登入頁');
+              // 使用 replace 而不是 href，避免歷史記錄問題
+              window.location.replace(`/#login?activation_token=${activationToken}`);
+              return; // 停止執行後續初始化
+            } else {
+              // 已登入，處理授權
+              console.log('✅ 檢測到授權連結且已登入，開始驗證授權');
+              handleActivationToken(activationToken);
+            }
           }
         }
+        
+        // 啟動打字機動畫
+        if (typeof initTypewriterAnimation === 'function') {
+          initTypewriterAnimation();
+        }
+        
+        // 啟動 token 監控（每分鐘檢查一次）
+        startTokenMonitor();
         
         // 檢查 URL 參數中是否有 token（OAuth callback fallback）
         const tokenParam = urlParams.get('token');
