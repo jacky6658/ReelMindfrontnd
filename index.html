@@ -11141,8 +11141,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 最後檢查 localStorage 中的用戶資料
           const userStr = localStorage.getItem('ipPlanningUser');
           if (userStr) {
-            const user = JSON.parse(userStr);
-            // 後端/前端一率以 falsy 視為未訂閱
+          const user = JSON.parse(userStr);
+          // 後端/前端一率以 falsy 視為未訂閱
             const userSubscribed = !!(user && (user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1'));
             if (userSubscribed) {
               return true;
@@ -12316,6 +12316,17 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       }
       
+      // 統一的載入動畫函數
+      function showLoadingAnimation(container, message = '載入中...') {
+        if (!container) return;
+        container.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; padding: 40px; gap: 12px; flex-direction: column;">
+            <div class="spinner" style="width: 24px; height: 24px; border: 3px solid #e5e7eb; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 8px;"></div>
+            <span style="color: #6b7280; font-size: 14px;">${message}</span>
+          </div>
+        `;
+      }
+      
       // 渲染個人資料內容（獨立函數，避免遞迴問題）
       function renderPersonalInfoContent() {
         const content = document.querySelector('#db-personalInfo .section-content');
@@ -12424,33 +12435,28 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         // 顯示載入動畫
-        content.innerHTML = `
-          <div style="display: flex; align-items: center; justify-content: center; padding: 40px; gap: 12px; flex-direction: column;">
-            <div class="spinner" style="width: 24px; height: 24px; border: 3px solid #e5e7eb; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 8px;"></div>
-            <span style="color: #6b7280; font-size: 14px;">載入個人資料中...</span>
-          </div>
-        `;
+        showLoadingAnimation(content, '載入個人資料中...');
         
         // 如果有本地資訊，先立即渲染（確保頁面有內容）
         if (ipPlanningUser && (ipPlanningUser.name || ipPlanningUser.email)) {
           // 短暫延遲後顯示內容，讓用戶看到載入動畫
           setTimeout(() => {
-            renderPersonalInfoContent();
+        renderPersonalInfoContent();
           }, 300);
         }
         
         // 如果有 token 但缺少 created_at 等關鍵資訊，在背景中嘗試更新
         if (ipPlanningToken && !ipPlanningUser.created_at) {
-          try {
-            await fetchUserInfo();
+            try {
+              await fetchUserInfo();
             // 如果更新成功，重新渲染
-            if (ipPlanningUser && ipPlanningUser.created_at) {
-              renderPersonalInfoContent();
-            }
-          } catch (error) {
+              if (ipPlanningUser && ipPlanningUser.created_at) {
+                renderPersonalInfoContent();
+              }
+            } catch (error) {
             // 如果 API 失敗，仍然顯示本地資訊（已在上面的 setTimeout 中渲染）
             console.warn('無法從伺服器獲取最新資訊，使用本地資料');
-          }
+            }
         }
       }
       
@@ -12463,7 +12469,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        content.innerHTML = '<div class="loading-text">正在載入腳本記錄...</div>';
+        // 顯示載入動畫
+        showLoadingAnimation(content, '載入腳本記錄中...');
         
         console.log('正在載入腳本列表...', {
           ipPlanningToken: ipPlanningToken ? 'present' : 'missing',
@@ -12475,9 +12482,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         console.log('本地腳本數量:', localScripts.length);
         console.log('本地腳本內容:', localScripts);
         
+        // 如果有本地腳本，短暫延遲後顯示，讓用戶看到載入動畫
         if (localScripts.length > 0) {
           console.log('先顯示本地腳本:', localScripts);
+          setTimeout(() => {
           displayScriptsForUserDB(localScripts);
+          }, 300);
           // 繼續執行 API 調用以獲取最新資料
         }
         
@@ -13546,7 +13556,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        content.innerHTML = '<div class="loading-text">正在載入帳號定位記錄...</div>';
+        // 顯示載入動畫
+        showLoadingAnimation(content, '載入帳號定位記錄中...');
         
         try {
           const response = await fetch(`https://aivideobackend.zeabur.app/api/user/positioning/${ipPlanningUser.user_id}`, {
@@ -13704,7 +13715,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        content.innerHTML = '<div class="loading-text">正在載入選題內容...</div>';
+        // 顯示載入動畫
+        showLoadingAnimation(content, '載入選題內容中...');
         
         try {
           // 從後端獲取選題生成記錄（generations 表）
@@ -13749,7 +13761,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        content.innerHTML = '<div class="loading-text">正在載入 IP 人設規劃結果...</div>';
+        // 顯示載入動畫
+        showLoadingAnimation(content, '載入 IP 人設規劃結果中...');
         
         try {
           // 先獲取帳號定位名稱
@@ -14714,6 +14727,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const decoder = new TextDecoder();
           let buffer = '';
           let result = '';
+          let generationEnded = false;
           
           while (true) {
             const { done, value } = await reader.read();
@@ -14731,6 +14745,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                     result += data.content;
                     updateResultBlock('topicContent', result, true);
                   } else if (data.type === 'end') {
+                    generationEnded = true;
                     break;
                   } else if (data.type === 'error') {
                     throw new Error(data.message || '生成失敗');
@@ -14740,10 +14755,46 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 }
               }
             }
+            
+            if (generationEnded) break;
           }
           
           // 自動切換到選題標籤
           switchTab('topics');
+          
+          // 自動保存選題內容到 generations 表（生成完成後）
+          if (generationEnded && result && result.trim() && ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
+            try {
+              const saveResponse = await fetch('https://aivideobackend.zeabur.app/api/generations', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${ipPlanningToken}`
+                },
+                body: JSON.stringify({
+                  user_id: ipPlanningUser.user_id,
+                  content: result,
+                  platform: platform,
+                  topic: topic || '選題推薦'
+                })
+              });
+              
+              if (saveResponse.ok) {
+                const saveData = await saveResponse.json();
+                console.log('選題已自動儲存:', saveData);
+                // 重新載入選題內容列表（如果用戶在創作者資料庫頁面）
+                const topicRecordsSection = document.querySelector('#db-topicRecords');
+                if (topicRecordsSection && topicRecordsSection.style.display !== 'none') {
+                  loadTopicHistoryForUserDB();
+                }
+              } else {
+                console.warn('選題保存失敗，但不影響使用');
+              }
+            } catch (saveError) {
+              console.error('自動儲存選題失敗:', saveError);
+              // 靜默失敗，不影響用戶體驗
+            }
+          }
           
         } catch (error) {
           updateResultBlock('topicContent', '生成失敗，請稍後再試', false);
@@ -16324,8 +16375,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               
               // 檢查並更新訂閱狀態（先更新訂閱狀態，再顯示主應用程式）
               checkSubscriptionStatus().then(() => {
-                // 顯示主應用程式
-                showMainApp();
+              // 顯示主應用程式
+              showMainApp();
                 console.log('DEBUG: Main app shown after subscription status updated');
               });
               console.log('DEBUG: Subscription status check initiated');
@@ -20272,8 +20323,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (contentDiv) {
           contentDiv.innerHTML = `抱歉，發生了錯誤：${error.message}`;
         } else {
-          const errorMessage = createMode3Message('assistant', `抱歉，發生了錯誤：${error.message}`);
-          chatMessages.appendChild(errorMessage);
+        const errorMessage = createMode3Message('assistant', `抱歉，發生了錯誤：${error.message}`);
+        chatMessages.appendChild(errorMessage);
         }
       } finally {
         // 恢復輸入框和按鈕
@@ -20348,9 +20399,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           <div class="typing-indicator">
             <span>AI思考中...</span>
             <div class="typing-dots">
-              <div class="typing-dot"></div>
-              <div class="typing-dot"></div>
-              <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
             </div>
           </div>
         </div>
