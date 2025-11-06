@@ -50,11 +50,12 @@ html, body, * {
   }
 }
 
-/* 2. 個人資料欄位寬度等於容器寬度 */
+/* 2. 個人資料欄位寬度等於容器寬度，並增加左右間距 */
 .user-db-page .detail-item {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  padding: 16px 24px !important; /* 增加左右 padding，讓內容區域更寬 */
 }
 
 .user-db-page .detail-item label,
@@ -66,6 +67,12 @@ html, body, * {
 .user-db-page .detail-item span {
   text-align: left;
   word-break: break-word;
+  padding-left: 12px; /* 增加 label 和 span 之間的間距 */
+}
+
+/* 增加 profile-details 的間距 */
+.user-db-page .profile-details {
+  gap: 20px !important; /* 增加欄位之間的垂直間距 */
 }
 
 /* 3. 我的腳本標題 - 移除編輯功能，改為固定標題 */
@@ -86,12 +93,13 @@ html, body, * {
   display: none !important;
 }
 
-/* 4. 所有區塊內的欄位寬度等於容器寬度 */
+/* 4. 所有區塊內的欄位寬度等於容器寬度，並增加左右間距 */
 /* 我的腳本 */
 #db-myScripts .script-item {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  padding: 0 24px; /* 增加左右 padding */
 }
 
 #db-myScripts .script-header,
@@ -100,6 +108,20 @@ html, body, * {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+#db-myScripts .script-header {
+  padding: 16px 24px !important; /* 增加 header 的左右間距 */
+}
+
+#db-myScripts .script-content {
+  padding: 20px 24px !important; /* 增加內容的左右間距 */
+}
+
+#db-myScripts .script-actions {
+  padding: 16px 24px !important; /* 增加操作按鈕區的左右間距 */
 }
 
 #db-myScripts .script-table {
@@ -128,6 +150,12 @@ html, body, * {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  padding-left: 24px !important; /* 增加左邊間距 */
+  padding-right: 24px !important; /* 增加右邊間距 */
+}
+
+#db-accountPositioning .detail-item {
+  padding: 16px 24px !important;
 }
 
 /* 選題內容 */
@@ -138,6 +166,13 @@ html, body, * {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+#db-topicRecords .topic-item,
+#db-topicRecords .topic-card {
+  padding: 20px 24px !important;
 }
 
 /* IP人設規劃 */
@@ -148,18 +183,23 @@ html, body, * {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
 }
 
 #db-ipPlanning .ip-planning-tabs {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
 }
 
 #db-ipPlanning .ip-planning-content {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  padding: 20px 24px !important;
 }
 
 /* 幫助中心 */
@@ -170,6 +210,13 @@ html, body, * {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+#db-helpCenter .help-item,
+#db-helpCenter .help-card {
+  padding: 20px 24px !important;
 }
 
 /* 通用：所有 db-section 內的直接子元素 */
@@ -185,6 +232,14 @@ html, body, * {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+}
+
+/* 增加 section-content 的左右 padding，讓整體內容有更多空間 */
+.db-section .section-content {
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+  padding-top: 0;
+  padding-bottom: 20px;
 }
 
 /* 5. 我的腳本編號順序 - 確保排序正確（由新到舊） */
