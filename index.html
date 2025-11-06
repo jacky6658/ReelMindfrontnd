@@ -10049,7 +10049,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   </div>
                   <!-- 我的腳本 -->
                   <div id="db-myScripts" class="db-section">
-                    <h3 class="section-title">💾 我的腳本</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px;">
+                      <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                        <h3 class="section-title" id="my-scripts-title" style="margin: 0; cursor: pointer; position: relative; padding-right: 24px;" onclick="editMyScriptsTitle()" title="點擊編輯標題">💾 我的腳本</h3>
+                        <span id="my-scripts-edit-icon" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s;" onclick="editMyScriptsTitle()" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
+                        <input type="text" id="my-scripts-title-input" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1rem; font-weight: 600; outline: none;" onblur="saveMyScriptsTitle()" onkeypress="if(event.key === 'Enter') saveMyScriptsTitle()">
+                      </div>
+                    </div>
                     <div class="section-content">
                       <p>我的腳本功能開發中...</p>
                     </div>
@@ -10063,7 +10069,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   </div>
                   <!-- 選題內容 -->
                   <div id="db-topicRecords" class="db-section">
-                    <h3 class="section-title">💡 選題內容</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px;">
+                      <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                        <h3 class="section-title" id="topic-content-title" style="margin: 0; cursor: pointer; position: relative; padding-right: 24px;" onclick="editTopicContentTitle()" title="點擊編輯標題">💡 選題內容</h3>
+                        <span id="topic-content-edit-icon" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s;" onclick="editTopicContentTitle()" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
+                        <input type="text" id="topic-content-title-input" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1rem; font-weight: 600; outline: none;" onblur="saveTopicContentTitle()" onkeypress="if(event.key === 'Enter') saveTopicContentTitle()">
+                      </div>
+                    </div>
                     <div class="section-content">
                       <p>正在載入選題內容...</p>
                     </div>
@@ -10323,7 +10335,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 <button class="generate-btn" onclick="generatePositioning()">一鍵生成帳號定位</button>
               </div>
               <div id="positioningContent" class="result-body">
-                點擊「一鍵生成帳號定位」按鈕開始分析...
+                請點選「一鍵生成帳號定位」按鈕開始
               </div>
               <div class="result-actions" id="positioningActions" style="display: none;">
                 <button class="save-btn" onclick="saveResult('positioning')">儲存</button>
@@ -10338,7 +10350,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 <button class="generate-btn" onclick="generateTopics()">一鍵生成選題</button>
               </div>
               <div id="topicContent" class="result-body">
-                請先完成帳號定位，再進行選題推薦...
+                請點選「一鍵生成選題」按鈕開始
               </div>
               <div class="result-actions" id="topicActions" style="display: none;">
                 <button class="save-btn" onclick="saveResult('topics')">儲存</button>
@@ -10353,7 +10365,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 <button class="generate-btn" onclick="generateScript()">一鍵生成腳本</button>
               </div>
               <div id="scriptContent" class="result-body">
-                請先完成帳號定位和選題，再生成腳本...
+                請點選「一鍵生成腳本」按鈕開始
               </div>
               <div class="result-actions" id="scriptActions" style="display: none;">
                 <button class="save-btn" onclick="saveScript()">儲存</button>
@@ -12469,6 +12481,26 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
+        // 更新標題（如果沒有保存的標題，預設為「在此輸入你的標題」）
+        const titleElement = document.getElementById('my-scripts-title');
+        if (titleElement) {
+          let savedTitle = '';
+          if (ipPlanningUser && ipPlanningUser.user_id) {
+            savedTitle = localStorage.getItem(`my-scripts-title-${ipPlanningUser.user_id}`);
+          }
+          
+          // 如果沒有保存的標題，預設為「在此輸入你的標題」
+          if (!savedTitle) {
+            savedTitle = '在此輸入你的標題';
+            if (ipPlanningUser && ipPlanningUser.user_id) {
+              localStorage.setItem(`my-scripts-title-${ipPlanningUser.user_id}`, savedTitle);
+            }
+          }
+          
+          // 更新標題顯示
+          titleElement.textContent = `💾 ${savedTitle}`;
+        }
+        
         // 顯示載入動畫
         showLoadingAnimation(content, '載入腳本記錄中...');
         
@@ -13204,7 +13236,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        container.innerHTML = scripts.map((script, index) => `
+        // 按時間排序：由新到舊（最新的在最上面）
+        const sortedScripts = [...scripts].sort((a, b) => {
+          const timeA = new Date(a.created_at || a.id || 0).getTime();
+          const timeB = new Date(b.created_at || b.id || 0).getTime();
+          return timeB - timeA; // 降序：大的（新的）在前
+        });
+        
+        container.innerHTML = sortedScripts.map((script, index) => `
           <div class="script-item" data-script-id="${script.id}">
             <div class="script-header" onclick="toggleScriptForUserDB(${script.id})">
               <div class="script-info">
@@ -13592,7 +13631,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        container.innerHTML = records.map(record => {
+        // 按時間排序：由新到舊（最新的在最上面）
+        const sortedRecords = [...records].sort((a, b) => {
+          const timeA = new Date(a.created_at || 0).getTime();
+          const timeB = new Date(b.created_at || 0).getTime();
+          return timeB - timeA; // 降序：大的（新的）在前
+        });
+        
+        container.innerHTML = sortedRecords.map((record, index) => {
+          // 編號從1開始（最新的為編號01）
+          const recordNumber = String(index + 1).padStart(2, '0');
           const date = new Date(record.created_at).toLocaleString('zh-TW', {
             timeZone: 'Asia/Taipei',
             year: 'numeric',
@@ -13606,12 +13654,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return `
             <div class="positioning-record-item" data-record-id="${record.id}">
               <div class="record-header">
-                <span class="record-number">編號 ${record.record_number}</span>
+                <span class="record-number">編號 ${recordNumber}</span>
                 <span class="record-date">${date}</span>
               </div>
               <div class="record-preview">${preview}</div>
               <div class="record-actions">
-                <button class="action-btn view-btn" onclick="viewPositioningDetailForUserDB(${record.id}, '${record.record_number}')">查看完整結果</button>
+                <button class="action-btn view-btn" onclick="viewPositioningDetailForUserDB(${record.id}, '${recordNumber}')">查看完整結果</button>
                 <button class="action-btn delete-btn" onclick="deletePositioningRecordForUserDB(${record.id})">刪除</button>
               </div>
             </div>
@@ -13715,6 +13763,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
+        // 載入標題（如果有的話）
+        const savedTitle = localStorage.getItem(`topic-content-title-${ipPlanningUser.user_id}`);
+        if (savedTitle) {
+          const titleElement = document.getElementById('topic-content-title');
+          if (titleElement) {
+            titleElement.textContent = `💡 ${savedTitle}`;
+          }
+        }
+        
         // 顯示載入動畫
         showLoadingAnimation(content, '載入選題內容中...');
         
@@ -13802,12 +13859,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               savedTitle = localStorage.getItem(`ip-planning-title-${ipPlanningUser.user_id}`);
             }
             
-            // 如果有保存的標題，使用保存的；否則使用從帳號定位獲取的名稱
-            if (savedTitle) {
-              titleElement.textContent = `🎭 ${savedTitle}`;
-            } else {
-              titleElement.textContent = `🎭 ${positioningName} 帳號定位`;
+            // 如果沒有保存的標題，預設為「在此輸入你的標題」
+            if (!savedTitle) {
+              savedTitle = '在此輸入你的標題';
+              if (ipPlanningUser && ipPlanningUser.user_id) {
+                localStorage.setItem(`ip-planning-title-${ipPlanningUser.user_id}`, savedTitle);
+              }
             }
+            
+            // 更新標題顯示
+            titleElement.textContent = `🎭 ${savedTitle}`;
           }
           
           // 獲取 IP 人設規劃結果
@@ -13835,6 +13896,59 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         } catch (error) {
           console.error('載入 IP 人設規劃結果錯誤:', error);
           content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+        }
+      }
+      
+      // 編輯選題內容標題
+      function editTopicContentTitle() {
+        const titleElement = document.getElementById('topic-content-title');
+        const inputElement = document.getElementById('topic-content-title-input');
+        const editIcon = document.getElementById('topic-content-edit-icon');
+        
+        if (titleElement && inputElement) {
+          // 獲取當前標題（去除 emoji）
+          const currentTitle = titleElement.textContent.replace(/^💡\s*/, '');
+          inputElement.value = currentTitle;
+          
+          // 切換顯示
+          titleElement.style.display = 'none';
+          editIcon.style.display = 'none';
+          inputElement.style.display = 'block';
+          
+          // 聚焦並選中文字
+          inputElement.focus();
+          inputElement.select();
+        }
+      }
+      
+      // 保存選題內容標題
+      function saveTopicContentTitle() {
+        const titleElement = document.getElementById('topic-content-title');
+        const inputElement = document.getElementById('topic-content-title-input');
+        const editIcon = document.getElementById('topic-content-edit-icon');
+        
+        if (titleElement && inputElement) {
+          const newTitle = inputElement.value.trim();
+          
+          // 如果為空，使用預設標題
+          const finalTitle = newTitle || '在此輸入你的標題';
+          
+          // 更新標題顯示
+          titleElement.textContent = `💡 ${finalTitle}`;
+          
+          // 保存到 localStorage
+          if (ipPlanningUser && ipPlanningUser.user_id) {
+            localStorage.setItem(`topic-content-title-${ipPlanningUser.user_id}`, finalTitle);
+          }
+          
+          if (newTitle) {
+            showToast('✅ 標題已更新', 2000);
+          }
+          
+          // 切換顯示
+          titleElement.style.display = 'block';
+          editIcon.style.display = 'inline-block';
+          inputElement.style.display = 'none';
         }
       }
       
@@ -13869,18 +13983,72 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (titleElement && inputElement) {
           const newTitle = inputElement.value.trim();
           
+          // 如果為空，使用預設標題
+          const finalTitle = newTitle || '在此輸入你的標題';
+          
+          // 更新標題顯示
+          titleElement.textContent = `🎭 ${finalTitle}`;
+          
+          // 保存到 localStorage
+          if (ipPlanningUser && ipPlanningUser.user_id) {
+            localStorage.setItem(`ip-planning-title-${ipPlanningUser.user_id}`, finalTitle);
+          }
+          
           if (newTitle) {
+            showToast('✅ 標題已更新', 2000);
+          }
+          
+          // 切換顯示
+          titleElement.style.display = '';
+          editIcon.style.display = '';
+          inputElement.style.display = 'none';
+        }
+      }
+      
+      // 編輯我的腳本標題
+      function editMyScriptsTitle() {
+        const titleElement = document.getElementById('my-scripts-title');
+        const inputElement = document.getElementById('my-scripts-title-input');
+        const editIcon = document.getElementById('my-scripts-edit-icon');
+        
+        if (titleElement && inputElement) {
+          // 獲取當前標題（去除 emoji）
+          const currentTitle = titleElement.textContent.replace(/^💾\s*/, '');
+          inputElement.value = currentTitle;
+          
+          // 切換顯示
+          titleElement.style.display = 'none';
+          editIcon.style.display = 'none';
+          inputElement.style.display = 'block';
+          
+          // 聚焦並選中文字
+          inputElement.focus();
+          inputElement.select();
+        }
+      }
+      
+      // 保存我的腳本標題
+      function saveMyScriptsTitle() {
+        const titleElement = document.getElementById('my-scripts-title');
+        const inputElement = document.getElementById('my-scripts-title-input');
+        const editIcon = document.getElementById('my-scripts-edit-icon');
+        
+        if (titleElement && inputElement) {
+          const newTitle = inputElement.value.trim();
+          
+          // 如果為空，使用預設標題
+          const finalTitle = newTitle || '在此輸入你的標題';
+          
             // 更新標題顯示
-            titleElement.textContent = `🎭 ${newTitle}`;
+          titleElement.textContent = `💾 ${finalTitle}`;
             
             // 保存到 localStorage
             if (ipPlanningUser && ipPlanningUser.user_id) {
-              localStorage.setItem(`ip-planning-title-${ipPlanningUser.user_id}`, newTitle);
+            localStorage.setItem(`my-scripts-title-${ipPlanningUser.user_id}`, finalTitle);
             }
             
+          if (newTitle) {
             showToast('✅ 標題已更新', 2000);
-          } else {
-            showToast('標題不能為空', 2000);
           }
           
           // 切換顯示
@@ -13957,11 +14125,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        // 按類型分組
+        // 先按時間排序：由新到舊（最新的在最上面）
+        const sortedResults = [...results].sort((a, b) => {
+          const timeA = new Date(a.created_at || 0).getTime();
+          const timeB = new Date(b.created_at || 0).getTime();
+          return timeB - timeA; // 降序：大的（新的）在前
+        });
+        
+        // 按類型分組（已排序）
         const groupedResults = {
-          profile: results.filter(r => r.result_type === 'profile'),
-          plan: results.filter(r => r.result_type === 'plan'),
-          scripts: results.filter(r => r.result_type === 'scripts')
+          profile: sortedResults.filter(r => r.result_type === 'profile'),
+          plan: sortedResults.filter(r => r.result_type === 'plan'),
+          scripts: sortedResults.filter(r => r.result_type === 'scripts')
         };
         
         // 顯示當前選中的類型
@@ -14033,7 +14208,84 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         loadIpPlanningResultsForUserDB();
       }
       
-      // 顯示選題內容（創作者資料庫版本）- 顯示實際選題內容而非記錄
+      // 解析選題內容為5個欄位
+      function parseTopicContent(content) {
+        if (!content) {
+          return {
+            hotTopics: '',
+            specificSuggestions: '',
+            strategies: '',
+            contentPlanning: '',
+            timeline: ''
+          };
+        }
+        
+        const sections = {
+          hotTopics: '',
+          specificSuggestions: '',
+          strategies: '',
+          contentPlanning: '',
+          timeline: ''
+        };
+        
+        // 使用正則表達式匹配各個欄位
+        const patterns = {
+          hotTopics: /(熱門選題方向|選題方向|熱門話題|熱門選題)[:：]?\s*([\s\S]*?)(?=(選題的具體建議|選題策略|內容規劃|執行時程|$))/i,
+          specificSuggestions: /(選題的具體建議|具體建議|每個選題的具體建議|選題建議)[:：]?\s*([\s\S]*?)(?=(選題策略|內容規劃|執行時程|$))/i,
+          strategies: /(選題策略和技巧|選題策略|策略和技巧|選題技巧)[:：]?\s*([\s\S]*?)(?=(內容規劃|執行時程|$))/i,
+          contentPlanning: /(內容規劃建議|內容規劃|規劃建議)[:：]?\s*([\s\S]*?)(?=(執行時程|時程建議|$))/i,
+          timeline: /(執行時程建議|時程建議|執行時程|時程)[:：]?\s*([\s\S]*?)$/i
+        };
+        
+        // 嘗試匹配各個欄位
+        for (const [key, pattern] of Object.entries(patterns)) {
+          const match = content.match(pattern);
+          if (match && match[2]) {
+            sections[key] = match[2].trim();
+          }
+        }
+        
+        // 如果沒有匹配到，嘗試按數字標記分割（1. 2. 3. 等）
+        if (!sections.hotTopics && !sections.specificSuggestions) {
+          const lines = content.split(/\n/);
+          let currentSection = '';
+          let currentKey = '';
+          
+          for (const line of lines) {
+            if (/^(1|一)[\.、]?\s*(熱門選題|選題方向)/i.test(line)) {
+              currentKey = 'hotTopics';
+              currentSection = line.replace(/^(1|一)[\.、]?\s*(熱門選題|選題方向)[:：]?\s*/i, '').trim() + '\n';
+            } else if (/^(2|二)[\.、]?\s*(具體建議|選題的具體)/i.test(line)) {
+              currentKey = 'specificSuggestions';
+              currentSection = line.replace(/^(2|二)[\.、]?\s*(具體建議|選題的具體)[:：]?\s*/i, '').trim() + '\n';
+            } else if (/^(3|三)[\.、]?\s*(策略|技巧)/i.test(line)) {
+              currentKey = 'strategies';
+              currentSection = line.replace(/^(3|三)[\.、]?\s*(策略|技巧)[:：]?\s*/i, '').trim() + '\n';
+            } else if (/^(4|四)[\.、]?\s*(內容規劃)/i.test(line)) {
+              currentKey = 'contentPlanning';
+              currentSection = line.replace(/^(4|四)[\.、]?\s*(內容規劃)[:：]?\s*/i, '').trim() + '\n';
+            } else if (/^(5|五)[\.、]?\s*(時程|執行)/i.test(line)) {
+              currentKey = 'timeline';
+              currentSection = line.replace(/^(5|五)[\.、]?\s*(時程|執行)[:：]?\s*/i, '').trim() + '\n';
+            } else if (currentKey && line.trim()) {
+              currentSection += line + '\n';
+            }
+            
+            if (currentKey && currentSection) {
+              sections[currentKey] = currentSection.trim();
+            }
+          }
+        }
+        
+        // 如果還是沒有匹配到，就將全部內容放在第一個欄位
+        if (!sections.hotTopics && !sections.specificSuggestions && !sections.strategies && !sections.contentPlanning && !sections.timeline) {
+          sections.hotTopics = content;
+        }
+        
+        return sections;
+      }
+      
+      // 顯示選題內容（創作者資料庫版本）- 按照5個欄位分類顯示
       function displayTopicRecordsForUserDB(generations) {
         const container = document.querySelector('#db-topicRecords .section-content');
         
@@ -14042,33 +14294,123 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        container.innerHTML = generations.map((gen, index) => {
+        // 按時間排序：由新到舊（最新的在最上面）
+        const sortedGenerations = [...generations].sort((a, b) => {
+          const timeA = new Date(a.created_at || 0).getTime();
+          const timeB = new Date(b.created_at || 0).getTime();
+          return timeB - timeA; // 降序：大的（新的）在前
+        });
+        
+        container.innerHTML = sortedGenerations.map((gen, index) => {
           const date = formatTaiwanTime(gen.created_at);
-          const platform = gen.platform ? `<span class="topic-platform">平台：${gen.platform}</span>` : '';
-          const topic = gen.topic ? `<span class="topic-topic">主題：${gen.topic}</span>` : '';
+          const platform = gen.platform || '';
+          const topic = gen.topic || '';
           
-          // 格式化內容顯示（保留換行和段落結構）
-          const formattedContent = (gen.content || '無內容').replace(/\n/g, '<br>');
+          // 解析選題內容為5個欄位
+          const sections = parseTopicContent(gen.content);
+          
+          // 獲取該項目的標題（從localStorage或使用預設）
+          const itemTitleKey = `topic-item-title-${gen.id || gen.created_at || index}`;
+          const savedItemTitle = localStorage.getItem(itemTitleKey);
+          const itemTitle = savedItemTitle || '在此輸入你的標題';
+          
+          // 格式化內容顯示（保留換行）
+          const formatText = (text) => {
+            if (!text) return '無內容';
+            return text.replace(/\n/g, '<br>');
+          };
           
           return `
-            <div class="topic-item" style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-              <div class="topic-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb;">
-                <span class="topic-number" style="background: #3b82f6; color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">選題 ${index + 1}</span>
+            <div class="topic-item" style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <div class="topic-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;">
+                <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                  <span class="topic-number" style="background: #3b82f6; color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">編號 ${index + 1}</span>
+                  <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                    <h4 class="topic-item-title" data-title-key="${itemTitleKey}" style="margin: 0; color: #1f2937; font-size: 1rem; font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;" onclick="editTopicItemTitle(this, '${itemTitleKey}')" title="點擊編輯標題">${itemTitle}</h4>
+                    <span class="topic-edit-icon" style="cursor: pointer; color: #6B7280; font-size: 0.8rem; opacity: 0.6; transition: opacity 0.2s;" onclick="editTopicItemTitle(this.previousElementSibling, '${itemTitleKey}')" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
+                  </div>
+                </div>
                 <span class="topic-date" style="color: #6b7280; font-size: 14px;">${date}</span>
               </div>
               ${platform || topic ? `
-              <div class="topic-meta" style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
-                ${platform}
-                ${topic}
+              <div class="topic-meta" style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                ${platform ? `<span style="background: #f3f4f6; color: #374151; padding: 4px 12px; border-radius: 4px; font-size: 12px;">平台：${platform}</span>` : ''}
+                ${topic ? `<span style="background: #f3f4f6; color: #374151; padding: 4px 12px; border-radius: 4px; font-size: 12px;">主題：${topic}</span>` : ''}
               </div>
               ` : ''}
-              <div class="topic-content" style="color: #1f2937; line-height: 1.6; font-size: 14px; white-space: pre-wrap; word-wrap: break-word;">
-                ${formattedContent}
+              <div class="topic-content-sections" style="display: flex; flex-direction: column; gap: 16px;">
+                ${sections.hotTopics ? `
+                <div class="topic-section" style="background: #f9fafb; border-left: 3px solid #3b82f6; padding: 12px; border-radius: 4px;">
+                  <h5 style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">🔥 熱門選題方向</h5>
+                  <div style="color: #374151; line-height: 1.6; font-size: 14px;">${formatText(sections.hotTopics)}</div>
+                </div>
+                ` : ''}
+                ${sections.specificSuggestions ? `
+                <div class="topic-section" style="background: #f9fafb; border-left: 3px solid #10b981; padding: 12px; border-radius: 4px;">
+                  <h5 style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">💡 選題的具體建議</h5>
+                  <div style="color: #374151; line-height: 1.6; font-size: 14px;">${formatText(sections.specificSuggestions)}</div>
+                </div>
+                ` : ''}
+                ${sections.strategies ? `
+                <div class="topic-section" style="background: #f9fafb; border-left: 3px solid #f59e0b; padding: 12px; border-radius: 4px;">
+                  <h5 style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">📋 選題策略和技巧</h5>
+                  <div style="color: #374151; line-height: 1.6; font-size: 14px;">${formatText(sections.strategies)}</div>
+                </div>
+                ` : ''}
+                ${sections.contentPlanning ? `
+                <div class="topic-section" style="background: #f9fafb; border-left: 3px solid #8b5cf6; padding: 12px; border-radius: 4px;">
+                  <h5 style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">📅 內容規劃建議</h5>
+                  <div style="color: #374151; line-height: 1.6; font-size: 14px;">${formatText(sections.contentPlanning)}</div>
+                </div>
+                ` : ''}
+                ${sections.timeline ? `
+                <div class="topic-section" style="background: #f9fafb; border-left: 3px solid #ef4444; padding: 12px; border-radius: 4px;">
+                  <h5 style="margin: 0 0 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">⏰ 執行時程建議</h5>
+                  <div style="color: #374151; line-height: 1.6; font-size: 14px;">${formatText(sections.timeline)}</div>
+                </div>
+                ` : ''}
+                ${!sections.hotTopics && !sections.specificSuggestions && !sections.strategies && !sections.contentPlanning && !sections.timeline ? `
+                <div class="topic-section" style="background: #f9fafb; border-left: 3px solid #6b7280; padding: 12px; border-radius: 4px;">
+                  <div style="color: #374151; line-height: 1.6; font-size: 14px;">${formatText(gen.content)}</div>
+                </div>
+                ` : ''}
               </div>
             </div>
           `;
         }).join('');
       }
+      
+      // 編輯選題項目標題
+      window.editTopicItemTitle = function(titleElement, titleKey) {
+        if (!titleElement || !titleKey) return;
+        
+        const currentTitle = titleElement.textContent.trim();
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = currentTitle;
+        input.style.cssText = 'padding: 4px 8px; border: 2px solid #3B82F6; border-radius: 4px; font-size: 1rem; font-weight: 600; outline: none; width: 100%; max-width: 300px;';
+        
+        const saveTitle = () => {
+          const newTitle = input.value.trim() || '在此輸入你的標題';
+          titleElement.textContent = newTitle;
+          localStorage.setItem(titleKey, newTitle);
+          input.replaceWith(titleElement);
+          if (input.value.trim()) {
+            showToast('✅ 標題已更新', 2000);
+          }
+        };
+        
+        input.addEventListener('blur', saveTitle);
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            saveTitle();
+          }
+        });
+        
+        titleElement.replaceWith(input);
+        input.focus();
+        input.select();
+      };
       
       // 載入使用統計
       async function loadUsageStatsForUserDB() {
@@ -14429,9 +14771,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         const positioningContent = document.getElementById('positioningContent').textContent.trim();
         const topicContent = document.getElementById('topicContent').textContent.trim();
         
-        const isPositioningDefault = positioningContent.includes('點擊「一鍵生成帳號定位」') || 
+        const isPositioningDefault = positioningContent.includes('請點選「一鍵生成帳號定位」按鈕開始') || 
+                                     positioningContent.includes('點擊「一鍵生成帳號定位」') || 
                                      positioningContent.includes('開始分析');
-        const isTopicDefault = topicContent.includes('完成帳號定位') || 
+        const isTopicDefault = topicContent.includes('請點選「一鍵生成選題」按鈕開始') ||
+                              topicContent.includes('完成帳號定位') || 
                               topicContent.includes('進行選題') ||
                               topicContent.includes('點擊「一鍵生成選題」');
         
@@ -14682,7 +15026,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 檢查是否已完成帳號定位（只檢查是否為預設提示文字）
         const positioningContent = document.getElementById('positioningContent').textContent.trim();
-        const isDefaultText = positioningContent.includes('點擊「一鍵生成帳號定位」') || 
+        const isDefaultText = positioningContent.includes('請點選「一鍵生成帳號定位」按鈕開始') ||
+                             positioningContent.includes('點擊「一鍵生成帳號定位」') || 
                              positioningContent.includes('開始分析');
         
         if (!positioningContent || isDefaultText) {
@@ -14870,7 +15215,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         const content = document.getElementById('scriptContent').textContent;
-        if (!content || content.includes('請先完成')) {
+        if (!content || content.includes('請點選「一鍵生成腳本」按鈕開始') || content.includes('請先完成')) {
           showToast('沒有可儲存的內容', 3000);
           return;
         }
