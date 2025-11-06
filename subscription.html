@@ -399,6 +399,24 @@ a{text-decoration:none;color:inherit}
   setPlan(initialPlan);
   
   // 處理付款結果頁面
+  // 處理授權連結：如果在 subscription.html 頁面檢測到 ?token=xxx，跳轉到 index.html 處理
+  (function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    if (token) {
+      // 檢測到授權連結，跳轉到 index.html 處理
+      const currentToken = localStorage.getItem('ipPlanningToken');
+      if (!currentToken) {
+        // 未登入，跳轉到 index.html 的登入頁
+        window.location.href = `/#login?activation_token=${token}`;
+      } else {
+        // 已登入，跳轉到 index.html 處理授權
+        window.location.href = `/?token=${token}`;
+      }
+      return; // 停止執行後續代碼
+    }
+  })();
+
   window.addEventListener('DOMContentLoaded', async function() {
     const urlParams = new URLSearchParams(window.location.search);
     const status = urlParams.get('status');

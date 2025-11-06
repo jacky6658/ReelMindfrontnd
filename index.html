@@ -13568,9 +13568,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         if (!currentToken) {
           // 未登入，導向登入頁（帶上 activation_token）
-          const hash = window.location.hash;
-          const separator = hash.includes('?') ? '&' : '?';
-          window.location.href = `/#login${separator}activation_token=${token}`;
+          // 確保在 index.html 頁面處理，而不是 subscription.html
+          if (window.location.pathname.includes('subscription.html')) {
+            // 如果在 subscription.html，先跳轉到 index.html
+            window.location.href = `/#login?activation_token=${token}`;
+          } else {
+            const hash = window.location.hash;
+            const separator = hash.includes('?') ? '&' : '?';
+            window.location.href = `/#login${separator}activation_token=${token}`;
+          }
           return;
         }
         
@@ -13587,6 +13593,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             // 驗證成功，後端會 redirect，但我們在前端處理
             // 重新檢查訂閱狀態
             await checkSubscriptionStatus();
+            
+            // 確保顯示主應用程式（而不是訂閱頁面）
+            if (window.location.pathname.includes('subscription.html')) {
+              // 如果在 subscription.html，跳轉到 index.html
+              window.location.href = '/';
+            } else {
+              // 顯示主應用程式
+              showMainApp();
+              // 更新首頁視圖（確保顯示已訂閱視圖）
+              updateHomepageView();
+            }
+            
             showToast('✅ 訂閱啟用成功！', 3000);
             // 清除 URL 參數
             window.history.replaceState({}, document.title, window.location.pathname);
@@ -20422,19 +20440,25 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               console.log('DEBUG: Global variables synced, token:', ipPlanningToken ? 'present' : 'missing');
               
               // 檢查並更新訂閱狀態（先更新訂閱狀態，再顯示主應用程式）
-              checkSubscriptionStatus().then(() => {
+              checkSubscriptionStatus().then(async () => {
                 // 檢查是否有 activation_token（授權連結）
                 const hashParams = new URLSearchParams(window.location.hash.slice(1));
                 const activationToken = hashParams.get('activation_token');
                 if (activationToken) {
-                  // 登入成功後，自動驗證授權
-                  handleActivationToken(activationToken);
+                  // 登入成功後，自動驗證授權（等待完成）
+                  await handleActivationToken(activationToken);
                   // 清除 hash 中的 activation_token
                   const newHash = window.location.hash.replace(/[?&]activation_token=[^&]*/, '').replace(/^#/, '');
                   window.history.replaceState({}, document.title, window.location.pathname + (newHash ? '#' + newHash : ''));
+                  // 授權處理完成後，再次檢查訂閱狀態並顯示主應用程式
+                  await checkSubscriptionStatus();
+                  showMainApp();
+                  updateHomepageView();
+                } else {
+                  // 沒有授權連結，直接顯示主應用程式
+                  showMainApp();
+                  updateHomepageView();
                 }
-                // 顯示主應用程式
-                showMainApp();
                 console.log('DEBUG: Main app shown after subscription status updated');
               });
               console.log('DEBUG: Subscription status check initiated');
@@ -20522,16 +20546,24 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 // 檢查並更新訂閱狀態（再略微延遲）
                 setTimeout(() => { 
                   try { 
-                    checkSubscriptionStatus().then(() => {
+                    checkSubscriptionStatus().then(async () => {
                       // 檢查是否有 activation_token（授權連結）
                       const hashParams = new URLSearchParams(window.location.hash.slice(1));
                       const activationToken = hashParams.get('activation_token');
                       if (activationToken) {
-                        // 登入成功後，自動驗證授權
-                        handleActivationToken(activationToken);
+                        // 登入成功後，自動驗證授權（等待完成）
+                        await handleActivationToken(activationToken);
                         // 清除 hash 中的 activation_token
                         const newHash = window.location.hash.replace(/[?&]activation_token=[^&]*/, '').replace(/^#/, '');
                         window.history.replaceState({}, document.title, window.location.pathname + (newHash ? '#' + newHash : ''));
+                        // 授權處理完成後，再次檢查訂閱狀態並顯示主應用程式
+                        await checkSubscriptionStatus();
+                        showMainApp();
+                        updateHomepageView();
+                      } else {
+                        // 沒有授權連結，直接顯示主應用程式
+                        showMainApp();
+                        updateHomepageView();
                       }
                     }); 
                   } catch(_){} 
