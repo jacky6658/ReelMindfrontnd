@@ -1,0 +1,41 @@
+/* High-contrast fallbacks for dark mode */
+.theme-dark .chat-messages,
+.theme-dark #chatMessages,
+.theme-dark #mode3 #mode3-chatMessages,
+.theme-dark #mode3 #mode3-chat-messages {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.theme-dark .message.ai .message-content,
+.theme-dark .message.assistant .message-content {
+  background: var(--gradient-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.theme-dark .message.user .message-content {
+  color: #dbeafe !important;
+}
+
+/* Quick buttons */
+.theme-dark .quick-buttons,
+.theme-dark .mode3-quick-buttons {
+  background: var(--bg-secondary) !important;
+  border-top-color: var(--border-color) !important;
+}
+
+.theme-dark .quick-btn,
+.theme-dark .mode3-quick-btn {
+  background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Hero primary CTA (開始使用) */
+.theme-dark .rm-hero a[style*="linear-gradient(135deg, #3B82F6"],
+.theme-dark .rm-hero a[style*="linear-gradient(135deg,#3B82F6"] {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,.6) !important;
+  font-weight: 800 !important;
+}
