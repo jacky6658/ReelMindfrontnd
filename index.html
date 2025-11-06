@@ -4880,6 +4880,43 @@
         text-align: left !important; /* AI 對話泡泡靠左對齊 */
       }
       
+      /* 確保 mode3 的 typing-indicator 正確顯示 */
+      #mode3-chatMessages .typing-indicator,
+      #mode3-chat-messages .typing-indicator {
+        display: flex !important;
+        align-items: center !important;
+        font-style: italic !important;
+        color: #6b7280 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      
+      #mode3-chatMessages .typing-dots,
+      #mode3-chat-messages .typing-dots {
+        display: flex !important;
+        margin-left: 10px !important;
+      }
+      
+      #mode3-chatMessages .typing-dot,
+      #mode3-chat-messages .typing-dot {
+        width: 6px !important;
+        height: 6px !important;
+        margin: 0 2px !important;
+        background-color: #3b82f6 !important;
+        border-radius: 50% !important;
+        animation: dot-flashing 1s infinite alternate !important;
+      }
+      
+      #mode3-chatMessages .typing-dot:nth-child(2),
+      #mode3-chat-messages .typing-dot:nth-child(2) {
+        animation-delay: 0.2s !important;
+      }
+      
+      #mode3-chatMessages .typing-dot:nth-child(3),
+      #mode3-chat-messages .typing-dot:nth-child(3) {
+        animation-delay: 0.4s !important;
+      }
+      
       /* 使用說明步驟指南樣式 */
       .mode3-step-guide {
         margin: 16px 0;
