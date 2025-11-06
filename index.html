@@ -778,9 +778,23 @@
         border-color: rgba(59, 130, 246, 0.3) !important;
       }
       
-      .theme-dark .chat-messages {
+      /* 深色模式：聊天消息容器 */
+      .theme-dark .chat-messages,
+      .theme-dark #chatMessages,
+      .theme-dark #mode2 #chatMessages,
+      .theme-dark #mode3 #mode3-chatMessages,
+      .theme-dark #mode3 #mode3-chat-messages {
         background: var(--bg-secondary) !important;
         border-color: var(--border-color) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      /* 覆蓋內聯樣式中的白色背景 */
+      .theme-dark .chat-messages[style*="background: white"],
+      .theme-dark .chat-messages[style*="background:white"],
+      .theme-dark #chatMessages[style*="background: white"],
+      .theme-dark #chatMessages[style*="background:white"] {
+        background: var(--bg-secondary) !important;
       }
       
       /* Mode2 說明抽屜 */
@@ -928,10 +942,29 @@
         color: var(--text-primary) !important;
       }
       
-      .theme-dark #mode3 .message.user .message-content {
+      /* 深色模式：Mode3 用戶對話泡泡 */
+      .theme-dark #mode3 .message.user .message-content,
+      .theme-dark #mode3-chatMessages .message.user .message-content,
+      .theme-dark #mode3-chat-messages .message.user .message-content {
         background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%) !important;
         color: #dbeafe !important;
         border-color: rgba(59, 130, 246, 0.3) !important;
+      }
+      
+      /* 覆蓋 Mode3 用戶消息的內聯樣式 */
+      .theme-dark #mode3 .message.user .message-content[style*="background: #dbeafe"],
+      .theme-dark #mode3 .message.user .message-content[style*="background:#dbeafe"],
+      .theme-dark #mode3-chatMessages .message.user .message-content[style*="background: #dbeafe"],
+      .theme-dark #mode3-chat-messages .message.user .message-content[style*="background: #dbeafe"] {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%) !important;
+        color: #dbeafe !important;
+      }
+      
+      .theme-dark #mode3 .message.user .message-content[style*="color: #1e40af"],
+      .theme-dark #mode3 .message.user .message-content[style*="color:#1e40af"],
+      .theme-dark #mode3-chatMessages .message.user .message-content[style*="color: #1e40af"],
+      .theme-dark #mode3-chat-messages .message.user .message-content[style*="color: #1e40af"] {
+        color: #dbeafe !important;
       }
       
       .theme-dark #mode3-chatMessages,
@@ -3738,6 +3771,7 @@
         border: 1px solid #e5e7eb;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         flex: 1;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
       }
       
       .message {
@@ -6605,13 +6639,19 @@
       #mode3-chatMessages .message.user .message-content,
       #mode3-chat-messages .message.user .message-content {
         flex: 1 !important;
+        background: #dbeafe !important; /* 添加背景色，與 Mode2 一致 */
         padding: 20px 40px !important; /* 與 AI 回覆框一樣的 padding，與 Mode2 一致 */
         padding-left: 50px !important; /* 增加左邊 padding，避免文字太貼邊界 */
+        border-radius: 12px !important; /* 添加圓角 */
+        border: 1px solid #3b82f6 !important; /* 添加邊框 */
+        color: #1e40af !important; /* 添加文字顏色 */
         line-height: 1.6 !important; /* 與 Mode2 一致的行高 */
         text-align: right !important; /* 用戶對話泡泡文字靠右對齊 */
         margin-right: 12px !important; /* 對話泡泡與頭像之間的間距 */
         margin-left: 0 !important;
         order: 1 !important; /* 確保內容在左邊 */
+        font-size: 16px !important; /* 字體大小 */
+        box-sizing: border-box !important;
       }
       
       /* Mode3 用戶頭像樣式 - 確保在對話泡泡右邊 */
@@ -7397,12 +7437,68 @@
         padding: 12px 16px;
         border-radius: 12px;
         border: 1px solid #e5e7eb;
+        color: #1f2937;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
       }
 
       .mode3-user-message .mode3-message-content {
         background: #dbeafe;
         border-color: #3b82f6;
         color: #1e40af;
+      }
+      
+      /* 深色模式：Mode3 消息內容 */
+      .theme-dark .mode3-message-content {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark .mode3-user-message .mode3-message-content {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%) !important;
+        color: #dbeafe !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+      }
+      
+      /* 覆蓋內聯樣式 */
+      .theme-dark .mode3-message-content[style*="background: #f8fafc"],
+      .theme-dark .mode3-message-content[style*="background:#f8fafc"],
+      .theme-dark .mode3-message-content[style*="background: white"],
+      .theme-dark .mode3-message-content[style*="background:white"] {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .mode3-user-message .mode3-message-content[style*="background: #dbeafe"],
+      .theme-dark .mode3-user-message .mode3-message-content[style*="background:#dbeafe"] {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%) !important;
+        color: #dbeafe !important;
+      }
+      
+      .theme-dark .mode3-message-content[style*="color: #1f2937"],
+      .theme-dark .mode3-message-content[style*="color:#1f2937"],
+      .theme-dark .mode3-user-message .mode3-message-content[style*="color: #1e40af"],
+      .theme-dark .mode3-user-message .mode3-message-content[style*="color:#1e40af"] {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .mode3-user-message .mode3-message-content[style*="color: #1e40af"],
+      .theme-dark .mode3-user-message .mode3-message-content[style*="color:#1e40af"] {
+        color: #dbeafe !important;
+      }
+      
+      .theme-dark .mode3-message-content p,
+      .theme-dark .mode3-message-content li,
+      .theme-dark .mode3-message-content span,
+      .theme-dark .mode3-message-content div {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .mode3-user-message .mode3-message-content p,
+      .theme-dark .mode3-user-message .mode3-message-content li,
+      .theme-dark .mode3-user-message .mode3-message-content span,
+      .theme-dark .mode3-user-message .mode3-message-content div {
+        color: #dbeafe !important;
       }
 
       .mode3-message-content p {
@@ -7431,6 +7527,18 @@
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      /* 深色模式：Mode3 快速按鈕容器 */
+      .theme-dark .mode3-quick-buttons {
+        background: var(--bg-secondary) !important;
+        border-top-color: var(--border-color) !important;
+      }
+      
+      .theme-dark .mode3-quick-buttons[style*="background: #f8fafc"],
+      .theme-dark .mode3-quick-buttons[style*="background:#f8fafc"] {
+        background: var(--bg-secondary) !important;
       }
 
       .mode3-quick-btn {
@@ -7444,11 +7552,35 @@
         transition: all 0.2s;
         white-space: nowrap;
       }
+      
+      /* 深色模式：Mode3 快速按鈕 */
+      .theme-dark .mode3-quick-btn {
+        background: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark .mode3-quick-btn[style*="background: white"],
+      .theme-dark .mode3-quick-btn[style*="background:white"] {
+        background: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .mode3-quick-btn[style*="color: #374151"],
+      .theme-dark .mode3-quick-btn[style*="color:#374151"] {
+        color: var(--text-primary) !important;
+      }
 
       .mode3-quick-btn:hover {
         background: #3b82f6;
         border-color: #3b82f6;
         color: white;
+      }
+      
+      .theme-dark .mode3-quick-btn:hover {
+        background: var(--accent-blue) !important;
+        border-color: var(--accent-blue) !important;
+        color: white !important;
       }
 
       /* 輸入區域 */
