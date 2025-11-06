@@ -1289,6 +1289,337 @@
         border-color: var(--border-color) !important;
       }
       
+      /* ========== 深色模式：改進與優化 ========== */
+      
+      /* 1. 導航欄標籤優化 */
+      .theme-dark .navbar-tab {
+        color: var(--text-secondary) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      }
+      
+      .theme-dark .navbar-tab.active {
+        background: linear-gradient(135deg, var(--accent-blue) 0%, #2563eb 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+        transform: translateY(-1px) !important;
+      }
+      
+      .theme-dark .navbar-tab:hover:not(.active) {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
+        transform: translateY(-1px) !important;
+      }
+      
+      /* 2. 滾動條樣式優化 */
+      .theme-dark ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      
+      .theme-dark ::-webkit-scrollbar-track {
+        background: var(--bg-secondary) !important;
+        border-radius: 10px;
+      }
+      
+      .theme-dark ::-webkit-scrollbar-thumb {
+        background: var(--border-color) !important;
+        border-radius: 10px;
+        border: 2px solid var(--bg-secondary);
+        transition: background 0.3s ease;
+      }
+      
+      .theme-dark ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-blue) !important;
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.4) !important;
+      }
+      
+      .theme-dark * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-color) var(--bg-secondary);
+      }
+      
+      /* 3. 選中文字樣式 */
+      .theme-dark ::selection {
+        background: rgba(59, 130, 246, 0.3) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark ::-moz-selection {
+        background: rgba(59, 130, 246, 0.3) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      /* 4. 加載動畫和骨架屏 */
+      .theme-dark .ai-loading,
+      .theme-dark .loading,
+      .theme-dark .spinner,
+      .theme-dark .popup-spinner {
+        background: var(--bg-secondary) !important;
+      }
+      
+      .theme-dark .ai-loading-dot,
+      .theme-dark .loading::after {
+        background: var(--accent-blue) !important;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.5) !important;
+      }
+      
+      .theme-dark .loading-text {
+        color: var(--text-secondary) !important;
+      }
+      
+      /* 5. Toast 通知優化 */
+      .theme-dark .toast {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(59, 130, 246, 0.1) !important;
+        backdrop-filter: blur(10px) !important;
+      }
+      
+      /* 6. 按鈕增強效果 */
+      .theme-dark .btn-primary,
+      .theme-dark .apply-btn,
+      .theme-dark button[style*="background: #3b82f6"],
+      .theme-dark button[style*="background:#3b82f6"] {
+        background: linear-gradient(135deg, var(--accent-blue) 0%, #2563eb 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        border: none !important;
+      }
+      
+      .theme-dark .btn-primary:hover,
+      .theme-dark .apply-btn:hover,
+      .theme-dark button[style*="background: #3b82f6"]:hover,
+      .theme-dark button[style*="background:#3b82f6"]:hover {
+        transform: translateY(-2px) scale(1.02) !important;
+        box-shadow: 0 6px 24px rgba(59, 130, 246, 0.5) !important;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+      }
+      
+      .theme-dark .btn-primary:active,
+      .theme-dark .apply-btn:active {
+        transform: translateY(0) scale(0.98) !important;
+      }
+      
+      /* 7. 輸入框聚焦效果增強 */
+      .theme-dark input:focus,
+      .theme-dark select:focus,
+      .theme-dark textarea:focus {
+        outline: none !important;
+        border-color: var(--accent-blue) !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 0 20px rgba(59, 130, 246, 0.1) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      }
+      
+      /* 8. 卡片懸停效果優化 */
+      .theme-dark .card:hover,
+      .theme-dark .mode-card:hover,
+      .theme-dark .user-story-card:hover,
+      .theme-dark .setting-group:hover {
+        transform: translateY(-4px) !important;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 
+                    0 0 0 1px rgba(59, 130, 246, 0.2),
+                    0 0 30px rgba(59, 130, 246, 0.1) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      }
+      
+      /* 9. 手機版抽屜優化 */
+      .theme-dark .mobile-drawer,
+      .theme-dark .user-drawer-sidebar,
+      .theme-dark .user-drawer-content {
+        background: var(--gradient-card) !important;
+        box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5) !important;
+        border-left: 1px solid var(--border-color) !important;
+      }
+      
+      .theme-dark .mobile-drawer-toggle,
+      .theme-dark .hamburger-icon {
+        color: var(--text-primary) !important;
+        transition: all 0.3s ease !important;
+      }
+      
+      .theme-dark .mobile-drawer-toggle:hover,
+      .theme-dark .hamburger-icon:hover {
+        color: var(--accent-blue) !important;
+        transform: scale(1.1) !important;
+      }
+      
+      /* 10. 下拉選單優化 */
+      .theme-dark select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23cbd5e1' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 12px center !important;
+        padding-right: 36px !important;
+        appearance: none !important;
+        cursor: pointer !important;
+      }
+      
+      .theme-dark select:hover {
+        border-color: var(--accent-blue) !important;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+      }
+      
+      /* 11. 代碼高亮優化（Highlight.js 深色主題適配） */
+      .theme-dark .hljs {
+        background: var(--bg-secondary) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 8px !important;
+        padding: 16px !important;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+      }
+      
+      .theme-dark .hljs-keyword,
+      .theme-dark .hljs-selector-tag,
+      .theme-dark .hljs-built_in,
+      .theme-dark .hljs-name {
+        color: #c792ea !important;
+      }
+      
+      .theme-dark .hljs-string,
+      .theme-dark .hljs-attr {
+        color: #c3e88d !important;
+      }
+      
+      .theme-dark .hljs-comment {
+        color: var(--text-tertiary) !important;
+        font-style: italic !important;
+      }
+      
+      .theme-dark .hljs-number {
+        color: #f78c6c !important;
+      }
+      
+      .theme-dark .hljs-function,
+      .theme-dark .hljs-title {
+        color: #82aaff !important;
+      }
+      
+      /* 12. 表格優化 */
+      .theme-dark table {
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+      }
+      
+      .theme-dark th {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
+        border-bottom: 2px solid var(--border-color) !important;
+        font-weight: 600 !important;
+      }
+      
+      .theme-dark td {
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+      
+      .theme-dark tr:hover {
+        background: var(--bg-tertiary) !important;
+        transition: background 0.2s ease !important;
+      }
+      
+      /* 13. 連結優化 */
+      .theme-dark a:not(.navbar-tab):not(.btn):not(.logout-btn) {
+        color: var(--accent-blue) !important;
+        text-decoration: none !important;
+        transition: all 0.2s ease !important;
+        border-bottom: 1px solid transparent !important;
+      }
+      
+      .theme-dark a:not(.navbar-tab):not(.btn):not(.logout-btn):hover {
+        color: #60a5fa !important;
+        border-bottom-color: var(--accent-blue) !important;
+      }
+      
+      /* 14. 標題優化 */
+      .theme-dark h1,
+      .theme-dark h2,
+      .theme-dark h3 {
+        background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      /* 15. 分隔線優化 */
+      .theme-dark hr,
+      .theme-dark .divider,
+      .theme-dark .menu-divider {
+        border-color: var(--border-color) !important;
+        background: linear-gradient(90deg, 
+          transparent 0%, 
+          var(--border-color) 20%, 
+          var(--border-color) 80%, 
+          transparent 100%) !important;
+        height: 1px !important;
+        border: none !important;
+      }
+      
+      /* 16. 標籤和徽章優化 */
+      .theme-dark .badge,
+      .theme-dark .tag,
+      .theme-dark [class*="badge"],
+      .theme-dark [class*="tag"] {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+      }
+      
+      /* 17. 工具提示優化 */
+      .theme-dark [title]:hover::after,
+      .theme-dark [data-tooltip]:hover::after {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+      }
+      
+      /* 18. 整體過渡動畫優化（僅針對需要動畫的元素） */
+      .theme-dark .card,
+      .theme-dark .mode-card,
+      .theme-dark .user-story-card,
+      .theme-dark .setting-group,
+      .theme-dark .btn-primary,
+      .theme-dark .apply-btn,
+      .theme-dark button,
+      .theme-dark input,
+      .theme-dark select,
+      .theme-dark textarea,
+      .theme-dark a {
+        transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                    color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      }
+      
+      /* 19. 導航欄標題優化 */
+      .theme-dark .navbar-title,
+      .theme-dark .clickable-title {
+        background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-blue) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        transition: all 0.3s ease !important;
+      }
+      
+      .theme-dark .clickable-title:hover {
+        filter: brightness(1.2) !important;
+        transform: scale(1.05) !important;
+      }
+      
+      /* 20. 用戶資訊優化 */
+      .theme-dark .user-info {
+        color: var(--text-secondary) !important;
+        transition: all 0.3s ease !important;
+      }
+      
+      .theme-dark .user-info:hover {
+        color: var(--text-primary) !important;
+        transform: translateX(2px) !important;
+      }
+      
       /* 頁面容器 */
       .app-container {
         display: flex;
