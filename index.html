@@ -13612,12 +13612,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 檢查 URL 參數中是否有 activation_token（授權連結）
         const urlParams = new URLSearchParams(window.location.search);
-        const activationToken = urlParams.get('token');
-        const activationSuccess = urlParams.get('activation');
+        const hashParams = new URLSearchParams(window.location.hash.slice(1));
+        const activationToken = urlParams.get('token') || hashParams.get('token');
+        const activationSuccess = urlParams.get('activation') || hashParams.get('activation');
         
         // 處理授權成功頁面（從後端 redirect 回來）
         if (activationSuccess === 'success') {
-          const plan = urlParams.get('plan') || 'yearly';
+          const plan = urlParams.get('plan') || hashParams.get('plan') || 'yearly';
           showToast(`✅ 訂閱啟用成功！方案：${plan === 'yearly' ? '年費' : '月費'}`, 5000);
           // 重新檢查訂閱狀態
           checkSubscriptionStatus().then(() => {
@@ -13626,9 +13627,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           });
         }
         
-        // 處理授權連結（/activate?token=xxx）
-        if (activationToken && (window.location.pathname === '/activate' || window.location.pathname === '/activate.html')) {
-          handleActivationToken(activationToken);
+        // 處理授權連結（/activate?token=xxx 或根路徑 ?token=xxx）
+        if (activationToken) {
+          // 檢查是否為授權連結（路徑是 /activate 或根路徑有 token 參數）
+          const isActivatePath = window.location.pathname === '/activate' || 
+                                 window.location.pathname === '/activate.html' ||
+                                 window.location.pathname === '/' ||
+                                 window.location.pathname === '';
+          
+          // 如果是授權連結，處理它
+          if (isActivatePath) {
+            handleActivationToken(activationToken);
+          }
         }
         
         // 檢查 URL 參數中是否有 token（OAuth callback fallback）
