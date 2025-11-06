@@ -93,6 +93,10 @@
       }
     </script>
     
+    <!-- CSS 文件 -->
+    <link rel="stylesheet" href="/assets/css/variables.css" />
+    <link rel="stylesheet" href="/assets/css/animations.css" />
+    <link rel="stylesheet" href="/assets/css/styles.css" />
     <link rel="stylesheet" href="/assets/css/main.css" />
     <script defer src="/assets/js/config.js"></script>
     <script defer src="/assets/js/auth.js"></script>
@@ -703,11 +707,43 @@
         background: var(--gradient-primary) !important;
       }
       
+      /* 深色模式：AI 對話泡泡 - 強制覆蓋所有白色背景 */
       .theme-dark .message.ai .message-content,
-      .theme-dark .message.assistant .message-content {
+      .theme-dark .message.assistant .message-content,
+      .theme-dark .message.ai[style*="background"] .message-content,
+      .theme-dark .message.assistant[style*="background"] .message-content {
         background: var(--gradient-card) !important;
         color: var(--text-primary) !important;
         border-color: var(--border-color) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+      }
+      
+      /* 覆蓋內聯樣式中的白色背景 */
+      .theme-dark .message.ai .message-content[style*="background: #f8fafc"],
+      .theme-dark .message.ai .message-content[style*="background:#f8fafc"],
+      .theme-dark .message.ai .message-content[style*="background: #F8FAFC"],
+      .theme-dark .message.ai .message-content[style*="background:#F8FAFC"],
+      .theme-dark .message.ai .message-content[style*="background: white"],
+      .theme-dark .message.ai .message-content[style*="background:white"],
+      .theme-dark .message.assistant .message-content[style*="background: #f8fafc"],
+      .theme-dark .message.assistant .message-content[style*="background:#f8fafc"],
+      .theme-dark .message.assistant .message-content[style*="background: white"],
+      .theme-dark .message.assistant .message-content[style*="background:white"] {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      /* 覆蓋內聯樣式中的深色文字 */
+      .theme-dark .message.ai .message-content[style*="color: #1f2937"],
+      .theme-dark .message.ai .message-content[style*="color:#1f2937"],
+      .theme-dark .message.ai .message-content[style*="color: #374151"],
+      .theme-dark .message.ai .message-content[style*="color:#374151"],
+      .theme-dark .message.assistant .message-content[style*="color: #1f2937"],
+      .theme-dark .message.assistant .message-content[style*="color:#1f2937"],
+      .theme-dark .message.assistant .message-content[style*="color: #374151"],
+      .theme-dark .message.assistant .message-content[style*="color:#374151"] {
+        color: var(--text-primary) !important;
       }
       
       .theme-dark .message.ai .message-content p,
@@ -723,7 +759,11 @@
       .theme-dark .message.ai .message-content strong,
       .theme-dark .message.ai .message-content em,
       .theme-dark .message.ai .message-content code,
-      .theme-dark .message.ai .message-content pre {
+      .theme-dark .message.ai .message-content pre,
+      .theme-dark .message.ai .message-content span,
+      .theme-dark .message.ai .message-content div,
+      .theme-dark .message.assistant .message-content span,
+      .theme-dark .message.assistant .message-content div {
         color: var(--text-primary) !important;
       }
       
@@ -833,15 +873,44 @@
         background: var(--gradient-primary) !important;
       }
       
+      /* 深色模式：Mode3 IP人設規劃對話泡泡 - 強制覆蓋白色背景 */
       .theme-dark #mode3 .message.ai .message-content,
       .theme-dark #mode3-chatMessages .message.ai .message-content,
       .theme-dark #mode3-chat-messages .message.ai .message-content,
       .theme-dark #mode3 .message.assistant .message-content,
       .theme-dark #mode3-chatMessages .message.assistant .message-content,
-      .theme-dark #mode3-chat-messages .message.assistant .message-content {
+      .theme-dark #mode3-chat-messages .message.assistant .message-content,
+      .theme-dark #mode3 .message.ai .message-content[style*="background"],
+      .theme-dark #mode3-chatMessages .message.ai .message-content[style*="background"],
+      .theme-dark #mode3-chat-messages .message.ai .message-content[style*="background"] {
         background: var(--gradient-card) !important;
         color: var(--text-primary) !important;
         border-color: var(--border-color) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+      }
+      
+      /* 覆蓋 Mode3 內聯樣式中的白色背景 */
+      .theme-dark #mode3 .message.ai .message-content[style*="background: #f8fafc"],
+      .theme-dark #mode3 .message.ai .message-content[style*="background:#f8fafc"],
+      .theme-dark #mode3 .message.ai .message-content[style*="background: white"],
+      .theme-dark #mode3 .message.ai .message-content[style*="background:white"],
+      .theme-dark #mode3-chatMessages .message.ai .message-content[style*="background: #f8fafc"],
+      .theme-dark #mode3-chatMessages .message.ai .message-content[style*="background: white"],
+      .theme-dark #mode3-chat-messages .message.ai .message-content[style*="background: #f8fafc"],
+      .theme-dark #mode3-chat-messages .message.ai .message-content[style*="background: white"] {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      /* 覆蓋 Mode3 內聯樣式中的深色文字 */
+      .theme-dark #mode3 .message.ai .message-content[style*="color: #1f2937"],
+      .theme-dark #mode3 .message.ai .message-content[style*="color:#1f2937"],
+      .theme-dark #mode3 .message.ai .message-content[style*="color: #374151"],
+      .theme-dark #mode3 .message.ai .message-content[style*="color:#374151"],
+      .theme-dark #mode3-chatMessages .message.ai .message-content[style*="color: #1f2937"],
+      .theme-dark #mode3-chat-messages .message.ai .message-content[style*="color: #1f2937"] {
+        color: var(--text-primary) !important;
       }
       
       .theme-dark #mode3 .message.ai .message-content p,
@@ -1113,6 +1182,63 @@
         color: var(--text-primary) !important;
       }
       
+      /* 深色模式：首頁 Hero 區塊文字優化 */
+      .theme-dark .rm-hero-title,
+      .theme-dark .rm-hero h1,
+      .theme-dark h1[style*="color: #1E293B"],
+      .theme-dark h1[style*="color:#1E293B"] {
+        color: var(--text-primary) !important;
+        font-weight: 900 !important;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+      }
+      
+      .theme-dark .rm-hero p,
+      .theme-dark .rm-hero p[style*="color: #64748B"],
+      .theme-dark .rm-hero p[style*="color:#64748B"] {
+        color: var(--text-secondary) !important;
+        font-weight: 500 !important;
+        opacity: 1 !important;
+      }
+      
+      .theme-dark .rm-hero span[style*="color: #94A3B8"],
+      .theme-dark .rm-hero span[style*="color:#94A3B8"] {
+        color: var(--text-tertiary) !important;
+        opacity: 0.9 !important;
+      }
+      
+      .theme-dark .homepage-subtitle,
+      .theme-dark .homepage-subtitle[style*="color: #6b7280"],
+      .theme-dark .homepage-subtitle[style*="color:#6b7280"],
+      .theme-dark p[style*="color: #6b7280"],
+      .theme-dark p[style*="color:#6b7280"] {
+        color: var(--text-secondary) !important;
+        font-weight: 500 !important;
+        opacity: 1 !important;
+      }
+      
+      /* 深色模式：首頁 Hero 區塊背景優化 */
+      .theme-dark .rm-hero[style*="background: #F8FAFC"],
+      .theme-dark .rm-hero[style*="background:#F8FAFC"] {
+        background: var(--gradient-primary) !important;
+      }
+      
+      /* 深色模式：首頁按鈕優化 */
+      .theme-dark .rm-hero a[style*="background: white"],
+      .theme-dark .rm-hero a[style*="background:white"] {
+        background: var(--gradient-card) !important;
+        color: var(--accent-blue) !important;
+        border: 2px solid var(--accent-blue) !important;
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2) !important;
+      }
+      
+      .theme-dark .rm-hero a[style*="background: white"]:hover,
+      .theme-dark .rm-hero a[style*="background:white"]:hover {
+        background: var(--accent-blue) !important;
+        color: white !important;
+        box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4) !important;
+        transform: translateY(-2px) !important;
+      }
+      
       .theme-dark div[style*="background: white"][style*="border-radius: 20px"] {
         background: var(--gradient-card) !important;
         border-color: var(--border-color) !important;
@@ -1205,26 +1331,68 @@
         border-color: var(--input-border) !important;
       }
       
-      .theme-dark .chat-input::placeholder {
+      .theme-dark .chat-input::placeholder,
+      .theme-dark #messageInput::placeholder,
+      .theme-dark #mode3-message-input::placeholder,
+      .theme-dark input::placeholder,
+      .theme-dark textarea::placeholder {
         color: var(--text-tertiary) !important;
+        opacity: 0.8 !important;
       }
       
       .theme-dark .quick-buttons {
         border-top-color: var(--border-color) !important;
       }
       
+      /* 深色模式：建議按鈕和快速按鈕 - 強制覆蓋所有樣式 */
       .theme-dark .suggestion-btn,
-      .theme-dark .quick-btn {
+      .theme-dark .quick-btn,
+      .theme-dark button[class*="suggestion"],
+      .theme-dark button[class*="quick"],
+      .theme-dark .input-wrapper .quick-btn,
+      .theme-dark .mode2 .quick-btn,
+      .theme-dark .mode3 .quick-btn,
+      .theme-dark #mode3 .quick-btn {
+        background: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+        font-weight: 500 !important;
+      }
+      
+      /* 覆蓋內聯樣式中的白色背景和深色文字 */
+      .theme-dark .quick-btn[style*="background: white"],
+      .theme-dark .quick-btn[style*="background:white"],
+      .theme-dark .quick-btn[style*="background: #ffffff"],
+      .theme-dark .quick-btn[style*="background:#ffffff"],
+      .theme-dark .suggestion-btn[style*="background: white"],
+      .theme-dark .suggestion-btn[style*="background:white"] {
         background: var(--card-bg) !important;
         color: var(--text-primary) !important;
         border-color: var(--border-color) !important;
       }
       
+      .theme-dark .quick-btn[style*="color: #374151"],
+      .theme-dark .quick-btn[style*="color:#374151"],
+      .theme-dark .quick-btn[style*="color: #1f2937"],
+      .theme-dark .quick-btn[style*="color:#1f2937"],
+      .theme-dark .suggestion-btn[style*="color: #374151"],
+      .theme-dark .suggestion-btn[style*="color:#374151"] {
+        color: var(--text-primary) !important;
+      }
+      
       .theme-dark .suggestion-btn:hover,
-      .theme-dark .quick-btn:hover {
+      .theme-dark .quick-btn:hover,
+      .theme-dark button[class*="suggestion"]:hover,
+      .theme-dark button[class*="quick"]:hover,
+      .theme-dark .input-wrapper .quick-btn:hover,
+      .theme-dark .mode2 .quick-btn:hover,
+      .theme-dark .mode3 .quick-btn:hover,
+      .theme-dark #mode3 .quick-btn:hover {
         background: var(--accent-blue) !important;
         border-color: var(--accent-blue) !important;
         color: white !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
       }
       
       .theme-dark .send-btn {
@@ -9967,7 +10135,7 @@
         <!-- 頁面內容區域 -->
         <div class="page-content">
           <!-- 首頁 -->
-          <div id="homepage" class="page active">
+          <div id="homepage" class="page active page-enter">
             <div class="homepage">
               <!-- 未登入用戶（訪客）視圖 - 顯示 index_unsubscribed.html 的內容 -->
               <div id="homepage-unsubscribed" class="homepage-view" style="display: none;">
@@ -15695,7 +15863,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                            result.result_type === 'plan' ? '14天規劃' : '今日腳本';
             const textContent = (result.content || '').replace(/<[^>]*>/g, '').replace(/"/g, '""').replace(/\n/g, ' ');
             const title = (result.title || typeName).replace(/"/g, '""');
-            const date = result.created_at ? new Date(result.created_at).toLocaleString('zh-TW') : '';
+            const date = result.created_at ? new Date(result.created_at).toLocaleString('zh-TW', {
+              timeZone: 'Asia/Taipei',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : '';
             csvContent += `"${typeName}","${title}","${textContent}","${date}"\n`;
           });
           
@@ -22299,7 +22474,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const textContent = content.innerText || content.textContent || '';
           
           // 生成 CSV 格式
-          const csvContent = `類型,標題,內容,匯出時間\n"${tabName}","${tabName === 'profile' ? 'IP Profile' : tabName === 'plan' ? '14天規劃' : '今日腳本'}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW')}"`;
+          const csvContent = `類型,標題,內容,匯出時間\n"${tabName}","${tabName === 'profile' ? 'IP Profile' : tabName === 'plan' ? '14天規劃' : '今日腳本'}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW', {
+            timeZone: 'Asia/Taipei',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}"`;
           
           // 創建 CSV 檔案
           const csvBlob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });

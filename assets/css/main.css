@@ -5,4 +5,268 @@ html, body, * {
   -webkit-touch-callout: default !important;
 }
 
+/* ============================================
+   創作者資料庫樣式修改
+   ============================================ */
 
+/* 1. 手機版用戶資料置中對齊 */
+@media (max-width: 768px) {
+  .user-db-sidebar .sidebar-header {
+    padding: 16px;
+  }
+  
+  .user-db-sidebar .user-profile {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .user-db-sidebar .profile-avatar {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto;
+  }
+  
+  .user-db-sidebar .profile-info {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .user-db-sidebar .profile-info h3,
+  .user-db-sidebar .profile-info p {
+    text-align: center;
+    width: 100%;
+  }
+  
+  /* 確保導覽列也是置中的 */
+  .user-db-sidebar .sidebar-menu {
+    width: 100%;
+  }
+  
+  .user-db-sidebar .menu-item {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+/* 2. 個人資料欄位寬度等於容器寬度（電腦版保持原樣） */
+
+.user-db-page .detail-item label,
+.user-db-page .detail-item span {
+  width: auto;
+  flex: 1;
+}
+
+.user-db-page .detail-item span {
+  text-align: left;
+  word-break: break-word;
+  padding-left: 12px; /* 增加 label 和 span 之間的間距 */
+}
+
+/* 增加 profile-details 的間距 */
+.user-db-page .profile-details {
+  gap: 20px !important; /* 增加欄位之間的垂直間距 */
+}
+
+/* 3. 我的腳本標題 - 移除編輯功能，改為固定標題 */
+#my-scripts-title {
+  cursor: default !important;
+  padding-right: 0 !important;
+}
+
+#my-scripts-title:hover {
+  opacity: 1 !important;
+}
+
+#my-scripts-edit-icon {
+  display: none !important;
+}
+
+#my-scripts-title-input {
+  display: none !important;
+}
+
+/* IP人設規劃主標題 - 移除編輯功能，改為固定標題 */
+#ip-planning-title {
+  cursor: default !important;
+  padding-right: 0 !important;
+}
+
+#ip-planning-title:hover {
+  opacity: 1 !important;
+}
+
+#ip-planning-edit-icon {
+  display: none !important;
+}
+
+#ip-planning-title-input {
+  display: none !important;
+}
+
+/* IP人設規劃項目標題 - 可編輯樣式 */
+.ip-planning-item:hover .ip-planning-item-edit-icon {
+  display: inline-block !important;
+}
+
+.ip-planning-item-title:hover {
+  opacity: 0.8;
+}
+
+/* 4. 所有區塊內的欄位寬度等於容器寬度（電腦版保持原樣，手機版在下方媒體查詢中調整） */
+
+#db-myScripts .script-table {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+#db-myScripts .script-table table {
+  width: 100%;
+  min-width: 100%;
+  box-sizing: border-box;
+}
+
+#db-myScripts .script-table th,
+#db-myScripts .script-table td {
+  box-sizing: border-box;
+}
+
+/* 其他區塊的樣式（電腦版保持原樣，手機版在下方媒體查詢中調整） */
+
+/* 通用：所有 db-section 內的直接子元素 */
+.db-section .section-content > * {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.db-section .section-content > div,
+.db-section .section-content > p,
+.db-section .section-content > table {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* section-content 的樣式（電腦版保持原樣，手機版在下方媒體查詢中調整） */
+
+/* 5. 我的腳本編號順序 - 確保排序正確（由新到舊） */
+/* 排序邏輯已在 JavaScript 中處理，使用時間降序（新的在前） */
+
+/* 手機版額外優化 */
+@media (max-width: 768px) {
+  /* 個人資料欄位手機版 - 增加左右間距 */
+  .user-db-page .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 16px 36px !important; /* 手機版增加左右間距 */
+  }
+  
+  .user-db-page .detail-item label {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .user-db-page .detail-item span {
+    width: 100%;
+    padding-left: 12px; /* 增加 label 和 span 之間的間距 */
+  }
+  
+  /* 增加 profile-details 的間距（手機版） */
+  .user-db-page .profile-details {
+    gap: 20px !important;
+  }
+  
+  /* 我的腳本表格手機版 */
+  #db-myScripts .script-table {
+    font-size: 12px;
+  }
+  
+  #db-myScripts .script-table th,
+  #db-myScripts .script-table td {
+    padding: 8px 4px;
+    word-break: break-word;
+  }
+  
+  /* 我的腳本手機版 - 增加左右間距 */
+  #db-myScripts .script-item {
+    padding: 0 36px !important;
+  }
+  
+  #db-myScripts .script-header {
+    padding: 16px 36px !important;
+  }
+  
+  #db-myScripts .script-content {
+    padding: 20px 36px !important;
+  }
+  
+  #db-myScripts .script-actions {
+    padding: 16px 36px !important;
+  }
+  
+  /* 所有區塊內容手機版 - 增加左右間距 */
+  .db-section .section-content {
+    padding-left: 36px !important;
+    padding-right: 36px !important;
+    padding-top: 0;
+    padding-bottom: 20px;
+  }
+  
+  /* 帳號定位手機版 */
+  #db-accountPositioning .detail-item {
+    padding: 16px 36px !important;
+  }
+  
+  #db-accountPositioning .section-content > *,
+  #db-accountPositioning .card,
+  #db-accountPositioning .content-item {
+    padding-left: 36px !important;
+    padding-right: 36px !important;
+  }
+  
+  /* 選題內容手機版 */
+  #db-topicRecords .topic-item,
+  #db-topicRecords .topic-card {
+    padding: 20px 36px !important;
+  }
+  
+  #db-topicRecords .section-content > *,
+  #db-topicRecords .content-field {
+    padding-left: 36px !important;
+    padding-right: 36px !important;
+  }
+  
+  /* IP人設規劃手機版 */
+  #db-ipPlanning .ip-planning-tabs {
+    padding-left: 36px !important;
+    padding-right: 36px !important;
+  }
+  
+  #db-ipPlanning .ip-planning-content {
+    padding: 20px 36px !important;
+  }
+  
+  #db-ipPlanning .section-content > *,
+  #db-ipPlanning .ip-planning-item,
+  #db-ipPlanning .ip-planning-card {
+    padding-left: 36px !important;
+    padding-right: 36px !important;
+  }
+  
+  /* 幫助中心手機版 */
+  #db-helpCenter .help-item,
+  #db-helpCenter .help-card {
+    padding: 20px 36px !important;
+  }
+  
+  #db-helpCenter .section-content > *,
+  #db-helpCenter .help-content {
+    padding-left: 36px !important;
+    padding-right: 36px !important;
+  }
+}
