@@ -3348,20 +3348,20 @@
       }
       
       .download-pdf-btn {
-        background: #dc2626;
+        background: #10b981;
         color: white;
       }
       
       .download-pdf-btn:hover {
-        background: #b91c1c;
+        background: #059669;
       }
       .download-csv-btn {
-        background: #059669;
+        background: #06b6d4;
         color: white;
       }
       
       .download-csv-btn:hover {
-        background: #047857;
+        background: #0891b2;
       }
       
       .delete-btn {
@@ -4646,7 +4646,7 @@
       /* ===== 模式3：IP人設規劃模式樣式 ===== */
       .mode3-page {
         min-height: 100vh;
-        background: #f8fafc;
+        background: transparent; /* 與 Mode2 一致，移除灰色背景 */
         padding: 0;
       }
       
@@ -4655,7 +4655,7 @@
         position: relative;
         width: 100%;
         min-height: calc(100vh - 60px);
-        background: #f8fafc;
+        background: transparent; /* 與 Mode2 一致，移除灰色背景 */
       }
       
       .mode3-page {
@@ -7440,31 +7440,155 @@
         }
         
         /* 腳本表格手機版 */
+        /* 我的腳本手機版優化 */
+        .script-item {
+          margin-bottom: 16px;
+          border-radius: 12px;
+        }
+        
+        .script-header {
+          padding: 12px 16px;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        
+        .script-info {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+          width: 100%;
+        }
+        
+        .script-name {
+          font-size: 14px;
+          word-break: break-word;
+          max-width: 100%;
+        }
+        
+        .script-date {
+          font-size: 12px;
+        }
+        
         .script-table {
           overflow-x: auto;
           -webkit-overflow-scrolling: touch;
+          margin: 12px 0;
+          border-radius: 8px;
+          border: 1px solid #e5e7eb;
         }
         
         .script-table table {
-          min-width: 600px;
-          font-size: 12px;
+          min-width: 800px;
+          font-size: 11px;
+          margin: 0;
         }
         
         .script-table th,
         .script-table td {
-          padding: 8px 6px;
-          white-space: nowrap;
+          padding: 10px 8px;
+          white-space: normal;
+          word-break: break-word;
+          vertical-align: top;
+        }
+        
+        .script-table th {
+          font-size: 11px;
+          font-weight: 600;
+          background: #f8fafc;
+          position: sticky;
+          left: 0;
+          z-index: 1;
+        }
+        
+        .script-table td:first-child {
+          position: sticky;
+          left: 0;
+          background: white;
+          z-index: 1;
+          font-weight: 500;
+        }
+        
+        .script-table tr:nth-child(even) td:first-child {
+          background: #f9fafb;
         }
         
         .script-actions {
           flex-direction: column;
-          gap: 8px;
+          gap: 10px;
+          padding: 12px;
+          background: #f8fafc;
+          border-top: 1px solid #e5e7eb;
         }
         
         .action-btn {
-          padding: 10px 16px;
+          padding: 12px 16px;
           font-size: 14px;
           width: 100%;
+          border-radius: 8px;
+          font-weight: 500;
+          transition: all 0.2s;
+        }
+        
+        .action-btn.view-btn {
+          background: #3b82f6;
+          color: white;
+        }
+        
+        .action-btn.view-btn:active {
+          background: #2563eb;
+          transform: scale(0.98);
+        }
+        
+        .action-btn.download-pdf-btn {
+          background: #10b981;
+          color: white;
+        }
+        
+        .action-btn.download-pdf-btn:active {
+          background: #059669;
+          transform: scale(0.98);
+        }
+        
+        .action-btn.download-csv-btn {
+          background: #06b6d4;
+          color: white;
+        }
+        
+        .action-btn.download-csv-btn:active {
+          background: #0891b2;
+          transform: scale(0.98);
+        }
+        
+        /* 手機版彈窗優化 */
+        @media (max-width: 768px) {
+          .script-modal-overlay {
+            padding: 10px !important;
+          }
+          
+          .script-modal-overlay > div {
+            max-width: 100% !important;
+            max-height: 95vh !important;
+            padding: 16px !important;
+          }
+          
+          .script-modal-overlay table {
+            font-size: 10px !important;
+          }
+          
+          .script-modal-overlay th,
+          .script-modal-overlay td {
+            padding: 8px 6px !important;
+          }
+        }
+        
+        .action-btn.delete-btn {
+          background: #ef4444;
+          color: white;
+        }
+        
+        .action-btn.delete-btn:active {
+          background: #dc2626;
+          transform: scale(0.98);
         }
         
         /* 用戶抽屜手機版 */
@@ -7925,11 +8049,11 @@
         width: 100% !important;
       }
       
-      /* Mode3 聊天訊息區域 */
+      /* Mode3 聊天訊息區域 - 與 Mode2 一致，移除白色背景 */
       #mode3-chatMessages {
         margin: 0 !important;
         padding: 16px 24px !important;
-        background: #ffffff !important;
+        background: transparent !important; /* 與 Mode2 一致，使用透明背景 */
         border: none !important;
         border-radius: 0 !important;
         flex: 1 !important;
@@ -10510,6 +10634,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               }
             }, 100);
           }
+          
+          // 如果是 userDB，自動顯示個人資料分區
+          if (pageId === 'userDB') {
+            // 延遲執行，確保 DOM 已完全渲染
+            setTimeout(() => {
+              if (typeof showDbSection === 'function') {
+                showDbSection('personalInfo');
+              }
+            }, 100);
+          }
         } else {
           console.error('Page not found:', pageId);
         }
@@ -12280,23 +12414,34 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        // 先立即渲染本地資訊（確保頁面有內容）
-        renderPersonalInfoContent();
+        // 顯示載入動畫
+        content.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; padding: 40px; gap: 12px; flex-direction: column;">
+            <div class="spinner" style="width: 24px; height: 24px; border: 3px solid #e5e7eb; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 8px;"></div>
+            <span style="color: #6b7280; font-size: 14px;">載入個人資料中...</span>
+          </div>
+        `;
+        
+        // 如果有本地資訊，先立即渲染（確保頁面有內容）
+        if (ipPlanningUser && (ipPlanningUser.name || ipPlanningUser.email)) {
+          // 短暫延遲後顯示內容，讓用戶看到載入動畫
+          setTimeout(() => {
+            renderPersonalInfoContent();
+          }, 300);
+        }
         
         // 如果有 token 但缺少 created_at 等關鍵資訊，在背景中嘗試更新
         if (ipPlanningToken && !ipPlanningUser.created_at) {
-          // 使用 setTimeout 非同步處理，避免阻塞頁面顯示
-          setTimeout(async () => {
-            try {
-              await fetchUserInfo();
-              // 如果更新成功，重新渲染（只渲染，不重新載入）
-              if (ipPlanningUser && ipPlanningUser.created_at) {
-                renderPersonalInfoContent();
-              }
-            } catch (error) {
-              // 靜默失敗，不影響已顯示的內容
+          try {
+            await fetchUserInfo();
+            // 如果更新成功，重新渲染
+            if (ipPlanningUser && ipPlanningUser.created_at) {
+              renderPersonalInfoContent();
             }
-          }, 100);
+          } catch (error) {
+            // 如果 API 失敗，仍然顯示本地資訊（已在上面的 setTimeout 中渲染）
+            console.warn('無法從伺服器獲取最新資訊，使用本地資料');
+          }
         }
       }
       
@@ -13175,9 +13320,170 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 查看完整腳本（創作者資料庫版本）
       window.viewFullScriptForUserDB = function(scriptId) {
-        // 這裡可以實現查看完整腳本的功能
-        console.log('查看完整腳本:', scriptId);
-        showToast('查看完整腳本功能開發中...', 3000);
+        // 獲取腳本數據（從本地或伺服器）
+        const scripts = getLocalScripts();
+        let script = scripts.find(s => s.id == scriptId);
+        
+        // 如果本地找不到，嘗試從 DOM 獲取
+        if (!script) {
+          const scriptItem = document.querySelector(`[data-script-id="${scriptId}"]`);
+          if (scriptItem) {
+            const scriptName = scriptItem.querySelector('.script-name')?.textContent || '未命名腳本';
+            const scriptDate = scriptItem.querySelector('.script-date')?.textContent || '';
+            const scriptTable = scriptItem.querySelector('table');
+            
+            // 從表格中提取數據
+            if (scriptTable) {
+              const rows = Array.from(scriptTable.querySelectorAll('tbody tr'));
+              const scriptData = {
+                rows: rows.map(row => {
+                  const cells = row.querySelectorAll('td');
+                  return {
+                    time: cells[0]?.textContent || '-',
+                    section: cells[1]?.textContent || '-',
+                    shot_desc: cells[2]?.textContent || '-',
+                    dialogue: cells[3]?.textContent || '-',
+                    subtitle: cells[4]?.textContent || '-',
+                    sfx: cells[5]?.textContent || '-'
+                  };
+                })
+              };
+              
+              script = {
+                id: scriptId,
+                name: scriptName,
+                created_at: scriptDate,
+                script_data: scriptData
+              };
+            }
+          }
+        }
+        
+        if (!script) {
+          showToast('找不到腳本數據', 3000);
+          return;
+        }
+        
+        // 創建彈出視窗
+        const modal = document.createElement('div');
+        modal.className = 'script-modal-overlay';
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 10000;
+          padding: 20px;
+          box-sizing: border-box;
+        `;
+        
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+          background: white;
+          border-radius: 12px;
+          padding: 24px;
+          max-width: 95%;
+          max-height: 95%;
+          overflow-y: auto;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+          position: relative;
+        `;
+        
+        // 生成完整腳本內容
+        let fullContent = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 style="margin: 0; color: #1f2937; font-size: 20px; font-weight: 600;">${script.name || '未命名腳本'}</h2>
+              ${script.created_at ? `<p style="margin: 4px 0 0 0; color: #6b7280; font-size: 14px;">${script.created_at}</p>` : ''}
+            </div>
+            <button onclick="this.closest('.script-modal-overlay').remove()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #6b7280; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">×</button>
+          </div>
+        `;
+        
+        // 處理新格式（有rows欄位）
+        if (script.script_data && script.script_data.rows && script.script_data.rows.length > 0) {
+          fullContent += `
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+                <thead>
+                  <tr style="background: #f8fafc; border-bottom: 2px solid #e5e7eb;">
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; white-space: nowrap;">時間</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">段落</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">鏡頭/畫面</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">台詞 (演員口白)</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">字幕文字 (可動畫)</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">音效與轉場</th>
+                  </tr>
+                </thead>
+                <tbody>
+          `;
+          
+          script.script_data.rows.forEach((row, index) => {
+            const bgColor = index % 2 === 0 ? '#ffffff' : '#f9fafb';
+            fullContent += `
+              <tr style="background: ${bgColor}; border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 12px; color: #1f2937; white-space: nowrap; font-weight: 500;">${row.time || row.start_sec ? `${row.start_sec}-${row.end_sec}s` : '-'}</td>
+                <td style="padding: 12px; color: #4b5563;">${row.section || '-'}</td>
+                <td style="padding: 12px; color: #4b5563; max-width: 200px;">${row.shot_desc || '-'}</td>
+                <td style="padding: 12px; color: #4b5563; max-width: 300px;">${row.dialogue || '-'}</td>
+                <td style="padding: 12px; color: #4b5563; max-width: 300px;">${row.subtitle || '-'}</td>
+                <td style="padding: 12px; color: #4b5563;">${row.sfx || '-'}</td>
+              </tr>
+            `;
+          });
+          
+          fullContent += `
+                </tbody>
+              </table>
+            </div>
+          `;
+        } else if (script.script_data && script.script_data.sections && script.script_data.sections.length > 0) {
+          // 處理舊格式（有sections欄位）
+          fullContent += '<div style="margin-top: 16px;">';
+          script.script_data.sections.forEach((section, index) => {
+            fullContent += `
+              <div style="margin-bottom: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                <h3 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">${section.type || '內容段落'}</h3>
+                <div style="color: #4b5563; line-height: 1.8;">
+                  ${section.content ? section.content.map(content => `<p style="margin: 8px 0;">${content}</p>`).join('') : '<p>無內容</p>'}
+                </div>
+              </div>
+            `;
+          });
+          fullContent += '</div>';
+        } else {
+          // 如果沒有結構化數據，顯示原始內容
+          fullContent += `
+            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; white-space: pre-wrap; line-height: 1.8; color: #4b5563; margin-top: 16px;">
+              ${script.content || script.script_data || '無內容'}
+            </div>
+          `;
+        }
+        
+        modalContent.innerHTML = fullContent;
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        
+        // 點擊背景關閉
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.remove();
+          }
+        });
+        
+        // ESC 鍵關閉
+        const handleEsc = (e) => {
+          if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', handleEsc);
+          }
+        };
+        document.addEventListener('keydown', handleEsc);
       }
       
       // 刪除腳本（創作者資料庫版本）
@@ -15296,16 +15602,236 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         });
       }
       
-      // 下載PDF
+      // 下載PDF（創作者資料庫版本）
       window.downloadScriptPDF = function(scriptId) {
-        console.log('下載PDF:', scriptId);
-        showToast('PDF下載功能開發中...', 3000);
+        // 獲取腳本數據
+        const scripts = getLocalScripts();
+        let script = scripts.find(s => s.id == scriptId);
+        
+        // 如果本地找不到，嘗試從 DOM 獲取
+        if (!script) {
+          const scriptItem = document.querySelector(`[data-script-id="${scriptId}"]`);
+          if (scriptItem) {
+            const scriptName = scriptItem.querySelector('.script-name')?.textContent || '未命名腳本';
+            const scriptDate = scriptItem.querySelector('.script-date')?.textContent || '';
+            const scriptTable = scriptItem.querySelector('table');
+            
+            if (scriptTable) {
+              const rows = Array.from(scriptTable.querySelectorAll('tbody tr'));
+              const scriptData = {
+                rows: rows.map(row => {
+                  const cells = row.querySelectorAll('td');
+                  return {
+                    time: cells[0]?.textContent || '-',
+                    section: cells[1]?.textContent || '-',
+                    shot_desc: cells[2]?.textContent || '-',
+                    dialogue: cells[3]?.textContent || '-',
+                    subtitle: cells[4]?.textContent || '-',
+                    sfx: cells[5]?.textContent || '-'
+                  };
+                })
+              };
+              
+              script = {
+                id: scriptId,
+                name: scriptName,
+                created_at: scriptDate,
+                script_data: scriptData
+              };
+            }
+          }
+        }
+        
+        if (!script) {
+          showToast('找不到腳本數據', 3000);
+          return;
+        }
+        
+        // 創建可列印的 HTML 內容
+        let printContent = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>${script.name || '未命名腳本'}</title>
+            <style>
+              @media print {
+                body { margin: 0; padding: 20px; }
+                .no-print { display: none; }
+              }
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h1 { color: #1f2937; margin-bottom: 10px; }
+              .meta { color: #6b7280; margin-bottom: 20px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th { background: #f8fafc; padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; }
+              td { padding: 10px; border-bottom: 1px solid #e5e7eb; color: #4b5563; }
+              tr:nth-child(even) { background: #f9fafb; }
+            </style>
+          </head>
+          <body>
+            <h1>${script.name || '未命名腳本'}</h1>
+            ${script.created_at ? `<div class="meta">建立時間：${script.created_at}</div>` : ''}
+        `;
+        
+        // 生成表格內容
+        if (script.script_data && script.script_data.rows && script.script_data.rows.length > 0) {
+          printContent += `
+            <table>
+              <thead>
+                <tr>
+                  <th>時間</th>
+                  <th>段落</th>
+                  <th>鏡頭/畫面</th>
+                  <th>台詞 (演員口白)</th>
+                  <th>字幕文字 (可動畫)</th>
+                  <th>音效與轉場</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          
+          script.script_data.rows.forEach(row => {
+            printContent += `
+              <tr>
+                <td>${row.time || (row.start_sec ? `${row.start_sec}-${row.end_sec}s` : '-')}</td>
+                <td>${row.section || '-'}</td>
+                <td>${row.shot_desc || '-'}</td>
+                <td>${row.dialogue || '-'}</td>
+                <td>${row.subtitle || '-'}</td>
+                <td>${row.sfx || '-'}</td>
+              </tr>
+            `;
+          });
+          
+          printContent += `
+              </tbody>
+            </table>
+          `;
+        } else if (script.script_data && script.script_data.sections) {
+          script.script_data.sections.forEach(section => {
+            printContent += `
+              <div style="margin-bottom: 20px; padding: 16px; background: #f8fafc; border-left: 4px solid #3b82f6;">
+                <h3 style="margin: 0 0 12px 0; color: #374151;">${section.type || '內容段落'}</h3>
+                <div style="color: #4b5563; line-height: 1.8;">
+                  ${section.content ? section.content.map(content => `<p style="margin: 8px 0;">${content}</p>`).join('') : '<p>無內容</p>'}
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          printContent += `<div style="padding: 16px; background: #f8fafc; white-space: pre-wrap;">${script.content || '無內容'}</div>`;
+        }
+        
+        printContent += `
+          </body>
+          </html>
+        `;
+        
+        // 創建新窗口並列印
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        
+        // 等待內容載入後列印
+        printWindow.onload = () => {
+          setTimeout(() => {
+            printWindow.print();
+            showToast('PDF 準備就緒，請使用瀏覽器的列印功能儲存為 PDF', 3000);
+          }, 250);
+        };
       }
       
-      // 下載CSV
+      // 下載CSV（創作者資料庫版本）
       window.downloadScriptCSV = function(scriptId) {
-        console.log('下載CSV:', scriptId);
-        showToast('CSV下載功能開發中...', 3000);
+        // 獲取腳本數據
+        const scripts = getLocalScripts();
+        let script = scripts.find(s => s.id == scriptId);
+        
+        // 如果本地找不到，嘗試從 DOM 獲取
+        if (!script) {
+          const scriptItem = document.querySelector(`[data-script-id="${scriptId}"]`);
+          if (scriptItem) {
+            const scriptName = scriptItem.querySelector('.script-name')?.textContent || '未命名腳本';
+            const scriptDate = scriptItem.querySelector('.script-date')?.textContent || '';
+            const scriptTable = scriptItem.querySelector('table');
+            
+            if (scriptTable) {
+              const rows = Array.from(scriptTable.querySelectorAll('tbody tr'));
+              const scriptData = {
+                rows: rows.map(row => {
+                  const cells = row.querySelectorAll('td');
+                  return {
+                    time: cells[0]?.textContent || '-',
+                    section: cells[1]?.textContent || '-',
+                    shot_desc: cells[2]?.textContent || '-',
+                    dialogue: cells[3]?.textContent || '-',
+                    subtitle: cells[4]?.textContent || '-',
+                    sfx: cells[5]?.textContent || '-'
+                  };
+                })
+              };
+              
+              script = {
+                id: scriptId,
+                name: scriptName,
+                created_at: scriptDate,
+                script_data: scriptData
+              };
+            }
+          }
+        }
+        
+        if (!script) {
+          showToast('找不到腳本數據', 3000);
+          return;
+        }
+        
+        // 生成 CSV 內容
+        let csvContent = '\uFEFF'; // BOM for Excel UTF-8 support
+        csvContent += `腳本名稱,${script.name || '未命名腳本'}\n`;
+        csvContent += `建立時間,${script.created_at || '-'}\n`;
+        csvContent += '\n';
+        csvContent += '時間,段落,鏡頭/畫面,台詞 (演員口白),字幕文字 (可動畫),音效與轉場\n';
+        
+        // 處理 CSV 中的特殊字符（逗號、引號、換行）
+        const escapeCSV = (str) => {
+          if (!str) return '-';
+          const s = String(str);
+          if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+            return `"${s.replace(/"/g, '""')}"`;
+          }
+          return s;
+        };
+        
+        if (script.script_data && script.script_data.rows && script.script_data.rows.length > 0) {
+          script.script_data.rows.forEach(row => {
+            csvContent += `${escapeCSV(row.time || (row.start_sec ? `${row.start_sec}-${row.end_sec}s` : '-'))},${escapeCSV(row.section)},${escapeCSV(row.shot_desc)},${escapeCSV(row.dialogue)},${escapeCSV(row.subtitle)},${escapeCSV(row.sfx)}\n`;
+          });
+        } else if (script.script_data && script.script_data.sections) {
+          script.script_data.sections.forEach(section => {
+            if (section.content && section.content.length > 0) {
+              section.content.forEach(content => {
+                csvContent += `-,${escapeCSV(section.type || '內容段落')},-,${escapeCSV(content)},-,-\n`;
+              });
+            }
+          });
+        } else {
+          csvContent += `-,全部內容,,-,${escapeCSV(script.content || '無內容')},-\n`;
+        }
+        
+        // 創建下載連結
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `${script.name || '腳本'}_${Date.now()}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        showToast('CSV 檔案下載成功！', 2000);
       }
       
       // 刪除腳本
