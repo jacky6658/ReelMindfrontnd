@@ -4872,12 +4872,89 @@
         background: transparent !important;
       }
       
+      /* Mode3 AI 訊息容器樣式 - 與 Mode2 一致 */
+      #mode3 .message.ai,
+      #mode3-chatMessages .message.ai,
+      #mode3-chat-messages .message.ai,
+      #mode3 .message.assistant,
+      #mode3-chatMessages .message.assistant,
+      #mode3-chat-messages .message.assistant {
+        display: flex !important;
+        margin-bottom: 16px !important;
+        align-items: flex-start !important;
+        background: transparent !important;
+      }
+      
+      /* Mode3 AI 對話泡泡內容樣式 - 與 Mode2 完全一致 */
+      #mode3 .message.ai .message-content,
       #mode3-chatMessages .message.ai .message-content,
-      #mode3-chatMessages .message.assistant .message-content,
       #mode3-chat-messages .message.ai .message-content,
+      #mode3 .message.assistant .message-content,
+      #mode3-chatMessages .message.assistant .message-content,
       #mode3-chat-messages .message.assistant .message-content {
-        line-height: 1.6 !important; /* 與 Mode2 一致的行高 */
+        flex: 1 !important;
+        background: #f8fafc !important;
+        padding: 20px 40px !important;
+        border-radius: 12px !important;
+        border: 1px solid #e5e7eb !important;
+        color: #1f2937 !important;
+        margin-left: 12px !important;
+        font-size: 16px !important; /* AI 對話泡泡字體大小 */
+        line-height: 1.6 !important; /* 行高 */
+        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji" !important;
         text-align: left !important; /* AI 對話泡泡靠左對齊 */
+        box-sizing: border-box !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+      }
+      
+      /* Mode3 AI 頭像樣式 - 與 Mode2 一致 */
+      #mode3 .message.ai .message-avatar,
+      #mode3-chatMessages .message.ai .message-avatar,
+      #mode3-chat-messages .message.ai .message-avatar,
+      #mode3 .message.assistant .message-avatar,
+      #mode3-chatMessages .message.assistant .message-avatar,
+      #mode3-chat-messages .message.assistant .message-avatar {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 16px !important;
+        margin-right: 12px !important;
+        flex-shrink: 0 !important;
+        background: #10a37f !important;
+        color: white !important;
+      }
+      
+      /* Mode3 AI 對話泡泡段落樣式 - 與 Mode2 一致 */
+      #mode3 .message.ai .message-content p,
+      #mode3-chatMessages .message.ai .message-content p,
+      #mode3-chat-messages .message.ai .message-content p,
+      #mode3 .message.assistant .message-content p,
+      #mode3-chatMessages .message.assistant .message-content p,
+      #mode3-chat-messages .message.assistant .message-content p {
+        margin: 8px 0 !important;
+        line-height: 1.6 !important;
+      }
+      
+      #mode3 .message.ai .message-content p:first-child,
+      #mode3-chatMessages .message.ai .message-content p:first-child,
+      #mode3-chat-messages .message.ai .message-content p:first-child,
+      #mode3 .message.assistant .message-content p:first-child,
+      #mode3-chatMessages .message.assistant .message-content p:first-child,
+      #mode3-chat-messages .message.assistant .message-content p:first-child {
+        margin-top: 0 !important;
+      }
+      
+      #mode3 .message.ai .message-content p:last-child,
+      #mode3-chatMessages .message.ai .message-content p:last-child,
+      #mode3-chat-messages .message.ai .message-content p:last-child,
+      #mode3 .message.assistant .message-content p:last-child,
+      #mode3-chatMessages .message.assistant .message-content p:last-child,
+      #mode3-chat-messages .message.assistant .message-content p:last-child {
+        margin-bottom: 0 !important;
       }
       
       /* 確保 mode3 的 typing-indicator 正確顯示 */
