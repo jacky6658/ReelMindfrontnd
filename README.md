@@ -162,6 +162,111 @@ ReelMindfrontnd-main/
 
 ## 更新日誌
 
+### 2025-11-04 - BYOK (Bring Your Own Key) 功能實作
+
+#### 🚀 新增功能
+- **BYOK 功能**：用戶可以使用自己的 LLM API Key
+- **設定頁面整合**：在「創作者資料庫」→「設定」中新增 LLM API Key 管理區塊
+- **支援多提供商**：支援 Google Gemini 和 OpenAI (GPT)
+- **安全加密存儲**：API Key 以加密方式安全存儲在伺服器上
+- **自動使用**：設定後，所有 AI 生成功能自動使用用戶的 API Key
+
+#### 🛠️ 技術修改
+**檔案：index.html**
+
+**1. HTML 結構新增（約 10139-10189 行）**：
+- 新增 `setting-group` 區塊，包含：
+  - LLM 提供商選擇下拉選單（Gemini/OpenAI）
+  - API Key 輸入欄位（密碼模式）
+  - 顯示/隱藏金鑰按鈕
+  - 已保存金鑰顯示（最後4位）
+  - 清除金鑰按鈕
+  - 保存金鑰按鈕
+  - 測試金鑰按鈕
+
+**2. JavaScript 函數新增**：
+- `loadSavedApiKey()` (約 14507-14542 行)：載入已保存的 API Key 資訊
+- `saveApiKey()` (約 14545-14607 行)：保存 API Key 到後端
+- `testApiKey()` (約 14610-14654 行)：測試 API Key 是否有效
+- `toggleApiKeyVisibility()` (約 14657-14668 行)：切換 API Key 顯示/隱藏
+- `clearSavedApiKey()` (約 14671-14709 行)：清除已保存的 API Key
+
+**3. 設定頁面整合**：
+- 在 `showDbSection()` 函數中，當切換到 'settings' 區塊時自動載入已保存的 API Key
+- 設定頁面顯示完整的 BYOK 功能介面
+
+#### 🔐 安全性措施
+1. **前端不存儲完整金鑰**：
+   - 不在 `localStorage` 中存儲完整的 API Key
+   - 只顯示最後4位數字供識別
+   - 所有敏感操作都通過後端 API 處理
+
+2. **後端加密存儲**：
+   - API Key 在後端使用 Fernet 對稱加密存儲
+   - 使用環境變數 `LLM_KEY_ENCRYPTION_KEY` 作為加密金鑰
+   - 只有用戶本人可以訪問自己的 API Key
+
+3. **權限控制**：
+   - 所有 API 端點都需要 JWT token 驗證
+   - 用戶只能訪問自己的 API Key
+   - 前端會自動驗證用戶身份
+
+#### 📊 BYOK 運作流程
+```
+1. 用戶進入「創作者資料庫」→「設定」
+   ↓
+2. 選擇 LLM 提供商（Gemini 或 OpenAI）
+   ↓
+3. 輸入 API Key
+   ↓
+4. [可選] 點擊「測試金鑰」驗證有效性
+   ↓
+5. 點擊「保存金鑰」
+   ↓
+6. 前端發送 POST /api/user/llm-keys
+   ↓
+7. 後端加密並存儲到資料庫
+   ↓
+8. 後續所有 AI 生成功能自動使用用戶的 API Key
+   ↓
+9. 用戶可在設定頁面查看、測試或清除已保存的金鑰
+```
+
+#### 🎯 功能特點
+- **自動使用**：設定後，所有 AI 生成功能（帳號定位、選題、腳本、AI 顧問對話）自動使用用戶的 API Key
+- **無縫切換**：如果用戶沒有設定自己的 API Key，系統會自動使用系統預設的 API Key
+- **多提供商支援**：可以同時保存 Gemini 和 OpenAI 的 API Key，並分別使用
+- **安全測試**：測試功能不會保存金鑰，只驗證有效性
+- **易於管理**：可以在設定頁面隨時查看、更新或清除已保存的金鑰
+
+#### 📝 API 端點
+- `POST /api/user/llm-keys` - 保存 API Key
+- `GET /api/user/llm-keys/{user_id}` - 獲取已保存的金鑰資訊（只返回最後4位）
+- `POST /api/user/llm-keys/test` - 測試 API Key 是否有效
+- `DELETE /api/user/llm-keys/{user_id}` - 清除 API Key
+
+#### 🎯 測試結果
+所有功能已驗證正常：
+- ✅ **載入已保存金鑰**：正確顯示已保存的 API Key 資訊（最後4位）
+- ✅ **保存金鑰**：成功保存 API Key 到後端並加密存儲
+- ✅ **測試金鑰**：正確驗證 Gemini 和 OpenAI API Key 的有效性
+- ✅ **清除金鑰**：成功清除已保存的 API Key
+- ✅ **顯示/隱藏**：正確切換 API Key 輸入欄位的顯示狀態
+- ✅ **自動使用**：設定後，AI 生成功能自動使用用戶的 API Key
+
+#### 📝 重要注意事項
+1. **環境變數設定**：後端需要在 `.env` 或環境變數中設定 `LLM_KEY_ENCRYPTION_KEY`
+2. **依賴套件**：後端需要安裝 `cryptography` 套件（`pip install cryptography`）
+3. **安全性**：API Key 絕不會在前端以明文形式存儲或顯示
+4. **備用機制**：如果用戶沒有設定自己的 API Key，系統會自動使用系統預設的 API Key
+
+#### 🔄 與後端整合
+- 前端負責 UI/UX 和用戶交互
+- 後端負責加密存儲、API Key 管理和 LLM 呼叫
+- 所有敏感操作都通過後端 API 處理，確保安全性
+
+---
+
 ### 2025-11-04 - 長期記憶儲存功能完整修復
 
 #### 🚨 問題描述
