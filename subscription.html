@@ -308,7 +308,7 @@ a{text-decoration:none;color:inherit}
     return urlParams.get(name);
   }
 
-  function checkout(){
+  async function checkout(){
     // 登入檢查：未登入先導回登入畫面
     try {
       var token = localStorage.getItem('ipPlanningToken') || '';
@@ -319,25 +319,71 @@ a{text-decoration:none;color:inherit}
       }
     } catch(_) {}
 
-    // 這裡接你的金流導轉（ex: ECPay 產生訂單 → 導向付款頁）
+    // 收集訂單資料
     const plan = current;
     const payload = {
       plan,
       amount: price[plan],
-      name: document.getElementById('name').value,
-      email: document.getElementById('email').value,
-      phone: document.getElementById('phone').value,
+      name: document.getElementById('name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
       invoiceType: document.getElementById('invoiceType').value,
-      vat: document.getElementById('vat').value,
-      note: document.getElementById('note').value
+      vat: document.getElementById('vat').value.trim(),
+      note: document.getElementById('note').value.trim()
     };
+    
     // 前端簡單檢查
     if(!payload.name || !payload.email){
-      alert('請填寫姓名與電子信箱'); return;
+      alert('請填寫姓名與電子信箱');
+      return;
     }
-    // TODO: 送到你的後端建立訂單，後端呼叫綠界交易 API，回傳導向 URL
-    console.log('訂單資料（範例）', payload);
-    alert('已讀取訂單資料。請在接上金流 API 後導向至 ECPay 付款頁。');
+    
+    // 驗證 Email 格式
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(payload.email)) {
+      alert('請輸入有效的電子信箱');
+      return;
+    }
+    
+    // 如果選擇公司發票，檢查統編
+    if (payload.invoiceType === 'company' && !payload.vat) {
+      alert('選擇公司發票時，請填寫統一編號');
+      return;
+    }
+    
+    // 顯示載入狀態
+    const checkoutBtn = document.querySelector('.btn.blue');
+    const originalText = checkoutBtn.textContent;
+    checkoutBtn.disabled = true;
+    checkoutBtn.textContent = '處理中...';
+    
+    try {
+      // 調用後端 API 建立訂單
+      const response = await fetch('https://aivideobackend.zeabur.app/api/payment/checkout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (response.ok) {
+        // 後端返回 HTML 表單，直接顯示（會自動提交到 ECPay）
+        const html = await response.text();
+        document.body.innerHTML = html;
+      } else {
+        const errorData = await response.json().catch(() => ({ error: '建立訂單失敗' }));
+        alert(errorData.error || '建立訂單失敗，請稍後再試');
+        checkoutBtn.disabled = false;
+        checkoutBtn.textContent = originalText;
+      }
+    } catch (error) {
+      console.error('付款錯誤:', error);
+      alert('付款處理失敗，請稍後再試');
+      checkoutBtn.disabled = false;
+      checkoutBtn.textContent = originalText;
+    }
   }
 
   function pay(kind){
@@ -356,6 +402,84 @@ a{text-decoration:none;color:inherit}
   const urlPlan = getUrlParam('plan');
   const initialPlan = urlPlan === 'yearly' ? 'yearly' : 'monthly';
   setPlan(initialPlan);
+  
+  // 處理付款結果頁面
+  window.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    const orderId = urlParams.get('order_id');
+    const message = urlParams.get('message');
+    
+    if (status === 'success') {
+      showPaymentSuccess(orderId);
+    } else if (status === 'failed' || status === 'error') {
+      showPaymentError(message || '付款失敗');
+    }
+  });
+  
+  function showPaymentSuccess(orderId) {
+    // 隱藏原有內容
+    const mainContent = document.querySelector('.safe.grid');
+    if (mainContent) {
+      mainContent.style.display = 'none';
+    }
+    
+    // 顯示成功訊息
+    const successHTML = `
+      <div class="safe" style="margin-top: 40px;">
+        <section class="card">
+          <div class="body" style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+            <h2 class="h2" style="color: var(--ok); margin-bottom: 12px;">付款成功！</h2>
+            <p class="sub" style="margin-bottom: 24px;">感謝您的訂閱，您的帳號已開通使用權限</p>
+            ${orderId ? `<p class="small" style="margin-bottom: 24px;">訂單編號：${orderId}</p>` : ''}
+            <div class="row" style="justify-content: center; gap: 12px;">
+              <button class="btn blue" onclick="window.location.href='/'">開始使用</button>
+              <button class="btn ghost" onclick="window.location.href='/subscription.html'">查看訂單</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+    
+    const container = document.querySelector('.wrap');
+    if (container) {
+      container.insertAdjacentHTML('beforeend', successHTML);
+    }
+  }
+  
+  function showPaymentError(message) {
+    // 隱藏原有內容
+    const mainContent = document.querySelector('.safe.grid');
+    if (mainContent) {
+      mainContent.style.display = 'none';
+    }
+    
+    // 顯示錯誤訊息
+    const errorHTML = `
+      <div class="safe" style="margin-top: 40px;">
+        <section class="card">
+          <div class="body" style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 64px; margin-bottom: 20px;">❌</div>
+            <h2 class="h2" style="color: var(--red); margin-bottom: 12px;">付款失敗</h2>
+            <p class="sub" style="margin-bottom: 24px;">${message}</p>
+            <div class="row" style="justify-content: center; gap: 12px;">
+              <button class="btn blue" onclick="window.location.href='/subscription.html'">重新付款</button>
+              <button class="btn ghost" onclick="window.location.href='/'">返回首頁</button>
+            </div>
+            <p class="small" style="margin-top: 24px;">
+              如有問題，請聯繫客服：<a href="mailto:hello@aijob.com.tw">hello@aijob.com.tw</a>
+            </p>
+          </div>
+        </section>
+      </div>
+    `;
+    
+    const container = document.querySelector('.wrap');
+    if (container) {
+      container.insertAdjacentHTML('beforeend', errorHTML);
+    }
+  }
 </script>
 
 </body>
