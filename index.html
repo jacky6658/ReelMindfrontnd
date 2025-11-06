@@ -12921,26 +12921,44 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
       
       // 切換腳本顯示（創作者資料庫版本）
-      function toggleScriptForUserDB(scriptId) {
+      window.toggleScriptForUserDB = function(scriptId) {
         const scriptContent = document.getElementById(`script-${scriptId}`);
         const scriptActions = document.getElementById(`actions-${scriptId}`);
         const toggleIcon = document.querySelector(`[data-script-id="${scriptId}"] .toggle-icon`);
+        const scriptHeader = document.querySelector(`[data-script-id="${scriptId}"] .script-header`);
+        const scriptNumber = document.querySelector(`[data-script-id="${scriptId}"] .script-number`);
         
-        if (scriptContent.style.display === 'none') {
+        if (!scriptContent || !scriptActions) {
+          console.error('找不到腳本元素:', scriptId);
+          return;
+        }
+        
+        // 切換顯示狀態
+        if (scriptContent.style.display === 'none' || !scriptContent.style.display) {
           scriptContent.style.display = 'block';
           scriptActions.style.display = 'flex';
-          toggleIcon.textContent = '▲';
+          if (toggleIcon) toggleIcon.textContent = '▲';
+          // 添加激活狀態樣式
+          if (scriptHeader) scriptHeader.style.background = '#f0f9ff';
+          if (scriptNumber) scriptNumber.style.background = '#2563eb';
         } else {
           scriptContent.style.display = 'none';
           scriptActions.style.display = 'none';
-          toggleIcon.textContent = '▼';
+          if (toggleIcon) toggleIcon.textContent = '▼';
+          // 移除激活狀態樣式
+          if (scriptHeader) scriptHeader.style.background = '';
+          if (scriptNumber) scriptNumber.style.background = '#3b82f6';
         }
       }
       
       // 編輯腳本名稱（創作者資料庫版本）
-      function editScriptNameForUserDB(scriptId, event) {
-        event.stopPropagation();
+      window.editScriptNameForUserDB = function(scriptId, event) {
+        if (event) event.stopPropagation();
         const scriptNameElement = document.querySelector(`[data-script-id="${scriptId}"] .script-name`);
+        if (!scriptNameElement) {
+          console.error('找不到腳本名稱元素:', scriptId);
+          return;
+        }
         const currentName = scriptNameElement.textContent;
         
         const newName = prompt('請輸入新的腳本名稱:', currentName);
@@ -12993,13 +13011,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
       
       // 查看完整腳本（創作者資料庫版本）
-      function viewFullScriptForUserDB(scriptId) {
+      window.viewFullScriptForUserDB = function(scriptId) {
         // 這裡可以實現查看完整腳本的功能
+        console.log('查看完整腳本:', scriptId);
         showToast('查看完整腳本功能開發中...', 3000);
       }
       
       // 刪除腳本（創作者資料庫版本）
-      async function deleteScriptForUserDB(scriptId) {
+      window.deleteScriptForUserDB = async function(scriptId) {
         if (!confirm('確定要刪除這個腳本嗎？此操作無法復原。')) {
           return;
         }
@@ -15115,12 +15134,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
       
       // 下載PDF
-      function downloadScriptPDF(scriptId) {
+      window.downloadScriptPDF = function(scriptId) {
+        console.log('下載PDF:', scriptId);
         showToast('PDF下載功能開發中...', 3000);
       }
       
       // 下載CSV
-      function downloadScriptCSV(scriptId) {
+      window.downloadScriptCSV = function(scriptId) {
+        console.log('下載CSV:', scriptId);
         showToast('CSV下載功能開發中...', 3000);
       }
       
@@ -19572,9 +19593,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         <div class="message-avatar">🤖</div>
         <div class="message-content">
           <div class="typing-indicator">
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
+            <span>AI思考中...</span>
+            <div class="typing-dots">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
           </div>
         </div>
       `;
