@@ -94,10 +94,10 @@
     </script>
     
     <!-- CSS 文件 -->
-    <link rel="stylesheet" href="/assets/css/variables.css" />
-    <link rel="stylesheet" href="/assets/css/animations.css" />
-    <link rel="stylesheet" href="/assets/css/styles.css" />
-    <link rel="stylesheet" href="/assets/css/main.css" />
+    <link rel="stylesheet" href="assets/css/variables.css" />
+    <link rel="stylesheet" href="assets/css/animations.css" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="assets/css/main.css" />
     <script defer src="/assets/js/config.js"></script>
     <script defer src="/assets/js/auth.js"></script>
     <script defer src="/assets/js/api.js"></script>
@@ -707,45 +707,62 @@
         background: var(--gradient-primary) !important;
       }
       
-      /* 深色模式：AI 對話泡泡 - 強制覆蓋所有白色背景 */
+      /* 深色模式：AI 對話泡泡 - 強制覆蓋所有白色背景，背景改為深色，文字改為純白色 */
       .theme-dark .message.ai .message-content,
       .theme-dark .message.assistant .message-content,
       .theme-dark .message.ai[style*="background"] .message-content,
       .theme-dark .message.assistant[style*="background"] .message-content {
-        background: var(--gradient-card) !important;
-        color: var(--text-primary) !important;
+        background: var(--gradient-card) !important; /* 深色背景 */
+        color: #ffffff !important; /* 白色文字 */
         border-color: var(--border-color) !important;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
       }
       
+      /* 強制覆蓋所有可能的白色背景 - 使用更強的特異性 */
+      .theme-dark .message.ai .message-content[style],
+      .theme-dark .message.assistant .message-content[style] {
+        background: var(--gradient-card) !important; /* 深色背景 */
+        color: #ffffff !important; /* 白色文字 */
+      }
+      
       /* 覆蓋內聯樣式中的白色背景 */
+      /* 強制覆蓋所有白色和淺色背景 - 改為深色背景 */
       .theme-dark .message.ai .message-content[style*="background: #f8fafc"],
       .theme-dark .message.ai .message-content[style*="background:#f8fafc"],
       .theme-dark .message.ai .message-content[style*="background: #F8FAFC"],
       .theme-dark .message.ai .message-content[style*="background:#F8FAFC"],
       .theme-dark .message.ai .message-content[style*="background: white"],
       .theme-dark .message.ai .message-content[style*="background:white"],
+      .theme-dark .message.ai .message-content[style*="background:#fff"],
+      .theme-dark .message.ai .message-content[style*="background: #fff"],
       .theme-dark .message.assistant .message-content[style*="background: #f8fafc"],
       .theme-dark .message.assistant .message-content[style*="background:#f8fafc"],
       .theme-dark .message.assistant .message-content[style*="background: white"],
-      .theme-dark .message.assistant .message-content[style*="background:white"] {
-        background: var(--gradient-card) !important;
-        color: var(--text-primary) !important;
+      .theme-dark .message.assistant .message-content[style*="background:white"],
+      .theme-dark .message.assistant .message-content[style*="background:#fff"],
+      .theme-dark .message.assistant .message-content[style*="background: #fff"] {
+        background: var(--gradient-card) !important; /* 深色背景 */
+        color: #ffffff !important; /* 白色文字 */
         border-color: var(--border-color) !important;
       }
       
-      /* 覆蓋內聯樣式中的深色文字 */
+      /* 覆蓋內聯樣式中的深色文字 - 強制改為白色 */
       .theme-dark .message.ai .message-content[style*="color: #1f2937"],
       .theme-dark .message.ai .message-content[style*="color:#1f2937"],
       .theme-dark .message.ai .message-content[style*="color: #374151"],
       .theme-dark .message.ai .message-content[style*="color:#374151"],
+      .theme-dark .message.ai .message-content[style*="color: #0c4a6e"],
+      .theme-dark .message.ai .message-content[style*="color:#0c4a6e"],
       .theme-dark .message.assistant .message-content[style*="color: #1f2937"],
       .theme-dark .message.assistant .message-content[style*="color:#1f2937"],
       .theme-dark .message.assistant .message-content[style*="color: #374151"],
-      .theme-dark .message.assistant .message-content[style*="color:#374151"] {
-        color: var(--text-primary) !important;
+      .theme-dark .message.assistant .message-content[style*="color:#374151"],
+      .theme-dark .message.assistant .message-content[style*="color: #0c4a6e"],
+      .theme-dark .message.assistant .message-content[style*="color:#0c4a6e"] {
+        color: #ffffff !important; /* 強制改為純白色 */
       }
       
+      /* 所有 AI 對話泡泡內的文字元素 - 強制改為白色 */
       .theme-dark .message.ai .message-content p,
       .theme-dark .message.assistant .message-content p,
       .theme-dark .message.ai .message-content li,
@@ -763,8 +780,18 @@
       .theme-dark .message.ai .message-content span,
       .theme-dark .message.ai .message-content div,
       .theme-dark .message.assistant .message-content span,
-      .theme-dark .message.assistant .message-content div {
-        color: var(--text-primary) !important;
+      .theme-dark .message.assistant .message-content div,
+      .theme-dark .message.assistant .message-content h1,
+      .theme-dark .message.assistant .message-content h2,
+      .theme-dark .message.assistant .message-content h3,
+      .theme-dark .message.assistant .message-content h4,
+      .theme-dark .message.assistant .message-content h5,
+      .theme-dark .message.assistant .message-content h6,
+      .theme-dark .message.assistant .message-content strong,
+      .theme-dark .message.assistant .message-content em,
+      .theme-dark .message.assistant .message-content code,
+      .theme-dark .message.assistant .message-content pre {
+        color: #ffffff !important; /* 強制改為純白色 */
       }
       
       .theme-dark .message.ai .message-content pre {
@@ -1263,6 +1290,20 @@
         border: 2px solid var(--accent-blue) !important;
         box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2) !important;
       }
+
+      /* 深色模式：首頁主要行動按鈕（開始使用）提高可讀性 */
+      .theme-dark .rm-hero a[style*="linear-gradient(135deg, #3B82F6"],
+      .theme-dark .rm-hero a[style*="linear-gradient(135deg,#3B82F6"] {
+        color: #ffffff !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+        font-weight: 800 !important;
+      }
+      .theme-dark .rm-hero a[style*="linear-gradient(135deg, #3B82F6"]:hover,
+      .theme-dark .rm-hero a[style*="linear-gradient(135deg,#3B82F6"]:hover {
+        filter: brightness(1.05) !important;
+        color: #ffffff !important;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7) !important;
+      }
       
       .theme-dark .rm-hero a[style*="background: white"]:hover,
       .theme-dark .rm-hero a[style*="background:white"]:hover {
@@ -1360,7 +1401,7 @@
       .theme-dark .input-wrapper textarea,
       .theme-dark .chat-input {
         background: var(--input-bg) !important;
-        color: var(--text-primary) !important;
+        color: #ffffff !important; /* 改為純白色 */
         border-color: var(--input-border) !important;
       }
       
@@ -1377,7 +1418,7 @@
         border-top-color: var(--border-color) !important;
       }
       
-      /* 深色模式：建議按鈕和快速按鈕 - 強制覆蓋所有樣式 */
+      /* 深色模式：建議按鈕和快速按鈕 - 強制覆蓋所有樣式，文字改為純白色 */
       .theme-dark .suggestion-btn,
       .theme-dark .quick-btn,
       .theme-dark button[class*="suggestion"],
@@ -1385,9 +1426,10 @@
       .theme-dark .input-wrapper .quick-btn,
       .theme-dark .mode2 .quick-btn,
       .theme-dark .mode3 .quick-btn,
-      .theme-dark #mode3 .quick-btn {
+      .theme-dark #mode3 .quick-btn,
+      .theme-dark .mode3-quick-btn {
         background: var(--card-bg) !important;
-        color: var(--text-primary) !important;
+        color: #ffffff !important; /* 改為純白色 */
         border-color: var(--border-color) !important;
         font-weight: 500 !important;
       }
@@ -1398,19 +1440,26 @@
       .theme-dark .quick-btn[style*="background: #ffffff"],
       .theme-dark .quick-btn[style*="background:#ffffff"],
       .theme-dark .suggestion-btn[style*="background: white"],
-      .theme-dark .suggestion-btn[style*="background:white"] {
+      .theme-dark .suggestion-btn[style*="background:white"],
+      .theme-dark .mode3-quick-btn[style*="background: white"],
+      .theme-dark .mode3-quick-btn[style*="background:white"] {
         background: var(--card-bg) !important;
-        color: var(--text-primary) !important;
+        color: #ffffff !important; /* 改為純白色 */
         border-color: var(--border-color) !important;
       }
       
+      /* 覆蓋所有深色文字，強制改為白色 */
       .theme-dark .quick-btn[style*="color: #374151"],
       .theme-dark .quick-btn[style*="color:#374151"],
       .theme-dark .quick-btn[style*="color: #1f2937"],
       .theme-dark .quick-btn[style*="color:#1f2937"],
       .theme-dark .suggestion-btn[style*="color: #374151"],
-      .theme-dark .suggestion-btn[style*="color:#374151"] {
-        color: var(--text-primary) !important;
+      .theme-dark .suggestion-btn[style*="color:#374151"],
+      .theme-dark .mode3-quick-btn[style*="color: #374151"],
+      .theme-dark .mode3-quick-btn[style*="color:#374151"],
+      .theme-dark .mode3-quick-btn[style*="color: #1f2937"],
+      .theme-dark .mode3-quick-btn[style*="color:#1f2937"] {
+        color: #ffffff !important; /* 強制改為純白色 */
       }
       
       .theme-dark .suggestion-btn:hover,
@@ -7447,10 +7496,10 @@
         color: #1e40af;
       }
       
-      /* 深色模式：Mode3 消息內容 */
+      /* 深色模式：Mode3 消息內容 - AI 消息改為純白色 */
       .theme-dark .mode3-message-content {
         background: var(--gradient-card) !important;
-        color: var(--text-primary) !important;
+        color: #ffffff !important; /* 改為純白色 */
         border-color: var(--border-color) !important;
       }
       
@@ -7466,7 +7515,7 @@
       .theme-dark .mode3-message-content[style*="background: white"],
       .theme-dark .mode3-message-content[style*="background:white"] {
         background: var(--gradient-card) !important;
-        color: var(--text-primary) !important;
+        color: #ffffff !important; /* 改為純白色 */
       }
       
       .theme-dark .mode3-user-message .mode3-message-content[style*="background: #dbeafe"],
@@ -7475,11 +7524,12 @@
         color: #dbeafe !important;
       }
       
+      /* 覆蓋 Mode3 內聯樣式中的深色文字 - 強制改為白色 */
       .theme-dark .mode3-message-content[style*="color: #1f2937"],
       .theme-dark .mode3-message-content[style*="color:#1f2937"],
-      .theme-dark .mode3-user-message .mode3-message-content[style*="color: #1e40af"],
-      .theme-dark .mode3-user-message .mode3-message-content[style*="color:#1e40af"] {
-        color: var(--text-primary) !important;
+      .theme-dark .mode3-message-content[style*="color: #374151"],
+      .theme-dark .mode3-message-content[style*="color:#374151"] {
+        color: #ffffff !important; /* 強制改為純白色 */
       }
       
       .theme-dark .mode3-user-message .mode3-message-content[style*="color: #1e40af"],
@@ -7487,11 +7537,22 @@
         color: #dbeafe !important;
       }
       
+      /* Mode3 AI 消息內的所有文字元素 - 強制改為白色 */
       .theme-dark .mode3-message-content p,
       .theme-dark .mode3-message-content li,
       .theme-dark .mode3-message-content span,
-      .theme-dark .mode3-message-content div {
-        color: var(--text-primary) !important;
+      .theme-dark .mode3-message-content div,
+      .theme-dark .mode3-message-content h1,
+      .theme-dark .mode3-message-content h2,
+      .theme-dark .mode3-message-content h3,
+      .theme-dark .mode3-message-content h4,
+      .theme-dark .mode3-message-content h5,
+      .theme-dark .mode3-message-content h6,
+      .theme-dark .mode3-message-content strong,
+      .theme-dark .mode3-message-content em,
+      .theme-dark .mode3-message-content code,
+      .theme-dark .mode3-message-content pre {
+        color: #ffffff !important; /* 強制改為純白色 */
       }
       
       .theme-dark .mode3-user-message .mode3-message-content p,
@@ -7553,22 +7614,26 @@
         white-space: nowrap;
       }
       
-      /* 深色模式：Mode3 快速按鈕 */
+      /* 深色模式：Mode3 快速按鈕 - 與 Mode2 一致，文字改為純白色 */
       .theme-dark .mode3-quick-btn {
         background: var(--card-bg) !important;
-        color: var(--text-primary) !important;
+        color: #ffffff !important; /* 改為純白色 */
         border-color: var(--border-color) !important;
       }
       
       .theme-dark .mode3-quick-btn[style*="background: white"],
-      .theme-dark .mode3-quick-btn[style*="background:white"] {
+      .theme-dark .mode3-quick-btn[style*="background:white"],
+      .theme-dark .mode3-quick-btn[style*="background: #ffffff"],
+      .theme-dark .mode3-quick-btn[style*="background:#ffffff"] {
         background: var(--card-bg) !important;
-        color: var(--text-primary) !important;
+        color: #ffffff !important; /* 改為純白色 */
       }
       
       .theme-dark .mode3-quick-btn[style*="color: #374151"],
-      .theme-dark .mode3-quick-btn[style*="color:#374151"] {
-        color: var(--text-primary) !important;
+      .theme-dark .mode3-quick-btn[style*="color:#374151"],
+      .theme-dark .mode3-quick-btn[style*="color: #1f2937"],
+      .theme-dark .mode3-quick-btn[style*="color:#1f2937"] {
+        color: #ffffff !important; /* 強制改為純白色 */
       }
 
       .mode3-quick-btn:hover {
