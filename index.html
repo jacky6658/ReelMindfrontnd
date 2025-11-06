@@ -121,26 +121,58 @@
       }
       
       .theme-dark {
-        --bg-primary: #000000;
-        --bg-secondary: #111827;
-        --bg-tertiary: #1f2937;
-        --text-primary: #f9fafb;
-        --text-secondary: #d1d5db;
-        --text-tertiary: #9ca3af;
-        --border-color: #374151;
-        --card-bg: #1f2937;
-        --navbar-bg: #111827;
-        --input-bg: #1f2937;
-        --input-border: #374151;
+        /* 使用深色漸變背景，避免全黑 */
+        --bg-primary: #0a0e27;
+        --bg-secondary: #1a1f3a;
+        --bg-tertiary: #252b47;
+        --text-primary: #f0f4ff;
+        --text-secondary: #cbd5e1;
+        --text-tertiary: #94a3b8;
+        --border-color: #3d4a6b;
+        --card-bg: #1e2640;
+        --navbar-bg: #151a2e;
+        --input-bg: #252b47;
+        --input-border: #3d4a6b;
         --button-bg: #3b82f6;
         --button-hover: #2563eb;
         --button-text: #ffffff;
-        --shadow: rgba(0, 0, 0, 0.3);
+        --shadow: rgba(0, 0, 0, 0.4);
+        /* 新增漸變和強調色 */
+        --accent-blue: #3b82f6;
+        --accent-purple: #8b5cf6;
+        --accent-green: #10b981;
+        --accent-orange: #f59e0b;
+        --gradient-primary: linear-gradient(135deg, #1e2640 0%, #252b47 100%);
+        --gradient-card: linear-gradient(135deg, #1e2640 0%, #252b47 50%, #1a1f3a 100%);
       }
       
       /* 全局深色模式適配規則 */
       .theme-dark {
         color-scheme: dark;
+        /* 添加整體背景漸變 */
+        background: var(--gradient-primary) !important;
+      }
+      
+      /* 深色模式動畫效果 */
+      @keyframes darkModeGlow {
+        0%, 100% {
+          box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+        }
+        50% {
+          box-shadow: 0 4px 30px rgba(59, 130, 246, 0.2);
+        }
+      }
+      
+      @keyframes darkModeGradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
       }
       
       /* 全局深色模式適配 - 覆蓋所有硬編碼的背景色 */
@@ -283,8 +315,123 @@
       
       .theme-dark .user-db-sidebar,
       .theme-dark .user-db-content {
-        background: var(--card-bg) !important;
+        background: var(--gradient-card) !important;
         color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+        transition: all 0.3s ease !important;
+      }
+      
+      /* 深色模式卡片增強效果 */
+      .theme-dark .mode-card,
+      .theme-dark .user-story-card,
+      .theme-dark [style*="background: white"][style*="border-radius"] {
+        background: var(--gradient-card) !important;
+        border: 1px solid var(--border-color) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.1) !important;
+        transition: all 0.3s ease !important;
+      }
+      
+      .theme-dark .mode-card:hover,
+      .theme-dark .user-story-card:hover {
+        transform: translateY(-4px) !important;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(59, 130, 246, 0.2) !important;
+        animation: darkModeGlow 2s ease-in-out infinite !important;
+      }
+      
+      /* 深色模式：修復「介紹如何開始」區塊的建議使用順序提示框 */
+      .theme-dark [style*="background: linear-gradient(135deg, #FEF3C7"],
+      .theme-dark [style*="background:linear-gradient(135deg, #FEF3C7"] {
+        background: linear-gradient(135deg, #3d2e1f 0%, #4a3a28 100%) !important;
+        border: 2px solid #f59e0b !important;
+        box-shadow: 0 4px 20px rgba(245, 158, 11, 0.2) !important;
+      }
+      
+      .theme-dark [style*="background: linear-gradient(135deg, #FEF3C7"] p,
+      .theme-dark [style*="background:linear-gradient(135deg, #FEF3C7"] p,
+      .theme-dark [style*="background: linear-gradient(135deg, #FEF3C7"] strong,
+      .theme-dark [style*="background:linear-gradient(135deg, #FEF3C7"] strong {
+        color: #fef3c7 !important;
+      }
+      
+      .theme-dark [style*="background: linear-gradient(135deg, #FEF3C7"] i,
+      .theme-dark [style*="background:linear-gradient(135deg, #FEF3C7"] i {
+        color: #fbbf24 !important;
+      }
+      
+      /* 深色模式：修復「別人怎麼用」區塊的標籤 */
+      .theme-dark [style*="background: #EFF6FF"],
+      .theme-dark [style*="background:#EFF6FF"] {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%) !important;
+        color: #dbeafe !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2) !important;
+      }
+      
+      .theme-dark [style*="background: #F0FDF4"],
+      .theme-dark [style*="background:#F0FDF4"] {
+        background: linear-gradient(135deg, #1e3a2e 0%, #059669 100%) !important;
+        color: #d1fae5 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2) !important;
+      }
+      
+      .theme-dark [style*="background: #FEF3C7"],
+      .theme-dark [style*="background:#FEF3C7"] {
+        background: linear-gradient(135deg, #3d2e1f 0%, #d97706 100%) !important;
+        color: #fef3c7 !important;
+        border: 1px solid rgba(245, 158, 11, 0.3) !important;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2) !important;
+      }
+      
+      .theme-dark [style*="background: #F3E8FF"],
+      .theme-dark [style*="background:#F3E8FF"] {
+        background: linear-gradient(135deg, #3d2e4a 0%, #7c3aed 100%) !important;
+        color: #e9d5ff !important;
+        border: 1px solid rgba(139, 92, 246, 0.3) !important;
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2) !important;
+      }
+      
+      /* 深色模式：修復頁尾 */
+      .theme-dark .rm-footer,
+      .theme-dark [style*="background: #EFF6FF"][class*="rm-footer"],
+      .theme-dark footer,
+      .theme-dark [style*="background: #f8fafc"] {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border-top: 1px solid var(--border-color) !important;
+      }
+      
+      .theme-dark footer p,
+      .theme-dark footer div,
+      .theme-dark footer span,
+      .theme-dark .rm-footer p,
+      .theme-dark .rm-footer div,
+      .theme-dark .rm-footer span {
+        color: var(--text-primary) !important;
+      }
+      
+      /* 深色模式：首頁區塊背景 */
+      .theme-dark section[id="introduction"],
+      .theme-dark section[class*="user-story-section"],
+      .theme-dark section[id="mode-cards"] {
+        background: var(--gradient-primary) !important;
+        position: relative;
+      }
+      
+      .theme-dark section[id="introduction"]::before,
+      .theme-dark section[class*="user-story-section"]::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+        animation: darkModeGradient 10s ease infinite;
+        background-size: 200% 200%;
       }
       
       .theme-dark .menu-item:not(.active) {
@@ -339,10 +486,49 @@
         color: var(--text-primary); 
         transition: background-color 0.3s ease, color 0.3s ease;
         -webkit-text-size-adjust: 100%;
-        -webkit-tap-highlight-color: transparent;
-        overflow-x: hidden !important; /* 防止整個頁面左右滑動 */
-        width: 100%; /* 確保寬度固定 */
-        max-width: 100vw; /* 限制最大寬度為視窗寬度 */
+      }
+      
+      /* 深色模式 body 背景 */
+      .theme-dark body {
+        background: var(--gradient-primary) !important;
+        background-attachment: fixed !important;
+      }
+      
+      /* 深色模式：步驟卡片增強 */
+      .theme-dark [style*="background: white"][style*="border-radius: 20px"] {
+        background: var(--gradient-card) !important;
+        border: 1px solid var(--border-color) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.1) !important;
+        transition: all 0.3s ease !important;
+      }
+      
+      .theme-dark [style*="background: white"][style*="border-radius: 20px"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(59, 130, 246, 0.2) !important;
+      }
+      
+      /* 深色模式：聯絡方式卡片 */
+      .theme-dark [style*="background: white"][style*="border: 1px solid #e2e8f0"] {
+        background: var(--gradient-card) !important;
+        border: 1px solid var(--border-color) !important;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4) !important;
+      }
+      
+      /* 深色模式：標題和文字顏色修復 */
+      .theme-dark h1, .theme-dark h2, .theme-dark h3,
+      .theme-dark [style*="color: #1E293B"],
+      .theme-dark [style*="color:#1E293B"],
+      .theme-dark [style*="color: #0f172a"],
+      .theme-dark [style*="color:#0f172a"] {
+        color: var(--text-primary) !important;
+      }
+      
+      /* 深色模式：次要文字顏色 */
+      .theme-dark [style*="color: #64748B"],
+      .theme-dark [style*="color:#64748B"],
+      .theme-dark [style*="color: #475569"],
+      .theme-dark [style*="color:#475569"] {
+        color: var(--text-secondary) !important;
       }
       
       /* 頁面容器 */
@@ -4877,9 +5063,6 @@
         color: var(--text-secondary);
         line-height: 1.6;
         transition: color 0.3s ease;
-        padding-left: 24px;
-        padding-right: 24px;
-        padding-bottom: 20px;
       }
       
       .profile-details {
@@ -4892,7 +5075,7 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 16px 24px;
+        padding: 12px;
         background: var(--bg-secondary);
         border-radius: 8px;
         transition: background-color 0.3s ease;
@@ -10338,11 +10521,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   <!-- IP人設規劃 -->
                   <div id="db-ipPlanning" class="db-section">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px;">
-                      <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                        <h3 class="section-title" id="ip-planning-title" style="margin: 0; cursor: pointer; position: relative; padding-right: 24px;" onclick="editIpPlanningTitle()" title="點擊編輯標題">🎭 IP人設規劃</h3>
-                        <span id="ip-planning-edit-icon" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s;" onclick="editIpPlanningTitle()" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
-                        <input type="text" id="ip-planning-title-input" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1rem; font-weight: 600; outline: none;" onblur="saveIpPlanningTitle()" onkeypress="if(event.key === 'Enter') saveIpPlanningTitle()">
-                      </div>
+                      <h3 class="section-title">🎭 IP人設規劃</h3>
                       <button onclick="exportIpPlanningResults()" style="padding: 8px 16px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">📥 匯出</button>
                     </div>
                     <div class="section-content">
@@ -14162,26 +14341,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             console.log('無法獲取帳號定位名稱，使用預設值:', e);
           }
           
-          // 更新標題
-          const titleElement = document.getElementById('ip-planning-title');
-          if (titleElement) {
-            // 先檢查 localStorage 是否有保存的自定義標題
-            let savedTitle = '';
-            if (ipPlanningUser && ipPlanningUser.user_id) {
-              savedTitle = localStorage.getItem(`ip-planning-title-${ipPlanningUser.user_id}`);
-            }
-            
-            // 如果沒有保存的標題，預設為「在此輸入你的標題」
-            if (!savedTitle) {
-              savedTitle = '在此輸入你的標題';
-              if (ipPlanningUser && ipPlanningUser.user_id) {
-                localStorage.setItem(`ip-planning-title-${ipPlanningUser.user_id}`, savedTitle);
-              }
-            }
-            
-            // 更新標題顯示
-            titleElement.textContent = `🎭 ${savedTitle}`;
-          }
+          // 主標題已改為固定「IP人設規劃」，不再需要編輯功能
           
           // 獲取 IP 人設規劃結果
           const response = await fetch('https://aivideobackend.zeabur.app/api/ip-planning/my', {
@@ -14211,20 +14371,25 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       }
       
-      // 編輯 IP 人設規劃標題
-      function editIpPlanningTitle() {
-        const titleElement = document.getElementById('ip-planning-title');
-        const inputElement = document.getElementById('ip-planning-title-input');
-        const editIcon = document.getElementById('ip-planning-edit-icon');
+      // 主標題已改為固定「IP人設規劃」，不再需要編輯功能
+      // editIpPlanningTitle 和 saveIpPlanningTitle 函數已移除
+      
+      // 編輯 IP 人設規劃項目標題（每個欄位的標題）
+      window.editIpPlanningItemTitle = function(resultId, event) {
+        if (event) event.stopPropagation();
+        
+        const titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${resultId}"]`);
+        const inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${resultId}"]`);
+        const editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${resultId}"]`);
         
         if (titleElement && inputElement) {
-          // 獲取當前標題（去除 emoji）
-          const currentTitle = titleElement.textContent.replace(/^🎭\s*/, '');
+          // 獲取當前標題
+          const currentTitle = titleElement.textContent.trim();
           inputElement.value = currentTitle;
           
           // 切換顯示
           titleElement.style.display = 'none';
-          editIcon.style.display = 'none';
+          if (editIcon) editIcon.style.display = 'none';
           inputElement.style.display = 'block';
           
           // 聚焦並選中文字
@@ -14233,24 +14398,37 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       }
       
-      // 保存 IP 人設規劃標題
-      function saveIpPlanningTitle() {
-        const titleElement = document.getElementById('ip-planning-title');
-        const inputElement = document.getElementById('ip-planning-title-input');
-        const editIcon = document.getElementById('ip-planning-edit-icon');
+      // 保存 IP 人設規劃項目標題
+      window.saveIpPlanningItemTitle = function(resultId) {
+        const titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${resultId}"]`);
+        const inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${resultId}"]`);
+        const editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${resultId}"]`);
         
         if (titleElement && inputElement) {
           const newTitle = inputElement.value.trim();
           
-          // 如果為空，使用預設標題
-          const finalTitle = newTitle || '在此輸入你的標題';
+          // 如果為空，使用預設標題（根據類型）
+          const item = document.querySelector(`.ip-planning-item[data-result-id="${resultId}"]`);
+          let defaultTitle = 'IP Profile';
+          if (item) {
+            const activeTab = document.querySelector('.ip-planning-tab.active');
+            if (activeTab) {
+              if (activeTab.textContent.includes('規劃')) {
+                defaultTitle = '14天規劃';
+              } else if (activeTab.textContent.includes('腳本')) {
+                defaultTitle = '今日腳本';
+              }
+            }
+          }
+          
+          const finalTitle = newTitle || defaultTitle;
           
           // 更新標題顯示
-          titleElement.textContent = `🎭 ${finalTitle}`;
+          titleElement.textContent = finalTitle;
           
           // 保存到 localStorage
           if (ipPlanningUser && ipPlanningUser.user_id) {
-            localStorage.setItem(`ip-planning-title-${ipPlanningUser.user_id}`, finalTitle);
+            localStorage.setItem(`ip-planning-item-title-${ipPlanningUser.user_id}-${resultId}`, finalTitle);
           }
           
           if (newTitle) {
@@ -14259,7 +14437,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 切換顯示
           titleElement.style.display = '';
-          editIcon.style.display = '';
+          if (editIcon) {
+            editIcon.style.display = 'none';
+            editIcon.style.opacity = '0.6';
+          }
           inputElement.style.display = 'none';
         }
       }
@@ -14420,11 +14601,21 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         content.innerHTML = currentResults.map((result, index) => {
           const date = formatTaiwanTime(result.created_at);
-          const title = result.title || (currentType === 'profile' ? 'IP Profile' : currentType === 'plan' ? '14天規劃' : '今日腳本');
+          // 檢查是否有保存的自定義標題
+          let savedTitle = '';
+          if (ipPlanningUser && ipPlanningUser.user_id) {
+            savedTitle = localStorage.getItem(`ip-planning-item-title-${ipPlanningUser.user_id}-${result.id}`);
+          }
+          const defaultTitle = currentType === 'profile' ? 'IP Profile' : currentType === 'plan' ? '14天規劃' : '今日腳本';
+          const title = savedTitle || result.title || defaultTitle;
           return `
-            <div class="ip-planning-item" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div class="ip-planning-item" data-result-id="${result.id}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
               <div class="ip-planning-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h4 style="margin: 0; color: #1F2937; font-size: 1.1rem;">${title}</h4>
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                  <h4 class="ip-planning-item-title" data-result-id="${result.id}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; position: relative; padding-right: 24px;" onclick="editIpPlanningItemTitle(${result.id}, event)" title="點擊編輯標題">${title}</h4>
+                  <span class="ip-planning-item-edit-icon" data-result-id="${result.id}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none;" onclick="editIpPlanningItemTitle(${result.id}, event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
+                  <input type="text" class="ip-planning-item-title-input" data-result-id="${result.id}" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; max-width: 300px;" onblur="saveIpPlanningItemTitle(${result.id})" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle(${result.id})">
+                </div>
                 <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
               </div>
               <div class="ip-planning-content-item" style="color: #374151; line-height: 1.6; max-height: 300px; overflow-y: auto;">
@@ -14433,6 +14624,23 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             </div>
           `;
         }).join('');
+        
+        // 為每個項目添加 hover 效果顯示編輯圖標
+        document.querySelectorAll('.ip-planning-item').forEach(item => {
+          const titleEl = item.querySelector('.ip-planning-item-title');
+          const editIcon = item.querySelector('.ip-planning-item-edit-icon');
+          if (titleEl && editIcon) {
+            item.addEventListener('mouseenter', () => {
+              editIcon.style.display = 'inline-block';
+            });
+            item.addEventListener('mouseleave', () => {
+              const inputEl = item.querySelector('.ip-planning-item-title-input');
+              if (!inputEl || inputEl.style.display === 'none') {
+                editIcon.style.display = 'none';
+              }
+            });
+          }
+        });
       }
       
       // 切換 IP 人設規劃類型
