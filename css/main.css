@@ -1,0 +1,231 @@
+/* 全站允許文字選取與長按拷貝（覆蓋任何既有限制） */
+html, body, * {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
+
+/* ============================================
+   創作者資料庫樣式修改
+   ============================================ */
+
+/* 1. 手機版用戶資料置中對齊 */
+@media (max-width: 768px) {
+  .user-db-sidebar .sidebar-header {
+    padding: 16px;
+  }
+  
+  .user-db-sidebar .user-profile {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .user-db-sidebar .profile-avatar {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto;
+  }
+  
+  .user-db-sidebar .profile-info {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .user-db-sidebar .profile-info h3,
+  .user-db-sidebar .profile-info p {
+    text-align: center;
+    width: 100%;
+  }
+  
+  /* 確保導覽列也是置中的 */
+  .user-db-sidebar .sidebar-menu {
+    width: 100%;
+  }
+  
+  .user-db-sidebar .menu-item {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+/* 2. 個人資料欄位寬度等於容器寬度 */
+.user-db-page .detail-item {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.user-db-page .detail-item label,
+.user-db-page .detail-item span {
+  width: auto;
+  flex: 1;
+}
+
+.user-db-page .detail-item span {
+  text-align: left;
+  word-break: break-word;
+}
+
+/* 3. 我的腳本標題 - 移除編輯功能，改為固定標題 */
+#my-scripts-title {
+  cursor: default !important;
+  padding-right: 0 !important;
+}
+
+#my-scripts-title:hover {
+  opacity: 1 !important;
+}
+
+#my-scripts-edit-icon {
+  display: none !important;
+}
+
+#my-scripts-title-input {
+  display: none !important;
+}
+
+/* 4. 所有區塊內的欄位寬度等於容器寬度 */
+/* 我的腳本 */
+#db-myScripts .script-item {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#db-myScripts .script-header,
+#db-myScripts .script-content,
+#db-myScripts .script-actions {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#db-myScripts .script-table {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+#db-myScripts .script-table table {
+  width: 100%;
+  min-width: 100%;
+  box-sizing: border-box;
+}
+
+#db-myScripts .script-table th,
+#db-myScripts .script-table td {
+  box-sizing: border-box;
+}
+
+/* 帳號定位 */
+#db-accountPositioning .section-content > *,
+#db-accountPositioning .detail-item,
+#db-accountPositioning .card,
+#db-accountPositioning .content-item {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 選題內容 */
+#db-topicRecords .section-content > *,
+#db-topicRecords .topic-item,
+#db-topicRecords .topic-card,
+#db-topicRecords .content-field {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* IP人設規劃 */
+#db-ipPlanning .section-content > *,
+#db-ipPlanning .ip-planning-item,
+#db-ipPlanning .ip-planning-card,
+#db-ipPlanning .planning-content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#db-ipPlanning .ip-planning-tabs {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#db-ipPlanning .ip-planning-content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 幫助中心 */
+#db-helpCenter .section-content > *,
+#db-helpCenter .help-item,
+#db-helpCenter .help-card,
+#db-helpCenter .help-content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 通用：所有 db-section 內的直接子元素 */
+.db-section .section-content > * {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.db-section .section-content > div,
+.db-section .section-content > p,
+.db-section .section-content > table {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 5. 我的腳本編號順序 - 確保排序正確（由新到舊） */
+/* 排序邏輯已在 JavaScript 中處理，使用時間降序（新的在前） */
+
+/* 手機版額外優化 */
+@media (max-width: 768px) {
+  /* 個人資料欄位手機版 */
+  .user-db-page .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .user-db-page .detail-item label {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .user-db-page .detail-item span {
+    width: 100%;
+  }
+  
+  /* 我的腳本表格手機版 */
+  #db-myScripts .script-table {
+    font-size: 12px;
+  }
+  
+  #db-myScripts .script-table th,
+  #db-myScripts .script-table td {
+    padding: 8px 4px;
+    word-break: break-word;
+  }
+  
+  /* 所有區塊內容手機版 */
+  .db-section .section-content {
+    padding: 0;
+  }
+  
+  .db-section .section-content > * {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
