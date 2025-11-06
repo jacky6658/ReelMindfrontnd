@@ -4928,15 +4928,15 @@
         color: white !important;
       }
       
-      /* Mode3 AI 對話泡泡段落樣式 - 與 Mode2 一致 */
+      /* Mode3 AI 對話泡泡段落樣式 - 與 Mode2 完全一致 */
       #mode3 .message.ai .message-content p,
       #mode3-chatMessages .message.ai .message-content p,
       #mode3-chat-messages .message.ai .message-content p,
       #mode3 .message.assistant .message-content p,
       #mode3-chatMessages .message.assistant .message-content p,
       #mode3-chat-messages .message.assistant .message-content p {
-        margin: 8px 0 !important;
-        line-height: 1.6 !important;
+        margin: 0 0 8px 0 !important;
+        line-height: 1.5 !important;
       }
       
       #mode3 .message.ai .message-content p:first-child,
@@ -4954,6 +4954,36 @@
       #mode3 .message.assistant .message-content p:last-child,
       #mode3-chatMessages .message.assistant .message-content p:last-child,
       #mode3-chat-messages .message.assistant .message-content p:last-child {
+        margin-bottom: 0 !important;
+      }
+      
+      /* Mode3 AI 對話泡泡列表樣式 - 與 Mode2 一致 */
+      #mode3 .message.ai .message-content ul,
+      #mode3-chatMessages .message.ai .message-content ul,
+      #mode3-chat-messages .message.ai .message-content ul,
+      #mode3 .message.assistant .message-content ul,
+      #mode3-chatMessages .message.assistant .message-content ul,
+      #mode3-chat-messages .message.assistant .message-content ul {
+        margin: 8px 0 !important;
+        padding-left: 20px !important;
+      }
+      
+      #mode3 .message.ai .message-content li,
+      #mode3-chatMessages .message.ai .message-content li,
+      #mode3-chat-messages .message.ai .message-content li,
+      #mode3 .message.assistant .message-content li,
+      #mode3-chatMessages .message.assistant .message-content li,
+      #mode3-chat-messages .message.assistant .message-content li {
+        margin: 4px 0 !important;
+      }
+      
+      /* Mode3 AI 對話泡泡最後一個段落樣式 - 與 Mode2 一致 */
+      #mode3 .message.ai .message-content:last-child p:last-child,
+      #mode3-chatMessages .message.ai .message-content:last-child p:last-child,
+      #mode3-chat-messages .message.ai .message-content:last-child p:last-child,
+      #mode3 .message.assistant .message-content:last-child p:last-child,
+      #mode3-chatMessages .message.assistant .message-content:last-child p:last-child,
+      #mode3-chat-messages .message.assistant .message-content:last-child p:last-child {
         margin-bottom: 0 !important;
       }
       
@@ -10953,11 +10983,30 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       // ===== 訂閱封鎖與導購：未訂閱使用者禁止進入三大模式 =====
       function isSubscribed() {
         try {
+          // 優先檢查 document.body.dataset.subscribed（從後端 API 獲取的狀態，最準確）
+          const backendSubscribed = document.body.dataset.subscribed === 'true';
+          if (backendSubscribed) {
+            return true;
+          }
+          
+          // 檢查 localStorage 中的 subscriptionStatus
+          const subscriptionStatus = localStorage.getItem('subscriptionStatus');
+          if (subscriptionStatus === 'active') {
+            return true;
+          }
+          
+          // 最後檢查 localStorage 中的用戶資料
           const userStr = localStorage.getItem('ipPlanningUser');
-          if (!userStr) return false;
-          const user = JSON.parse(userStr);
-          // 後端/前端一率以 falsy 視為未訂閱
-          return !!(user && (user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1'));
+          if (userStr) {
+            const user = JSON.parse(userStr);
+            // 後端/前端一率以 falsy 視為未訂閱
+            const userSubscribed = !!(user && (user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1'));
+            if (userSubscribed) {
+              return true;
+            }
+          }
+          
+          return false;
         } catch (_) {
           return false;
         }
@@ -15691,13 +15740,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               ipPlanningUser = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
               console.log('DEBUG: Global variables synced, token:', ipPlanningToken ? 'present' : 'missing');
               
-              // 顯示主應用程式
-              showMainApp();
-              console.log('DEBUG: Main app shown');
-              
-              // 檢查並更新訂閱狀態
-              checkSubscriptionStatus();
-              console.log('DEBUG: Subscription status checked');
+              // 檢查並更新訂閱狀態（先更新訂閱狀態，再顯示主應用程式）
+              checkSubscriptionStatus().then(() => {
+                // 顯示主應用程式
+                showMainApp();
+                console.log('DEBUG: Main app shown after subscription status updated');
+              });
+              console.log('DEBUG: Subscription status check initiated');
               
               // 顯示成功提示
               showToast('登入成功！', 2000);
