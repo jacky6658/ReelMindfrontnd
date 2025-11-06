@@ -1233,9 +1233,151 @@
       }
       
       /* 深色模式：首頁區塊中的白色背景 */
+      /* 深色模式：所有 section 白色背景 */
       .theme-dark section[style*="background: white"],
-      .theme-dark section[style*="background:white"] {
+      .theme-dark section[style*="background:white"],
+      .theme-dark section[style*="background: #ffffff"],
+      .theme-dark section[style*="background:#ffffff"],
+      .theme-dark section[style*="background: #F8FAFC"],
+      .theme-dark section[style*="background:#F8FAFC"] {
         background: var(--gradient-primary) !important;
+      }
+      
+      /* 深色模式：首頁卡片白色背景 */
+      .theme-dark div[style*="background: white"][style*="border-radius: 20px"],
+      .theme-dark div[style*="background:white"][style*="border-radius: 20px"],
+      .theme-dark div[style*="background: #ffffff"][style*="border-radius: 20px"],
+      .theme-dark div[style*="background:#ffffff"][style*="border-radius: 20px"] {
+        background: var(--gradient-card) !important;
+        border-color: var(--border-color) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+      }
+      
+      /* 深色模式：首頁卡片內的文字顏色 - 全面覆蓋 */
+      .theme-dark div[style*="background: white"] [style*="color: #1E293B"],
+      .theme-dark div[style*="background:white"] [style*="color: #1E293B"],
+      .theme-dark div[style*="background: white"] [style*="color:#1E293B"],
+      .theme-dark div[style*="background:white"] [style*="color:#1E293B"],
+      .theme-dark div[style*="background: white"] [style*="color: #64748B"],
+      .theme-dark div[style*="background:white"] [style*="color: #64748B"],
+      .theme-dark div[style*="background: white"] [style*="color:#64748B"],
+      .theme-dark div[style*="background:white"] [style*="color:#64748B"],
+      .theme-dark div[style*="background: white"] [style*="color: #475569"],
+      .theme-dark div[style*="background:white"] [style*="color: #475569"],
+      .theme-dark div[style*="background: white"] [style*="color:#475569"],
+      .theme-dark div[style*="background:white"] [style*="color:#475569"] {
+        color: var(--text-primary) !important;
+      }
+      
+      /* 深色模式：首頁卡片內的次要文字 */
+      .theme-dark div[style*="background: white"] [style*="color: #64748B"],
+      .theme-dark div[style*="background:white"] [style*="color: #64748B"],
+      .theme-dark div[style*="background: white"] [style*="color:#64748B"],
+      .theme-dark div[style*="background:white"] [style*="color:#64748B"] {
+        color: var(--text-secondary) !important;
+      }
+      
+      /* 深色模式：全面覆蓋所有內聯樣式中的深色文字 */
+      .theme-dark [style*="color: #1E293B"],
+      .theme-dark [style*="color:#1E293B"],
+      .theme-dark [style*="color: #1e293b"],
+      .theme-dark [style*="color:#1e293b"],
+      .theme-dark [style*="color: #334155"],
+      .theme-dark [style*="color:#334155"] {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark [style*="color: #64748B"],
+      .theme-dark [style*="color:#64748B"],
+      .theme-dark [style*="color: #64748b"],
+      .theme-dark [style*="color:#64748b"],
+      .theme-dark [style*="color: #475569"],
+      .theme-dark [style*="color:#475569"] {
+        color: var(--text-secondary) !important;
+      }
+      
+      /* 深色模式：覆蓋所有白色背景的 div（包括首頁卡片、步驟卡片等） */
+      .theme-dark div[style*="background: white"][style*="border-radius"],
+      .theme-dark div[style*="background:white"][style*="border-radius"],
+      .theme-dark div[style*="background: #ffffff"][style*="border-radius"],
+      .theme-dark div[style*="background:#ffffff"][style*="border-radius"] {
+        background: var(--gradient-card) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      /* 深色模式：覆蓋所有白色背景的 div，不限定 border-radius */
+      .theme-dark div[style*="background: white"]:not([style*="linear-gradient"]):not([style*="radial-gradient"]),
+      .theme-dark div[style*="background:white"]:not([style*="linear-gradient"]):not([style*="radial-gradient"]),
+      .theme-dark div[style*="background: #ffffff"]:not([style*="linear-gradient"]):not([style*="radial-gradient"]),
+      .theme-dark div[style*="background:#ffffff"]:not([style*="linear-gradient"]):not([style*="radial-gradient"]) {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      /* 深色模式：首頁卡片底部區域 */
+      .theme-dark div[style*="background: #F8FAFC"],
+      .theme-dark div[style*="background:#F8FAFC"],
+      .theme-dark div[style*="background: #f8fafc"],
+      .theme-dark div[style*="background:#f8fafc"] {
+        background: var(--bg-secondary) !important;
+      }
+      
+      /* 深色模式：用戶故事區塊 */
+      .theme-dark .user-story-section[style*="background: white"],
+      .theme-dark .user-story-section[style*="background:white"] {
+        background: var(--gradient-primary) !important;
+      }
+      
+      /* 深色模式：實戰指南區塊 */
+      .theme-dark .rm-guide-section[style*="background: #F8FAFC"],
+      .theme-dark .rm-guide-section[style*="background:#F8FAFC"] {
+        background: var(--gradient-primary) !important;
+      }
+      
+      /* 深色模式：介紹如何開始區塊 */
+      .theme-dark section#introduction[style*="background: white"],
+      .theme-dark section#introduction[style*="background:white"] {
+        background: var(--gradient-primary) !important;
+      }
+      
+      /* 深色模式：覆蓋所有白色背景的 a 標籤（按鈕） */
+      .theme-dark a[style*="background: white"][style*="color: #2563EB"],
+      .theme-dark a[style*="background:white"][style*="color: #2563EB"],
+      .theme-dark a[style*="background: white"][style*="color:#2563EB"],
+      .theme-dark a[style*="background:white"][style*="color:#2563EB"] {
+        background: var(--gradient-card) !important;
+        color: var(--accent-blue) !important;
+        border-color: var(--accent-blue) !important;
+      }
+      
+      /* 深色模式：覆蓋 Discord 分享按鈕 */
+      .theme-dark a[style*="background: white"][style*="color: #5865F2"],
+      .theme-dark a[style*="background:white"][style*="color: #5865F2"] {
+        background: var(--gradient-card) !important;
+        color: #5865F2 !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      /* 深色模式：覆蓋所有白色背景的按鈕和連結 */
+      .theme-dark a[style*="background: white"]:not([style*="linear-gradient"]),
+      .theme-dark a[style*="background:white"]:not([style*="linear-gradient"]),
+      .theme-dark button[style*="background: white"],
+      .theme-dark button[style*="background:white"] {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      /* 深色模式：覆蓋所有白色背景的容器（包括 Discord 頻道卡片等） */
+      .theme-dark div[style*="background: white"][style*="border: 1px solid"],
+      .theme-dark div[style*="background:white"][style*="border: 1px solid"],
+      .theme-dark div[style*="background: white"][style*="border-radius: 16px"],
+      .theme-dark div[style*="background:white"][style*="border-radius: 16px"],
+      .theme-dark div[style*="background: white"][style*="border-radius: 14px"],
+      .theme-dark div[style*="background:white"][style*="border-radius: 14px"] {
+        background: var(--gradient-card) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-primary) !important;
       }
       
       .theme-dark .homepage-title[style*="color: #1f2937"] {
@@ -2177,6 +2319,21 @@
         color: var(--text-secondary);
         line-height: 1.5;
         transition: color 0.3s ease;
+      }
+      
+      /* 深色模式：模式卡片說明文字改為白色 */
+      .theme-dark .mode-card-desc,
+      .theme-dark .mode-card p {
+        color: #ffffff !important; /* 改為純白色 */
+      }
+      
+      /* 覆蓋內聯樣式 */
+      .theme-dark .mode-card-desc[style*="color"],
+      .theme-dark .mode-card p[style*="color: #374151"],
+      .theme-dark .mode-card p[style*="color:#374151"],
+      .theme-dark .mode-card p[style*="color: #6b7280"],
+      .theme-dark .mode-card p[style*="color:#6b7280"] {
+        color: #ffffff !important; /* 強制改為白色 */
       }
       
       /* 模式1：一鍵生成頁面 */
@@ -6008,7 +6165,7 @@
       .tag { display:inline-block; padding:4px 8px; border:1px solid #d1d5db; border-radius:999px; font-size:12px; color:#6b7280; background:#f3f4f6; }
       
       /* 設定區塊樣式 */
-      .settings-block { background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; padding:20px; margin-bottom:16px; }
+      .settings-block { background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; padding:20px; margin-bottom:16px; transition: background-color 0.3s ease, border-color 0.3s ease; }
       .settings-block h3 { margin:0 0 16px; color:#2563eb; font-size:16px; cursor:pointer; user-select:none; display:flex; align-items:center; gap:8px; }
       .settings-block h3:hover { color:#1d4ed8; }
       .settings-toggle { font-size:12px; transition:transform 0.2s ease; }
@@ -6016,8 +6173,60 @@
       .settings-content.collapsed { max-height:0; margin:0; padding:0; }
       .settings-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:16px; }
       .setting-item { display:flex; flex-direction:column; gap:6px; }
-      .setting-item label { font-size:12px; color:#6b7280; font-weight:500; }
-      .setting-item input, .setting-item select { padding:8px 12px; border-radius:8px; border:1px solid #d1d5db; background:#ffffff; color:#374151; -webkit-appearance: none; }
+      .setting-item label { font-size:12px; color:#6b7280; font-weight:500; transition: color 0.3s ease; }
+      .setting-item input, .setting-item select { padding:8px 12px; border-radius:8px; border:1px solid #d1d5db; background:#ffffff; color:#374151; -webkit-appearance: none; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+      
+      /* 深色模式：設定區塊 */
+      .theme-dark .settings-block {
+        background: var(--gradient-card) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark .settings-block h3 {
+        color: var(--accent-blue) !important;
+      }
+      
+      .theme-dark .settings-block h3:hover {
+        color: #60a5fa !important;
+      }
+      
+      .theme-dark .setting-item label {
+        color: var(--text-secondary) !important;
+      }
+      
+      .theme-dark .setting-item input,
+      .theme-dark .setting-item select {
+        background: var(--input-bg) !important;
+        color: #ffffff !important; /* 白色文字 */
+        border-color: var(--input-border) !important;
+      }
+      
+      .theme-dark .setting-item input::placeholder,
+      .theme-dark .setting-item select::placeholder {
+        color: var(--text-tertiary) !important;
+        opacity: 0.8 !important;
+      }
+      
+      /* 覆蓋內聯樣式中的白色背景和深色文字 */
+      .theme-dark .setting-item input[style*="background"],
+      .theme-dark .setting-item select[style*="background"],
+      .theme-dark input[style*="background: white"],
+      .theme-dark input[style*="background:white"],
+      .theme-dark input[style*="background: #ffffff"],
+      .theme-dark input[style*="background:#ffffff"],
+      .theme-dark select[style*="background: white"],
+      .theme-dark select[style*="background:white"] {
+        background: var(--input-bg) !important;
+        color: #ffffff !important; /* 白色文字 */
+        border-color: var(--input-border) !important;
+      }
+      
+      .theme-dark input[style*="color: #374151"],
+      .theme-dark input[style*="color:#374151"],
+      .theme-dark select[style*="color: #374151"],
+      .theme-dark select[style*="color:#374151"] {
+        color: #ffffff !important; /* 強制改為白色 */
+      }
       .apply-btn { background:#3b82f6; border:1px solid #2563eb; color:#ffffff; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:500; }
       .apply-btn:hover { background:#2563eb; }
       .applied-tags { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
@@ -12065,15 +12274,31 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                     <div class="section-content" id="settingsContent">
                       <div class="settings-container">
                         <!-- BYOK 說明（放在最上面） -->
-                        <div style="margin-bottom: 24px; padding: 16px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+                        <div class="byok-notice" style="margin-bottom: 24px; padding: 16px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; transition: background-color 0.3s ease, border-color 0.3s ease;">
                           <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
                             <span style="font-size: 24px;">🔑</span>
-                            <h4 style="margin: 0; color: #0369a1; font-size: 16px; font-weight: 600;">大型語言模型(LLM) API 金鑰管理</h4>
+                            <h4 style="margin: 0; color: #0369a1; font-size: 16px; font-weight: 600; transition: color 0.3s ease;">大型語言模型(LLM) API 金鑰管理</h4>
                           </div>
-                          <p style="margin: 0; color: #0c4a6e; font-size: 14px; line-height: 1.6;">
+                          <p style="margin: 0; color: #0c4a6e; font-size: 14px; line-height: 1.6; transition: color 0.3s ease;">
                             使用您自己的 API 金鑰可以獲得更高的使用額度和更穩定的服務
                           </p>
                         </div>
+                        
+                        <style>
+                          /* 深色模式：BYOK 說明區塊 */
+                          .theme-dark .byok-notice {
+                            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%) !important;
+                            border-color: rgba(59, 130, 246, 0.3) !important;
+                          }
+                          
+                          .theme-dark .byok-notice h4 {
+                            color: #dbeafe !important;
+                          }
+                          
+                          .theme-dark .byok-notice p {
+                            color: #bfdbfe !important;
+                          }
+                        </style>
                         
                         <div class="setting-group">
                           <h4>🎨 顯示偏好</h4>
