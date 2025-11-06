@@ -1138,10 +1138,26 @@
       
       /* 深色模式：覆蓋選題內容中的內聯樣式 */
       .theme-dark .topic-item[style*="background: white"],
-      .theme-dark .topic-item[style*="background:white"] {
+      .theme-dark .topic-item[style*="background:white"],
+      .theme-dark .topic-item[style*="background: #ffffff"],
+      .theme-dark .topic-item[style*="background:#ffffff"] {
         background: var(--gradient-card) !important;
         border-color: var(--border-color) !important;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      /* 深色模式：選題內容卡片內的所有文字 */
+      .theme-dark .topic-item,
+      .theme-dark .topic-item * {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .topic-item .topic-header,
+      .theme-dark .topic-item .topic-content-sections,
+      .theme-dark .topic-item .topic-header *,
+      .theme-dark .topic-item .topic-content-sections * {
+        color: var(--text-primary) !important;
       }
       
       .theme-dark .topic-header[style*="border-bottom"],
@@ -1617,6 +1633,26 @@
         color: white !important;
         transform: translateY(-1px) !important;
         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+      }
+      
+      /* 深色模式：Mode2 快速按鈕文字改為白色（確保所有情況都覆蓋） */
+      .theme-dark .mode2 .quick-btn,
+      .theme-dark .mode2 .suggestion-btn,
+      .theme-dark #mode2 .quick-btn,
+      .theme-dark #mode2 .suggestion-btn,
+      .theme-dark .mode2.fig1 .quick-btn,
+      .theme-dark .mode2.fig1 .suggestion-btn,
+      .theme-dark .mode2.fig1 .input-wrapper .quick-btn {
+        color: #ffffff !important;
+      }
+      
+      .theme-dark .mode2 .quick-btn[style*="color"],
+      .theme-dark .mode2 .suggestion-btn[style*="color"],
+      .theme-dark #mode2 .quick-btn[style*="color"],
+      .theme-dark #mode2 .suggestion-btn[style*="color"],
+      .theme-dark .mode2.fig1 .quick-btn[style*="color"],
+      .theme-dark .mode2.fig1 .suggestion-btn[style*="color"] {
+        color: #ffffff !important;
       }
       
       .theme-dark .send-btn {
@@ -4258,6 +4294,7 @@
         border-radius: 12px;
         padding: 12px;
         gap: 8px;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
       }
       
       .mode2.fig1 .input-wrapper:focus-within,
@@ -5350,6 +5387,34 @@
         background: #dc2626;
       }
       
+      /* 深色模式：操作按鈕 */
+      .theme-dark .action-btn {
+        color: #ffffff !important;
+      }
+      
+      .theme-dark .view-btn {
+        background: var(--accent-blue) !important;
+        color: #ffffff !important;
+      }
+      
+      .theme-dark .view-btn:hover {
+        background: var(--button-hover) !important;
+      }
+      
+      .theme-dark .delete-btn {
+        background: #ef4444 !important;
+        color: #ffffff !important;
+      }
+      
+      .theme-dark .delete-btn:hover {
+        background: #dc2626 !important;
+      }
+      
+      .theme-dark .action-btn.view-btn,
+      .theme-dark .action-btn.delete-btn {
+        color: #ffffff !important;
+      }
+      
       .generation-header {
         display: flex;
         gap: 10px;
@@ -5401,6 +5466,33 @@
       .positioning-record-item:hover {
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         transform: translateY(-1px);
+      }
+      
+      /* 深色模式：帳號定位記錄卡片 */
+      .theme-dark .positioning-record-item {
+        background: var(--gradient-card) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .positioning-record-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+        transform: translateY(-2px) !important;
+      }
+      
+      .theme-dark .record-header,
+      .theme-dark .record-preview,
+      .theme-dark .record-actions {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .record-number,
+      .theme-dark .record-date {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .record-preview {
+        color: var(--text-secondary) !important;
       }
       
       .record-header {
@@ -5491,6 +5583,34 @@
         max-height: 80vh;
         overflow: hidden;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      /* 深色模式：模態框 */
+      .theme-dark .modal-content {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark .modal-header {
+        background: var(--bg-secondary) !important;
+        border-bottom-color: var(--border-color) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .modal-body {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .modal-close {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .modal-close:hover {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
       }
       
       .modal-header {
@@ -6060,6 +6180,18 @@
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         max-width: 400px;
         width: 90%;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      /* 深色模式：彈出視窗 */
+      .theme-dark .popup-content {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .popup-content h3,
+      .theme-dark .popup-content p {
+        color: var(--text-primary) !important;
       }
       
       .popup-spinner {
@@ -6456,6 +6588,46 @@
         display: flex;
         flex-direction: column;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      /* 深色模式：詳細內容模態框（已在上面定義，這裡確保覆蓋） */
+      .theme-dark .detail-modal {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .detail-modal-header {
+        background: var(--bg-secondary) !important;
+        border-bottom-color: var(--border-color) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .detail-modal-body {
+        background: var(--gradient-card) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .detail-info,
+      .theme-dark .detail-content,
+      .theme-dark .record-detail,
+      .theme-dark .detail-meta,
+      .theme-dark .detail-value,
+      .theme-dark .content-text {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .detail-meta .detail-label {
+        color: var(--text-secondary) !important;
+      }
+      
+      .theme-dark .close-detail-btn {
+        color: var(--text-primary) !important;
+      }
+      
+      .theme-dark .close-detail-btn:hover {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
       }
       
       .detail-modal-header {
@@ -10293,11 +10465,26 @@
         padding: 12px !important;
         gap: 8px !important;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease, border-color 0.3s ease;
       }
       
       #mode3 .input-wrapper:focus-within {
         border-color: #3b82f6;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      
+      /* 深色模式：Mode3 輸入欄位容器 */
+      .theme-dark #mode3 .input-wrapper,
+      .theme-dark #mode3.active .input-wrapper,
+      .theme-dark .mode3.fig1 .input-wrapper {
+        background: var(--gradient-card) !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark #mode3 .input-wrapper:focus-within,
+      .theme-dark .mode3.fig1 .input-wrapper:focus-within {
+        border-color: var(--accent-blue) !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
       }
       
       #mode3 .input-row-inner,
@@ -15982,9 +16169,21 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       async function deletePositioningRecordForUserDB(recordId) {
         if (!confirm('確定要刪除這筆帳號定位記錄嗎？')) return;
         
+        // 清理 recordId，移除可能的額外字符（如 :1 等）
+        const cleanRecordId = String(recordId).split(':')[0].trim();
+        
+        if (!cleanRecordId) {
+          console.error('無效的記錄ID:', recordId);
+          showToast('刪除失敗：無效的記錄ID', 3000);
+          return;
+        }
+        
         try {
-          // 修正 API 端點：應該使用 /api/user/positioning/{recordId} 而不是 /api/user/positioning/{user_id}/{recordId}
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/user/positioning/${recordId}`, {
+          // 使用正確的 API 端點：/api/user/positioning/{recordId}
+          const url = `https://aivideobackend.zeabur.app/api/user/positioning/${cleanRecordId}`;
+          console.log('刪除請求 URL:', url);
+          
+          const response = await fetch(url, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`,
@@ -15998,7 +16197,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             await loadPositioningRecordsForUserDB();
           } else {
             const errorData = await response.json().catch(() => ({}));
-            console.error('刪除失敗，狀態碼:', response.status, '錯誤:', errorData);
+            console.error('刪除失敗，狀態碼:', response.status, 'URL:', url, '錯誤:', errorData);
             throw new Error(errorData.error || `刪除失敗 (${response.status})`);
           }
         } catch (error) {
@@ -16468,7 +16667,26 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         for (const [key, pattern] of Object.entries(patterns)) {
           const match = content.match(pattern);
           if (match && match[2]) {
-            sections[key] = match[2].trim();
+            let extracted = match[2].trim();
+            
+            // 清理提取的內容：移除開頭的標題重複和格式符號
+            // 移除可能重複的標題（如 "1. 熱門選題方向："）
+            extracted = extracted.replace(/^(1|一)[\.、]?\s*(熱門選題方向|選題方向|熱門話題|熱門選題)[:：]?\s*/i, '');
+            extracted = extracted.replace(/^(2|二)[\.、]?\s*(具體建議|選題的具體建議|選題建議)[:：]?\s*/i, '');
+            extracted = extracted.replace(/^(3|三)[\.、]?\s*(策略|選題策略|技巧)[:：]?\s*/i, '');
+            extracted = extracted.replace(/^(4|四)[\.、]?\s*(內容規劃)[:：]?\s*/i, '');
+            extracted = extracted.replace(/^(5|五)[\.、]?\s*(時程|執行時程)[:：]?\s*/i, '');
+            
+            // 移除開頭的數字標記（如 "1. "、"2. "）
+            extracted = extracted.replace(/^\d+[\.、]\s*/, '');
+            
+            // 移除多餘的空白行
+            extracted = extracted.replace(/\n{3,}/g, '\n\n');
+            
+            // 移除開頭和結尾的空白
+            extracted = extracted.trim();
+            
+            sections[key] = extracted;
           }
         }
         
@@ -16541,10 +16759,49 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const savedItemTitle = localStorage.getItem(itemTitleKey);
           const itemTitle = savedItemTitle || '在此輸入你的標題';
           
-          // 格式化內容顯示（保留換行）
+          // 格式化內容顯示（清理 Markdown 和格式符號）
           const formatText = (text) => {
             if (!text) return '無內容';
-            return text.replace(/\n/g, '<br>');
+            
+            // 清理內容：移除多餘的格式符號和標記
+            let cleaned = text;
+            
+            // 1. 移除多餘的空白行（3個以上連續換行）
+            cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+            
+            // 2. 清理 Markdown 格式
+            // 移除單獨的 ** 或 * 符號（但保留用於強調的）
+            cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>'); // **文字** → <strong>文字</strong>
+            cleaned = cleaned.replace(/\*([^*\n]+)\*/g, '<em>$1</em>'); // *文字* → <em>文字</em>
+            cleaned = cleaned.replace(/`([^`]+)`/g, '<code>$1</code>'); // `文字` → <code>文字</code>
+            
+            // 3. 清理 Markdown 標題格式
+            cleaned = cleaned.replace(/^#{1,6}\s*(.+)$/gm, '<strong>$1</strong>'); // # 標題 → <strong>標題</strong>
+            
+            // 4. 清理列表格式，統一為有序列表
+            // 處理數字列表（1. 2. 3.）
+            cleaned = cleaned.replace(/^(\d+)[\.、]\s*(.+)$/gm, '<div style="margin: 6px 0; padding-left: 8px;">$1. $2</div>');
+            // 處理項目符號列表（- * •）
+            cleaned = cleaned.replace(/^[-*•]\s*(.+)$/gm, '<div style="margin: 6px 0; padding-left: 8px;">• $1</div>');
+            
+            // 5. 清理多餘的標記符號和分隔線
+            cleaned = cleaned.replace(/^[-=*]{3,}$/gm, ''); // 移除分隔線
+            cleaned = cleaned.replace(/^[●○■□]\s*/gm, ''); // 移除開頭的項目符號（如果已經處理過）
+            
+            // 6. 清理多餘的空白
+            cleaned = cleaned.replace(/[ \t]+/g, ' '); // 多個空白變一個
+            cleaned = cleaned.trim();
+            
+            // 7. 處理換行：保留段落結構
+            cleaned = cleaned.replace(/\n\n+/g, '</p><p style="margin: 8px 0;">'); // 多個換行 → 段落分隔
+            cleaned = cleaned.replace(/\n/g, '<br>'); // 單換行 → 換行標籤
+            
+            // 8. 包裝在段落標籤中
+            if (cleaned && !cleaned.startsWith('<')) {
+              cleaned = '<p style="margin: 4px 0;">' + cleaned + '</p>';
+            }
+            
+            return cleaned;
           };
           
           return `
