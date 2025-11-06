@@ -13560,6 +13560,46 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       }
 
+      // 處理授權連結驗證
+      async function handleActivationToken(token) {
+        if (!token) return;
+        
+        const currentToken = localStorage.getItem('ipPlanningToken');
+        
+        if (!currentToken) {
+          // 未登入，導向登入頁（帶上 activation_token）
+          const hash = window.location.hash;
+          const separator = hash.includes('?') ? '&' : '?';
+          window.location.href = `/#login${separator}activation_token=${token}`;
+          return;
+        }
+        
+        // 已登入，直接驗證授權
+        try {
+          const response = await fetch(`https://aivideobackend.zeabur.app/api/user/license/verify?token=${token}`, {
+            headers: {
+              'Authorization': `Bearer ${currentToken}`
+            },
+            redirect: 'manual'  // 不自動跟隨 redirect
+          });
+          
+          if (response.ok || response.status === 302) {
+            // 驗證成功，後端會 redirect，但我們在前端處理
+            // 重新檢查訂閱狀態
+            await checkSubscriptionStatus();
+            showToast('✅ 訂閱啟用成功！', 3000);
+            // 清除 URL 參數
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } else {
+            const error = await response.json().catch(() => ({ error: '啟用失敗' }));
+            alert(error.error || '啟用失敗，請稍後再試');
+          }
+        } catch (error) {
+          console.error('啟用失敗:', error);
+          alert('啟用失敗，請稍後再試');
+        }
+      }
+      
       // 初始化頁面
       document.addEventListener('DOMContentLoaded', function() {
         // 啟動打字機動畫
@@ -13570,10 +13610,30 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 啟動 token 監控（每分鐘檢查一次）
         startTokenMonitor();
         
-        // 檢查 URL 參數中是否有 token（OAuth callback fallback）
+        // 檢查 URL 參數中是否有 activation_token（授權連結）
         const urlParams = new URLSearchParams(window.location.search);
+        const activationToken = urlParams.get('token');
+        const activationSuccess = urlParams.get('activation');
+        
+        // 處理授權成功頁面（從後端 redirect 回來）
+        if (activationSuccess === 'success') {
+          const plan = urlParams.get('plan') || 'yearly';
+          showToast(`✅ 訂閱啟用成功！方案：${plan === 'yearly' ? '年費' : '月費'}`, 5000);
+          // 重新檢查訂閱狀態
+          checkSubscriptionStatus().then(() => {
+            // 清除 URL 參數
+            window.history.replaceState({}, document.title, window.location.pathname);
+          });
+        }
+        
+        // 處理授權連結（/activate?token=xxx）
+        if (activationToken && (window.location.pathname === '/activate' || window.location.pathname === '/activate.html')) {
+          handleActivationToken(activationToken);
+        }
+        
+        // 檢查 URL 參數中是否有 token（OAuth callback fallback）
         const tokenParam = urlParams.get('token');
-        if (tokenParam) {
+        if (tokenParam && !activationToken) {  // 避免與授權 token 衝突
           console.log('DEBUG: Found token in URL params, processing OAuth callback...');
           const userId = urlParams.get('user_id');
           const email = urlParams.get('email');
@@ -20353,8 +20413,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               
               // 檢查並更新訂閱狀態（先更新訂閱狀態，再顯示主應用程式）
               checkSubscriptionStatus().then(() => {
-              // 顯示主應用程式
-              showMainApp();
+                // 檢查是否有 activation_token（授權連結）
+                const hashParams = new URLSearchParams(window.location.hash.slice(1));
+                const activationToken = hashParams.get('activation_token');
+                if (activationToken) {
+                  // 登入成功後，自動驗證授權
+                  handleActivationToken(activationToken);
+                  // 清除 hash 中的 activation_token
+                  const newHash = window.location.hash.replace(/[?&]activation_token=[^&]*/, '').replace(/^#/, '');
+                  window.history.replaceState({}, document.title, window.location.pathname + (newHash ? '#' + newHash : ''));
+                }
+                // 顯示主應用程式
+                showMainApp();
                 console.log('DEBUG: Main app shown after subscription status updated');
               });
               console.log('DEBUG: Subscription status check initiated');
@@ -20440,7 +20510,22 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   console.log('DEBUG: /api/auth/me status:', meRes.status);
                 } catch (e) { console.warn('DEBUG: me probe failed:', e); }
                 // 檢查並更新訂閱狀態（再略微延遲）
-                setTimeout(() => { try { checkSubscriptionStatus(); } catch(_){} }, 150);
+                setTimeout(() => { 
+                  try { 
+                    checkSubscriptionStatus().then(() => {
+                      // 檢查是否有 activation_token（授權連結）
+                      const hashParams = new URLSearchParams(window.location.hash.slice(1));
+                      const activationToken = hashParams.get('activation_token');
+                      if (activationToken) {
+                        // 登入成功後，自動驗證授權
+                        handleActivationToken(activationToken);
+                        // 清除 hash 中的 activation_token
+                        const newHash = window.location.hash.replace(/[?&]activation_token=[^&]*/, '').replace(/^#/, '');
+                        window.history.replaceState({}, document.title, window.location.pathname + (newHash ? '#' + newHash : ''));
+                      }
+                    }); 
+                  } catch(_){} 
+                }, 150);
               })();
                 console.log('DEBUG: Subscription status checked');
                 
