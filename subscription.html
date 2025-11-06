@@ -40,7 +40,7 @@
               - 創作者資料庫完整功能<br />
               - 基礎客服支援
             </div>
-            <button class="btn" onclick="mockPurchase('monthly')">立即加入</button>
+            <button class="btn" onclick="scrollToSubscription()">立即加入</button>
           </div>
           <div class="plan" id="plan-yearly">
             <h3>年方案</h3>
@@ -49,10 +49,9 @@
               - 方案內容同上（年繳更划算）<br />
               - 優先客服支援
             </div>
-            <button class="btn secondary" onclick="mockPurchase('yearly')">立即加入</button>
+            <button class="btn secondary" onclick="scrollToSubscription()">立即加入</button>
           </div>
         </div>
-        <div class="notice">本頁為金流導購頁面。之後串接金流時，點擊「立即加入」改為導向金流，支付完成回調更新會員資格與到期日。</div>
       </div>
     </div>
 
@@ -66,6 +65,13 @@
           document.getElementById('plan-monthly').scrollIntoView({behavior:'smooth'});
         }
       })();
+
+      function scrollToSubscription() {
+        const subscriptionSection = document.getElementById('subscription-section');
+        if (subscriptionSection) {
+          subscriptionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
 
       async function mockPurchase(plan) {
         // TODO: 串接金流後改為導向第三方支付，支付成功再回到 callback
@@ -118,7 +124,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>訂閱 ReelMind｜付費即使用，無免費體驗</title>
-<meta name="description" content="ReelMind 單一訂閱制：AI 顧問、AI 一鍵生成、IP 人設規劃與創作者資料庫。付費即使用，無免費體驗。支援綠界 ECPay。">
+<meta name="description" content="ReelMind 單一訂閱制：AI 顧問、AI 一鍵生成、IP 人設規劃與創作者資料庫。付費即使用，無免費體驗。支援信用卡、LINE Pay、Apple Pay 等多種支付方式。">
 <meta name="theme-color" content="#2563EB" />
 <style>
 :root{
@@ -171,12 +177,11 @@ a{text-decoration:none;color:inherit}
 <body>
 
 <!-- HERO -->
-<header class="hero wrap">
+<header class="hero wrap" id="subscription-section">
   <div class="safe">
     <span class="badge">單一訂閱制 · 不分等級 · 付費即使用</span>
     <h1 class="h1">訂閱 ReelMind，解鎖你的 AI 創作系統</h1>
-    <p class="lead">包含 AI 顧問、AI 一鍵生成、IP 人設規劃與創作者資料庫。支援 ECPay（綠界）付款。</p>
-    <div class="notice">⚠️ 無免費體驗｜成功付款即開通使用權</div>
+    <p class="lead">包含 AI 顧問、AI 一鍵生成、IP 人設規劃與創作者資料庫。支援信用卡、LINE Pay、Apple Pay 等多種支付方式。</p>
   </div>
 </header>
 
@@ -211,13 +216,10 @@ a{text-decoration:none;color:inherit}
 
         <div class="h3">付款方式</div>
         <div class="payrow" style="margin-top:8px">
-          <!-- 把這些改成你實際的付款連結或觸發 JS -->
-          <a class="paybtn" href="#" onclick="pay('ecpay')">
-            <img alt="" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Ecpay_logo.svg/120px-Ecpay_logo.svg.png" style="height:18px" />
-            綠界 ECPay（信用卡）
+          <a class="paybtn" href="#" onclick="pay('card')">
+            💳 信用卡
+            <span style="font-size: 0.85em; color: #64748b; margin-left: 8px;">（支援 LINE Pay、Apple Pay、ATM、超商等）</span>
           </a>
-          <a class="paybtn" href="#" onclick="pay('card')">信用卡（備用）</a>
-          <a class="paybtn" href="#" onclick="pay('redeem')">兌換序號</a>
         </div>
 
         <div class="small" style="margin-top:10px">付款即代表同意<a href="#terms" class="link">服務條款與退費政策</a>。</div>
@@ -387,14 +389,7 @@ a{text-decoration:none;color:inherit}
   }
 
   function pay(kind){
-    if(kind==='redeem'){
-      const code = prompt('請輸入序號進行兌換：');
-      if(!code) return;
-      // TODO: 呼叫你的後端兌換 API
-      alert('已送出序號：' + code + '（請接上後端驗證與開通邏輯）');
-      return;
-    }
-    // 其他支付方式可以共用 checkout()
+    // 所有支付方式都使用 checkout()，ECPay 會讓用戶自行選擇付款方式
     checkout();
   }
 
@@ -404,7 +399,7 @@ a{text-decoration:none;color:inherit}
   setPlan(initialPlan);
   
   // 處理付款結果頁面
-  window.addEventListener('DOMContentLoaded', function() {
+  window.addEventListener('DOMContentLoaded', async function() {
     const urlParams = new URLSearchParams(window.location.search);
     const status = urlParams.get('status');
     const orderId = urlParams.get('order_id');
@@ -412,10 +407,137 @@ a{text-decoration:none;color:inherit}
     
     if (status === 'success') {
       showPaymentSuccess(orderId);
+    } else if (status === 'pending') {
+      // 取號成功待付款（ATM/超商）
+      await showPaymentPending(orderId);
     } else if (status === 'failed' || status === 'error') {
       showPaymentError(message || '付款失敗');
     }
   });
+  
+  // 顯示取號成功待付款頁面
+  async function showPaymentPending(orderId) {
+    if (!orderId) {
+      showPaymentError('訂單編號不存在');
+      return;
+    }
+    
+    try {
+      // 查詢訂單詳情
+      const token = localStorage.getItem('ipPlanningToken') || '';
+      const response = await fetch(`https://aivideobackend.zeabur.app/api/user/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const order = data.orders?.find(o => o.order_id === orderId);
+        
+        if (order) {
+          const paymentMethod = order.payment_method || '';
+          const paymentCode = order.payment_code || '';
+          const bankCode = order.bank_code || '';
+          const expireDate = order.expire_date || '';
+          
+          // 隱藏原有內容
+          const mainContent = document.querySelector('.safe.grid');
+          if (mainContent) {
+            mainContent.style.display = 'none';
+          }
+          
+          // 顯示取號成功訊息
+          let paymentInfoHTML = '';
+          if (paymentMethod === 'ATM') {
+            paymentInfoHTML = `
+              <div style="background: #f8f9fa; padding: 24px; border-radius: 8px; margin: 24px 0;">
+                <h3 class="h3" style="margin-bottom: 16px;">ATM 轉帳資訊</h3>
+                ${bankCode ? `<p class="sub" style="margin-bottom: 8px;"><strong>銀行代碼：</strong>${bankCode}</p>` : ''}
+                ${paymentCode ? `<p class="sub" style="margin-bottom: 8px;"><strong>虛擬帳號：</strong><code style="background: white; padding: 4px 8px; border-radius: 4px; font-size: 1.1em;">${paymentCode}</code></p>` : ''}
+                ${expireDate ? `<p class="small" style="color: var(--red); margin-top: 16px;">⚠️ 請於 ${expireDate} 前完成轉帳</p>` : ''}
+              </div>
+            `;
+          } else if (paymentMethod === 'CVS' || paymentMethod === 'BARCODE') {
+            paymentInfoHTML = `
+              <div style="background: #f8f9fa; padding: 24px; border-radius: 8px; margin: 24px 0;">
+                <h3 class="h3" style="margin-bottom: 16px;">超商代碼</h3>
+                ${paymentCode ? `<p class="sub" style="margin-bottom: 8px;"><strong>付款代碼：</strong><code style="background: white; padding: 4px 8px; border-radius: 4px; font-size: 1.1em;">${paymentCode}</code></p>` : ''}
+                ${expireDate ? `<p class="small" style="color: var(--red); margin-top: 16px;">⚠️ 請於 ${expireDate} 前至超商完成付款</p>` : ''}
+                <p class="small" style="margin-top: 16px;">請至 7-11、全家、萊爾富、OK 超商等門市，使用多媒體機台輸入代碼完成付款</p>
+              </div>
+            `;
+          }
+          
+          const pendingHTML = `
+            <div class="safe" style="margin-top: 40px;">
+              <section class="card">
+                <div class="body" style="text-align: center; padding: 40px 20px;">
+                  <div style="font-size: 64px; margin-bottom: 20px;">⏳</div>
+                  <h2 class="h2" style="color: var(--warning); margin-bottom: 12px;">取號成功，待付款</h2>
+                  <p class="sub" style="margin-bottom: 24px;">請依照下方資訊完成付款，付款完成後系統將自動開通您的帳號</p>
+                  ${orderId ? `<p class="small" style="margin-bottom: 24px;">訂單編號：${orderId}</p>` : ''}
+                  ${paymentInfoHTML}
+                  <div class="row" style="justify-content: center; gap: 12px; margin-top: 24px;">
+                    <button class="btn blue" onclick="window.location.href='/'">返回首頁</button>
+                    <button class="btn ghost" onclick="checkOrderStatus('${orderId}')">檢查付款狀態</button>
+                  </div>
+                  <p class="small" style="margin-top: 24px;">
+                    如有問題，請聯繫客服：<a href="mailto:hello@aijob.com.tw">hello@aijob.com.tw</a>
+                  </p>
+                </div>
+              </section>
+            </div>
+          `;
+          
+          const container = document.querySelector('.wrap');
+          if (container) {
+            container.insertAdjacentHTML('beforeend', pendingHTML);
+          }
+        } else {
+          showPaymentError('找不到訂單資訊');
+        }
+      } else {
+        showPaymentError('無法查詢訂單資訊');
+      }
+    } catch (error) {
+      console.error('查詢訂單失敗:', error);
+      showPaymentError('查詢訂單失敗，請稍後再試');
+    }
+  }
+  
+  // 檢查訂單付款狀態
+  async function checkOrderStatus(orderId) {
+    try {
+      const token = localStorage.getItem('ipPlanningToken') || '';
+      const response = await fetch(`https://aivideobackend.zeabur.app/api/user/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const order = data.orders?.find(o => o.order_id === orderId);
+        
+        if (order) {
+          if (order.payment_status === 'paid') {
+            alert('付款成功！您的帳號已開通');
+            window.location.href = '/';
+          } else {
+            alert('尚未完成付款，請完成付款後再試');
+          }
+        } else {
+          alert('找不到訂單資訊');
+        }
+      } else {
+        alert('無法查詢訂單狀態');
+      }
+    } catch (error) {
+      console.error('檢查訂單狀態失敗:', error);
+      alert('檢查訂單狀態失敗，請稍後再試');
+    }
+  }
   
   function showPaymentSuccess(orderId) {
     // 隱藏原有內容

@@ -10857,8 +10857,7 @@
                         <span class="typewriter-text"></span><span class="typewriter-cursor">|</span>
                       </h1>
                       <p style="font-size: clamp(1rem, 2vw, 1.25rem); color: #64748B; margin-bottom: 32px; line-height: 1.7; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
-                        AI 生成腳本、AI 帳號定位，一次完成。<br/>
-                        <span style="font-size: 0.9em; color: #94A3B8;">付費即使用，無免費體驗。</span>
+                        AI 生成腳本、AI 帳號定位，一次完成。
                       </p>
                       <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;">
                         <a href="#" onclick="goToPricing(); return false;" style="padding: 16px 24px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px rgba(59,130,246,0.25); transition: all 0.3s; font-size: 0.9rem; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; flex: 1;">
@@ -12500,6 +12499,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                       <span class="menu-icon">🎭</span>
                       <span class="menu-text">IP人設規劃</span>
                     </div>
+                    <div class="menu-item" onclick="showDbSection('myOrders')">
+                      <span class="menu-icon">💳</span>
+                      <span class="menu-text">我的訂單</span>
+                    </div>
                     <div class="menu-item" onclick="showDbSection('settings')">
                       <span class="menu-icon">⚙️</span>
                       <span class="menu-text">設定</span>
@@ -12564,6 +12567,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                       <div id="ip-planning-content" class="ip-planning-content">
                         <div class="loading-text">載入中...</div>
                       </div>
+                    </div>
+                  </div>
+                  <!-- 我的訂單 -->
+                  <div id="db-myOrders" class="db-section">
+                    <h3 class="section-title">💳 我的訂單</h3>
+                    <div class="section-content" id="myOrdersContent">
+                      <div class="loading-text">載入中...</div>
                     </div>
                   </div>
                   <!-- 設定 -->
@@ -14861,6 +14871,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           case 'ipPlanning':
             loadIpPlanningResultsForUserDB();
             break;
+          case 'myOrders':
+            loadMyOrdersForUserDB();
+            break;
           case 'settings':
             // 設定頁面內容已在HTML中定義，無需動態載入
             break;
@@ -14885,7 +14898,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
       
       // 渲染個人資料內容（獨立函數，避免遞迴問題）
-      function renderPersonalInfoContent() {
+      async function renderPersonalInfoContent() {
         const content = document.querySelector('#db-personalInfo .section-content');
         if (!content || !ipPlanningUser) return;
         
@@ -14917,23 +14930,72 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             '<span style="color: #10b981; font-weight: bold;">✅ 已訂閱</span>' : 
             '<span style="color: #ef4444; font-weight: bold;">❌ 未訂閱</span>';
           
-          // 自動續費日期（下個月同一天）
-          let renewalDate = '未知';
-          if (ipPlanningUser.created_at && isSubscribed) {
+          // 載入詳細訂閱資訊（使用新的 API）
+          let expiresAt = null;
+          let daysLeft = null;
+          let expiresAtText = '未知';
+          let daysLeftText = '';
+          let expirationWarning = '';
+          
+          // 嘗試從 API 獲取詳細訂閱資訊
+          if (ipPlanningToken && ipPlanningUser?.user_id) {
             try {
-              const createdDate = new Date(ipPlanningUser.created_at);
-              const renewal = new Date(createdDate);
-              renewal.setMonth(renewal.getMonth() + 1);
-              renewalDate = renewal.toLocaleString('zh-TW', {
-                timeZone: 'Asia/Taipei',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
+              const subResponse = await fetch('https://aivideobackend.zeabur.app/api/user/subscription', {
+                headers: {
+                  'Authorization': `Bearer ${ipPlanningToken}`
+                }
               });
+              
+              if (subResponse.ok) {
+                const subData = await subResponse.json();
+                if (subData.expires_at) {
+                  expiresAt = new Date(subData.expires_at);
+                  const now = new Date();
+                  daysLeft = Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24));
+                  
+                  expiresAtText = expiresAt.toLocaleString('zh-TW', {
+                    timeZone: 'Asia/Taipei',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  });
+                  
+                  if (daysLeft < 0) {
+                    daysLeftText = `<span style="color: #ef4444; font-weight: bold;">（已過期 ${Math.abs(daysLeft)} 天）</span>`;
+                    expirationWarning = '<div style="margin-top: 12px; padding: 12px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b;"><strong>⚠️ 訂閱已過期</strong><br>請前往訂閱頁面續費以繼續使用服務。</div>';
+                  } else if (daysLeft <= 3) {
+                    daysLeftText = `<span style="color: #ef4444; font-weight: bold;">（剩餘 ${daysLeft} 天）</span>`;
+                    expirationWarning = '<div style="margin-top: 12px; padding: 12px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; color: #92400e;"><strong>⚠️ 訂閱即將到期</strong><br>請盡快前往訂閱頁面續費。</div>';
+                  } else if (daysLeft <= 7) {
+                    daysLeftText = `<span style="color: #f59e0b; font-weight: bold;">（剩餘 ${daysLeft} 天）</span>`;
+                    expirationWarning = '<div style="margin-top: 12px; padding: 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; color: #92400e;"><strong>提醒</strong><br>您的訂閱將在 7 天內到期，請記得續費。</div>';
+                  } else {
+                    daysLeftText = `<span style="color: #10b981;">（剩餘 ${daysLeft} 天）</span>`;
+                  }
+                }
+              }
             } catch (e) {
-              renewalDate = '未知';
+              console.warn('載入訂閱詳情失敗:', e);
+              // 如果 API 失敗，使用舊的計算方式
+              if (ipPlanningUser.created_at && isSubscribed) {
+                try {
+                  const createdDate = new Date(ipPlanningUser.created_at);
+                  const renewal = new Date(createdDate);
+                  renewal.setMonth(renewal.getMonth() + 1);
+                  expiresAtText = renewal.toLocaleString('zh-TW', {
+                    timeZone: 'Asia/Taipei',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  });
+                } catch (e2) {
+                  expiresAtText = '未知';
+                }
+              }
             }
           }
           
@@ -14961,10 +15023,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               </div>
               ${isSubscribed ? `
               <div class="detail-item">
-                <label>下次續費日期：</label>
-                <span>${renewalDate}</span>
+                <label>到期日期：</label>
+                <span>${expiresAtText} ${daysLeftText}</span>
               </div>
-              <div class="detail-actions">
+              ${expirationWarning}
+              <div class="detail-actions" style="margin-top: 16px;">
+                <a href="/subscription.html" style="display: inline-block; padding: 8px 16px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500; margin-right: 8px;">
+                  💳 續費訂閱
+                </a>
                 <button class="btn btn-danger" onclick="cancelSubscription()" style="padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; background: #ef4444; color: white;">
                   🔴 取消自動續費
                 </button>
@@ -14997,8 +15063,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 如果有本地資訊，先立即渲染（確保頁面有內容）
         if (ipPlanningUser && (ipPlanningUser.name || ipPlanningUser.email)) {
           // 短暫延遲後顯示內容，讓用戶看到載入動畫
-          setTimeout(() => {
-        renderPersonalInfoContent();
+          setTimeout(async () => {
+            await renderPersonalInfoContent();
           }, 300);
         }
         
@@ -17152,6 +17218,132 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         } catch (error) {
           console.error('載入統計失敗:', error);
         }
+      }
+      
+      // 載入我的訂單（創作者資料庫版本）
+      async function loadMyOrdersForUserDB() {
+        const content = document.querySelector('#myOrdersContent');
+        if (!content) return;
+        
+        if (!ipPlanningToken || !ipPlanningUser || !ipPlanningUser.user_id) {
+          content.innerHTML = '<div class="loading-text">請先登入以查看訂單記錄</div>';
+          return;
+        }
+        
+        // 顯示載入動畫
+        showLoadingAnimation(content, '載入訂單記錄中...');
+        
+        try {
+          const response = await fetch('https://aivideobackend.zeabur.app/api/user/orders', {
+            headers: {
+              'Authorization': `Bearer ${ipPlanningToken}`
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const orders = data.orders || [];
+            displayOrdersForUserDB(orders);
+          } else if (response.status === 401) {
+            content.innerHTML = '<div class="loading-text">請先登入</div>';
+          } else {
+            const errorData = await response.json().catch(() => ({ error: '載入失敗' }));
+            throw new Error(errorData.error || '載入失敗');
+          }
+        } catch (error) {
+          console.error('載入訂單失敗:', error);
+          content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+        }
+      }
+      
+      // 顯示訂單列表（創作者資料庫版本）
+      function displayOrdersForUserDB(orders) {
+        const container = document.querySelector('#myOrdersContent');
+        if (!container) return;
+        
+        if (orders.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+              <div style="font-size: 48px; margin-bottom: 16px;">📦</div>
+              <p style="color: #6b7280; font-size: 16px; margin-bottom: 24px;">尚無訂單記錄</p>
+              <a href="/subscription.html" style="display: inline-block; padding: 12px 24px; background: #3B82F6; color: white; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                前往訂閱
+              </a>
+            </div>
+          `;
+          return;
+        }
+        
+        // 按時間排序：由新到舊
+        const sortedOrders = [...orders].sort((a, b) => {
+          const timeA = new Date(a.created_at || 0).getTime();
+          const timeB = new Date(b.created_at || 0).getTime();
+          return timeB - timeA; // 降序：新的在前
+        });
+        
+        container.innerHTML = `
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
+              <thead>
+                <tr style="background: #f3f4f6;">
+                  <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">訂單編號</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">方案</th>
+                  <th style="padding: 12px; text-align: right; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">金額</th>
+                  <th style="padding: 12px; text-align: center; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">狀態</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">付款時間</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">到期日期</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">發票號碼</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sortedOrders.map(order => {
+                  const orderDate = order.created_at ? new Date(order.created_at).toLocaleString('zh-TW', {
+                    timeZone: 'Asia/Taipei',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) : '-';
+                  
+                  const paidDate = order.paid_at ? new Date(order.paid_at).toLocaleString('zh-TW', {
+                    timeZone: 'Asia/Taipei',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) : '-';
+                  
+                  const expiresDate = order.expires_at ? new Date(order.expires_at).toLocaleString('zh-TW', {
+                    timeZone: 'Asia/Taipei',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                  }) : '-';
+                  
+                  const statusBadge = order.payment_status === 'paid' 
+                    ? '<span style="display: inline-block; padding: 4px 12px; background: #d1fae5; color: #065f46; border-radius: 12px; font-size: 12px; font-weight: 600;">✅ 已付款</span>'
+                    : '<span style="display: inline-block; padding: 4px 12px; background: #fee2e2; color: #991b1b; border-radius: 12px; font-size: 12px; font-weight: 600;">⏳ 待付款</span>';
+                  
+                  const planText = order.plan_type === 'monthly' ? '月費方案' : order.plan_type === 'yearly' ? '年費方案' : order.plan_type || '-';
+                  
+                  return `
+                    <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s;">
+                      <td style="padding: 12px; color: #1f2937; font-weight: 500;">${order.order_id || order.id || '-'}</td>
+                      <td style="padding: 12px; color: #4b5563;">${planText}</td>
+                      <td style="padding: 12px; text-align: right; color: #1f2937; font-weight: 600;">NT$${order.amount?.toLocaleString() || 0}</td>
+                      <td style="padding: 12px; text-align: center;">${statusBadge}</td>
+                      <td style="padding: 12px; color: #6b7280; font-size: 14px;">${paidDate}</td>
+                      <td style="padding: 12px; color: #6b7280; font-size: 14px;">${expiresDate}</td>
+                      <td style="padding: 12px; color: #6b7280; font-size: 14px;">${order.invoice_number || '-'}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
       }
       
       // 匯出用戶資料（CSV 格式）
