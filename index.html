@@ -708,10 +708,15 @@
       }
       
       /* 深色模式：AI 對話泡泡 - 強制覆蓋所有白色背景，背景改為深色，文字改為純白色 */
+      /* 使用最高特異性來覆蓋淺色模式的 !important */
       .theme-dark .message.ai .message-content,
       .theme-dark .message.assistant .message-content,
       .theme-dark .message.ai[style*="background"] .message-content,
-      .theme-dark .message.assistant[style*="background"] .message-content {
+      .theme-dark .message.assistant[style*="background"] .message-content,
+      .theme-dark #mode2 .message.ai .message-content,
+      .theme-dark #mode2 .message.assistant .message-content,
+      .theme-dark #chatMessages .message.ai .message-content,
+      .theme-dark #chatMessages .message.assistant .message-content {
         background: var(--gradient-card) !important; /* 深色背景 */
         color: #ffffff !important; /* 白色文字 */
         border-color: var(--border-color) !important;
@@ -720,7 +725,11 @@
       
       /* 強制覆蓋所有可能的白色背景 - 使用更強的特異性 */
       .theme-dark .message.ai .message-content[style],
-      .theme-dark .message.assistant .message-content[style] {
+      .theme-dark .message.assistant .message-content[style],
+      .theme-dark #mode2 .message.ai .message-content[style],
+      .theme-dark #mode2 .message.assistant .message-content[style],
+      .theme-dark #chatMessages .message.ai .message-content[style],
+      .theme-dark #chatMessages .message.assistant .message-content[style] {
         background: var(--gradient-card) !important; /* 深色背景 */
         color: #ffffff !important; /* 白色文字 */
       }
@@ -3037,6 +3046,38 @@
           font-size: 0.95rem !important;
           line-height: 1.6 !important;
         }
+        
+      /* 打字機動畫樣式 */
+      .typewriter-title {
+        min-height: 1.2em; /* 確保高度穩定 */
+      }
+      
+      .typewriter-text {
+        display: inline;
+      }
+      
+      .typewriter-cursor {
+        display: inline-block;
+        animation: blink 1s infinite;
+        margin-left: 2px;
+        font-weight: 300;
+        color: inherit;
+      }
+      
+      @keyframes blink {
+        0%, 50% {
+          opacity: 1;
+        }
+        51%, 100% {
+          opacity: 0;
+        }
+      }
+      
+      /* 深色模式：打字機光標 */
+      .theme-dark .typewriter-cursor {
+        color: var(--text-primary) !important;
+      }
+      
         .rm-guide-section {
           padding: 60px 0 !important;
           margin: -20px 0 0 0 !important;
@@ -3626,6 +3667,29 @@
         color: #1f2937;
         max-width: 100%;
         word-wrap: break-word;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      /* 深色模式：msg-bubble 樣式（另一種創建消息的方式） */
+      .theme-dark .msg.assistant .msg-bubble,
+      .theme-dark .msg-bubble {
+        background: var(--gradient-card) !important;
+        color: #ffffff !important;
+        border-color: var(--border-color) !important;
+      }
+      
+      .theme-dark .msg.assistant .msg-bubble p,
+      .theme-dark .msg.assistant .msg-bubble span,
+      .theme-dark .msg.assistant .msg-bubble div,
+      .theme-dark .msg-bubble p,
+      .theme-dark .msg-bubble span,
+      .theme-dark .msg-bubble div {
+        color: #ffffff !important;
+      }
+      
+      .theme-dark .msg.assistant .msg-avatar {
+        background: var(--bg-secondary) !important;
+        color: var(--text-primary) !important;
       }
       
       .msg-bubble p {
@@ -4069,6 +4133,41 @@
         line-height: 1.6; /* 行高 */
         font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
         text-align: left; /* AI 對話泡泡靠左對齊 */
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      /* 深色模式：強制覆蓋淺色模式的 !important - 使用更高特異性 */
+      .theme-dark .message.ai .message-content,
+      .theme-dark .message.assistant .message-content,
+      .theme-dark #mode2 .message.ai .message-content,
+      .theme-dark #mode2 .message.assistant .message-content,
+      .theme-dark #chatMessages .message.ai .message-content,
+      .theme-dark #chatMessages .message.assistant .message-content,
+      .theme-dark #mode2 #chatMessages .message.ai .message-content,
+      .theme-dark #mode2 #chatMessages .message.assistant .message-content {
+        background: var(--gradient-card) !important; /* 深色背景 - 覆蓋淺色模式的 !important */
+        color: #ffffff !important; /* 白色文字 - 覆蓋淺色模式的 !important */
+        border-color: var(--border-color) !important;
+      }
+      
+      /* 深色模式：使用最高特異性覆蓋所有內聯樣式 */
+      .theme-dark #mode2 #chatMessages .message.ai .message-content[style*="background"],
+      .theme-dark #mode2 #chatMessages .message.assistant .message-content[style*="background"],
+      .theme-dark #mode2 .message.ai .message-content[style*="background"],
+      .theme-dark #mode2 .message.assistant .message-content[style*="background"],
+      .theme-dark #chatMessages .message.ai .message-content[style*="background"],
+      .theme-dark #chatMessages .message.assistant .message-content[style*="background"] {
+        background: var(--gradient-card) !important;
+        color: #ffffff !important;
+      }
+      
+      .theme-dark #mode2 #chatMessages .message.ai .message-content[style*="color"],
+      .theme-dark #mode2 #chatMessages .message.assistant .message-content[style*="color"],
+      .theme-dark #mode2 .message.ai .message-content[style*="color"],
+      .theme-dark #mode2 .message.assistant .message-content[style*="color"],
+      .theme-dark #chatMessages .message.ai .message-content[style*="color"],
+      .theme-dark #chatMessages .message.assistant .message-content[style*="color"] {
+        color: #ffffff !important;
       }
       
       .message-avatar {
@@ -6247,6 +6346,18 @@
       .msg-bubble { max-width: 80%; padding: 12px 16px; border-radius: 18px; white-space: pre-wrap; word-wrap: break-word; }
       .msg.user .msg-bubble { background: #3b82f6; color: #ffffff; border-bottom-right-radius: 4px; }
       .msg.assistant .msg-bubble { background: #f3f4f6; color: #374151; border-bottom-left-radius: 4px; }
+      
+      /* 深色模式：手機版 msg-bubble */
+      .theme-dark .msg.assistant .msg-bubble {
+        background: var(--gradient-card) !important;
+        color: #ffffff !important;
+      }
+      
+      .theme-dark .msg.assistant .msg-bubble p,
+      .theme-dark .msg.assistant .msg-bubble span,
+      .theme-dark .msg.assistant .msg-bubble div {
+        color: #ffffff !important;
+      }
       .msg-label { font-size: 11px; color: #6b7280; margin-bottom: 4px; font-weight: 500; }
       .msg.user .msg-label { text-align: right; }
       .msg.assistant .msg-label { text-align: left; }
@@ -10742,8 +10853,8 @@
                     
                     <!-- 左側：文案區 -->
                     <div style="padding: 20px 0; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
-                      <h1 class="rm-hero-title" style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; color: #1E293B; margin-bottom: 20px; line-height: 1.2; letter-spacing: -0.02em; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
-                        讓 AI 幫你打造<br/>下一支爆款短影音
+                      <h1 id="hero-title-1" class="rm-hero-title typewriter-title" style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; color: #1E293B; margin-bottom: 20px; line-height: 1.2; letter-spacing: -0.02em; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
+                        <span class="typewriter-text"></span><span class="typewriter-cursor">|</span>
                       </h1>
                       <p style="font-size: clamp(1rem, 2vw, 1.25rem); color: #64748B; margin-bottom: 32px; line-height: 1.7; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
                         AI 生成腳本、AI 帳號定位，一次完成。<br/>
@@ -11242,8 +11353,8 @@
                       
                       <!-- 左側：文案區 -->
                       <div style="padding: 20px 0; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
-                        <h1 class="rm-hero-title" style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; color: #1E293B; margin-bottom: 20px; line-height: 1.2; letter-spacing: -0.02em; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
-                          讓 AI 幫你打造<br/>下一支爆款短影音
+                        <h1 id="hero-title-2" class="rm-hero-title typewriter-title" style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; color: #1E293B; margin-bottom: 20px; line-height: 1.2; letter-spacing: -0.02em; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
+                          <span class="typewriter-text"></span><span class="typewriter-cursor">|</span>
                         </h1>
                         <p style="font-size: clamp(1rem, 2vw, 1.25rem); color: #64748B; margin-bottom: 32px; line-height: 1.7; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
                           AI 生成腳本、AI 帳號定位，一次完成。<br/>
@@ -13441,6 +13552,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
 
       // 初始化頁面
       document.addEventListener('DOMContentLoaded', function() {
+        // 啟動打字機動畫
+        if (typeof initTypewriterAnimation === 'function') {
+          initTypewriterAnimation();
+        }
+        
         // 啟動 token 監控（每分鐘檢查一次）
         startTokenMonitor();
         
@@ -24296,5 +24412,67 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       };
     }
   })();
+  
+  // 打字機動畫函數
+  function initTypewriterAnimation() {
+    const heroTitles = [
+      { id: 'hero-title-1', text: '讓 AI 幫你打造\n下一支爆款短影音' },
+      { id: 'hero-title-2', text: '讓 AI 幫你打造\n下一支爆款短影音' }
+    ];
+    
+    heroTitles.forEach(({ id, text }) => {
+      const titleElement = document.getElementById(id);
+      if (!titleElement) return;
+      
+      const textSpan = titleElement.querySelector('.typewriter-text');
+      if (!textSpan) return;
+      
+      // 重置文字
+      textSpan.textContent = '';
+      
+      // 將換行符轉換為處理
+      const lines = text.split('\n');
+      let currentLineIndex = 0;
+      let currentCharIndex = 0;
+      let isTyping = true;
+      
+      function typeChar() {
+        if (!isTyping) return;
+        
+        if (currentLineIndex < lines.length) {
+          const currentLine = lines[currentLineIndex];
+          
+          if (currentCharIndex < currentLine.length) {
+            // 添加當前字符
+            if (currentCharIndex === 0 && currentLineIndex > 0) {
+              textSpan.innerHTML += '<br>';
+            }
+            textSpan.textContent += currentLine[currentCharIndex];
+            currentCharIndex++;
+            
+            // 繼續打字
+            setTimeout(typeChar, 80); // 每個字符間隔 80ms
+          } else {
+            // 當前行完成，移到下一行
+            currentLineIndex++;
+            currentCharIndex = 0;
+            
+            if (currentLineIndex < lines.length) {
+              // 還有下一行，繼續
+              setTimeout(typeChar, 200); // 換行前暫停 200ms
+            } else {
+              // 所有文字完成
+              isTyping = false;
+            }
+          }
+        }
+      }
+      
+      // 延遲啟動動畫，讓頁面先載入
+      setTimeout(() => {
+        typeChar();
+      }, 500);
+    });
+  }
 </script>
 </html>
