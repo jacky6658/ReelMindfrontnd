@@ -19471,9 +19471,21 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         console.error('記錄長期記憶錯誤:', error);
       }
       
-      // 添加載入動畫
-      const typingIndicator = createMode3TypingIndicator();
-      chatMessages.appendChild(typingIndicator);
+      // 添加載入動畫（直接創建 AI 訊息容器，內容先顯示載入動畫）
+      const aiMessage = createMode3Message('assistant', '');
+      const contentDiv = aiMessage.querySelector('.message-content');
+      // 先顯示載入動畫
+      contentDiv.innerHTML = `
+        <div class="typing-indicator">
+          <span>AI思考中...</span>
+          <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      `;
+      chatMessages.appendChild(aiMessage);
       chatMessages.scrollTop = chatMessages.scrollHeight;
       
       try {
@@ -19494,13 +19506,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        // 移除載入動畫
-        chatMessages.removeChild(typingIndicator);
-        
-        // 創建AI回應容器
-        const aiMessage = createMode3Message('assistant', '');
-        chatMessages.appendChild(aiMessage);
-        const contentDiv = aiMessage.querySelector('.message-content');
+        // 不需要移除載入動畫，直接更新內容即可
         
         // 處理串流回應
         const reader = response.body.getReader();
@@ -19554,11 +19560,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       } catch (error) {
         console.error('發送訊息錯誤:', error);
-        if (chatMessages.contains(typingIndicator)) {
-          chatMessages.removeChild(typingIndicator);
+        // 直接更新現有的 AI 訊息內容為錯誤訊息
+        if (contentDiv) {
+          contentDiv.innerHTML = `抱歉，發生了錯誤：${error.message}`;
+        } else {
+          const errorMessage = createMode3Message('assistant', `抱歉，發生了錯誤：${error.message}`);
+          chatMessages.appendChild(errorMessage);
         }
-        const errorMessage = createMode3Message('assistant', `抱歉，發生了錯誤：${error.message}`);
-        chatMessages.appendChild(errorMessage);
       } finally {
         // 恢復輸入框和按鈕
         messageInput.disabled = false;
