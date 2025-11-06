@@ -10069,13 +10069,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   </div>
                   <!-- 選題內容 -->
                   <div id="db-topicRecords" class="db-section">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px;">
-                      <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                        <h3 class="section-title" id="topic-content-title" style="margin: 0; cursor: pointer; position: relative; padding-right: 24px;" onclick="editTopicContentTitle()" title="點擊編輯標題">💡 選題內容</h3>
-                        <span id="topic-content-edit-icon" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s;" onclick="editTopicContentTitle()" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
-                        <input type="text" id="topic-content-title-input" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1rem; font-weight: 600; outline: none;" onblur="saveTopicContentTitle()" onkeypress="if(event.key === 'Enter') saveTopicContentTitle()">
-                      </div>
-                    </div>
+                    <h3 class="section-title">💡 選題內容</h3>
                     <div class="section-content">
                       <p>正在載入選題內容...</p>
                     </div>
@@ -10865,7 +10859,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         let html = '<div class="scripts-list">';
         scripts.forEach(script => {
-          const date = new Date(script.created_at).toLocaleDateString('zh-TW');
+          const date = formatTaiwanTime(script.created_at).split(' ')[0]; // 只取日期部分
           html += `
             <div class="script-item">
               <div class="script-header">
@@ -11878,7 +11872,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           item.className = 'conversation-item';
           item.innerHTML = `
             <div class="conversation-summary">${conv.summary}</div>
-            <div class="conversation-date">${new Date(conv.created_at).toLocaleDateString()}</div>
+            <div class="conversation-date">${formatTaiwanTime(conv.created_at).split(' ')[0]}</div>
           `;
           conversationsList.appendChild(item);
         });
@@ -11899,7 +11893,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               <span class="generation-topic">${gen.topic}</span>
             </div>
             <div class="generation-content">${gen.content}</div>
-            <div class="generation-date">${new Date(gen.created_at).toLocaleDateString()}</div>
+            <div class="generation-date">${formatTaiwanTime(gen.created_at).split(' ')[0]}</div>
           `;
           generationsList.appendChild(item);
         });
@@ -12002,7 +11996,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 顯示詳細內容彈出視窗
       function showDetailModal(recordNumber, createdAt, content) {
-        const date = new Date(createdAt).toLocaleString('zh-TW');
+        const date = formatTaiwanTime(createdAt);
         const modal = document.createElement('div');
         modal.className = 'detail-modal-overlay';
         modal.innerHTML = `
@@ -12539,10 +12533,35 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             console.log('腳本列表數據:', data);
             const serverScripts = data.scripts || [];
             
-            // 如果有伺服器腳本，顯示伺服器腳本；否則如果有本地腳本，保持顯示本地腳本
-            if (serverScripts.length > 0) {
-              displayScriptsForUserDB(serverScripts);
-            } else if (localScripts.length === 0) {
+            // 合併本地和後端腳本，避免覆蓋
+            // 使用 Map 來去重（根據 ID），保留最新的版本
+            const scriptMap = new Map();
+            
+            // 先添加本地腳本
+            localScripts.forEach(script => {
+              if (script.id) {
+                scriptMap.set(script.id, script);
+              }
+            });
+            
+            // 再添加後端腳本（會覆蓋同 ID 的本地腳本，確保使用最新的）
+            serverScripts.forEach(script => {
+              if (script.id) {
+                scriptMap.set(script.id, script);
+              } else {
+                // 如果後端腳本沒有 ID，使用 created_at 作為唯一標識
+                const uniqueKey = script.created_at || Date.now();
+                scriptMap.set(uniqueKey, script);
+              }
+            });
+            
+            // 轉換為陣列並顯示
+            const mergedScripts = Array.from(scriptMap.values());
+            console.log('合併後的腳本數量:', mergedScripts.length);
+            
+            if (mergedScripts.length > 0) {
+              displayScriptsForUserDB(mergedScripts);
+            } else {
               content.innerHTML = '<div class="loading-text">還沒有儲存的腳本，請先使用一鍵生成功能創建腳本</div>';
             }
           } else if (response.status === 401) {
@@ -13763,15 +13782,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        // 載入標題（如果有的話）
-        const savedTitle = localStorage.getItem(`topic-content-title-${ipPlanningUser.user_id}`);
-        if (savedTitle) {
-          const titleElement = document.getElementById('topic-content-title');
-          if (titleElement) {
-            titleElement.textContent = `💡 ${savedTitle}`;
-          }
-        }
-        
         // 顯示載入動畫
         showLoadingAnimation(content, '載入選題內容中...');
         
@@ -13896,59 +13906,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         } catch (error) {
           console.error('載入 IP 人設規劃結果錯誤:', error);
           content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
-        }
-      }
-      
-      // 編輯選題內容標題
-      function editTopicContentTitle() {
-        const titleElement = document.getElementById('topic-content-title');
-        const inputElement = document.getElementById('topic-content-title-input');
-        const editIcon = document.getElementById('topic-content-edit-icon');
-        
-        if (titleElement && inputElement) {
-          // 獲取當前標題（去除 emoji）
-          const currentTitle = titleElement.textContent.replace(/^💡\s*/, '');
-          inputElement.value = currentTitle;
-          
-          // 切換顯示
-          titleElement.style.display = 'none';
-          editIcon.style.display = 'none';
-          inputElement.style.display = 'block';
-          
-          // 聚焦並選中文字
-          inputElement.focus();
-          inputElement.select();
-        }
-      }
-      
-      // 保存選題內容標題
-      function saveTopicContentTitle() {
-        const titleElement = document.getElementById('topic-content-title');
-        const inputElement = document.getElementById('topic-content-title-input');
-        const editIcon = document.getElementById('topic-content-edit-icon');
-        
-        if (titleElement && inputElement) {
-          const newTitle = inputElement.value.trim();
-          
-          // 如果為空，使用預設標題
-          const finalTitle = newTitle || '在此輸入你的標題';
-          
-          // 更新標題顯示
-          titleElement.textContent = `💡 ${finalTitle}`;
-          
-          // 保存到 localStorage
-          if (ipPlanningUser && ipPlanningUser.user_id) {
-            localStorage.setItem(`topic-content-title-${ipPlanningUser.user_id}`, finalTitle);
-          }
-          
-          if (newTitle) {
-            showToast('✅ 標題已更新', 2000);
-          }
-          
-          // 切換顯示
-          titleElement.style.display = 'block';
-          editIcon.style.display = 'inline-block';
-          inputElement.style.display = 'none';
         }
       }
       
@@ -15552,14 +15509,31 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       function saveScriptToLocal(scriptData) {
         try {
           const scripts = getLocalScripts();
+          
+          // 確保每個腳本都有唯一的 ID
+          // 使用時間戳 + 隨機數來確保唯一性
+          const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          
           const newScript = {
-            id: Date.now(),
+            id: uniqueId,
             ...scriptData,
             created_at: new Date().toISOString()
           };
-          scripts.unshift(newScript);
+          
+          // 檢查是否已存在相同 ID 的腳本（避免重複）
+          const existingIndex = scripts.findIndex(s => s.id === uniqueId);
+          if (existingIndex === -1) {
+            // 新腳本，添加到開頭
+            scripts.unshift(newScript);
+            console.log('新腳本已添加到本地:', newScript);
+          } else {
+            // 如果已存在（不太可能），更新它
+            scripts[existingIndex] = newScript;
+            console.log('腳本已更新到本地:', newScript);
+          }
+          
           localStorage.setItem('user_scripts', JSON.stringify(scripts));
-          console.log('腳本已儲存到本地:', newScript);
+          console.log('本地腳本總數:', scripts.length);
         } catch (error) {
           console.error('Error saving script locally:', error);
         }
@@ -16322,15 +16296,24 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 格式化台灣時間
       function formatTaiwanTime(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleString('zh-TW', {
-          timeZone: 'Asia/Taipei',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
+        if (!dateString) return '-';
+        try {
+          const date = new Date(dateString);
+          if (isNaN(date.getTime())) {
+            return dateString; // 如果日期無效，返回原始字符串
+          }
+          return date.toLocaleString('zh-TW', {
+            timeZone: 'Asia/Taipei',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        } catch (error) {
+          console.error('格式化台灣時區時間錯誤:', error);
+          return dateString; // 發生錯誤時返回原始字符串
+        }
       }
       
       // 重新生成結果
