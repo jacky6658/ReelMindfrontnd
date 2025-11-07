@@ -2,30 +2,247 @@
 <meta charset="utf-8" />
 <title>Signing in…</title>
 <style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
   body {
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100vh;
     margin: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: hidden;
+    position: relative;
   }
+
+  /* 流動漸層背景 */
+  .gradient-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 25%, #3B82F6 50%, #60A5FA 75%, #FFFFFF 100%);
+    background-size: 400% 400%;
+    animation: gradientFlow 8s ease infinite;
+    z-index: 0;
+  }
+
+  @keyframes gradientFlow {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  /* 額外的流動波紋效果 */
+  .gradient-bg::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+  }
+
+  @keyframes rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
   .container {
+    position: relative;
+    z-index: 1;
     text-align: center;
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 60px 40px;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    min-width: 320px;
+    max-width: 90%;
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    animation: containerFadeIn 0.6s ease-out forwards;
   }
-  h3 {
-    color: #27ae60;
-    margin: 0;
+
+  @keyframes containerFadeIn {
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* ReelMind 文字動畫 */
+  .brand-title {
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 50%, #3B82F6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+    animation: titleAnimation 1s ease-out 0.3s forwards;
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 30px rgba(37, 99, 235, 0.3);
+  }
+
+  @keyframes titleAnimation {
+    0% {
+      opacity: 0;
+      transform: translateY(30px) scale(0.8);
+    }
+    60% {
+      transform: translateY(-5px) scale(1.05);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* 進度條容器 */
+  .progress-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 30px;
+    position: relative;
+    opacity: 0;
+    animation: progressFadeIn 0.5s ease-out 0.8s forwards;
+  }
+
+  @keyframes progressFadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #2563EB 0%, #3B82F6 50%, #60A5FA 100%);
+    border-radius: 999px;
+    width: 0%;
+    animation: progressFill 2s ease-out 1s forwards;
+    position: relative;
+    overflow: hidden;
+  }
+
+  @keyframes progressFill {
+    0% {
+      width: 0%;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+
+  /* 進度條閃爍效果 */
+  .progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: progressShine 2s ease-in-out 1s infinite;
+  }
+
+  @keyframes progressShine {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%;
+    }
+  }
+
+  /* 狀態文字 */
+  .status-text {
+    margin-top: 20px;
+    font-size: 1rem;
+    color: #475569;
+    opacity: 0;
+    animation: statusFadeIn 0.5s ease-out 1.5s forwards;
+  }
+
+  @keyframes statusFadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+
+  .status-text.success {
+    color: #16A34A;
+    font-weight: 600;
+  }
+
+  .status-text.error {
+    color: #DC2626;
+    font-weight: 600;
+  }
+
+  /* 成功圖示動畫 */
+  .success-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: scale(0);
+    animation: iconBounce 0.6s ease-out 2s forwards;
+  }
+
+  @keyframes iconBounce {
+    0% {
+      opacity: 0;
+      transform: scale(0);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* 響應式設計 */
+  @media (max-width: 480px) {
+    .brand-title {
+      font-size: 2rem;
+    }
+    .container {
+      padding: 40px 24px;
+    }
   }
 </style>
-<div class="container">
-  <h3>✅ 登入成功！</h3>
-  <p>視窗即將自動關閉...</p>
+<div class="gradient-bg"></div>
+<div class="container" id="container">
+  <div class="success-icon" id="successIcon" style="display: none;">✅</div>
+  <h1 class="brand-title" id="brandTitle">ReelMind</h1>
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <p class="status-text" id="statusText">正在處理登入...</p>
 </div>
 <script>
 (function () {
@@ -33,6 +250,32 @@
   console.log('DEBUG: window.opener exists:', !!window.opener);
   console.log('DEBUG: window.opener type:', typeof window.opener);
   console.log('DEBUG: Current URL:', window.location.href);
+  
+  var container = document.getElementById('container');
+  var statusText = document.getElementById('statusText');
+  var successIcon = document.getElementById('successIcon');
+  var progressBar = document.getElementById('progressBar');
+  
+  // 更新狀態文字
+  function updateStatus(text, isSuccess, isError) {
+    if (statusText) {
+      statusText.textContent = text;
+      statusText.className = 'status-text';
+      if (isSuccess) statusText.classList.add('success');
+      if (isError) statusText.classList.add('error');
+    }
+  }
+  
+  // 顯示成功狀態
+  function showSuccess() {
+    if (successIcon) {
+      successIcon.style.display = 'block';
+    }
+    updateStatus('✅ 登入成功！', true);
+    if (progressBar) {
+      progressBar.style.width = '100%';
+    }
+  }
   
   // 檢測是否為手機版（手機版是整頁跳轉，不是彈窗）
   var isMobile = window.innerWidth <= 768 || 
@@ -86,14 +329,17 @@
       }));
       localStorage.setItem('ipPlanningTokenUpdated', Date.now().toString());
       console.log('DEBUG: ✅ Token saved to localStorage');
+      updateStatus('正在保存登入資訊...', false);
     } catch (e) {
       console.error('DEBUG: ❌ Failed to save to localStorage:', e);
+      updateStatus('⚠️ 保存失敗，請重試', false, true);
     }
     
     // 手機版處理：直接跳轉回首頁（因為是整頁跳轉，不是彈窗）
     if (isMobile || !window.opener) {
       console.log('DEBUG: Mobile or no opener detected, redirecting to homepage');
-      document.querySelector('.container').innerHTML = '<h3>✅ 登入成功！</h3><p>正在跳轉...</p>';
+      showSuccess();
+      updateStatus('正在跳轉...', true);
       
       // 延遲一小段時間確保 localStorage 已保存，然後跳轉回首頁
       setTimeout(function() {
@@ -101,9 +347,10 @@
         var homepageUrl = window.location.origin + '/';
         console.log('DEBUG: Redirecting to homepage:', homepageUrl);
         window.location.href = homepageUrl;
-      }, 300); // 縮短延遲時間，提升體驗
+      }, 1500); // 延長一點時間讓動畫完成
       return; // 手機版直接結束，不處理 postMessage
     }
+    
     // 準備訊息對象
     var message = {
       type: 'GOOGLE_AUTH_SUCCESS',
@@ -125,20 +372,32 @@
     try {
       var ch = new BroadcastChannel('auth');
       ch.postMessage({ type: 'login-success', access_token: token, refresh_token: refreshToken, user: message.user });
-    } catch (e) { console.warn('DEBUG: BroadcastChannel unavailable:', e); }
+      updateStatus('正在同步登入狀態...', false);
+    } catch (e) { 
+      console.warn('DEBUG: BroadcastChannel unavailable:', e); 
+    }
 
     // 依照規範：通知主視窗並嘗試立即關閉視窗
     try { if (window.opener && window.opener !== window) { window.opener.postMessage({ type: 'googleAuthSuccess' }, '*'); } } catch(_) {}
     try { window.close(); } catch(_) {}
+    
     // 500ms 後仍未關閉時顯示手動關閉按鈕（iOS/Safari 退路）
     setTimeout(function(){
       if (!window.closed) {
-        document.body.innerHTML = '<div style="margin:2rem;font-family:sans-serif;text-align:center">\
-          <p>已完成登入，可以關閉此視窗。</p>\
-          <button onclick="window.close()" style="padding:.6rem 1rem">關閉</button>\
-        </div>';
+        showSuccess();
+        updateStatus('✅ 登入成功！您可以關閉此視窗。', true);
+        if (container) {
+          var closeBtn = document.createElement('button');
+          closeBtn.textContent = '關閉';
+          closeBtn.style.cssText = 'margin-top: 20px; padding: 12px 24px; background: #2563EB; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;';
+          closeBtn.onmouseover = function() { this.style.background = '#1D4ED8'; };
+          closeBtn.onmouseout = function() { this.style.background = '#2563EB'; };
+          closeBtn.onclick = function() { window.close(); };
+          container.appendChild(closeBtn);
+        }
       }
     }, 500);
+    
     // 方案1：嘗試使用 postMessage（如果 window.opener 存在）
     // 方案2：使用 localStorage + storage 事件作為備用
     
@@ -154,6 +413,7 @@
         window.opener.postMessage(message, originParam);
         console.log('DEBUG: ✅ First postMessage sent successfully');
         postMessageSuccess = true;
+        showSuccess();
         
         // 延遲發送以確保接收
         setTimeout(function() {
@@ -223,14 +483,21 @@
       console.warn('DEBUG: 但 token 已保存到 localStorage，主視窗應能透過 storage 事件接收');
       // 即使 opener 不存在，也標記為成功（因為已經保存到 localStorage）
       postMessageSuccess = true;
+      showSuccess();
     }
     
     // 由主頁負責關閉彈窗：此頁不再嘗試 window.close() 以避免 COOP 問題
-    document.querySelector('.container').innerHTML = '<h3>✅ 登入成功！</h3><p>您可以關閉此視窗，或等待系統自動處理。</p>';
+    setTimeout(function() {
+      showSuccess();
+      updateStatus('✅ 登入成功！視窗即將自動關閉...', true);
+    }, 1500);
   } else {
     console.warn('DEBUG: ⚠️ No token found in URL');
-    document.querySelector('.container').innerHTML = '<h3>⚠️ 登入完成，但未找到認證資訊</h3><p>請關閉此視窗</p>';
+    updateStatus('⚠️ 登入完成，但未找到認證資訊', false, true);
+    if (progressBar) {
+      progressBar.style.width = '100%';
+      progressBar.style.background = '#DC2626';
+    }
   }
 })();
 </script>
-
