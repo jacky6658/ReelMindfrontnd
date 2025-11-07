@@ -1,125 +1,5 @@
 <!doctype html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>ReelMind 訂閱方案</title>
-    <style>
-      body { font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial; margin:0; background:#f8fafc; color:#0f172a; }
-      .container { max-width: 920px; margin: 0 auto; padding: 24px; }
-      .hero { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-top: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-      .plans { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
-      .plan { background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px; }
-      .plan h3 { margin: 0 0 6px 0; font-size: 18px; }
-      .price { font-size: 28px; font-weight: 700; margin: 8px 0 12px 0; }
-      .btn { display:inline-block; padding:10px 16px; background:#3b82f6; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; }
-      .btn.secondary { background:#0ea5e9; }
-      .btn:disabled { opacity:.6; cursor:not-allowed; }
-      .features { margin: 8px 0 12px 0; color:#334155; font-size: 14px; }
-      .notice { margin-top: 10px; color:#64748b; font-size: 13px; }
-      @media (max-width: 768px) { .plans { grid-template-columns: 1fr; } }
-    </style>
-  </head>
-  <body>
-    <link rel="stylesheet" href="/assets/css/main.css" />
-    <script defer src="/assets/js/config.js"></script>
-    <script defer src="/assets/js/auth.js"></script>
-    <script defer src="/assets/js/api.js"></script>
-    <script defer src="/assets/js/ui.js"></script>
-    <script defer src="/assets/js/bootstrap.js"></script>
-    <div class="container">
-      <h1>加入 ReelMind 會員</h1>
-      <div class="hero">
-        <p>訂閱後即可無限使用「一鍵生成」「AI顧問」「IP 人設規劃」三大模式。</p>
-        <div class="plans">
-          <div class="plan" id="plan-monthly">
-            <h3>月方案</h3>
-            <div class="price">NT$ 3,980 / 月</div>
-            <div class="features">
-              - 三大模式無限次使用<br />
-              - 創作者資料庫完整功能<br />
-              - 基礎客服支援
-            </div>
-            <button class="btn" onclick="scrollToSubscription()">立即加入</button>
-          </div>
-          <div class="plan" id="plan-yearly">
-            <h3>年方案</h3>
-            <div class="price">NT$ 39,800 / 年</div>
-            <div class="features">
-              - 方案內容同上（年繳更划算）<br />
-              - 優先客服支援
-            </div>
-            <button class="btn secondary" onclick="scrollToSubscription()">立即加入</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      (function initFromQuery(){
-        const params = new URLSearchParams(location.search);
-        const plan = params.get('plan');
-        if (plan === 'yearly') {
-          document.getElementById('plan-yearly').scrollIntoView({behavior:'smooth'});
-        } else if (plan === 'monthly') {
-          document.getElementById('plan-monthly').scrollIntoView({behavior:'smooth'});
-        }
-      })();
-
-      function scrollToSubscription() {
-        const subscriptionSection = document.getElementById('subscription-section');
-        if (subscriptionSection) {
-          subscriptionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }
-
-      async function mockPurchase(plan) {
-        // TODO: 串接金流後改為導向第三方支付，支付成功再回到 callback
-        try {
-          const userStr = localStorage.getItem('ipPlanningUser');
-          if (!userStr) {
-            alert('請先登入後再訂閱');
-            return;
-          }
-          const user = JSON.parse(userStr);
-          // 通知後端（準備用回調端點）
-          try {
-            await fetch('https://aivideobackend.zeabur.app/api/payment/callback', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                user_id: user.user_id,
-                plan,
-                transaction_id: 'TEST-' + Date.now(),
-                amount: plan === 'yearly' ? 39800 : 3980,
-                paid_at: new Date().toISOString()
-              })
-            }).catch(() => {});
-          } catch (_) {}
-          user.is_subscribed = true;
-          // 設置到期日（月/年）供前端顯示（實際以後端為準）
-          const now = new Date();
-          if (plan === 'yearly') {
-            now.setFullYear(now.getFullYear() + 1);
-          } else {
-            now.setMonth(now.getMonth() + 1);
-          }
-          user.subscription = { plan, expires_at: now.toISOString() };
-          localStorage.setItem('ipPlanningUser', JSON.stringify(user));
-          localStorage.setItem('ipPlanningTokenUpdated', Date.now().toString());
-          alert('感謝加入！您的訂閱已啟用（測試模式）');
-          // 回首頁
-          window.location.href = '/';
-        } catch (e) {
-          console.warn('mockPurchase error:', e);
-        }
-      }
-    </script>
-  </body>
-</html>
-
-<!doctype html>
-<html lang="zh-Hant">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -141,13 +21,20 @@ a{text-decoration:none;color:inherit}
   radial-gradient(600px 260px at 8% -10%, rgba(59,130,246,.10), transparent 60%);
   border-bottom:1px solid var(--line)}
 .h1{font-size:32px;line-height:1.2;margin:0 0 6px}
+.typewriter-cursor{color:var(--blue);animation:blink 1s infinite}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+@keyframes discountBlink{0%,45%{opacity:1;transform:scale(1)}50%,55%{opacity:0.3;transform:scale(0.95)}60%,100%{opacity:1;transform:scale(1)}}
 .lead{color:var(--sub);margin:0}
 .badge{display:inline-flex;gap:8px;align-items:center;background:#E0F2FE;color:#075985;padding:8px 12px;border-radius:999px;font-weight:800;font-size:12px;margin-bottom:10px}
 .notice{display:flex;gap:8px;align-items:center;color:#0F172A;background:#FEF3C7;border:1px solid #FDE68A;border-radius:12px;padding:8px 12px;margin-top:12px;font-weight:700}
 .grid{display:grid;gap:16px}
 @media(min-width:980px){.cols-2{grid-template-columns:1.1fr 1fr}}
+@media(max-width:980px){.grid[style*="grid-template-columns: repeat(3, 1fr)"]{grid-template-columns:1fr !important}}
 .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--line)}
-.card .body{padding:18px}
+.card .body{padding:18px;min-height:100%;position:relative;overflow:visible!important}
+.card a.btn{position:relative!important;z-index:10000!important;pointer-events:auto!important;cursor:pointer!important}
+.card .body > a.btn{position:relative!important;z-index:10000!important;pointer-events:auto!important;cursor:pointer!important;display:inline-flex!important}
+.monthly-btn{position:relative!important;z-index:10000!important;pointer-events:auto!important;cursor:pointer!important;overflow:visible!important}
 .h2{font-size:22px;font-weight:900;margin:0 0 8px}
 .h3{font-size:18px;font-weight:900;margin:0 0 6px}
 .hr{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:12px 0}
@@ -172,95 +59,369 @@ a{text-decoration:none;color:inherit}
 .faq{background:#FFF;border:1px solid var(--line);border-radius:16px;padding:14px}
 .ft{padding:24px 0;color:#64748B;text-align:center;border-top:1px solid var(--line);font-size:14px}
 .small{font-size:12px;color:#64748B}
+
+/* 動畫效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Hero 區塊動畫 */
+.hero {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.hero .badge {
+  animation: fadeIn 0.6s ease-out 0.2s both;
+}
+
+.hero .h1 {
+  animation: fadeInUp 0.8s ease-out 0.3s both;
+}
+
+.hero .lead {
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+/* 卡片動畫 */
+.card {
+  animation: fadeInUp 0.8s ease-out both;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 60px rgba(2,6,23,.12);
+}
+
+/* 三張卡片分別動畫 */
+.card:nth-child(1) {
+  animation: none !important; /* 移除月費方案卡片動畫 */
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.card:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.card:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+/* 年費方案特殊動畫 */
+.card[style*="border: 2px solid var(--blue)"] {
+  animation: scaleIn 0.8s ease-out 0.4s both;
+}
+
+.card[style*="border: 2px solid var(--blue)"]:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 30px 70px rgba(37,99,235,.25);
+}
+
+/* 標籤動畫 */
+.card[style*="border: 2px solid var(--blue)"] > div[style*="position: absolute"] {
+  animation: pulse 2s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* 按鈕動畫 */
+.btn {
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+/* 確保按鈕可點擊，移除可能阻擋的偽元素 */
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* 月費方案按鈕特殊處理 - 移除所有動畫效果，確保可點擊 */
+.monthly-btn {
+  position: relative !important;
+  z-index: 10000 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  overflow: visible !important;
+  animation: none !important;
+  transition: background 0.3s ease, transform 0.3s ease !important;
+}
+
+/* 完全移除月費按鈕的 ::before 偽元素動畫 */
+.monthly-btn::before {
+  display: none !important;
+  pointer-events: none !important;
+  content: none !important;
+}
+
+/* 確保月費按鈕內容可點擊 */
+.monthly-btn > * {
+  position: relative !important;
+  z-index: 10001 !important;
+  pointer-events: auto !important;
+}
+
+/* 月費按鈕 hover 效果（簡化版，無動畫） */
+.monthly-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(37,99,235,.3) !important;
+  background: var(--blue-deep) !important;
+}
+
+/* 折扣文字閃爍動畫 */
+.discount-badge {
+  display: inline-block;
+  font-weight: 900;
+  color: var(--red);
+  animation: discountBlink 2s ease-in-out infinite;
+  text-shadow: 0 0 8px rgba(220,38,38,0.5);
+}
+
+.btn > * {
+  position: relative;
+  z-index: 1;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37,99,235,.3);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* 價格數字動畫 */
+.price {
+  animation: fadeInUp 0.6s ease-out both;
+  transition: color 0.3s ease;
+}
+
+/* 列表項目動畫 */
+.list li {
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.list li:nth-child(1) { animation-delay: 0.1s; }
+.list li:nth-child(2) { animation-delay: 0.2s; }
+.list li:nth-child(3) { animation-delay: 0.3s; }
+.list li:nth-child(4) { animation-delay: 0.4s; }
+.list li:nth-child(5) { animation-delay: 0.5s; }
+
+/* CTA 區塊動畫 */
+.safe[style*="margin-top:24px; text-align: center"] {
+  animation: fadeInUp 0.8s ease-out 0.8s both;
+}
+
+/* FAQ 區塊動畫 */
+.faq {
+  animation: fadeInUp 0.8s ease-out 1s both;
+}
+
+/* Footer 動畫 */
+.ft {
+  animation: fadeIn 0.6s ease-out 1.2s both;
+}
+
+/* 響應式：手機版減少動畫延遲 */
+@media (max-width: 768px) {
+  .card {
+    animation-delay: 0s !important;
+  }
+  
+  .list li {
+    animation-delay: 0s !important;
+  }
+}
+
+/* 載入完成後的微動畫 */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.card[style*="border: 2px solid var(--blue)"]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
 </style>
 </head>
 <body>
 
 <!-- HERO -->
 <header class="hero wrap" id="subscription-section">
-  <div class="safe">
-    <span class="badge">單一訂閱制 · 不分等級 · 付費即使用</span>
-    <h1 class="h1">訂閱 ReelMind，解鎖你的 AI 創作系統</h1>
-    <p class="lead">包含 AI 顧問、AI 一鍵生成、IP 人設規劃與創作者資料庫。支援信用卡、LINE Pay、Apple Pay 等多種支付方式。</p>
+  <div class="safe" style="text-align: center;">
+    <h1 class="h1" id="typewriter-title">用 AI 智能體，打造你的爆款短影音</h1>
+    <p class="lead">每天不到 NT$66，全年 AI 幫你帳號定位、生成靈感選題與爆款腳本</p>
   </div>
 </header>
 
 <main class="wrap" style="padding:28px 0">
-  <div class="safe grid cols-2">
+  <div class="safe grid" style="grid-template-columns: repeat(3, 1fr); gap: 16px;">
 
-    <!-- 左：方案與付款 -->
+    <!-- 左：月費方案 -->
     <section class="card">
-      <div class="body">
-        <div class="kv" style="justify-content:space-between">
-          <h2 class="h2">選擇方案</h2>
-          <div class="switch" role="tablist" aria-label="plan switch">
-            <button id="mPlan" class="active" onclick="setPlan('monthly')" aria-selected="true">月費方案</button>
-            <button id="yPlan" onclick="setPlan('yearly')" aria-selected="false">年費方案</button>
-          </div>
-        </div>
-
-        <div id="planBox" style="margin-top:10px">
-          <div class="h3" id="planName">月費方案</div>
-          <div class="price" id="planPrice">NT$3,980</div>
-          <div class="sub" id="planDesc">每月訂閱，可隨時續訂；不分等級、功能完整。</div>
+      <div class="body" style="text-align: center; display: flex; flex-direction: column; height: 100%;">
+        <div style="flex: 1;">
+          <h2 class="h2">月費方案</h2>
+          <div class="price" style="color: var(--ink); margin: 16px 0;">NT$2,480</div>
+          <div class="sub" style="margin-bottom: 16px;">彈性方案，適合短期使用者</div>
           <div class="hr"></div>
-          <ul class="list">
+          <ul class="list" style="text-align: left; margin: 16px 0;">
             <li>AI 顧問對話：定位 / 節奏 / 變現 Q&A</li>
             <li>AI 一鍵生成：Hook、口播、分鏡、CTA</li>
             <li>IP 人設規劃：Profile + 14 天內容規劃</li>
             <li>創作者資料庫：PDF / CSV 下載、版本重生</li>
           </ul>
+          <div class="hr"></div>
+          <div class="small" style="margin-top: 0; text-align: center; margin-bottom: 12px;">一次付款、自動續約、可隨時取消</div>
         </div>
-
-        <div class="hr"></div>
-
-        <div class="h3">付款方式</div>
-        <div class="payrow" style="margin-top:8px">
-          <a class="paybtn" href="#" onclick="pay('card')">
-            💳 信用卡
-            <span style="font-size: 0.85em; color: #64748b; margin-left: 8px;">（支援 LINE Pay、Apple Pay、ATM、超商等）</span>
-          </a>
-        </div>
-
-        <div class="small" style="margin-top:10px">付款即代表同意<a href="#terms" class="link">服務條款與退費政策</a>。</div>
+        <a href="checkout.html?plan=monthly" class="btn blue monthly-btn" onclick="window.location.href='checkout.html?plan=monthly'; return false;" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none; position: relative; z-index: 10000 !important; cursor: pointer !important; pointer-events: auto !important; background: var(--blue) !important; color: white !important; padding: 12px 24px; border-radius: 999px; font-weight: 900;">立即加入</a>
       </div>
     </section>
 
-    <!-- 右：帳務資訊 / 訂單摘要 -->
-    <section class="card">
-      <div class="body">
-        <h2 class="h2">帳務資訊</h2>
-        <div class="row">
-          <input class="input" placeholder="姓名（或公司抬頭）" id="name" />
-          <input class="input" placeholder="電子信箱（收據與通知）" id="email" type="email" />
-          <input class="input" placeholder="手機（選填）" id="phone" />
-        </div>
-
-        <div class="row" style="margin-top:8px">
-          <select class="select" id="invoiceType">
-            <option value="personal">發票：個人</option>
-            <option value="company">發票：公司（統編）</option>
-          </select>
-          <input class="input" placeholder="統一編號（選擇公司時填寫）" id="vat" />
-        </div>
-
-        <textarea class="textarea" id="note" placeholder="備註（選填）" style="margin-top:8px"></textarea>
-
-        <div class="hr"></div>
-
-        <div class="h3">訂單摘要</div>
-        <div class="sum" aria-live="polite">
-          <div class="line"><span id="sumPlan">月費方案</span><b id="sumPrice">NT$3,980</b></div>
-          <div class="line"><span>手續費</span><b id="fee">NT$0</b></div>
-          <div class="line" style="border-top:1px dashed #334155;margin-top:8px;padding-top:8px">
-            <span><b>應付金額</b></span><b id="total">NT$3,980</b>
+    <!-- 中：年費方案（主推） -->
+    <section class="card" style="border: 2px solid var(--blue); box-shadow: 0 20px 50px rgba(37,99,235,.15); position: relative;">
+      <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--blue); color: white; padding: 4px 16px; border-radius: 999px; font-size: 12px; font-weight: 900;">🔥 最多人選擇</div>
+      <div class="body" style="text-align: center; display: flex; flex-direction: column; height: 100%;">
+        <div style="flex: 1;">
+          <h2 class="h2">年費方案</h2>
+          <div class="price" style="color: var(--blue);">NT$23,760</div>
+          <div class="sub" style="margin: 8px 0;">
+            <div style="font-size: 16px; font-weight: 700; color: var(--red); margin-bottom: 4px;">平均每月 NT$1,980</div>
+            <div style="font-size: 14px; color: var(--red); margin-bottom: 4px;">節省 NT$5,000（<span class="discount-badge">20% OFF</span>）</div>
+            <div style="font-size: 13px; color: var(--sub);">等於每天不到 NT$66</div>
           </div>
+          <div class="hr"></div>
+          <div class="sub" style="margin: 12px 0; font-weight: 600;">一次付款、自動續約、可隨時取消</div>
+          <ul class="list" style="text-align: left; margin: 16px 0;">
+            <li>AI 顧問對話：定位 / 節奏 / 變現 Q&A</li>
+            <li>AI 一鍵生成：Hook、口播、分鏡、CTA</li>
+            <li>IP 人設規劃：Profile + 14 天內容規劃</li>
+            <li>創作者資料庫：PDF / CSV 下載、版本重生</li>
+            <li>優先客服支援</li>
+          </ul>
+          <div class="hr"></div>
         </div>
+        <a href="checkout.html?plan=yearly" class="btn blue" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none;">立即升級 🔥 年付方案</a>
+      </div>
+    </section>
 
-        <div class="row" style="margin-top:12px">
-          <button class="btn blue" onclick="checkout()">前往付款</button>
-          <a class="btn ghost" href="/#login" onclick="(function(){ try{ window.location.href='/' + '#login'; }catch(_){ } return false; })();">已訂閱？登入使用</a>
+    <!-- 右：客製化方案 -->
+    <section class="card">
+      <div class="body" style="text-align: center; display: flex; flex-direction: column; height: 100%;">
+        <div style="flex: 1;">
+          <h2 class="h2">客製化方案</h2>
+          <div class="price" style="color: var(--ink); margin: 16px 0; font-size: 20px;">客製報價</div>
+          <div class="sub" style="margin-bottom: 16px;">品牌／團隊合作整合方案</div>
+          <div class="hr"></div>
+          <ul class="list" style="text-align: left; margin: 16px 0;">
+            <li>專屬整合服務</li>
+            <li>團隊輔導支援</li>
+            <li>客製化功能開發</li>
+            <li>優先技術支援</li>
+          </ul>
+          <div class="hr"></div>
+          <div class="small" style="margin-top: 0; text-align: center; margin-bottom: 12px;">專屬整合服務與團隊輔導</div>
         </div>
+        <a href="contact.html" class="btn blue" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none;">聯繫我們</a>
       </div>
     </section>
 
@@ -270,10 +431,18 @@ a{text-decoration:none;color:inherit}
   <div class="safe" style="margin-top:18px">
     <section class="faq" id="terms">
       <h2 class="h2">常見問題與條款</h2>
-      <p><b>Q：是否有免費試用？</b><br/>A：沒有。付費即使用，無免費體驗。</p>
+      <p><b>Q：付款後多久可以開始使用？</b><br/>A：完成付款後系統會自動開通，立即可登入並使用全部功能。無需等待人工審核。</p>
+      <p><b>Q：付款是否安全？</b><br/>A：所有付款皆透過綠界金流（ECPay）或官方合作支付管道，採用 SSL 加密連線，確保交易安全。</p>
+      <p><b>Q：可以使用哪些付款方式？</b><br/>A：目前支援信用卡、轉帳、台灣金流付款及海外信用卡支付（Visa、Master、JCB）。</p>
+      <p><b>Q：可以多人共用帳號嗎？</b><br/>A：為保障安全與使用紀錄，每個帳號僅限一人使用。如需團隊版本，請洽詢客製化方案。</p>
+      <p><b>Q：不同方案的功能差在哪裡？</b><br/>A：功能完全相同，僅付款週期不同。年付方案可享 20% 折扣與優先客服支援。</p>
       <p><b>Q：訂閱包含哪些功能？</b><br/>A：AI 顧問、AI 一鍵生成、IP 人設規劃與創作者資料庫；不分等級、功能完整。</p>
       <p><b>Q：如何開立發票？</b><br/>A：付款後將於 3–5 個工作日寄送電子發票至你的信箱。</p>
-      <p class="small">退費政策：數位服務一經啟用恕不退款（法規另有規定者除外）。若扣款或開通發生問題，請來信 <a href="mailto:hello@aijob.com.tw">hello@aijob.com.tw</a>。</p>
+      <p><b>Q：如何取消訂閱？</b><br/>A：可於下期前隨時取消，不另收續約手續費。</p>
+      <p class="small" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line);">
+        <strong>※ 所有方案皆為一次性付款並自動續約，可於下期前隨時取消，不另收續約手續費。</strong><br/>
+        退費政策：數位服務一經啟用恕不退款（法規另有規定者除外）。若扣款或開通發生問題，請來信 <a href="mailto:aiagent168168@gmail.com">aiagent168168@gmail.com</a>。
+      </p>
     </section>
   </div>
 </main>
@@ -282,26 +451,15 @@ a{text-decoration:none;color:inherit}
 
 <script>
   // 價格設定（如未來調整，改這裡即可）
-  const price = { monthly: 3980, yearly: 39800 };
+  const price = { monthly: 2480, yearly: 23760 };
   let current = 'monthly';
 
   function format(n){ return 'NT$' + n.toLocaleString('zh-Hant-TW'); }
 
   function setPlan(p){
     current = p;
-    document.getElementById('mPlan').classList.toggle('active', p==='monthly');
-    document.getElementById('yPlan').classList.toggle('active', p==='yearly');
-
-    const name = p==='monthly' ? '月費方案' : '年費方案（省 NT$7,960）';
-    const desc = p==='monthly'
-      ? '每月訂閱，可隨時續訂；不分等級、功能完整。'
-      : '一次結清 12 個月；不分等級、功能完整。';
-    document.getElementById('planName').textContent = name;
-    document.getElementById('planPrice').textContent = format(price[p]);
-    document.getElementById('planDesc').textContent = desc;
-    document.getElementById('sumPlan').textContent = name;
-    document.getElementById('sumPrice').textContent = format(price[p]);
-    document.getElementById('total').textContent = format(price[p]);
+    // 這些元素在新的三卡片布局中不存在，所以只更新 current 變數
+    // 如果需要，可以在這裡添加其他邏輯
   }
 
   // 從 URL 參數讀取方案
@@ -321,17 +479,26 @@ a{text-decoration:none;color:inherit}
       }
     } catch(_) {}
 
+    // 檢查表單元素是否存在（subscription.html 中沒有表單，表單在 checkout.html）
+    const nameEl = document.getElementById('name');
+    const emailEl = document.getElementById('email');
+    if (!nameEl || !emailEl) {
+      // 如果表單不存在，這個函數不應該在 subscription.html 中被調用
+      console.warn('checkout 函數在 subscription.html 中不應該被調用');
+      return;
+    }
+
     // 收集訂單資料
     const plan = current;
     const payload = {
       plan,
       amount: price[plan],
-      name: document.getElementById('name').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      invoiceType: document.getElementById('invoiceType').value,
-      vat: document.getElementById('vat').value.trim(),
-      note: document.getElementById('note').value.trim()
+      name: nameEl.value.trim(),
+      email: emailEl.value.trim(),
+      phone: document.getElementById('phone')?.value.trim() || '',
+      invoiceType: document.getElementById('invoiceType')?.value || 'personal',
+      vat: document.getElementById('vat')?.value.trim() || '',
+      note: document.getElementById('note')?.value.trim() || ''
     };
     
     // 前端簡單檢查
@@ -397,6 +564,22 @@ a{text-decoration:none;color:inherit}
   const urlPlan = getUrlParam('plan');
   const initialPlan = urlPlan === 'yearly' ? 'yearly' : 'monthly';
   setPlan(initialPlan);
+
+  // 添加滾動到對應卡片的動畫
+  if (urlPlan) {
+    setTimeout(() => {
+      const targetCard = document.querySelector(`a[href="checkout.html?plan=${urlPlan}"]`)?.closest('.card');
+      if (targetCard) {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // 添加高亮效果
+        targetCard.style.transition = 'all 0.5s ease';
+        targetCard.style.transform = 'scale(1.05)';
+        setTimeout(() => {
+          targetCard.style.transform = 'scale(1)';
+        }, 500);
+      }
+    }, 1000);
+  }
   
   // 處理付款結果頁面
   // 處理授權連結：如果在 subscription.html 頁面檢測到 ?token=xxx，跳轉到 index.html 處理
@@ -501,7 +684,7 @@ a{text-decoration:none;color:inherit}
                     <button class="btn ghost" onclick="checkOrderStatus('${orderId}')">檢查付款狀態</button>
                   </div>
                   <p class="small" style="margin-top: 24px;">
-                    如有問題，請聯繫客服：<a href="mailto:hello@aijob.com.tw">hello@aijob.com.tw</a>
+                    如有問題，請聯繫客服：<a href="mailto:aiagent168168@gmail.com">aiagent168168@gmail.com</a>
                   </p>
                 </div>
               </section>
@@ -608,7 +791,7 @@ a{text-decoration:none;color:inherit}
               <button class="btn ghost" onclick="window.location.href='/'">返回首頁</button>
             </div>
             <p class="small" style="margin-top: 24px;">
-              如有問題，請聯繫客服：<a href="mailto:hello@aijob.com.tw">hello@aijob.com.tw</a>
+              如有問題，請聯繫客服：<a href="mailto:aiagent168168@gmail.com">aiagent168168@gmail.com</a>
             </p>
           </div>
         </section>
@@ -620,6 +803,89 @@ a{text-decoration:none;color:inherit}
       container.insertAdjacentHTML('beforeend', errorHTML);
     }
   }
+  
+  // 打字機效果
+  function initTypewriter() {
+    const titleElement = document.getElementById('typewriter-title');
+    if (!titleElement) return;
+    
+    const text = '用 AI 智能體，打造你的爆款短影音';
+    let index = 0;
+    let showCursor = true;
+    
+    // 先保存原始文字，然後清空標題內容開始打字效果
+    const originalText = titleElement.textContent || text;
+    titleElement.textContent = '';
+    titleElement.innerHTML = '<span class="typewriter-cursor">|</span>';
+    
+    function typeChar() {
+      if (index < text.length) {
+        const cursor = showCursor ? '<span class="typewriter-cursor">|</span>' : '';
+        titleElement.innerHTML = text.substring(0, index + 1) + cursor;
+        index++;
+        setTimeout(typeChar, 100); // 每個字元間隔 100ms
+      } else {
+        // 打字完成後，讓光標閃爍幾次後消失
+        let blinkCount = 0;
+        const blinkInterval = setInterval(() => {
+          showCursor = !showCursor;
+          titleElement.innerHTML = text + (showCursor ? '<span class="typewriter-cursor">|</span>' : '');
+          blinkCount++;
+          if (blinkCount >= 6) {
+            clearInterval(blinkInterval);
+            titleElement.textContent = text; // 最終移除光標
+          }
+        }, 500);
+      }
+    }
+    
+    // 延遲開始，讓頁面先載入
+    setTimeout(typeChar, 300);
+  }
+  
+  // 頁面載入完成後初始化打字機效果
+  document.addEventListener('DOMContentLoaded', function() {
+    initTypewriter();
+    
+    // 強制確保月付方案按鈕可點擊
+    const monthlyBtn = document.querySelector('.monthly-btn');
+    if (monthlyBtn) {
+      // 強制設置樣式，確保按鈕可點擊
+      monthlyBtn.style.pointerEvents = 'auto';
+      monthlyBtn.style.cursor = 'pointer';
+      monthlyBtn.style.zIndex = '10000';
+      monthlyBtn.style.position = 'relative';
+      monthlyBtn.style.overflow = 'visible';
+      
+      // 移除可能阻擋點擊的偽元素
+      const style = document.createElement('style');
+      style.textContent = `
+        .monthly-btn::before {
+          display: none !important;
+          pointer-events: none !important;
+        }
+        .monthly-btn {
+          overflow: visible !important;
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // 添加點擊事件監聽器作為備用（使用 capture 階段確保優先觸發）
+      monthlyBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        window.location.href = 'checkout.html?plan=monthly';
+        return false;
+      }, true);
+      
+      // 確保按鈕在動畫完成後仍然可點擊
+      setTimeout(() => {
+        monthlyBtn.style.pointerEvents = 'auto';
+        monthlyBtn.style.cursor = 'pointer';
+      }, 1000);
+    }
+  });
 </script>
 
 </body>

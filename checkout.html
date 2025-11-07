@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>填寫付款資訊｜ReelMind</title>
+<meta name="description" content="填寫付款資訊，完成 ReelMind 訂閱">
+<meta name="theme-color" content="#2563EB" />
+<style>
+:root{
+  --bg:#F8FAFC; --ink:#0F172A; --sub:#475569; --line:#E2E8F0; --card:#FFFFFF;
+  --blue:#2563EB; --blue-deep:#1D4ED8; --ok:#16A34A; --warn:#F59E0B; --red:#DC2626;
+  --shadow:0 16px 40px rgba(2,6,23,.08); --r:16px;
+}
+*{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Noto Sans TC","PingFang TC",Segoe UI,Roboto,Arial}
+a{text-decoration:none;color:inherit}
+.wrap{width:100%} .safe{max-width:1120px;margin:0 auto;padding:0 16px}
+.hero{padding:40px 0 24px;background:
+  radial-gradient(900px 320px at 90% -10%, rgba(37,99,235,.12), transparent 60%),
+  radial-gradient(600px 260px at 8% -10%, rgba(59,130,246,.10), transparent 60%);
+  border-bottom:1px solid var(--line)}
+.h1{font-size:28px;line-height:1.2;margin:0 0 6px}
+.lead{color:var(--sub);margin:0;font-size:16px}
+.badge{display:inline-flex;gap:8px;align-items:center;background:#E0F2FE;color:#075985;padding:8px 12px;border-radius:999px;font-weight:800;font-size:12px;margin-bottom:10px}
+.grid{display:grid;gap:16px}
+@media(min-width:980px){.cols-2{grid-template-columns:1.1fr 1fr}}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--line)}
+.card .body{padding:24px}
+.h2{font-size:22px;font-weight:900;margin:0 0 8px}
+.h3{font-size:18px;font-weight:900;margin:0 0 6px}
+.hr{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:12px 0}
+.sub{color:var(--sub)}
+.list{padding-left:18px;margin:8px 0} .list li{margin:6px 0;color:var(--sub)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.input{width:100%;height:44px;border:1px solid #CBD5E1;border-radius:10px;padding:10px 12px;font-size:14px}
+.select{width:100%;height:44px;border:1px solid #CBD5E1;border-radius:10px;padding:10px 12px;background:#fff}
+.textarea{width:100%;min-height:88px;border:1px solid #CBD5E1;border-radius:12px;padding:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 18px;border-radius:999px;font-weight:900;cursor:pointer;border:none}
+.btn.blue{background:var(--blue);color:#fff}.btn.blue:hover{background:var(--blue-deep)}
+.btn.ghost{border:1px solid #CBD5E1;background:#fff;color:#334155}
+.payrow{display:grid;gap:10px}
+.paybtn{width:100%;height:48px;border:1px solid #CBD5E1;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;gap:8px;cursor:pointer}
+.sum{background:#0B1220;color:#E5E7EB;border-radius:14px;padding:16px}
+.sum .line{display:flex;justify-content:space-between;margin:8px 0}
+.ft{padding:24px 0;color:#64748B;text-align:center;border-top:1px solid var(--line);font-size:14px}
+.small{font-size:12px;color:#64748B}
+.plan-summary{background:#F1F5F9;border-radius:12px;padding:16px;margin-bottom:16px}
+.plan-summary .plan-name{font-size:18px;font-weight:900;margin-bottom:8px}
+.plan-summary .plan-price{font-size:24px;font-weight:900;color:var(--blue)}
+.plan-summary .plan-desc{color:var(--sub);font-size:14px;margin-top:4px}
+
+/* 動畫效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Hero 區塊動畫 */
+.hero {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.hero .badge {
+  animation: fadeIn 0.6s ease-out 0.2s both;
+}
+
+.hero .h1 {
+  animation: fadeInUp 0.8s ease-out 0.3s both;
+}
+
+.hero .lead {
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+/* 卡片動畫 */
+.card {
+  animation: fadeInUp 0.8s ease-out both;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 50px rgba(2,6,23,.12);
+}
+
+/* 左右卡片分別動畫 */
+.card:nth-child(1) {
+  animation: slideInLeft 0.8s ease-out 0.2s both;
+}
+
+.card:nth-child(2) {
+  animation: slideInRight 0.8s ease-out 0.4s both;
+}
+
+/* 方案摘要動畫 */
+.plan-summary {
+  animation: fadeInUp 0.6s ease-out 0.6s both;
+  transition: transform 0.3s ease;
+}
+
+.plan-summary:hover {
+  transform: scale(1.02);
+}
+
+/* 輸入框動畫 */
+.input, .select, .textarea {
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.input:nth-of-type(1) { animation-delay: 0.7s; }
+.input:nth-of-type(2) { animation-delay: 0.8s; }
+.input:nth-of-type(3) { animation-delay: 0.9s; }
+.select { animation-delay: 1s; }
+.textarea { animation-delay: 1.1s; }
+
+.input:focus, .select:focus, .textarea:focus {
+  transform: scale(1.02);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+}
+
+/* 按鈕動畫 */
+.btn {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease-out 1.2s both;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37,99,235,.3);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* 訂單摘要動畫 */
+.sum {
+  animation: fadeInUp 0.6s ease-out 1s both;
+}
+
+.sum .line {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+.sum .line:nth-child(1) { animation-delay: 1.1s; }
+.sum .line:nth-child(2) { animation-delay: 1.2s; }
+.sum .line:nth-child(3) { animation-delay: 1.3s; }
+
+/* 列表項目動畫 */
+.list li {
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.list li:nth-child(1) { animation-delay: 1.1s; }
+.list li:nth-child(2) { animation-delay: 1.2s; }
+.list li:nth-child(3) { animation-delay: 1.3s; }
+.list li:nth-child(4) { animation-delay: 1.4s; }
+.list li:nth-child(5) { animation-delay: 1.5s; }
+
+/* Footer 動畫 */
+.ft {
+  animation: fadeIn 0.6s ease-out 1.6s both;
+}
+
+/* 響應式：手機版減少動畫延遲 */
+@media (max-width: 768px) {
+  .card {
+    animation-delay: 0s !important;
+  }
+  
+  .input, .select, .textarea {
+    animation-delay: 0s !important;
+  }
+  
+  .list li {
+    animation-delay: 0s !important;
+  }
+}
+
+/* 載入動畫 */
+@keyframes loading {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.btn:disabled::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: loading 0.8s linear infinite;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero wrap">
+  <div class="safe">
+    <span class="badge">一次付款 · 自動續約 · 可隨時取消</span>
+    <h1 class="h1">填寫付款資訊</h1>
+    <p class="lead">完成以下資訊即可開始使用 ReelMind</p>
+  </div>
+</header>
+
+<main class="wrap" style="padding:28px 0">
+  <div class="safe grid cols-2">
+
+    <!-- 左：帳務資訊 -->
+    <section class="card">
+      <div class="body">
+        <h2 class="h2">帳務資訊</h2>
+        
+        <!-- 方案摘要 -->
+        <div class="plan-summary" id="planSummary">
+          <div class="plan-name" id="summaryPlanName">月費方案</div>
+          <div class="plan-price" id="summaryPlanPrice">NT$2,480</div>
+          <div class="plan-desc" id="summaryPlanDesc">彈性方案，適合短期使用者</div>
+        </div>
+
+        <div class="row">
+          <input class="input" placeholder="姓名（或公司抬頭）" id="name" required />
+          <input class="input" placeholder="電子信箱（收據與通知）" id="email" type="email" required />
+          <input class="input" placeholder="手機（選填）" id="phone" />
+        </div>
+
+        <div class="row" style="margin-top:8px">
+          <select class="select" id="invoiceType">
+            <option value="personal">發票：個人</option>
+            <option value="company">發票：公司（統編）</option>
+          </select>
+          <input class="input" placeholder="統一編號（選擇公司時填寫）" id="vat" />
+        </div>
+
+        <textarea class="textarea" id="note" placeholder="備註（選填）" style="margin-top:8px"></textarea>
+
+        <div class="hr"></div>
+
+        <div class="h3">付款方式</div>
+        <div class="payrow" style="margin-top:8px">
+          <a class="paybtn" href="#" onclick="pay('card'); return false;">
+            💳 信用卡
+            <span style="font-size: 0.85em; color: #64748b; margin-left: 8px;">（支援 LINE Pay、Apple Pay、ATM、超商等）</span>
+          </a>
+        </div>
+
+        <div class="row" style="margin-top:16px">
+          <button class="btn blue" onclick="checkout()" style="width: 100%;">前往付款</button>
+        </div>
+        <div class="small" style="margin-top:10px; text-align: center;">付款即代表同意<a href="#terms" class="link">服務條款與退費政策</a>。</div>
+      </div>
+    </section>
+
+    <!-- 右：訂單摘要 -->
+    <section class="card">
+      <div class="body">
+        <h2 class="h2">訂單摘要</h2>
+        <div class="sum" aria-live="polite">
+          <div class="line"><span id="sumPlan">月費方案</span><b id="sumPrice">NT$2,480</b></div>
+          <div class="line"><span>手續費</span><b id="fee">NT$0</b></div>
+          <div class="line" style="border-top:1px dashed #334155;margin-top:8px;padding-top:8px">
+            <span><b>應付金額</b></span><b id="total">NT$2,480</b>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h3 class="h3">方案內容</h3>
+        <ul class="list">
+          <li>AI 顧問對話：定位 / 節奏 / 變現 Q&A</li>
+          <li>AI 一鍵生成：Hook、口播、分鏡、CTA</li>
+          <li>IP 人設規劃：Profile + 14 天內容規劃</li>
+          <li>創作者資料庫：PDF / CSV 下載、版本重生</li>
+          <li id="extraFeature" style="display:none;">優先客服支援</li>
+        </ul>
+
+        <div class="hr"></div>
+
+        <div class="small" style="line-height:1.6;">
+          <strong>※ 所有方案皆為一次性付款並自動續約，可於下期前隨時取消，不另收續約手續費。</strong>
+        </div>
+
+        <div class="row" style="margin-top:16px">
+          <a class="btn ghost" href="subscription.html" style="width: 100%; text-align: center;">← 返回選擇方案</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="ft">© 2025 ReelMind · AI 短影音｜AI 腳本生成｜AI 顧問｜IP 人設規劃 · 台灣</footer>
+
+<script>
+  // 價格設定
+  const price = { monthly: 2480, yearly: 23760 };
+  let currentPlan = 'monthly';
+
+  function format(n){ return 'NT$' + n.toLocaleString('zh-Hant-TW'); }
+
+  // 從 URL 參數讀取方案
+  function getUrlParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+  }
+
+  // 初始化：根據 URL 參數設定方案
+  function initPlan() {
+    const plan = getUrlParam('plan');
+    if (plan === 'yearly' || plan === 'monthly') {
+      currentPlan = plan;
+      updatePlanDisplay();
+    } else {
+      // 如果沒有方案參數，跳轉回選擇頁面
+      window.location.href = 'subscription.html';
+    }
+  }
+
+  // 更新方案顯示
+  function updatePlanDisplay() {
+    const isYearly = currentPlan === 'yearly';
+    
+    // 更新方案摘要
+    document.getElementById('summaryPlanName').textContent = isYearly ? '年費方案 🔥' : '月費方案';
+    document.getElementById('summaryPlanPrice').textContent = format(price[currentPlan]);
+    document.getElementById('summaryPlanDesc').textContent = isYearly 
+      ? '最划算，節省 NT$5,000（20% OFF）' 
+      : '彈性方案，適合短期使用者';
+
+    // 更新訂單摘要
+    const planName = isYearly ? '年費方案（省 NT$5,000）' : '月費方案';
+    document.getElementById('sumPlan').textContent = planName;
+    document.getElementById('sumPrice').textContent = format(price[currentPlan]);
+    document.getElementById('total').textContent = format(price[currentPlan]);
+
+    // 年費方案顯示額外功能
+    const extraFeature = document.getElementById('extraFeature');
+    if (extraFeature) {
+      extraFeature.style.display = isYearly ? 'list-item' : 'none';
+    }
+  }
+
+  async function checkout(){
+    // 登入檢查
+    try {
+      var token = localStorage.getItem('ipPlanningToken') || '';
+      if (!token) {
+        alert('請先登入後再訂閱');
+        try { window.location.href = '/' + '#login'; } catch(_) {}
+        return;
+      }
+    } catch(_) {}
+
+    // 收集訂單資料
+    const payload = {
+      plan: currentPlan,
+      amount: price[currentPlan],
+      name: document.getElementById('name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      invoiceType: document.getElementById('invoiceType').value,
+      vat: document.getElementById('vat').value.trim(),
+      note: document.getElementById('note').value.trim()
+    };
+    
+    // 前端驗證
+    if(!payload.name || !payload.email){
+      alert('請填寫姓名與電子信箱');
+      return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(payload.email)) {
+      alert('請輸入有效的電子信箱');
+      return;
+    }
+    
+    if (payload.invoiceType === 'company' && !payload.vat) {
+      alert('選擇公司發票時，請填寫統一編號');
+      return;
+    }
+    
+    // 顯示載入狀態
+    const checkoutBtn = document.querySelector('.btn.blue');
+    const originalText = checkoutBtn.textContent;
+    checkoutBtn.disabled = true;
+    checkoutBtn.textContent = '處理中...';
+    
+    try {
+      const response = await fetch('https://aivideobackend.zeabur.app/api/payment/checkout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (response.ok) {
+        const html = await response.text();
+        document.body.innerHTML = html;
+      } else {
+        const errorData = await response.json().catch(() => ({ error: '建立訂單失敗' }));
+        alert(errorData.error || '建立訂單失敗，請稍後再試');
+        checkoutBtn.disabled = false;
+        checkoutBtn.textContent = originalText;
+      }
+    } catch (error) {
+      console.error('付款錯誤:', error);
+      alert('付款處理失敗，請稍後再試');
+      checkoutBtn.disabled = false;
+      checkoutBtn.textContent = originalText;
+    }
+  }
+
+  function pay(kind){
+    checkout();
+  }
+
+  // 處理付款結果頁面
+  window.addEventListener('DOMContentLoaded', async function() {
+    initPlan();
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    const orderId = urlParams.get('order_id');
+    const message = urlParams.get('message');
+    
+    if (status === 'success') {
+      showPaymentSuccess(orderId);
+    } else if (status === 'pending') {
+      await showPaymentPending(orderId);
+    } else if (status === 'failed' || status === 'error') {
+      showPaymentError(message || '付款失敗');
+    }
+  });
+  
+  async function showPaymentPending(orderId) {
+    if (!orderId) {
+      showPaymentError('訂單編號不存在');
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('ipPlanningToken') || '';
+      const response = await fetch(`https://aivideobackend.zeabur.app/api/user/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const order = data.orders?.find(o => o.order_id === orderId);
+        
+        if (order) {
+          const paymentMethod = order.payment_method || '';
+          const paymentCode = order.payment_code || '';
+          const bankCode = order.bank_code || '';
+          const expireDate = order.expire_date || '';
+          
+          const mainContent = document.querySelector('.safe.grid');
+          if (mainContent) {
+            mainContent.style.display = 'none';
+          }
+          
+          let paymentInfoHTML = '';
+          if (paymentMethod === 'ATM') {
+            paymentInfoHTML = `
+              <div style="background: #f8f9fa; padding: 24px; border-radius: 8px; margin: 24px 0;">
+                <h3 class="h3" style="margin-bottom: 16px;">ATM 轉帳資訊</h3>
+                ${bankCode ? `<p class="sub" style="margin-bottom: 8px;"><strong>銀行代碼：</strong>${bankCode}</p>` : ''}
+                ${paymentCode ? `<p class="sub" style="margin-bottom: 8px;"><strong>虛擬帳號：</strong><code style="background: white; padding: 4px 8px; border-radius: 4px; font-size: 1.1em;">${paymentCode}</code></p>` : ''}
+                ${expireDate ? `<p class="small" style="color: var(--red); margin-top: 16px;">⚠️ 請於 ${expireDate} 前完成轉帳</p>` : ''}
+              </div>
+            `;
+          } else if (paymentMethod === 'CVS' || paymentMethod === 'BARCODE') {
+            paymentInfoHTML = `
+              <div style="background: #f8f9fa; padding: 24px; border-radius: 8px; margin: 24px 0;">
+                <h3 class="h3" style="margin-bottom: 16px;">超商代碼</h3>
+                ${paymentCode ? `<p class="sub" style="margin-bottom: 8px;"><strong>付款代碼：</strong><code style="background: white; padding: 4px 8px; border-radius: 4px; font-size: 1.1em;">${paymentCode}</code></p>` : ''}
+                ${expireDate ? `<p class="small" style="color: var(--red); margin-top: 16px;">⚠️ 請於 ${expireDate} 前至超商完成付款</p>` : ''}
+                <p class="small" style="margin-top: 16px;">請至 7-11、全家、萊爾富、OK 超商等門市，使用多媒體機台輸入代碼完成付款</p>
+              </div>
+            `;
+          }
+          
+          const pendingHTML = `
+            <div class="safe" style="margin-top: 40px;">
+              <section class="card">
+                <div class="body" style="text-align: center; padding: 40px 20px;">
+                  <div style="font-size: 64px; margin-bottom: 20px;">⏳</div>
+                  <h2 class="h2" style="color: var(--warn); margin-bottom: 12px;">取號成功，待付款</h2>
+                  <p class="sub" style="margin-bottom: 24px;">請依照下方資訊完成付款，付款完成後系統將自動開通您的帳號</p>
+                  ${orderId ? `<p class="small" style="margin-bottom: 24px;">訂單編號：${orderId}</p>` : ''}
+                  ${paymentInfoHTML}
+                  <div class="row" style="justify-content: center; gap: 12px; margin-top: 24px;">
+                    <button class="btn blue" onclick="window.location.href='/'">返回首頁</button>
+                    <button class="btn ghost" onclick="checkOrderStatus('${orderId}')">檢查付款狀態</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+          `;
+          
+          const container = document.querySelector('.wrap');
+          if (container) {
+            container.insertAdjacentHTML('beforeend', pendingHTML);
+          }
+        } else {
+          showPaymentError('找不到訂單資訊');
+        }
+      } else {
+        showPaymentError('無法查詢訂單資訊');
+      }
+    } catch (error) {
+      console.error('查詢訂單失敗:', error);
+      showPaymentError('查詢訂單失敗，請稍後再試');
+    }
+  }
+  
+  async function checkOrderStatus(orderId) {
+    try {
+      const token = localStorage.getItem('ipPlanningToken') || '';
+      const response = await fetch(`https://aivideobackend.zeabur.app/api/user/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const order = data.orders?.find(o => o.order_id === orderId);
+        
+        if (order) {
+          if (order.payment_status === 'paid') {
+            alert('付款成功！您的帳號已開通');
+            window.location.href = '/';
+          } else {
+            alert('尚未完成付款，請完成付款後再試');
+          }
+        } else {
+          alert('找不到訂單資訊');
+        }
+      } else {
+        alert('無法查詢訂單狀態');
+      }
+    } catch (error) {
+      console.error('檢查訂單狀態失敗:', error);
+      alert('檢查訂單狀態失敗，請稍後再試');
+    }
+  }
+  
+  function showPaymentSuccess(orderId) {
+    const mainContent = document.querySelector('.safe.grid');
+    if (mainContent) {
+      mainContent.style.display = 'none';
+    }
+    
+    const successHTML = `
+      <div class="safe" style="margin-top: 40px;">
+        <section class="card">
+          <div class="body" style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+            <h2 class="h2" style="color: var(--ok); margin-bottom: 12px;">付款成功！</h2>
+            <p class="sub" style="margin-bottom: 24px;">感謝您的訂閱，您的帳號已開通使用權限</p>
+            ${orderId ? `<p class="small" style="margin-bottom: 24px;">訂單編號：${orderId}</p>` : ''}
+            <div class="row" style="justify-content: center; gap: 12px;">
+              <button class="btn blue" onclick="window.location.href='/'">開始使用</button>
+              <button class="btn ghost" onclick="window.location.href='subscription.html'">查看訂單</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+    
+    const container = document.querySelector('.wrap');
+    if (container) {
+      container.insertAdjacentHTML('beforeend', successHTML);
+    }
+  }
+  
+  function showPaymentError(message) {
+    const mainContent = document.querySelector('.safe.grid');
+    if (mainContent) {
+      mainContent.style.display = 'none';
+    }
+    
+    const errorHTML = `
+      <div class="safe" style="margin-top: 40px;">
+        <section class="card">
+          <div class="body" style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 64px; margin-bottom: 20px;">❌</div>
+            <h2 class="h2" style="color: var(--red); margin-bottom: 12px;">付款失敗</h2>
+            <p class="sub" style="margin-bottom: 24px;">${message}</p>
+            <div class="row" style="justify-content: center; gap: 12px;">
+              <button class="btn blue" onclick="window.location.href='checkout.html?plan=' + '${currentPlan}'">重新付款</button>
+              <button class="btn ghost" onclick="window.location.href='subscription.html'">返回選擇方案</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+    
+    const container = document.querySelector('.wrap');
+    if (container) {
+      container.insertAdjacentHTML('beforeend', errorHTML);
+    }
+  }
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>聯繫我們｜ReelMind</title>
+<meta name="description" content="聯繫 ReelMind 團隊，了解客製化方案與企業合作">
+<meta name="theme-color" content="#2563EB" />
+<style>
+:root{
+  --bg:#F8FAFC; --ink:#0F172A; --sub:#475569; --line:#E2E8F0; --card:#FFFFFF;
+  --blue:#2563EB; --blue-deep:#1D4ED8; --ok:#16A34A; --warn:#F59E0B; --red:#DC2626;
+  --shadow:0 16px 40px rgba(2,6,23,.08); --r:16px;
+}
+*{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Noto Sans TC","PingFang TC",Segoe UI,Roboto,Arial}
+a{text-decoration:none;color:inherit}
+.wrap{width:100%} .safe{max-width:1120px;margin:0 auto;padding:0 16px}
+.hero{padding:56px 0 24px;background:
+  radial-gradient(900px 320px at 90% -10%, rgba(37,99,235,.12), transparent 60%),
+  radial-gradient(600px 260px at 8% -10%, rgba(59,130,246,.10), transparent 60%);
+  border-bottom:1px solid var(--line);text-align:center}
+.h1{font-size:32px;line-height:1.2;margin:0 0 6px}
+.lead{color:var(--sub);margin:0;font-size:18px}
+.grid{display:grid;gap:24px}
+@media(min-width:768px){.cols-2{grid-template-columns:1fr 1fr}}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--line);padding:32px}
+.h2{font-size:24px;font-weight:900;margin:0 0 16px}
+.h3{font-size:18px;font-weight:900;margin:0 0 12px}
+.hr{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:20px 0}
+.sub{color:var(--sub);line-height:1.6}
+.input{width:100%;height:48px;border:1px solid #CBD5E1;border-radius:10px;padding:12px 16px;font-size:14px;margin-bottom:16px}
+.select{width:100%;height:48px;border:1px solid #CBD5E1;border-radius:10px;padding:12px 16px;font-size:14px;margin-bottom:16px;background:white;cursor:pointer}
+.textarea{width:100%;min-height:120px;border:1px solid #CBD5E1;border-radius:12px;padding:12px 16px;font-size:14px;margin-bottom:16px;resize:vertical}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 24px;border-radius:999px;font-weight:900;cursor:pointer;border:none;transition:all 0.3s ease}
+.btn.blue{background:var(--blue);color:#fff}.btn.blue:hover{background:var(--blue-deep);transform:translateY(-2px);box-shadow:0 8px 20px rgba(37,99,235,.3)}
+.contact-item{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px}
+.contact-icon{width:48px;height:48px;border-radius:12px;background:#E0F2FE;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.contact-info h4{margin:0 0 4px;font-size:16px;font-weight:700}
+.contact-info p{margin:0;color:var(--sub);font-size:14px}
+.ft{padding:32px 0;color:#64748B;text-align:center;border-top:1px solid var(--line);font-size:14px}
+.back-home{display:inline-flex;align-items:center;gap:8px;color:var(--blue);text-decoration:none;margin-bottom:20px;font-weight:600;transition:all 0.3s ease;padding:8px 16px;border-radius:8px}
+.back-home:hover{background:rgba(37,99,235,0.1);transform:translateX(-4px)}
+.back-home span:first-child{font-size:18px}
+
+/* 動畫效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.card {
+  animation: fadeInUp 0.8s ease-out both;
+}
+
+.card:nth-child(1) {
+  animation-delay: 0.2s;
+}
+
+.card:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.input, .textarea {
+  transition: all 0.3s ease;
+}
+
+.input:focus, .textarea:focus, .select:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero wrap">
+  <div class="safe">
+    <a href="index.html" class="back-home">
+      <span>←</span>
+      <span>返回首頁</span>
+    </a>
+    <h1 class="h1">聯繫我們</h1>
+    <p class="lead">需要客製化方案或企業合作？我們很樂意為您服務</p>
+  </div>
+</header>
+
+<main class="wrap" style="padding:40px 0">
+  <div class="safe grid cols-2">
+
+    <!-- 左：聯絡表單 -->
+    <section class="card">
+      <h2 class="h2">發送訊息給我們</h2>
+      <p class="sub" style="margin-bottom: 24px;">填寫以下表單，我們會在 24 小時內回覆您</p>
+      
+      <form id="contactForm" onsubmit="handleSubmit(event)">
+        <input class="input" type="text" id="name" placeholder="姓名（必填）" required />
+        <input class="input" type="email" id="email" placeholder="電子信箱（必填）" required />
+        <input class="input" type="tel" id="phone" placeholder="電話（選填）" />
+        <input class="input" type="text" id="company" placeholder="公司名稱（選填）" />
+        
+        <select class="select" id="inquiryType" required>
+          <option value="">需求類型（必填）</option>
+          <option value="custom">客製化方案</option>
+          <option value="enterprise">企業合作</option>
+          <option value="technical">技術支援</option>
+          <option value="pricing">方案與報價諮詢</option>
+          <option value="other">其他</option>
+        </select>
+        
+        <select class="select" id="budget">
+          <option value="">預算範圍（選填）</option>
+          <option value="under-50k">NT$ 50,000 以下</option>
+          <option value="50k-100k">NT$ 50,000 - 100,000</option>
+          <option value="100k-200k">NT$ 100,000 - 200,000</option>
+          <option value="200k-500k">NT$ 200,000 - 500,000</option>
+          <option value="over-500k">NT$ 500,000 以上</option>
+          <option value="discuss">需討論</option>
+        </select>
+        
+        <select class="select" id="teamSize">
+          <option value="">團隊規模（選填）</option>
+          <option value="individual">個人</option>
+          <option value="small">2-5 人</option>
+          <option value="medium">6-20 人</option>
+          <option value="large">21-50 人</option>
+          <option value="enterprise">50 人以上</option>
+        </select>
+        
+        <select class="select" id="timeline">
+          <option value="">預計使用時間（選填）</option>
+          <option value="immediate">立即需要</option>
+          <option value="1month">1 個月內</option>
+          <option value="3months">3 個月內</option>
+          <option value="6months">6 個月內</option>
+          <option value="planning">還在規劃中</option>
+        </select>
+        
+        <textarea class="textarea" id="message" placeholder="請詳細告訴我們您的需求、使用場景、特殊要求等...（必填）" required></textarea>
+        
+        <button type="submit" class="btn blue" style="width: 100%;">發送訊息</button>
+      </form>
+    </section>
+
+    <!-- 右：聯絡資訊 -->
+    <section class="card">
+      <h2 class="h2">聯絡資訊</h2>
+      
+      <div class="contact-item">
+        <div class="contact-icon">📧</div>
+        <div class="contact-info">
+          <h4>電子信箱</h4>
+          <p><a href="mailto:aiagent168168@gmail.com" style="color: var(--blue);">aiagent168168@gmail.com</a></p>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <h3 class="h3">服務時間</h3>
+      <p class="sub" style="margin-bottom: 16px;">週一至週五：09:00 - 18:00<br/>週六、週日：休息</p>
+
+      <div class="hr"></div>
+
+      <h3 class="h3">常見問題</h3>
+      <p class="sub" style="margin-bottom: 12px;"><strong>Q：客製化方案包含哪些服務？</strong><br/>A：專屬整合服務、團隊輔導支援、客製化功能開發、優先技術支援等。</p>
+      <p class="sub" style="margin-bottom: 12px;"><strong>Q：企業合作流程為何？</strong><br/>A：請填寫表單或來信，我們會安排專人與您聯繫，討論具體需求與報價。</p>
+      <p class="sub"><strong>Q：需要多久時間回覆？</strong><br/>A：我們會在 24 小時內回覆您的詢問。</p>
+    </section>
+
+  </div>
+</main>
+
+<footer class="ft">© 2025 ReelMind · AI 短影音｜AI 腳本生成｜AI 顧問｜IP 人設規劃 · 台灣</footer>
+
+<script>
+  function handleSubmit(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const company = document.getElementById('company').value.trim();
+    const inquiryType = document.getElementById('inquiryType').value;
+    const budget = document.getElementById('budget').value;
+    const teamSize = document.getElementById('teamSize').value;
+    const timeline = document.getElementById('timeline').value;
+    const message = document.getElementById('message').value.trim();
+    
+    if (!name || !email || !message || !inquiryType) {
+      alert('請填寫必填欄位（姓名、電子信箱、需求類型、訊息內容）');
+      return;
+    }
+    
+    // 驗證 Email 格式
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('請輸入有效的電子信箱');
+      return;
+    }
+    
+    // 需求類型對應文字
+    const inquiryTypeMap = {
+      'custom': '客製化方案',
+      'enterprise': '企業合作',
+      'technical': '技術支援',
+      'pricing': '方案與報價諮詢',
+      'other': '其他'
+    };
+    
+    // 預算範圍對應文字
+    const budgetMap = {
+      'under-50k': 'NT$ 50,000 以下',
+      '50k-100k': 'NT$ 50,000 - 100,000',
+      '100k-200k': 'NT$ 100,000 - 200,000',
+      '200k-500k': 'NT$ 200,000 - 500,000',
+      'over-500k': 'NT$ 500,000 以上',
+      'discuss': '需討論'
+    };
+    
+    // 團隊規模對應文字
+    const teamSizeMap = {
+      'individual': '個人',
+      'small': '2-5 人',
+      'medium': '6-20 人',
+      'large': '21-50 人',
+      'enterprise': '50 人以上'
+    };
+    
+    // 預計使用時間對應文字
+    const timelineMap = {
+      'immediate': '立即需要',
+      '1month': '1 個月內',
+      '3months': '3 個月內',
+      '6months': '6 個月內',
+      'planning': '還在規劃中'
+    };
+    
+    // 構建郵件內容
+    const subject = encodeURIComponent(`ReelMind 聯繫表單 - ${inquiryTypeMap[inquiryType] || '其他'} - ${company || name}`);
+    const body = encodeURIComponent(
+      `【基本資訊】\n` +
+      `姓名：${name}\n` +
+      `電子信箱：${email}\n` +
+      `電話：${phone || '未填寫'}\n` +
+      `公司名稱：${company || '未填寫'}\n\n` +
+      `【需求資訊】\n` +
+      `需求類型：${inquiryTypeMap[inquiryType] || '未填寫'}\n` +
+      `預算範圍：${budget ? budgetMap[budget] : '未填寫'}\n` +
+      `團隊規模：${teamSize ? teamSizeMap[teamSize] : '未填寫'}\n` +
+      `預計使用時間：${timeline ? timelineMap[timeline] : '未填寫'}\n\n` +
+      `【詳細需求】\n${message}`
+    );
+    
+    // 開啟郵件客戶端
+    window.location.href = `mailto:aiagent168168@gmail.com?subject=${subject}&body=${body}`;
+    
+    // 顯示成功訊息
+    const btn = event.target.querySelector('.btn');
+    const originalText = btn.textContent;
+    btn.textContent = '已開啟郵件客戶端';
+    btn.style.background = 'var(--ok)';
+    
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = 'var(--blue)';
+    }, 3000);
+  }
+</script>
+
+</body>
+</html>
+
