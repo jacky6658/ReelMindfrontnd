@@ -4,6 +4,37 @@
   const REFRESH_KEY = CFG.REFRESH_TOKEN_KEY || 'ipPlanningRefreshToken';
   const originalFetch = window.fetch.bind(window);
 
+  // CSRF Token 管理
+  let csrfTokenCache = null;
+  
+  async function getCsrfToken(){
+    // 如果已有緩存的 Token，直接返回
+    if (csrfTokenCache) return csrfTokenCache;
+    
+    try {
+      const tk = window.Auth && window.Auth.getToken ? window.Auth.getToken() : '';
+      if (!tk) return null; // 未登入，不需要 CSRF Token
+      
+      const res = await originalFetch(`${BASE}/api/csrf-token`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${tk}` }
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        csrfTokenCache = data.csrf_token;
+        return csrfTokenCache;
+      }
+    } catch (e) {
+      console.warn('獲取 CSRF Token 失敗:', e);
+    }
+    return null;
+  }
+  
+  function clearCsrfToken(){
+    csrfTokenCache = null;
+  }
+  
   function authHeaders(extra){
     const tk = window.Auth && window.Auth.getToken ? window.Auth.getToken() : '';
     const headers = new Headers({ ...(extra || {}) });
@@ -58,12 +89,47 @@
       // 僅當呼叫者真的提供 body 時才加 Content-Type，避免 GET 觸發預檢
       const hasBody = Object.prototype.hasOwnProperty.call(initObj, 'body');
       if(hasBody && !mergedHeaders.has('Content-Type')) mergedHeaders.set('Content-Type', 'application/json');
+      
+      // 為 POST/PUT/DELETE/PATCH 請求添加 CSRF Token
+      const method = (initObj.method || (typeof input !== 'string' && input && input.method) || 'GET').toUpperCase();
+      if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method) && tk) {
+        // 檢查是否已提供 CSRF Token（允許手動覆寫）
+        if (!mergedHeaders.has('X-CSRF-Token')) {
+          const csrfToken = await getCsrfToken();
+          if (csrfToken) {
+            mergedHeaders.set('X-CSRF-Token', csrfToken);
+          }
+        }
+      }
     }
 
     const first = await originalFetch(input, { ...initObj, headers: mergedHeaders });
+    
+    // 處理 403 錯誤（可能是 CSRF Token 驗證失敗）
+    if(isBackendApi && first.status === 403 && !isRefreshCall){
+      const responseText = await first.clone().text();
+      try {
+        const errorData = JSON.parse(responseText);
+        if (errorData.error && (errorData.error.includes('CSRF') || errorData.error.includes('csrf'))) {
+          // CSRF Token 驗證失敗，清除緩存並重新獲取
+          clearCsrfToken();
+          const csrfToken = await getCsrfToken();
+          if (csrfToken) {
+            const retryHeaders = new Headers(mergedHeaders);
+            retryHeaders.set('X-CSRF-Token', csrfToken);
+            return originalFetch(input, { ...initObj, headers: retryHeaders });
+          }
+        }
+      } catch (e) {
+        // 無法解析錯誤信息，繼續返回原響應
+      }
+    }
+    
     if(isBackendApi && first.status === 401 && !isRefreshCall){
       const ok = await refreshTokenIfNeeded();
       if(ok){
+        // Token 刷新成功，清除 CSRF Token 緩存（需要重新獲取）
+        clearCsrfToken();
         const retryHeaders = new Headers(initObj.headers || (typeof input !== 'string' && input && input.headers) || {});
         const tk2 = window.Auth && window.Auth.getToken ? window.Auth.getToken() : '';
         if (tk2) {
@@ -74,6 +140,16 @@
         if(!retryHeaders.has('Content-Type') && (!initObj || !initObj.body || typeof initObj.body === 'object')){
           retryHeaders.set('Content-Type', 'application/json');
         }
+        
+        // 為 POST/PUT/DELETE/PATCH 請求添加新的 CSRF Token
+        const method = (initObj.method || (typeof input !== 'string' && input && input.method) || 'GET').toUpperCase();
+        if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method) && tk2) {
+          const csrfToken = await getCsrfToken();
+          if (csrfToken) {
+            retryHeaders.set('X-CSRF-Token', csrfToken);
+          }
+        }
+        
         return originalFetch(input, { ...initObj, headers: retryHeaders });
       }
     }
@@ -103,8 +179,13 @@
       const data = await res.json();
       if(data.access_token && window.Auth && window.Auth.setToken) window.Auth.setToken(data.access_token);
       if(data.refresh_token && window.Auth && window.Auth.setRefreshToken) window.Auth.setRefreshToken(data.refresh_token);
+      // Token 刷新後，清除 CSRF Token 緩存
+      clearCsrfToken();
       return data;
     };
+    // 提供 CSRF Token 相關方法
+    API.getCsrfToken = getCsrfToken;
+    API.clearCsrfToken = clearCsrfToken;
     window.Api = Object.assign(window.Api || {}, API);
   } catch(_) {}
 })();

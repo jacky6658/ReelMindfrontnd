@@ -12,6 +12,10 @@
       if(!token) return;
       localStorage.setItem(TOKEN_KEY, token);
       localStorage.setItem(TOKEN_UPDATED, Date.now().toString());
+      // Token 更新時，清除 CSRF Token 緩存（需要重新獲取）
+      if (window.Api && window.Api.clearCsrfToken) {
+        window.Api.clearCsrfToken();
+      }
     },
     getRefreshToken(){
       return localStorage.getItem(REFRESH_KEY) || '';
@@ -19,6 +23,12 @@
     setRefreshToken(rt){
       if(!rt) return;
       localStorage.setItem(REFRESH_KEY, rt);
+    },
+    // 登出時清除 CSRF Token
+    clearCsrfToken(){
+      if (window.Api && window.Api.clearCsrfToken) {
+        window.Api.clearCsrfToken();
+      }
     }
     // 其餘登入/登出流程仍由原有代碼處理
   };

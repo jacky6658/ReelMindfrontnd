@@ -183,6 +183,17 @@ a{text-decoration:none;color:inherit}
 
 <footer class="ft">© 2025 ReelMind · AI 短影音｜AI 腳本生成｜AI 顧問｜IP 人設規劃 · 台灣</footer>
 
+<!-- 載入 API 和認證模組（自動處理 CSRF Token） -->
+<script>
+  window.APP_CONFIG = {
+    API_BASE: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:8000'
+      : 'https://aivideobackend.zeabur.app'
+  };
+</script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/api.js"></script>
+
 <script>
   // 後端 API 基礎 URL（根據環境自動判斷）
   const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'

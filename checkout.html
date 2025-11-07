@@ -816,6 +816,15 @@ a{text-decoration:none;color:inherit}
   }
 </script>
 
+<!-- 載入 API 和認證模組（自動處理 CSRF Token） -->
+<script>
+  window.APP_CONFIG = {
+    API_BASE: 'https://aivideobackend.zeabur.app'
+  };
+</script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/api.js"></script>
+
 </body>
 </html>
 
