@@ -13591,6 +13591,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           if (response.ok || response.status === 302) {
             // 驗證成功，後端會 redirect，但我們在前端處理
+            // 嘗試從 response 獲取方案資訊（如果有的話）
+            let planType = 'yearly';
+            try {
+              if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
+                const responseData = await response.json();
+                planType = responseData.plan_type || planType;
+              }
+            } catch (e) {
+              // 如果無法解析 JSON（例如 302 redirect），使用預設值
+              console.log('無法從 response 獲取方案資訊，使用預設值');
+            }
+            
             // 重新檢查訂閱狀態
             await checkSubscriptionStatus();
             
@@ -13605,16 +13617,35 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               updateHomepageView();
             }
             
-            showToast('✅ 訂閱啟用成功！', 3000);
+            // 顯示成功通知（包含方案資訊）
+            const planName = planType === 'yearly' ? '年費' : '月費';
+            showToast(`✅ 訂閱啟用成功！方案：${planName}`, 5000);
+            
             // 清除 URL 參數
             window.history.replaceState({}, document.title, window.location.pathname);
           } else {
-            const error = await response.json().catch(() => ({ error: '啟用失敗' }));
-            alert(error.error || '啟用失敗，請稍後再試');
+            // 嘗試獲取詳細錯誤訊息
+            let errorMessage = '啟用失敗，請稍後再試';
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.error || errorMessage;
+              
+              // 根據錯誤類型顯示不同的提示
+              if (errorMessage.includes('已使用') || errorMessage.includes('已啟用')) {
+                errorMessage = '⚠️ 此授權連結已使用過';
+              } else if (errorMessage.includes('過期')) {
+                errorMessage = '⚠️ 授權連結已過期（7天內有效）';
+              } else if (errorMessage.includes('無效')) {
+                errorMessage = '⚠️ 無效的授權連結';
+              }
+            } catch (e) {
+              // 如果無法解析 JSON，使用預設錯誤訊息
+            }
+            showToast(errorMessage, 5000);
           }
         } catch (error) {
           console.error('啟用失敗:', error);
-          alert('啟用失敗，請稍後再試');
+          showToast('⚠️ 啟用失敗，請稍後再試', 5000);
         }
       }
       
