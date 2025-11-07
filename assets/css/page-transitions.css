@@ -1,0 +1,285 @@
+/**
+ * ReelMind 頁面轉場動畫
+ * 獨特的渲染動畫效果
+ */
+
+/* ===== 頁面載入動畫 ===== */
+
+/* 頁面容器淡入效果 */
+.page-container {
+  animation: pageFadeIn 0.6s ease-out;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 主要內容滑入效果 */
+.main-content {
+  animation: slideUpFadeIn 0.8s ease-out;
+}
+
+@keyframes slideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 漸變背景動畫 */
+.page-background {
+  animation: gradientShift 1s ease-out;
+}
+
+@keyframes gradientShift {
+  from {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  }
+  to {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  }
+}
+
+/* ===== 元素出現動畫 ===== */
+
+/* 卡片動畫（stagger 效果） */
+.animated-card {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: cardSlideIn 0.6s ease-out forwards;
+}
+
+.animated-card:nth-child(1) { animation-delay: 0.1s; }
+.animated-card:nth-child(2) { animation-delay: 0.2s; }
+.animated-card:nth-child(3) { animation-delay: 0.3s; }
+.animated-card:nth-child(4) { animation-delay: 0.4s; }
+.animated-card:nth-child(5) { animation-delay: 0.5s; }
+.animated-card:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 按鈕動畫（從中心放大） */
+.animated-button {
+  opacity: 0;
+  transform: scale(0.8);
+  animation: buttonPopIn 0.4s ease-out forwards;
+}
+
+@keyframes buttonPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 文字動畫（打字機效果，可選） */
+.typewriter-text {
+  overflow: hidden;
+  border-right: 2px solid #3b82f6;
+  white-space: nowrap;
+  animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  from, to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #3b82f6;
+  }
+}
+
+/* ===== 頁面轉場動畫 ===== */
+
+/* 頁面離開動畫 */
+.page-leaving {
+  animation: pageFadeOut 0.3s ease-in forwards;
+}
+
+@keyframes pageFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* 頁面進入動畫 */
+.page-entering {
+  animation: pageSlideIn 0.5s ease-out forwards;
+}
+
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===== 特殊效果 ===== */
+
+/* 光暈效果 */
+.glow-effect {
+  position: relative;
+}
+
+.glow-effect::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+  animation: glowPulse 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+/* 粒子效果（可選） */
+.particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #3b82f6;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: particleFloat 10s infinite;
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(100vh) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(100px);
+    opacity: 0;
+  }
+}
+
+/* ===== 響應式動畫 ===== */
+
+/* 在行動裝置上減少動畫效果（提升效能） */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 在行動裝置上簡化動畫 */
+@media (max-width: 768px) {
+  .animated-card {
+    animation-delay: 0s !important;
+  }
+  
+  .typewriter-text {
+    animation: none;
+    border-right: none;
+  }
+}
+
+/* ===== 載入狀態動畫 ===== */
+
+/* 載入中動畫 */
+.loading-spinner {
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 骨架屏動畫 */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonLoading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+

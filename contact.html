@@ -184,7 +184,12 @@ a{text-decoration:none;color:inherit}
 <footer class="ft">© 2025 ReelMind · AI 短影音｜AI 腳本生成｜AI 顧問｜IP 人設規劃 · 台灣</footer>
 
 <script>
-  function handleSubmit(event) {
+  // 後端 API 基礎 URL（根據環境自動判斷）
+  const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:8000'
+    : 'https://aivideobackend.zeabur.app';
+
+  async function handleSubmit(event) {
     event.preventDefault();
     
     const name = document.getElementById('name').value.trim();
@@ -209,72 +214,86 @@ a{text-decoration:none;color:inherit}
       return;
     }
     
-    // 需求類型對應文字
-    const inquiryTypeMap = {
-      'custom': '客製化方案',
-      'enterprise': '企業合作',
-      'technical': '技術支援',
-      'pricing': '方案與報價諮詢',
-      'other': '其他'
-    };
-    
-    // 預算範圍對應文字
-    const budgetMap = {
-      'under-50k': 'NT$ 50,000 以下',
-      '50k-100k': 'NT$ 50,000 - 100,000',
-      '100k-200k': 'NT$ 100,000 - 200,000',
-      '200k-500k': 'NT$ 200,000 - 500,000',
-      'over-500k': 'NT$ 500,000 以上',
-      'discuss': '需討論'
-    };
-    
-    // 團隊規模對應文字
-    const teamSizeMap = {
-      'individual': '個人',
-      'small': '2-5 人',
-      'medium': '6-20 人',
-      'large': '21-50 人',
-      'enterprise': '50 人以上'
-    };
-    
-    // 預計使用時間對應文字
-    const timelineMap = {
-      'immediate': '立即需要',
-      '1month': '1 個月內',
-      '3months': '3 個月內',
-      '6months': '6 個月內',
-      'planning': '還在規劃中'
-    };
-    
-    // 構建郵件內容
-    const subject = encodeURIComponent(`ReelMind 聯繫表單 - ${inquiryTypeMap[inquiryType] || '其他'} - ${company || name}`);
-    const body = encodeURIComponent(
-      `【基本資訊】\n` +
-      `姓名：${name}\n` +
-      `電子信箱：${email}\n` +
-      `電話：${phone || '未填寫'}\n` +
-      `公司名稱：${company || '未填寫'}\n\n` +
-      `【需求資訊】\n` +
-      `需求類型：${inquiryTypeMap[inquiryType] || '未填寫'}\n` +
-      `預算範圍：${budget ? budgetMap[budget] : '未填寫'}\n` +
-      `團隊規模：${teamSize ? teamSizeMap[teamSize] : '未填寫'}\n` +
-      `預計使用時間：${timeline ? timelineMap[timeline] : '未填寫'}\n\n` +
-      `【詳細需求】\n${message}`
-    );
-    
-    // 開啟郵件客戶端
-    window.location.href = `mailto:aiagent168168@gmail.com?subject=${subject}&body=${body}`;
-    
-    // 顯示成功訊息
+    // 獲取按鈕元素
     const btn = event.target.querySelector('.btn');
     const originalText = btn.textContent;
-    btn.textContent = '已開啟郵件客戶端';
-    btn.style.background = 'var(--ok)';
     
-    setTimeout(() => {
-      btn.textContent = originalText;
-      btn.style.background = 'var(--blue)';
-    }, 3000);
+    // 顯示載入狀態
+    btn.disabled = true;
+    btn.textContent = '發送中...';
+    btn.style.background = 'var(--sub)';
+    btn.style.cursor = 'not-allowed';
+    
+    try {
+      // 發送請求到後端 API
+      const response = await fetch(`${API_BASE_URL}/api/contact/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          company,
+          inquiryType,
+          budget,
+          teamSize,
+          timeline,
+          message
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        // 成功
+        btn.textContent = '✓ 已成功發送';
+        btn.style.background = 'var(--ok)';
+        
+        // 清空表單
+        event.target.reset();
+        
+        // 3 秒後恢復按鈕
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = originalText;
+          btn.style.background = 'var(--blue)';
+          btn.style.cursor = 'pointer';
+        }, 3000);
+        
+        // 顯示成功訊息
+        alert(data.message || '您的訊息已成功發送，我們會在 24 小時內回覆您');
+      } else {
+        // 失敗
+        btn.textContent = '發送失敗';
+        btn.style.background = 'var(--red)';
+        
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = originalText;
+          btn.style.background = 'var(--blue)';
+          btn.style.cursor = 'pointer';
+        }, 3000);
+        
+        alert(data.error || '發送失敗，請稍後再試或直接來信至 aiagent168168@gmail.com');
+      }
+    } catch (error) {
+      console.error('發送郵件時發生錯誤:', error);
+      
+      // 錯誤處理
+      btn.textContent = '發送失敗';
+      btn.style.background = 'var(--red)';
+      
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = originalText;
+        btn.style.background = 'var(--blue)';
+        btn.style.cursor = 'pointer';
+      }, 3000);
+      
+      alert('網路錯誤，請檢查您的網路連線或稍後再試。您也可以直接來信至 aiagent168168@gmail.com');
+    }
   }
 </script>
 

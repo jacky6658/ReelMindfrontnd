@@ -1448,9 +1448,10 @@
       }
       
       /* 深色模式：首頁 Hero 區塊背景優化 */
-      .theme-dark .rm-hero[style*="background: #F8FAFC"],
-      .theme-dark .rm-hero[style*="background:#F8FAFC"] {
-        background: var(--gradient-primary) !important;
+      .theme-dark .rm-hero {
+        background: linear-gradient(135deg, #1E3A8A 0%, #1E40AF 15%, #2563EB 30%, #3B82F6 45%, #1E293B 60%, #0F172A 75%, #020617 100%) !important;
+        background-size: 400% 400% !important;
+        animation: heroGradientFlow 10s ease infinite !important;
       }
       
       /* 深色模式：首頁按鈕優化 */
@@ -2284,6 +2285,108 @@
         position: relative;
         overflow-x: hidden !important;
         box-sizing: border-box;
+        /* 漸層流動背景 */
+        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 15%, #3B82F6 30%, #60A5FA 45%, #DBEAFE 60%, #F8FAFC 75%, #FFFFFF 100%) !important;
+        background-size: 400% 400% !important;
+        animation: heroGradientFlow 10s ease infinite !important;
+      }
+      
+      /* Hero 漸層流動動畫 */
+      @keyframes heroGradientFlow {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+      
+      /* Hero 額外的流動波紋效果 */
+      .rm-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+        animation: heroRotate 25s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+      }
+      
+      @keyframes heroRotate {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      
+      /* 確保 Hero 內容在背景之上 */
+      .rm-hero > * {
+        position: relative;
+        z-index: 1;
+      }
+      
+      /* Hero 按鈕動態渲染動畫 */
+      .rm-hero .rm-hero-container .rm-hero-grid > div:first-child > div:last-child > a {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: heroButtonFadeIn 0.8s ease-out forwards;
+      }
+      
+      .rm-hero .rm-hero-container .rm-hero-grid > div:first-child > div:last-child > a:nth-child(1) {
+        animation-delay: 0.3s;
+      }
+      
+      .rm-hero .rm-hero-container .rm-hero-grid > div:first-child > div:last-child > a:nth-child(2) {
+        animation-delay: 0.5s;
+      }
+      
+      @keyframes heroButtonFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      /* Hero 按鈕懸浮動畫 */
+      .rm-hero .rm-hero-container .rm-hero-grid > div:first-child > div:last-child > a {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .rm-hero .rm-hero-container .rm-hero-grid > div:first-child > div:last-child > a::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+      }
+      
+      .rm-hero .rm-hero-container .rm-hero-grid > div:first-child > div:last-child > a:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+      
+      .rm-hero .rm-hero-container .rm-hero-grid > div:first-child > div:last-child > a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
       }
       
       .rm-hero-container {
@@ -10848,26 +10951,26 @@
               <!-- 未登入用戶（訪客）視圖 - 顯示 index_unsubscribed.html 的內容 -->
               <div id="homepage-unsubscribed" class="homepage-view" style="display: none;">
               <!-- Hero Section: 白＋藍冷系｜滿版全出血 -->
-              <section class="rm-hero" style="background: #F8FAFC; position: relative; overflow: hidden; padding: 80px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw;">
-                <!-- 背景淡藍光暈 -->
-                <div style="position: absolute; top: -100px; right: 0; width: 800px; height: 800px; background: radial-gradient(circle at 80% 20%, rgba(59,130,246,0.10), transparent 60%); pointer-events: none;"></div>
+              <section class="rm-hero" style="position: relative; overflow: hidden; padding: 80px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw;">
+                <!-- 背景淡藍光暈（增強效果） -->
+                <div style="position: absolute; top: -100px; right: 0; width: 800px; height: 800px; background: radial-gradient(circle at 80% 20%, rgba(59,130,246,0.15), transparent 60%); pointer-events: none; z-index: 0;"></div>
                 
                 <div class="rm-hero-container" style="max-width: 1400px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-left)) 0 max(16px, env(safe-area-inset-right)); position: relative; z-index: 1; width: 100%; box-sizing: border-box;">
                   <div class="rm-hero-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; width: 100%; max-width: 100%; box-sizing: border-box;">
                     
                     <!-- 左側：文案區 -->
                     <div style="padding: 20px 0; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
-                      <h1 id="hero-title-1" class="rm-hero-title typewriter-title" style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; color: #1E293B; margin-bottom: 20px; line-height: 1.2; letter-spacing: -0.02em; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
+                      <h1 id="hero-title-1" class="rm-hero-title typewriter-title" style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; color: white; margin-bottom: 20px; line-height: 1.2; letter-spacing: -0.02em; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; text-shadow: 0 2px 15px rgba(0,0,0,0.15);">
                         <span class="typewriter-text"></span><span class="typewriter-cursor">|</span>
                       </h1>
-                      <p style="font-size: clamp(1rem, 2vw, 1.25rem); color: #64748B; margin-bottom: 32px; line-height: 1.7; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
+                      <p style="font-size: clamp(1rem, 2vw, 1.25rem); color: white; margin-bottom: 32px; line-height: 1.7; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         AI 生成腳本、AI 帳號定位，一次完成。
                       </p>
                       <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;">
-                        <a href="#" onclick="goToPricing(); return false;" style="padding: 16px 24px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px rgba(59,130,246,0.25); transition: all 0.3s; font-size: 0.9rem; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; flex: 1;">
+                        <a href="#" onclick="goToPricing(); return false;" style="padding: 16px 24px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px rgba(16,185,129,0.3); transition: all 0.3s; font-size: 0.9rem; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden;">
                           立即啟用<br>AI 智能體
                         </a>
-                        <a href="#rm-overview-v2" onclick="smoothScrollTo('rm-overview-v2'); return false;" style="padding: 16px 24px; background: white; color: #2563EB; border: 2px solid #2563EB; border-radius: 12px; font-weight: 600; text-decoration: none; transition: all 0.3s; font-size: 0.9rem; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; flex: 1;">
+                        <a href="#rm-overview-v2" onclick="smoothScrollTo('rm-overview-v2'); return false;" style="padding: 16px 24px; background: rgba(255,255,255,0.95); color: #2563EB; border: 2px solid rgba(255,255,255,0.5); border-radius: 12px; font-weight: 600; text-decoration: none; transition: all 0.3s; font-size: 0.9rem; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden; backdrop-filter: blur(10px);">
                           了解使用方式
                         </a>
                       </div>
@@ -11357,27 +11460,27 @@
               <!-- 已登入用戶（已訂閱）視圖 - 顯示 index_subscribed.html 的內容 -->
               <div id="homepage-subscribed" class="homepage-view" style="display: none;">
                 <!-- Hero Section: 白＋藍冷系｜滿版全出血 -->
-                <section class="rm-hero" style="background: #F8FAFC; position: relative; overflow: hidden; padding: 80px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw;">
-                  <!-- 背景淡藍光暈 -->
-                  <div style="position: absolute; top: -100px; right: 0; width: 800px; height: 800px; background: radial-gradient(circle at 80% 20%, rgba(59,130,246,0.10), transparent 60%); pointer-events: none;"></div>
+                <section class="rm-hero" style="position: relative; overflow: hidden; padding: 80px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw;">
+                  <!-- 背景淡藍光暈（增強效果） -->
+                  <div style="position: absolute; top: -100px; right: 0; width: 800px; height: 800px; background: radial-gradient(circle at 80% 20%, rgba(59,130,246,0.15), transparent 60%); pointer-events: none; z-index: 0;"></div>
                   
                   <div class="rm-hero-container" style="max-width: 1400px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-left)) 0 max(16px, env(safe-area-inset-right)); position: relative; z-index: 1; width: 100%; box-sizing: border-box;">
                     <div class="rm-hero-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; width: 100%; max-width: 100%; box-sizing: border-box;">
                       
                       <!-- 左側：文案區 -->
                       <div style="padding: 20px 0; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
-                        <h1 id="hero-title-2" class="rm-hero-title typewriter-title" style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; color: #1E293B; margin-bottom: 20px; line-height: 1.2; letter-spacing: -0.02em; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
+                        <h1 id="hero-title-2" class="rm-hero-title typewriter-title" style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; color: white; margin-bottom: 20px; line-height: 1.2; letter-spacing: -0.02em; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; text-shadow: 0 2px 15px rgba(0,0,0,0.15);">
                           <span class="typewriter-text"></span><span class="typewriter-cursor">|</span>
                         </h1>
-                        <p style="font-size: clamp(1rem, 2vw, 1.25rem); color: #64748B; margin-bottom: 32px; line-height: 1.7; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">
+                        <p style="font-size: clamp(1rem, 2vw, 1.25rem); color: white; margin-bottom: 32px; line-height: 1.7; width: 100%; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                           AI 生成腳本、AI 帳號定位，一次完成。<br/>
-                          <span style="font-size: 0.9em; color: #94A3B8;">開始你的創作之旅</span>
+                          <span style="font-size: 0.9em; color: rgba(255,255,255,0.9);">開始你的創作之旅</span>
                         </p>
                         <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;">
-                          <a href="#mode-cards" onclick="smoothScrollTo('mode-cards'); return false;" style="padding: 16px 24px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px rgba(59,130,246,0.25); transition: all 0.3s; font-size: 0.9rem; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; flex: 1;">
+                          <a href="#mode-cards" onclick="smoothScrollTo('mode-cards'); return false;" style="padding: 16px 24px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px rgba(16,185,129,0.3); transition: all 0.3s; font-size: 0.9rem; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden;">
                             開始使用
                           </a>
-                          <a href="#introduction" onclick="smoothScrollTo('introduction'); return false;" style="padding: 16px 24px; background: white; color: #2563EB; border: 2px solid #2563EB; border-radius: 12px; font-weight: 600; text-decoration: none; transition: all 0.3s; font-size: 0.9rem; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; flex: 1;">
+                          <a href="#introduction" onclick="smoothScrollTo('introduction'); return false;" style="padding: 16px 24px; background: rgba(255,255,255,0.95); color: #2563EB; border: 2px solid rgba(255,255,255,0.5); border-radius: 12px; font-weight: 600; text-decoration: none; transition: all 0.3s; font-size: 0.9rem; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden; backdrop-filter: blur(10px);">
                             了解如何開始
                           </a>
                         </div>
@@ -12621,28 +12724,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                             color: #bfdbfe !important;
                           }
                         </style>
-                        
-                        <div class="setting-group">
-                          <h4>🎨 顯示偏好</h4>
-                          <div class="setting-item">
-                            <label for="theme">主題</label>
-                            <span class="setting-desc" style="display: block; margin-bottom: 8px;">切換淺色/深色主題模式</span>
-                            <select id="theme" onchange="saveDisplayPreferences()">
-                              <option value="light">淺色模式</option>
-                              <option value="dark">深色模式</option>
-                              <option value="auto">自動</option>
-                            </select>
-                          </div>
-                          <div class="setting-item">
-                            <label for="language">語言</label>
-                            <span class="setting-desc" style="display: block; margin-bottom: 8px;">選擇介面顯示語言</span>
-                            <select id="language" onchange="saveDisplayPreferences()">
-                              <option value="zh-TW">繁體中文</option>
-                              <option value="zh-CN">简体中文</option>
-                              <option value="en">English</option>
-                            </select>
-                          </div>
-                        </div>
                         
                         <div class="setting-group">
                           <h4>🔑 大型語言模型(LLM) API 金鑰管理</h4>
