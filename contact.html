@@ -147,7 +147,7 @@ a{text-decoration:none;color:inherit}
           <option value="planning">還在規劃中</option>
         </select>
         
-        <textarea class="textarea" id="message" placeholder="請詳細告訴我們您的需求、使用場景、特殊要求等...（必填）" required></textarea>
+        <textarea class="textarea" id="message" placeholder="請詳細告訴我們您的需求、使用場景、特殊要求等...（選填）"></textarea>
         
         <button type="submit" class="btn blue" style="width: 100%;">發送訊息</button>
       </form>
@@ -202,8 +202,8 @@ a{text-decoration:none;color:inherit}
     const timeline = document.getElementById('timeline').value;
     const message = document.getElementById('message').value.trim();
     
-    if (!name || !email || !message || !inquiryType) {
-      alert('請填寫必填欄位（姓名、電子信箱、需求類型、訊息內容）');
+    if (!name || !email || !inquiryType) {
+      alert('請填寫必填欄位（姓名、電子信箱、需求類型）');
       return;
     }
     
