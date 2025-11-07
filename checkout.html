@@ -469,16 +469,44 @@ a{text-decoration:none;color:inherit}
       
       if (response.ok) {
         const html = await response.text();
-        document.body.innerHTML = html;
+        // 檢查返回的 HTML 是否包含 ECPay 表單
+        if (html.includes('ecpayForm') || html.includes('ECPay') || html.includes('payment-stage')) {
+          // 替換整個頁面內容
+          document.body.innerHTML = html;
+          // 確保表單會自動提交
+          setTimeout(() => {
+            const form = document.getElementById('ecpayForm');
+            if (form) {
+              console.log('找到 ECPay 表單，準備提交...');
+              form.submit();
+            } else {
+              console.error('找不到 ECPay 表單');
+            }
+          }, 100);
+        } else {
+          // 如果返回的不是 ECPay 表單，可能是錯誤訊息
+          console.error('後端返回的內容不是 ECPay 表單:', html.substring(0, 200));
+          alert('無法載入付款頁面，請稍後再試或聯繫客服');
+          checkoutBtn.disabled = false;
+          checkoutBtn.textContent = originalText;
+        }
       } else {
-        const errorData = await response.json().catch(() => ({ error: '建立訂單失敗' }));
-        alert(errorData.error || '建立訂單失敗，請稍後再試');
+        // 處理錯誤回應
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json().catch(() => ({ error: '建立訂單失敗' }));
+          alert(errorData.error || '建立訂單失敗，請稍後再試');
+        } else {
+          const errorText = await response.text().catch(() => '建立訂單失敗');
+          console.error('後端錯誤回應:', errorText);
+          alert('建立訂單失敗，請稍後再試或聯繫客服：aiagent168168@gmail.com');
+        }
         checkoutBtn.disabled = false;
         checkoutBtn.textContent = originalText;
       }
     } catch (error) {
       console.error('付款錯誤:', error);
-      alert('付款處理失敗，請稍後再試');
+      alert('付款處理失敗，請檢查網路連線或稍後再試。如有問題請聯繫客服：aiagent168168@gmail.com');
       checkoutBtn.disabled = false;
       checkoutBtn.textContent = originalText;
     }
