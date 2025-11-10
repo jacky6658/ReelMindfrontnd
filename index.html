@@ -11110,7 +11110,7 @@
               <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: center;">
             <span id="userName" class="user-name"></span>
           </div>
-          <div class="auth-buttons" style="display: none;">
+          <div class="auth-buttons">
               <button id="loginBtn" class="login-btn" onclick="goToLogin()" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">🔐 登入</button>
           </div>
         </div>
@@ -12909,10 +12909,19 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const canAccess = await window.ReelMindCommon.checkFeatureAccess(featureType);
             if (!canAccess) {
               // 需要登入或訂閱，已由 checkFeatureAccess 處理
-              // 保持首頁顯示
+              // 保持首頁顯示並顯示提示訊息
               const homepage = document.getElementById('homepage');
               if (homepage) {
                 homepage.classList.add('active');
+              }
+              // 顯示狀態提示
+              if (typeof showToast === 'function') {
+                const isLoggedIn = ipPlanningToken && ipPlanningUser;
+                if (!isLoggedIn) {
+                  showToast('⚠️ 請先登入以使用此功能', 3000);
+                } else {
+                  showToast('⚠️ 請先訂閱以使用此功能', 3000);
+                }
               }
               return;
             }
@@ -13560,10 +13569,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }
         }
         
-        // 啟動打字機動畫
-        if (typeof initTypewriterAnimation === 'function') {
-          initTypewriterAnimation();
-        }
+        // 啟動打字機動畫（延遲執行，確保首頁已顯示）
+        setTimeout(() => {
+          if (typeof initTypewriterAnimation === 'function') {
+            initTypewriterAnimation();
+          }
+        }, 300);
         
         // 啟動 token 監控（每分鐘檢查一次）
         startTokenMonitor();
@@ -13773,8 +13784,40 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             }
           }
           // 如果無法訪問，checkFeatureAccess 已經處理了登入/訂閱流程
+          // 顯示狀態提示
+          if (typeof showToast === 'function') {
+            const isLoggedIn = ipPlanningToken && ipPlanningUser;
+            if (!isLoggedIn) {
+              showToast('⚠️ 請先登入以使用此功能', 3000);
+            } else {
+              showToast('⚠️ 請先訂閱以使用此功能', 3000);
+            }
+          }
         } else {
-          // 降級處理：直接跳轉到獨立頁面（使用相同的映射關係）
+          // 降級處理：檢查登入和訂閱狀態
+          const isLoggedIn = ipPlanningToken && ipPlanningUser;
+          const isSubscribed = document.body.dataset.subscribed === 'true';
+          
+          if (!isLoggedIn) {
+            // 未登入，顯示提示並導向登入
+            if (typeof showToast === 'function') {
+              showToast('⚠️ 請先登入以使用此功能', 3000);
+            }
+            if (typeof goToLogin === 'function') {
+              goToLogin();
+            }
+            return;
+          }
+          
+          if (!isSubscribed && modeId !== 'userDB') {
+            // 未訂閱，顯示提示
+            if (typeof showToast === 'function') {
+              showToast('⚠️ 請先訂閱以使用此功能', 3000);
+            }
+            return;
+          }
+          
+          // 可以訪問，跳轉到對應的獨立頁面
           const pageMap = {
             'mode1': 'mode3.html',  // 一鍵生成模式 → mode3.html
             'mode2': 'mode2.html',  // AI顧問模式 → mode2.html
@@ -13996,15 +14039,28 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       async function updateUserInfo() {
         const authButtons = document.querySelector('.auth-buttons');
         const userInfo = document.getElementById('userInfo');
-        if (authButtons) authButtons.style.display = 'none';
-        if (userInfo && ipPlanningUser) {
-          userInfo.style.display = 'flex';
-          const userNameEl = document.getElementById('userName');
-          const userAvatarEl = document.getElementById('userAvatar');
-          if (userNameEl) userNameEl.textContent = ipPlanningUser.name || '用戶';
-          if (userAvatarEl && ipPlanningUser.picture) {
-            userAvatarEl.src = ipPlanningUser.picture;
+        const loginBtn = document.getElementById('loginBtn');
+        
+        // 檢查登入狀態
+        const isLoggedIn = !!(ipPlanningToken && ipPlanningUser);
+        
+        if (isLoggedIn) {
+          // 已登入：顯示用戶資訊，隱藏登入按鈕
+          if (authButtons) authButtons.style.display = 'none';
+          if (userInfo) {
+            userInfo.style.display = 'flex';
+            const userNameEl = document.getElementById('userName');
+            const userAvatarEl = document.getElementById('userAvatar');
+            if (userNameEl) userNameEl.textContent = ipPlanningUser.name || '用戶';
+            if (userAvatarEl && ipPlanningUser.picture) {
+              userAvatarEl.src = ipPlanningUser.picture;
+            }
           }
+        } else {
+          // 未登入：顯示登入按鈕，隱藏用戶資訊
+          if (userInfo) userInfo.style.display = 'none';
+          if (authButtons) authButtons.style.display = 'flex';
+          if (loginBtn) loginBtn.style.display = 'block';
         }
         // 更新用戶資訊後，檢查訂閱狀態
         await checkSubscriptionStatus();
@@ -14172,6 +14228,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           subscribedView.style.display = 'block';
           console.log('顯示已登入已訂閱視圖');
         }
+        
+        // 首頁顯示後，重新啟動打字機動畫
+        setTimeout(() => {
+          if (typeof initTypewriterAnimation === 'function') {
+            initTypewriterAnimation();
+          }
+        }, 200);
       }
       
       // 設置語言
