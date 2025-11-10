@@ -12716,17 +12716,35 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
     <div id="toast" class="toast" style="display: none;"></div>
     <script>
       // ===== 提前定義 goToLogin 函數，確保按鈕可以使用 =====
-      function goToLogin() {
-        // 優先使用 common.js 中的 goToLogin（Google OAuth）
-        if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
-          window.ReelMindCommon.goToLogin();
-          return;
+      function goToLogin(showMessage = true) {
+        // 如果 showMessage 為 true，先顯示提示訊息
+        if (showMessage && typeof showToast === 'function') {
+          showToast('⚠️ 請先登入以使用此功能', 3000);
+          // 延遲跳轉，讓用戶看到提示訊息
+          setTimeout(() => {
+            // 優先使用 common.js 中的 goToLogin（Google OAuth）
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+              window.ReelMindCommon.goToLogin();
+              return;
+            }
+            // 降級處理：顯示登入頁面
+            const loginPage = document.getElementById('loginPage');
+            const appContainer = document.getElementById('appContainer');
+            if (loginPage) loginPage.style.display = 'flex';
+            if (appContainer) appContainer.style.display = 'none';
+          }, 1500);
+        } else {
+          // 直接跳轉（不顯示提示訊息）
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+            window.ReelMindCommon.goToLogin();
+            return;
+          }
+          // 降級處理：顯示登入頁面
+          const loginPage = document.getElementById('loginPage');
+          const appContainer = document.getElementById('appContainer');
+          if (loginPage) loginPage.style.display = 'flex';
+          if (appContainer) appContainer.style.display = 'none';
         }
-        // 降級處理：顯示登入頁面
-        const loginPage = document.getElementById('loginPage');
-        const appContainer = document.getElementById('appContainer');
-        if (loginPage) loginPage.style.display = 'flex';
-        if (appContainer) appContainer.style.display = 'none';
       }
       // 確保 goToLogin 在全局作用域中可用
       window.goToLogin = goToLogin;
@@ -12994,6 +13012,19 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }
         } else {
           console.error('Page not found:', pageId);
+          // 如果找不到頁面，檢查是否是 forum 或 guide
+          if (pageId === 'forum' || pageId === 'guide') {
+            // forum 和 guide 頁面存在，但可能被隱藏了，強制顯示
+            const forumPage = document.getElementById('forum');
+            const guidePage = document.getElementById('guide');
+            if (pageId === 'forum' && forumPage) {
+              forumPage.classList.add('active');
+              console.log('Forum page activated');
+            } else if (pageId === 'guide' && guidePage) {
+              guidePage.classList.add('active');
+              console.log('Guide page activated');
+            }
+          }
         }
         
         // 更新導航標籤狀態
@@ -13504,6 +13535,26 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }
         }, 500);
         
+        // 監聽登入事件（從 common.js 或 auth.js 觸發）
+        window.addEventListener('auth:logged-in', async function() {
+          console.log('🔔 收到登入事件，開始更新用戶資訊...');
+          // 重新載入用戶資訊
+          const storedToken = localStorage.getItem('ipPlanningToken');
+          const storedUserStr = localStorage.getItem('ipPlanningUser');
+          if (storedToken) {
+            ipPlanningToken = storedToken;
+          }
+          if (storedUserStr) {
+            try {
+              ipPlanningUser = JSON.parse(storedUserStr);
+            } catch (e) {
+              console.warn('無法解析用戶資料:', e);
+            }
+          }
+          // 更新用戶資訊顯示
+          await updateUserInfo();
+        });
+        
         // 啟動 token 監控（每分鐘檢查一次）
         startTokenMonitor();
         
@@ -13576,15 +13627,26 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         // 檢查是否已經登入
-        checkLoginStatus();
-        
-        // 初始化首頁視圖（在 checkLoginStatus 之後，因為它會更新訂閱狀態）
-        setTimeout(() => {
-          updateHomepageView();
-        }, 100);
-        
-        // 檢查訂閱狀態
-        checkSubscriptionStatus();
+        console.log('🚀 開始初始化頁面...');
+        checkLoginStatus().then(() => {
+          console.log('✅ 登入狀態檢查完成');
+          
+          // 初始化首頁視圖（在 checkLoginStatus 之後，因為它會更新訂閱狀態）
+          setTimeout(() => {
+            updateHomepageView();
+          }, 100);
+          
+          // 檢查訂閱狀態
+          checkSubscriptionStatus().then(() => {
+            console.log('✅ 訂閱狀態檢查完成');
+            
+            // 如果已登入，載入用戶歷史資訊
+            if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
+              console.log('📚 開始載入用戶歷史資訊...');
+              loadUserHistory();
+            }
+          });
+        });
         
         // 確保 Highlight.js 載入後初始化（因為使用了 defer）
         function initializeHighlightJS() {
@@ -13690,75 +13752,47 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       async function handleModeCardClick(modeId) {
         console.log('Mode card clicked:', modeId);
         
-        // 直接跳轉到外部文件（因為頁面已經分離）
-        // 使用 checkFeatureAccess 檢查登入和訂閱狀態
-        if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
-          const canAccess = await window.ReelMindCommon.checkFeatureAccess();
-          if (canAccess) {
-            // 可以訪問，跳轉到對應的獨立頁面
-            const pageMap = {
-              'mode1': 'mode3.html',  // 一鍵生成模式 → mode3.html
-              'mode2': 'mode2.html',  // AI顧問模式 → mode2.html
-              'mode3': 'mode1.html',  // IP人設規劃模式 → mode1.html
-              'userDB': 'userDB.html'
-            };
-            
-            const targetPage = pageMap[modeId];
-            if (targetPage) {
-              window.location.href = targetPage;
-            } else {
-              // 如果沒有對應的獨立頁面，使用原有的 switchPage
-              switchPage(modeId);
-            }
-          }
-          // 如果無法訪問，checkFeatureAccess 已經處理了登入/訂閱流程
-          // 顯示狀態提示
+        // 先檢查登入狀態
+        const isLoggedIn = ipPlanningToken && ipPlanningUser;
+        
+        if (!isLoggedIn) {
+          // 未登入，先顯示提示訊息，再跳轉登入
           if (typeof showToast === 'function') {
-            const isLoggedIn = ipPlanningToken && ipPlanningUser;
-            if (!isLoggedIn) {
-              showToast('⚠️ 請先登入以使用此功能', 3000);
-            } else {
-              showToast('⚠️ 請先訂閱以使用此功能', 3000);
-            }
+            showToast('⚠️ 請先登入以使用此功能', 3000);
           }
-        } else {
-          // 降級處理：檢查登入和訂閱狀態
-          const isLoggedIn = ipPlanningToken && ipPlanningUser;
-          const isSubscribed = document.body.dataset.subscribed === 'true';
-          
-          if (!isLoggedIn) {
-            // 未登入，顯示提示並導向登入
-            if (typeof showToast === 'function') {
-              showToast('⚠️ 請先登入以使用此功能', 3000);
-            }
+          // 使用 goToLogin(true) 顯示提示訊息後再跳轉
+          setTimeout(() => {
             if (typeof goToLogin === 'function') {
-              goToLogin();
+              goToLogin(false); // false 表示不重複顯示提示訊息
             }
-            return;
+          }, 1500);
+          return;
+        }
+        
+        // 已登入，檢查訂閱狀態
+        const isSubscribed = document.body.dataset.subscribed === 'true';
+        
+        if (!isSubscribed && modeId !== 'userDB') {
+          // 未訂閱，顯示提示
+          if (typeof showToast === 'function') {
+            showToast('⚠️ 請先訂閱以使用此功能', 3000);
           }
-          
-          if (!isSubscribed && modeId !== 'userDB') {
-            // 未訂閱，顯示提示
-            if (typeof showToast === 'function') {
-              showToast('⚠️ 請先訂閱以使用此功能', 3000);
-            }
-            return;
-          }
-          
-          // 可以訪問，跳轉到對應的獨立頁面
-          const pageMap = {
-            'mode1': 'mode3.html',  // 一鍵生成模式 → mode3.html
-            'mode2': 'mode2.html',  // AI顧問模式 → mode2.html
-            'mode3': 'mode1.html',  // IP人設規劃模式 → mode1.html
-            'userDB': 'userDB.html'
-          };
-          
-          const targetPage = pageMap[modeId];
-          if (targetPage) {
-            window.location.href = targetPage;
-          } else {
-            switchPage(modeId);
-          }
+          return;
+        }
+        
+        // 可以訪問，跳轉到對應的獨立頁面
+        const pageMap = {
+          'mode1': 'mode3.html',  // 一鍵生成模式 → mode3.html
+          'mode2': 'mode2.html',  // AI顧問模式 → mode2.html
+          'mode3': 'mode1.html',  // IP人設規劃模式 → mode1.html
+          'userDB': 'userDB.html'
+        };
+        
+        const targetPage = pageMap[modeId];
+        if (targetPage) {
+          window.location.href = targetPage;
+        } else {
+          switchPage(modeId);
         }
       }
       
@@ -13933,9 +13967,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               ipPlanningToken = newToken;
             }
           }
+          console.log('👤 更新用戶資訊顯示...');
           updateUserInfo();
         } else {
           // 未登入時顯示登入按鈕
+          console.log('🔐 未登入，顯示登入按鈕');
           showLoginButton();
         }
       }
@@ -13965,12 +14001,17 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 顯示用戶資訊
       async function updateUserInfo() {
+        console.log('🔄 更新用戶資訊...');
+        console.log('Token:', ipPlanningToken ? '存在' : '不存在');
+        console.log('用戶:', ipPlanningUser ? (ipPlanningUser.name || '無名稱') : '不存在');
+        
         const authButtons = document.querySelector('.auth-buttons');
         const userInfo = document.getElementById('userInfo');
         const loginBtn = document.getElementById('loginBtn');
         
         // 檢查登入狀態
         const isLoggedIn = !!(ipPlanningToken && ipPlanningUser);
+        console.log('登入狀態:', isLoggedIn);
         
         if (isLoggedIn) {
           // 已登入：顯示用戶資訊，隱藏登入按鈕
@@ -13980,8 +14021,19 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const userNameEl = document.getElementById('userName');
             const userAvatarEl = document.getElementById('userAvatar');
             if (userNameEl) userNameEl.textContent = ipPlanningUser.name || '用戶';
-            if (userAvatarEl && ipPlanningUser.picture) {
-              userAvatarEl.src = ipPlanningUser.picture;
+            if (userAvatarEl) {
+              if (ipPlanningUser.picture) {
+                userAvatarEl.src = ipPlanningUser.picture;
+              } else {
+                // 如果沒有頭像，使用預設頭像或首字母
+                userAvatarEl.src = 'https://via.placeholder.com/32';
+                userAvatarEl.alt = ipPlanningUser.name || '用戶';
+              }
+            }
+            // 確保點擊用戶資訊可以打開創作者資料庫
+            if (userInfo.onclick !== 'handleUserDBClick()') {
+              userInfo.setAttribute('onclick', 'handleUserDBClick()');
+              userInfo.style.cursor = 'pointer';
             }
           }
         } else {
@@ -13991,10 +14043,20 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (loginBtn) loginBtn.style.display = 'block';
         }
         // 更新用戶資訊後，檢查訂閱狀態
+        console.log('📊 檢查訂閱狀態...');
         await checkSubscriptionStatus();
         
         // 更新首頁視圖
+        console.log('🏠 更新首頁視圖...');
         updateHomepageView();
+        
+        // 如果已登入，載入用戶歷史資訊（對話記錄、生成記錄、記憶等）
+        if (isLoggedIn && ipPlanningUser && ipPlanningUser.user_id) {
+          console.log('📚 載入用戶歷史資訊（對話記錄、生成記錄、記憶等）...');
+          setTimeout(() => {
+            loadUserHistory();
+          }, 500);
+        }
       }
       
       // 跳過登入
@@ -14007,32 +14069,43 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 檢查訂閱狀態並更新浮層
       async function checkSubscriptionStatus() {
+        console.log('🔍 開始檢查訂閱狀態...');
+        console.log('Token 存在:', !!ipPlanningToken);
+        console.log('用戶存在:', !!ipPlanningUser);
+        console.log('用戶ID:', ipPlanningUser?.user_id);
+        
         // 如果有登入資訊，從後端 API 獲取訂閱狀態
         if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
           try {
+            console.log('📡 發送 API 請求獲取用戶資訊...');
             let response = await fetch('https://aivideobackend.zeabur.app/api/auth/me', {
               headers: {
                 'Authorization': `Bearer ${ipPlanningToken}`
               }
             });
             
+            console.log('API 響應狀態:', response.status);
+            
             // 如果收到 401，嘗試刷新 token 後重試
             if (response.status === 401) {
+              console.log('⚠️ Token 已過期，嘗試刷新...');
               const refreshed = await tryRefreshTokenSafe();
               if (refreshed) {
                 // Token 刷新成功，使用新 token 重試
+                console.log('✅ Token 刷新成功，重新獲取用戶資訊...');
                 response = await fetch('https://aivideobackend.zeabur.app/api/auth/me', {
                   headers: {
                     'Authorization': `Bearer ${ipPlanningToken}`
                   }
                 });
+                console.log('重新請求後的響應狀態:', response.status);
               }
             }
             
             if (response.ok) {
               const userInfo = await response.json();
-              console.log('用戶資訊:', userInfo);
-              console.log('訂閱狀態:', userInfo.is_subscribed);
+              console.log('✅ 用戶資訊獲取成功:', userInfo);
+              console.log('📊 訂閱狀態:', userInfo.is_subscribed);
               
               // 更新訂閱狀態
               // 處理各種可能的返回類型
@@ -14432,64 +14505,80 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
 
       // 載入用戶歷史資訊
       async function loadUserHistory() {
+        console.log('📚 ========== 開始載入用戶歷史資訊 ==========');
+        
         // 確保用戶有ID
         if (!ipPlanningUser?.user_id) {
-          console.log('沒有用戶ID，嘗試生成...');
+          console.warn('⚠️ 沒有用戶ID，嘗試生成...');
           if (ipPlanningUser) {
             ipPlanningUser.user_id = generateUserId();
             localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
-            console.log('為用戶生成新ID:', ipPlanningUser.user_id);
+            console.log('✅ 為用戶生成新ID:', ipPlanningUser.user_id);
           } else {
-            console.log('沒有當前用戶，跳過載入歷史');
+            console.error('❌ 沒有當前用戶，跳過載入歷史');
             return;
           }
         }
         
-        console.log('開始載入用戶歷史，用戶ID:', ipPlanningUser.user_id);
+        console.log('👤 用戶ID:', ipPlanningUser.user_id);
+        console.log('🔑 Token:', ipPlanningToken ? '存在' : '不存在');
         
         try {
           // 載入對話記錄
-          console.log('正在載入對話記錄...');
-          const conversationsResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/conversations/${ipPlanningUser.user_id}`);
-          console.log('對話記錄響應狀態:', conversationsResponse.status);
+          console.log('📝 [1/4] 正在載入對話記錄...');
+          const conversationsResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/conversations/${ipPlanningUser.user_id}`, {
+            headers: {
+              'Authorization': `Bearer ${ipPlanningToken}`
+            }
+          });
+          console.log('📝 對話記錄響應狀態:', conversationsResponse.status);
           if (conversationsResponse.ok) {
             const conversationsData = await conversationsResponse.json();
-            console.log('對話記錄數據:', conversationsData);
+            console.log('✅ 對話記錄數據:', conversationsData);
             updateConversationsDisplay(conversationsData.conversations);
           } else {
-            console.error('載入對話記錄失敗:', conversationsResponse.status, conversationsResponse.statusText);
+            console.error('❌ 載入對話記錄失敗:', conversationsResponse.status, conversationsResponse.statusText);
           }
           
           // 載入生成記錄
-          console.log('正在載入生成記錄...');
-          const generationsResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/generations/${ipPlanningUser.user_id}`);
-          console.log('生成記錄響應狀態:', generationsResponse.status);
+          console.log('📄 [2/4] 正在載入生成記錄...');
+          const generationsResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/generations/${ipPlanningUser.user_id}`, {
+            headers: {
+              'Authorization': `Bearer ${ipPlanningToken}`
+            }
+          });
+          console.log('📄 生成記錄響應狀態:', generationsResponse.status);
           if (generationsResponse.ok) {
             const generationsData = await generationsResponse.json();
-            console.log('生成記錄數據:', generationsData);
+            console.log('✅ 生成記錄數據:', generationsData);
             updateGenerationsDisplay(generationsData.generations);
           } else {
-            console.error('載入生成記錄失敗:', generationsResponse.status, generationsResponse.statusText);
+            console.error('❌ 載入生成記錄失敗:', generationsResponse.status, generationsResponse.statusText);
           }
           
           // 載入帳號定位記錄
-          console.log('正在載入帳號定位記錄...');
+          console.log('🎯 [3/4] 正在載入帳號定位記錄...');
           await loadPositioningRecords();
           
           // 載入用戶記憶
-          console.log('正在載入用戶記憶...');
-          const memoryResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/memory/${ipPlanningUser.user_id}`);
-          console.log('用戶記憶響應狀態:', memoryResponse.status);
+          console.log('🧠 [4/4] 正在載入用戶記憶...');
+          const memoryResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/memory/${ipPlanningUser.user_id}`, {
+            headers: {
+              'Authorization': `Bearer ${ipPlanningToken}`
+            }
+          });
+          console.log('🧠 用戶記憶響應狀態:', memoryResponse.status);
           if (memoryResponse.ok) {
             const memoryData = await memoryResponse.json();
-            console.log('用戶記憶數據:', memoryData);
+            console.log('✅ 用戶記憶數據:', memoryData);
             updateMemoryDisplay(memoryData.memory);
           } else {
-            console.error('載入用戶記憶失敗:', memoryResponse.status, memoryResponse.statusText);
+            console.error('❌ 載入用戶記憶失敗:', memoryResponse.status, memoryResponse.statusText);
           }
           
+          console.log('✅ ========== 用戶歷史資訊載入完成 ==========');
         } catch (error) {
-          console.error('載入用戶歷史資訊時出錯:', error);
+          console.error('❌ 載入用戶歷史資訊時出錯:', error);
         }
       }
 
@@ -24974,8 +25063,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
   function initTypewriterAnimation() {
     console.log('initTypewriterAnimation 被調用');
     const heroTitles = [
-      { id: 'hero-title-1', text: '讓 AI 幫你打造\n下一支爆款短影音' },
-      { id: 'hero-title-2', text: '讓 AI 幫你打造\n下一支爆款短影音' }
+      { id: 'hero-title-1', text: 'AI 生成腳本、AI 帳號定位,一次完成。' },
+      { id: 'hero-title-2', text: 'AI 生成腳本、AI 帳號定位,一次完成。' }
     ];
     
     heroTitles.forEach(({ id, text }) => {
@@ -24991,7 +25080,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         return;
       }
       
-      console.log(`開始打字機動畫: ${id}`);
+      console.log(`開始打字機動畫: ${id}, 文字: ${text}`);
+      
+      // 檢查是否已經有文字（避免重複執行）
+      if (textSpan.textContent && textSpan.textContent.trim() !== '') {
+        console.log(`元素 ${id} 已有文字，跳過動畫`);
+        return;
+      }
       
       // 重置文字
       textSpan.textContent = '';
@@ -25001,6 +25096,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       let currentLineIndex = 0;
       let currentCharIndex = 0;
       let isTyping = true;
+      let animationId = null; // 用於追蹤動畫ID，避免重複執行
+      
+      // 為每個元素創建唯一的動畫ID
+      const uniqueId = `${id}-${Date.now()}`;
       
       function typeChar() {
         if (!isTyping) return;
@@ -25017,7 +25116,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             currentCharIndex++;
             
             // 繼續打字
-            setTimeout(typeChar, 80); // 每個字符間隔 80ms
+            animationId = setTimeout(typeChar, 100); // 每個字符間隔 100ms（稍微慢一點，更清晰）
           } else {
             // 當前行完成，移到下一行
             currentLineIndex++;
@@ -25025,7 +25124,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             
             if (currentLineIndex < lines.length) {
               // 還有下一行，繼續
-              setTimeout(typeChar, 200); // 換行前暫停 200ms
+              animationId = setTimeout(typeChar, 300); // 換行前暫停 300ms
             } else {
               // 所有文字完成
               isTyping = false;

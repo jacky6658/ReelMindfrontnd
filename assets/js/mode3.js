@@ -3,7 +3,11 @@
 
 // API_BASE_URL 已在 config.js 中定義為全局變數
 // 這裡直接使用 window.APP_CONFIG，避免重複聲明
-const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+// 使用 window 檢查避免重複聲明錯誤
+if (typeof window.API_URL === 'undefined') {
+  window.API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+}
+const API_URL = window.API_URL;
 let currentPlatform = null;
 let currentTopic = null;
 let currentProfile = null;
