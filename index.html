@@ -12993,7 +12993,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         const targetPage = document.getElementById(pageId);
         if (targetPage) {
           targetPage.classList.add('active');
-          console.log('Switched to page:', pageId);
+          console.log('✅ Switched to page:', pageId);
+          
+          // 確保首頁被隱藏（如果切換到其他頁面）
+          if (pageId !== 'homepage') {
+            const homepage = document.getElementById('homepage');
+            if (homepage) {
+              homepage.classList.remove('active');
+            }
+          }
           
           // 如果是 mode2，添加 mode2-active 類並確保有 fig1 類
           if (pageId === 'mode2') {
@@ -13054,19 +13062,30 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             }, 100);
           }
         } else {
-          console.error('Page not found:', pageId);
+          console.error('❌ Page not found:', pageId);
           // 如果找不到頁面，檢查是否是 forum 或 guide
           if (pageId === 'forum' || pageId === 'guide') {
             // forum 和 guide 頁面存在，但可能被隱藏了，強制顯示
             const forumPage = document.getElementById('forum');
             const guidePage = document.getElementById('guide');
+            const homepage = document.getElementById('homepage');
+            
+            // 先隱藏首頁
+            if (homepage) {
+              homepage.classList.remove('active');
+            }
+            
             if (pageId === 'forum' && forumPage) {
               forumPage.classList.add('active');
-              console.log('Forum page activated');
+              console.log('✅ Forum page activated');
             } else if (pageId === 'guide' && guidePage) {
               guidePage.classList.add('active');
-              console.log('Guide page activated');
+              console.log('✅ Guide page activated');
+            } else {
+              console.error('❌ 找不到頁面元素:', pageId, 'forum:', !!forumPage, 'guide:', !!guidePage);
             }
+          } else {
+            console.error('❌ 未知的頁面ID:', pageId);
           }
         }
         
@@ -13580,22 +13599,34 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 監聽登入事件（從 common.js 或 auth.js 觸發）
         window.addEventListener('auth:logged-in', async function() {
-          console.log('🔔 收到登入事件，開始更新用戶資訊...');
+          console.log('🔔 ========== 收到登入事件 ==========');
+          console.log('🔔 開始更新用戶資訊...');
+          
           // 重新載入用戶資訊
           const storedToken = localStorage.getItem('ipPlanningToken');
           const storedUserStr = localStorage.getItem('ipPlanningUser');
+          
+          console.log('🔑 Token 存在:', !!storedToken);
+          console.log('👤 用戶資料存在:', !!storedUserStr);
+          
           if (storedToken) {
             ipPlanningToken = storedToken;
+            console.log('✅ Token 已更新');
           }
           if (storedUserStr) {
             try {
               ipPlanningUser = JSON.parse(storedUserStr);
+              console.log('✅ 用戶資料已更新:', ipPlanningUser);
             } catch (e) {
-              console.warn('無法解析用戶資料:', e);
+              console.warn('❌ 無法解析用戶資料:', e);
             }
           }
+          
           // 更新用戶資訊顯示
+          console.log('🔄 調用 updateUserInfo...');
           await updateUserInfo();
+          
+          console.log('✅ ========== 登入事件處理完成 ==========');
         });
         
         // 啟動 token 監控（每分鐘檢查一次）
@@ -13624,9 +13655,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             // 清除 URL 參數
             window.history.replaceState({}, document.title, window.location.pathname);
             
-            console.log('DEBUG: Token processed from URL params, updating UI');
+            console.log('✅ DEBUG: Token processed from URL params, updating UI');
+            console.log('👤 用戶資訊:', ipPlanningUser);
             updateAuthUI(true);
             showMainApp();
+            // 立即更新用戶資訊顯示
+            updateUserInfo().then(() => {
+              console.log('✅ 用戶資訊更新完成');
+            }).catch(err => {
+              console.error('❌ 更新用戶資訊失敗:', err);
+            });
           }
         }
         
@@ -13661,11 +13699,17 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             localStorage.removeItem('ipPlanningTokenUpdated');
             
             // 更新 UI
+            console.log('✅ 從 localStorage 更新登入狀態');
+            console.log('👤 用戶資訊:', ipPlanningUser);
             updateAuthUI(true);
             showMainApp();
-            checkSubscriptionStatus();
-            
-            console.log('DEBUG: ✅ Login state updated from localStorage');
+            // 立即更新用戶資訊顯示
+            updateUserInfo().then(async () => {
+              await checkSubscriptionStatus();
+              console.log('✅ DEBUG: Login state updated from localStorage');
+            }).catch(err => {
+              console.error('❌ 更新用戶資訊失敗:', err);
+            });
           }
         }
         
@@ -14063,14 +14107,20 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             userInfo.style.display = 'flex';
             const userNameEl = document.getElementById('userName');
             const userAvatarEl = document.getElementById('userAvatar');
-            if (userNameEl) userNameEl.textContent = ipPlanningUser.name || '用戶';
+            if (userNameEl) {
+              userNameEl.textContent = ipPlanningUser.name || ipPlanningUser.displayName || '用戶';
+              console.log('✅ 更新用戶名稱:', userNameEl.textContent);
+            }
             if (userAvatarEl) {
-              if (ipPlanningUser.picture) {
-                userAvatarEl.src = ipPlanningUser.picture;
+              if (ipPlanningUser.picture || ipPlanningUser.avatar) {
+                userAvatarEl.src = ipPlanningUser.picture || ipPlanningUser.avatar;
+                userAvatarEl.alt = ipPlanningUser.name || '用戶';
+                console.log('✅ 更新用戶頭像:', userAvatarEl.src);
               } else {
                 // 如果沒有頭像，使用預設頭像或首字母
                 userAvatarEl.src = 'https://via.placeholder.com/32';
                 userAvatarEl.alt = ipPlanningUser.name || '用戶';
+                console.log('⚠️ 用戶沒有頭像，使用預設頭像');
               }
             }
             // 確保點擊用戶資訊可以打開創作者資料庫
@@ -14147,8 +14197,37 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             
             if (response.ok) {
               const userInfo = await response.json();
-              console.log('✅ 用戶資訊獲取成功:', userInfo);
+              console.log('✅ ========== 用戶資訊獲取成功 ==========');
+              console.log('✅ 完整用戶資訊:', JSON.stringify(userInfo, null, 2));
               console.log('📊 訂閱狀態:', userInfo.is_subscribed);
+              console.log('👤 用戶名稱:', userInfo.name || userInfo.displayName);
+              console.log('🖼️ 用戶頭像:', userInfo.picture || userInfo.avatar);
+              
+              // 更新全局用戶資訊（從 API 獲取的最新資訊）
+              if (userInfo.user_id) {
+                ipPlanningUser = {
+                  ...ipPlanningUser,
+                  ...userInfo,
+                  user_id: userInfo.user_id,
+                  name: userInfo.name || userInfo.displayName || ipPlanningUser?.name,
+                  picture: userInfo.picture || userInfo.avatar || ipPlanningUser?.picture,
+                  email: userInfo.email || ipPlanningUser?.email
+                };
+                localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                console.log('✅ 更新全局用戶資訊:', ipPlanningUser);
+                
+                // 立即更新 UI 顯示（用戶頭像和名稱）
+                const userNameEl = document.getElementById('userName');
+                const userAvatarEl = document.getElementById('userAvatar');
+                if (userNameEl) {
+                  userNameEl.textContent = ipPlanningUser.name || '用戶';
+                  console.log('✅ UI 更新用戶名稱:', userNameEl.textContent);
+                }
+                if (userAvatarEl && ipPlanningUser.picture) {
+                  userAvatarEl.src = ipPlanningUser.picture;
+                  console.log('✅ UI 更新用戶頭像:', ipPlanningUser.picture);
+                }
+              }
               
               // 更新訂閱狀態
               // 處理各種可能的返回類型
