@@ -257,7 +257,13 @@
         // 載入用戶資訊
         if (window.Auth && window.Auth.getToken()) {
           ipPlanningToken = window.Auth.getToken();
-          ipPlanningUser = window.Auth.getUser();
+        }
+        // 從 localStorage 或 common.js 獲取用戶資訊
+        if (window.ReelMindCommon && window.ReelMindCommon.getUser) {
+          ipPlanningUser = window.ReelMindCommon.getUser();
+        } else {
+          const userStr = localStorage.getItem('ipPlanningUser');
+          ipPlanningUser = userStr ? JSON.parse(userStr) : null;
         }
       });
 
