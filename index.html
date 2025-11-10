@@ -25170,8 +25170,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const safeErrorMsg = escapeHtml(error.message || '未知錯誤');
           contentDiv.innerHTML = `抱歉，發生了錯誤：${safeErrorMsg}`;
         } else {
-        const errorMessage = createMode3Message('assistant', `抱歉，發生了錯誤：${error.message}`);
-        chatMessages.appendChild(errorMessage);
+          const errorMessage = createMode3Message('assistant', `抱歉，發生了錯誤：${error.message}`);
+          chatMessages.appendChild(errorMessage);
         }
       } finally {
         // 恢復輸入框和按鈕
@@ -25528,6 +25528,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }, 500);
     });
   }
+}
   </script>
   </body>
 </html>
