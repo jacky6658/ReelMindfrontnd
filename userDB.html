@@ -954,6 +954,7 @@
     <script src="assets/js/auth.js"></script>
     <script src="assets/js/api.js"></script>
     <script src="assets/js/common.js"></script>
+    <script src="assets/js/userDB.js"></script>
     
     <script>
       // API_BASE_URL 已在 config.js 中定義為全局變數
@@ -1383,129 +1384,7 @@
       });
     </script>
     
-    <!-- 注意：以下函數需要從 index.html 中提取，由於文件太大，建議放在獨立的 userDB.js 文件中 -->
-    <!-- 暫時在這裡添加占位符，實際函數需要從 index.html 提取 -->
-    <script>
-      // 以下函數需要從 index.html 中提取：
-      // - loadMyScriptsForUserDB()
-      // - displayScriptsForUserDB()
-      // - loadPositioningRecordsForUserDB()
-      // - displayPositioningRecordsForUserDB()
-      // - loadTopicHistoryForUserDB()
-      // - displayTopicRecordsForUserDB()
-      // - loadIpPlanningResultsForUserDB()
-      // - displayIpPlanningResultsForUserDB()
-      // - showIpPlanningType()
-      // - exportIpPlanningResults()
-      // - loadMyOrdersForUserDB()
-      // - displayOrdersForUserDB()
-      // - loadUsageStatsForUserDB()
-      // - saveApiKey()
-      // - testApiKey()
-      // - toggleApiKeyVisibility()
-      // - clearSavedApiKey()
-      // - loadSavedApiKey()
-      // - exportUserData()
-      // - clearUserData()
-      // - getLocalScripts()
-      // - 以及其他相關函數
-      
-      // 為了避免文件過大，這些函數應該放在獨立的 userDB.js 文件中
-      // 這裡先定義空的占位函數，避免錯誤
-      
-      async function loadMyScriptsForUserDB() {
-        const content = document.querySelector('#db-myScripts .section-content');
-        if (content) {
-          content.innerHTML = '<div class="loading-text">功能開發中...</div>';
-        }
-      }
-      
-      async function loadPositioningRecordsForUserDB() {
-        const content = document.querySelector('#db-accountPositioning .section-content');
-        if (content) {
-          content.innerHTML = '<div class="loading-text">功能開發中...</div>';
-        }
-      }
-      
-      async function loadTopicHistoryForUserDB() {
-        const content = document.querySelector('#db-topicRecords .section-content');
-        if (content) {
-          content.innerHTML = '<div class="loading-text">功能開發中...</div>';
-        }
-      }
-      
-      async function loadIpPlanningResultsForUserDB() {
-        const content = document.getElementById('ip-planning-content');
-        if (content) {
-          content.innerHTML = '<div class="loading-text">功能開發中...</div>';
-        }
-      }
-      
-      function showIpPlanningType(type) {
-        // 占位函數
-        console.log('showIpPlanningType:', type);
-      }
-      
-      function exportIpPlanningResults() {
-        showToast('功能開發中...', 3000);
-      }
-      
-      async function loadMyOrdersForUserDB() {
-        const content = document.querySelector('#myOrdersContent');
-        if (content) {
-          content.innerHTML = '<div class="loading-text">功能開發中...</div>';
-        }
-      }
-      
-      async function loadUsageStatsForUserDB() {
-        // 占位函數
-      }
-      
-      async function saveApiKey() {
-        showToast('功能開發中...', 3000);
-      }
-      
-      async function testApiKey() {
-        showToast('功能開發中...', 3000);
-      }
-      
-      function toggleApiKeyVisibility() {
-        const apiKeyInput = document.getElementById('llmApiKey');
-        const toggleIcon = document.getElementById('toggleKeyIcon');
-        
-        if (apiKeyInput && toggleIcon) {
-          if (apiKeyInput.type === 'password') {
-            apiKeyInput.type = 'text';
-            toggleIcon.textContent = '🙈';
-          } else {
-            apiKeyInput.type = 'password';
-            toggleIcon.textContent = '👁️';
-          }
-        }
-      }
-      
-      async function clearSavedApiKey() {
-        showToast('功能開發中...', 3000);
-      }
-      
-      async function loadSavedApiKey() {
-        // 占位函數
-      }
-      
-      async function exportUserData() {
-        showToast('功能開發中...', 3000);
-      }
-      
-      function clearUserData() {
-        if (confirm('確定要清除所有本地快取嗎？此操作無法復原。')) {
-          localStorage.clear();
-          showToast('本地快取已清除', 3000);
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        }
-      }
-    </script>
+    <!-- 所有 userDB 相關函數已移至 assets/js/userDB.js -->
   </body>
 </html>
 
