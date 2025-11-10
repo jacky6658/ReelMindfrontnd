@@ -11523,7 +11523,7 @@
                         <div style="font-size: 0.9rem; color: rgba(255,255,255,0.8); flex-shrink: 0;">/月</div>
                       </div>
                       <div style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin-bottom: 16px;">彈性方案，適合短期使用者</div>
-                      <a href="subscription.html?plan=monthly" style="display: block; margin-top: auto; padding: 0 32px; background: white; color: #2563EB; border-radius: 12px; font-weight: 700; text-decoration: none; transition: all 0.3s; text-align: center; height: 56px; display: flex; align-items: center; justify-content: center;">
+                      <a href="#" onclick="handleSubscriptionClick('monthly'); return false;" style="display: block; margin-top: auto; padding: 0 32px; background: white; color: #2563EB; border-radius: 12px; font-weight: 700; text-decoration: none; transition: all 0.3s; text-align: center; height: 56px; display: flex; align-items: center; justify-content: center;">
                         立即訂閱
                       </a>
                     </div>
@@ -11540,7 +11540,7 @@
                       </div>
                       <div style="font-size: 0.9rem; color: #10B981; font-weight: 600; margin-bottom: 4px;">平均每月 NT$1,980</div>
                       <div style="font-size: 0.9rem; color: #94A3B8; margin-bottom: 16px;">節省 NT$5,000（20% OFF）</div>
-                      <a href="subscription.html?plan=yearly" style="display: block; margin-top: auto; padding: 0 32px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px rgba(16,185,129,0.3); transition: all 0.3s; text-align: center; height: 56px; display: flex; align-items: center; justify-content: center;">
+                      <a href="#" onclick="handleSubscriptionClick('yearly'); return false;" style="display: block; margin-top: auto; padding: 0 32px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px rgba(16,185,129,0.3); transition: all 0.3s; text-align: center; height: 56px; display: flex; align-items: center; justify-content: center;">
                         立即訂閱
                       </a>
                     </div>
@@ -11712,17 +11712,17 @@
                     </div>
                     
                     <div class="mode-cards" style="position: relative; display: flex; justify-content: center; margin: 0 auto; max-width: 1200px;">
-                      <div class="mode-card" onclick="switchPage('mode1'); console.log('Mode1 card clicked');">
+                      <div class="mode-card" onclick="handleModeCardClick('mode1');">
                         <div class="mode-card-icon"><i class="fas fa-magic"></i></div>
                         <h3 class="mode-card-title">一鍵生成模式</h3>
                         <p class="mode-card-desc">快速設定需求，依序生成帳號定位、選題和腳本，適合效率導向的用戶</p>
                       </div>
-                      <div class="mode-card" onclick="switchPage('mode2'); console.log('Mode2 card clicked');">
+                      <div class="mode-card" onclick="handleModeCardClick('mode2');">
                         <div class="mode-card-icon"><i class="fas fa-comments"></i></div>
                         <h3 class="mode-card-title">AI顧問對話模式</h3>
                         <p class="mode-card-desc">與AI進行深度對話，靈活討論內容策略，適合需要創意討論的用戶</p>
                       </div>
-                      <div class="mode-card" onclick="switchPage('mode3'); console.log('Mode3 card clicked');">
+                      <div class="mode-card" onclick="handleModeCardClick('mode3');">
                         <div class="mode-card-icon"><i class="fas fa-user-tie"></i></div>
                         <h3 class="mode-card-title">IP人設規劃模式</h3>
                         <p class="mode-card-desc">透過聊天記錄人生曲線，AI協助擬定個人化IP Profile、14天規劃和腳本</p>
@@ -13378,7 +13378,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       }
       
-      function switchPage(pageId) {
+      async function switchPage(pageId) {
         console.log('switchPage called with:', pageId);
         
         // 需要訂閱才能訪問的頁面列表
@@ -13386,31 +13386,49 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 檢查是否為受保護的頁面
         if (protectedPages.includes(pageId)) {
-          const isSubscribed = document.body.dataset.subscribed === 'true';
-          const isLoggedIn = ipPlanningToken && ipPlanningUser;
-          
-          console.log('嘗試訪問受保護頁面:', pageId);
-          console.log('訂閱狀態:', isSubscribed);
-          console.log('登入狀態:', isLoggedIn);
-          console.log('document.body.dataset.subscribed:', document.body.dataset.subscribed);
-          
-          // 未登入，顯示登入提示
-          if (!isLoggedIn) {
-            console.warn('未登入 - 需要登入');
-            alert('請先登入以使用此功能！');
-            goToLogin();
-            // 保持首頁顯示
-            const homepage = document.getElementById('homepage');
-            if (homepage) {
-              homepage.classList.add('active');
+          // 使用 checkFeatureAccess 檢查登入和訂閱狀態
+          if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
+            const canAccess = await window.ReelMindCommon.checkFeatureAccess();
+            if (!canAccess) {
+              // 需要登入或訂閱，已由 checkFeatureAccess 處理
+              // 保持首頁顯示
+              const homepage = document.getElementById('homepage');
+              if (homepage) {
+                homepage.classList.add('active');
+              }
+              return;
             }
-            return;
-          }
-          
-          // 已登入但未訂閱（需要訂閱才能使用）
-          if (isLoggedIn && !isSubscribed) {
-            console.warn('已登入但未訂閱 - 允許訪問（臨時）');
-            // 暫時允許訪問，因為所有現有用戶都應該是已訂閱狀態
+          } else {
+            // 降級處理：使用原有邏輯
+            const isSubscribed = document.body.dataset.subscribed === 'true';
+            const isLoggedIn = ipPlanningToken && ipPlanningUser;
+            
+            console.log('嘗試訪問受保護頁面:', pageId);
+            console.log('訂閱狀態:', isSubscribed);
+            console.log('登入狀態:', isLoggedIn);
+            
+            // 未登入，顯示登入提示
+            if (!isLoggedIn) {
+              console.warn('未登入 - 需要登入');
+              if (typeof goToLogin === 'function') {
+                goToLogin();
+              } else {
+                alert('請先登入以使用此功能！');
+              }
+              // 保持首頁顯示
+              const homepage = document.getElementById('homepage');
+              if (homepage) {
+                homepage.classList.add('active');
+              }
+              return;
+            }
+            
+            // 已登入但未訂閱，導向訂閱頁
+            if (isLoggedIn && !isSubscribed) {
+              console.warn('已登入但未訂閱 - 導向訂閱頁');
+              window.location.href = '/subscription.html';
+              return;
+            }
           }
         }
         
@@ -14174,12 +14192,24 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
 
       // 包裝頁面切換，對三大模式進行封鎖
       const originalSwitchPage = typeof switchPage === 'function' ? switchPage : null;
-      window.switchPage = function(page) {
+      window.switchPage = async function(page) {
         // 三大模式代稱：mode1(一鍵生成)、mode2(AI顧問)、mode3(IP人設規劃)
         const isModePage = page === 'mode1' || page === 'mode2' || page === 'mode3';
-        if (isModePage && !isSubscribed()) {
-          // 預設導到訂閱頁（不帶方案；如需可改 'monthly' 或 'yearly'）
-          return showSubscriptionPaywall();
+        if (isModePage) {
+          // 使用 checkFeatureAccess 檢查登入和訂閱狀態
+          if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
+            const canAccess = await window.ReelMindCommon.checkFeatureAccess();
+            if (!canAccess) {
+              // 需要登入或訂閱，已由 checkFeatureAccess 處理
+              return;
+            }
+          } else {
+            // 降級處理：使用原有邏輯
+            if (!isSubscribed()) {
+              // 預設導到訂閱頁（不帶方案；如需可改 'monthly' 或 'yearly'）
+              return showSubscriptionPaywall();
+            }
+          }
         }
         // 其他頁面正常切換
         if (originalSwitchPage) {
@@ -14187,6 +14217,49 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
       };
 
+      // 處理 mode-card 點擊
+      async function handleModeCardClick(modeId) {
+        console.log('Mode card clicked:', modeId);
+        
+        // 使用 checkFeatureAccess 檢查登入和訂閱狀態
+        if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
+          const canAccess = await window.ReelMindCommon.checkFeatureAccess();
+          if (canAccess) {
+            // 可以訪問，切換到對應模式
+            switchPage(modeId);
+          }
+          // 如果無法訪問，checkFeatureAccess 已經處理了登入/訂閱流程
+        } else {
+          // 降級處理：直接切換
+          switchPage(modeId);
+        }
+      }
+      
+      // 處理訂閱按鈕點擊
+      async function handleSubscriptionClick(plan) {
+        console.log('Subscription button clicked:', plan);
+        
+        // 先檢查登入狀態
+        if (window.ReelMindCommon && window.ReelMindCommon.checkLoginStatus) {
+          const loggedIn = await window.ReelMindCommon.checkLoginStatus();
+          
+          if (!loggedIn) {
+            // 未登入，先跳轉登入
+            if (typeof goToLogin === 'function') {
+              // 保存目標方案到 sessionStorage，登入成功後使用
+              sessionStorage.setItem('pendingSubscriptionPlan', plan);
+              goToLogin();
+            } else {
+              alert('請先登入以訂閱服務！');
+            }
+            return;
+          }
+        }
+        
+        // 已登入，直接跳轉到訂閱頁
+        window.location.href = `subscription.html?plan=${plan}`;
+      }
+      
       // 在登入成功後與訂閱狀態載入時，同步本地 user.is_subscribed 欄位
       function markUnsubscribedByDefault() {
         try {
