@@ -3210,15 +3210,23 @@
       
       /* 頁面隱藏/顯示 */
       .page {
-        display: none;
+        display: none !important;
         width: 100%;
         max-width: 100vw;
         overflow-x: hidden !important; /* 防止頁面左右滑動 */
         box-sizing: border-box;
+        position: relative;
+        z-index: 1;
       }
       
       .page.active {
-        display: block;
+        display: block !important;
+        z-index: 2;
+      }
+      
+      /* 確保首頁在最上層 */
+      #homepage.active {
+        z-index: 10;
       }
       
       /* 動畫效果 */
@@ -11173,7 +11181,7 @@
                     </div>
                     
                     <!-- 主標題 -->
-                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent leading-tight">
+                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent leading-tight" style="cursor: default; pointer-events: none;">
                       ReelMind 能為你做什麼？
                     </h2>
                     
