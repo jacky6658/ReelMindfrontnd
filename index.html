@@ -14240,39 +14240,97 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               if (isSubscribed) {
                 document.body.dataset.subscribed = 'true';
                 localStorage.setItem('subscriptionStatus', 'active');
-                console.log('設為已訂閱，訂閱狀態:', userInfo.is_subscribed);
+                console.log('✅ 設為已訂閱，訂閱狀態:', userInfo.is_subscribed);
+                
+                // 更新用戶資料中的訂閱狀態
+                if (ipPlanningUser) {
+                  ipPlanningUser.is_subscribed = true;
+                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  console.log('✅ 更新用戶資料中的訂閱狀態');
+                }
+                
+                // 立即更新首頁視圖
+                updateHomepageView();
               } else {
                 document.body.dataset.subscribed = 'false';
                 localStorage.setItem('subscriptionStatus', 'inactive');
-                console.log('設為未訂閱，訂閱狀態:', userInfo.is_subscribed);
+                console.log('⚠️ 設為未訂閱，訂閱狀態:', userInfo.is_subscribed);
+                
+                // 更新用戶資料中的訂閱狀態
+                if (ipPlanningUser) {
+                  ipPlanningUser.is_subscribed = false;
+                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                }
+                
+                // 立即更新首頁視圖
+                updateHomepageView();
               }
             } else {
               // API 失敗（包括 401 刷新失敗），使用本地儲存或預設已訂閱
               const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
-              const localIsSubscribed = ipPlanningUser.is_subscribed !== false; // 預設為已訂閱
+              const localIsSubscribed = ipPlanningUser && ipPlanningUser.is_subscribed !== false; // 預設為已訂閱
               
               if (localSubscriptionStatus === 'active' || localIsSubscribed) {
-              document.body.dataset.subscribed = 'true';
-              localStorage.setItem('subscriptionStatus', 'active');
+                document.body.dataset.subscribed = 'true';
+                localStorage.setItem('subscriptionStatus', 'active');
+                console.log('⚠️ API 失敗，使用本地儲存狀態: 已訂閱');
+                
+                // 更新用戶資料中的訂閱狀態
+                if (ipPlanningUser) {
+                  ipPlanningUser.is_subscribed = true;
+                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                }
+                
+                // 立即更新首頁視圖
+                updateHomepageView();
               } else {
                 document.body.dataset.subscribed = 'false';
                 localStorage.setItem('subscriptionStatus', 'inactive');
+                console.log('⚠️ API 失敗，使用本地儲存狀態: 未訂閱');
+                
+                // 更新用戶資料中的訂閱狀態
+                if (ipPlanningUser) {
+                  ipPlanningUser.is_subscribed = false;
+                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                }
+                
+                // 立即更新首頁視圖
+                updateHomepageView();
               }
-              // 靜默處理，不顯示錯誤日誌
             }
           } catch (error) {
             // 網路錯誤等異常，使用本地儲存或預設已訂閱
+            console.error('❌ 檢查訂閱狀態時發生錯誤:', error);
             const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
             const localIsSubscribed = ipPlanningUser && ipPlanningUser.is_subscribed !== false;
             
             if (localSubscriptionStatus === 'active' || localIsSubscribed) {
-            document.body.dataset.subscribed = 'true';
-            localStorage.setItem('subscriptionStatus', 'active');
+              document.body.dataset.subscribed = 'true';
+              localStorage.setItem('subscriptionStatus', 'active');
+              console.log('⚠️ 網路錯誤，使用本地儲存狀態: 已訂閱');
+              
+              // 更新用戶資料中的訂閱狀態
+              if (ipPlanningUser) {
+                ipPlanningUser.is_subscribed = true;
+                localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+              }
+              
+              // 立即更新首頁視圖
+              updateHomepageView();
             } else {
               document.body.dataset.subscribed = 'false';
               localStorage.setItem('subscriptionStatus', 'inactive');
+              console.log('⚠️ 網路錯誤，使用本地儲存狀態: 未訂閱');
+              
+              // 更新用戶資料中的訂閱狀態
+              if (ipPlanningUser) {
+                ipPlanningUser.is_subscribed = false;
+                localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+              }
+              
+              // 立即更新首頁視圖
+              updateHomepageView();
             }
-            // 不輸出錯誤日誌，避免控制台噪音
           }
         } else {
           // 未登入，從本地存儲檢查訂閱狀態
@@ -14297,32 +14355,50 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 根據用戶權限顯示對應的首頁視圖
       function updateHomepageView() {
+        console.log('🏠 ========== 更新首頁視圖 ==========');
+        
         // 檢查登入狀態
         const token = localStorage.getItem('ipPlanningToken');
         const userStr = localStorage.getItem('ipPlanningUser');
         const isLoggedIn = !!(token && userStr);
+        console.log('🔐 登入狀態:', isLoggedIn);
         
-        // 檢查訂閱狀態
+        // 檢查訂閱狀態（多個來源）
         let userSubscribed = false;
         if (isLoggedIn && userStr) {
           try {
             const user = JSON.parse(userStr);
-            userSubscribed = !!(user && (user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1'));
+            userSubscribed = !!(user && (
+              user.is_subscribed === true || 
+              user.is_subscribed === 1 || 
+              user.is_subscribed === '1' ||
+              user.is_subscribed === 'true'
+            ));
+            console.log('👤 從用戶資料檢查訂閱狀態:', userSubscribed, 'is_subscribed:', user.is_subscribed);
           } catch (e) {
-            console.warn('無法解析用戶資料:', e);
+            console.warn('❌ 無法解析用戶資料:', e);
           }
         }
         
-        // 同時檢查 document.body.dataset.subscribed（從後端 API 獲取的狀態）
+        // 檢查 document.body.dataset.subscribed（從後端 API 獲取的狀態）
         const backendSubscribed = document.body.dataset.subscribed === 'true';
-        const isSubscribed = userSubscribed || backendSubscribed;
+        console.log('📡 從後端 API 檢查訂閱狀態:', backendSubscribed);
+        
+        // 檢查 localStorage 中的訂閱狀態
+        const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
+        const localSubscribed = localSubscriptionStatus === 'active';
+        console.log('💾 從 localStorage 檢查訂閱狀態:', localSubscribed, 'status:', localSubscriptionStatus);
+        
+        // 綜合判斷訂閱狀態（任一為 true 即視為已訂閱）
+        const isSubscribed = userSubscribed || backendSubscribed || localSubscribed;
+        console.log('✅ 最終訂閱狀態:', isSubscribed);
         
         // 獲取視圖元素
         const unsubscribedView = document.getElementById('homepage-unsubscribed');
         const subscribedView = document.getElementById('homepage-subscribed');
         
         if (!unsubscribedView || !subscribedView) {
-          console.warn('首頁視圖元素未找到');
+          console.warn('❌ 首頁視圖元素未找到');
           return;
         }
         
@@ -14334,16 +14410,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (!isLoggedIn) {
           // 未登入用戶 → 顯示未訂閱視圖
           unsubscribedView.style.display = 'block';
-          console.log('顯示未登入視圖');
+          console.log('✅ 顯示未登入視圖');
         } else if (isLoggedIn && !isSubscribed) {
           // 已登入但未訂閱 → 顯示未訂閱視圖
           unsubscribedView.style.display = 'block';
-          console.log('顯示已登入未訂閱視圖');
+          console.log('✅ 顯示已登入未訂閱視圖');
         } else if (isLoggedIn && isSubscribed) {
           // 已登入且已訂閱 → 顯示已訂閱視圖
           subscribedView.style.display = 'block';
-          console.log('顯示已登入已訂閱視圖');
+          console.log('✅ 顯示已登入已訂閱視圖');
         }
+        
+        console.log('🏠 ========== 首頁視圖更新完成 ==========');
         
         // 首頁顯示後，重新啟動打字機動畫
         setTimeout(() => {
