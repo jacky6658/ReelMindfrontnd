@@ -44,6 +44,342 @@
     
     <!-- Mode1/Mode3 專用樣式（從 index.html 提取） -->
     <style>
+      /* ===== 導航欄樣式（電腦版和手機版） ===== */
+      .top-navbar {
+        background: var(--navbar-bg);
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 1px 3px var(--shadow);
+        padding-top: calc(16px + var(--safe-area-inset-top, 0px));
+        min-height: 60px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      .navbar-left {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+      
+      .navbar-title {
+        font-size: 30px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-right: auto;
+        transition: color 0.3s ease;
+      }
+      
+      .clickable-title {
+        cursor: pointer;
+        transition: color 0.2s ease;
+      }
+      
+      .clickable-title:hover {
+        color: #3b82f6;
+      }
+      
+      .navbar-tabs {
+        display: flex;
+        gap: 8px;
+      }
+      
+      .navbar-tab {
+        padding: 8px 16px;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+      }
+      
+      .navbar-tab.active {
+        background: var(--button-bg);
+        color: var(--button-text);
+      }
+      
+      .navbar-tab:hover:not(.active) {
+        background: var(--bg-tertiary);
+      }
+      
+      .navbar-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+        font-size: 14px;
+        transition: color 0.3s ease;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 8px;
+        transition: background 0.2s;
+      }
+      
+      .user-info:hover {
+        background: #f3f4f6;
+      }
+      
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #e5ecef;
+        object-fit: cover;
+        object-position: center;
+      }
+      
+      .user-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+      }
+      
+      .auth-buttons {
+        display: flex;
+        gap: 8px;
+      }
+      
+      .login-btn, .logout-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .login-btn {
+        background: #3b82f6;
+        color: white;
+      }
+      
+      .login-btn:hover {
+        background: #2563eb;
+      }
+      
+      .logout-btn {
+        background: #ef4444;
+        color: white;
+      }
+      
+      .logout-btn:hover {
+        background: #dc2626;
+      }
+      
+      /* 手機版抽屜按鈕 */
+      .mobile-drawer-toggle {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: var(--text-primary);
+        cursor: pointer;
+        padding: 8px;
+        margin-right: 12px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+      
+      .mobile-drawer-toggle:hover {
+        background-color: #f3f4f6;
+      }
+      
+      .hamburger-icon {
+        display: block;
+      }
+      
+      .mobile-drawer-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none;
+      }
+      
+      .mobile-drawer {
+        position: fixed;
+        top: 0;
+        left: -300px;
+        width: 280px;
+        height: 100%;
+        background: white;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      .mobile-drawer.open {
+        left: 0;
+      }
+      
+      .mobile-drawer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f8fafc;
+      }
+      
+      .mobile-drawer-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+      
+      .mobile-drawer-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+      
+      .mobile-drawer-close:hover {
+        background-color: #e5e7eb;
+      }
+      
+      .mobile-drawer-content {
+        padding: 20px 0;
+      }
+      
+      .mobile-drawer-item {
+        display: flex;
+        align-items: center;
+        padding: 16px 20px;
+        color: #374151;
+        text-decoration: none;
+        transition: background-color 0.2s;
+        border-left: 3px solid transparent;
+      }
+      
+      .mobile-drawer-item:hover {
+        background-color: #f8fafc;
+        color: #1f2937;
+      }
+      
+      .mobile-drawer-item.active {
+        background-color: #eff6ff;
+        color: #3b82f6;
+        border-left-color: #3b82f6;
+      }
+      
+      .mobile-drawer-icon {
+        font-size: 20px;
+        margin-right: 12px;
+        width: 24px;
+        text-align: center;
+      }
+      
+      .mobile-drawer-text {
+        font-size: 16px;
+        font-weight: 500;
+      }
+      
+      /* 桌面版樣式 - 隱藏手機版抽屜 */
+      @media (min-width: 769px) {
+        .mobile-drawer-toggle {
+          display: none !important;
+        }
+        
+        .mobile-drawer {
+          display: none !important;
+        }
+        
+        .mobile-drawer-overlay {
+          display: none !important;
+        }
+      }
+      
+      /* 響應式設計 - 手機版 */
+      @media (max-width: 768px) {
+        /* 頂部導航欄手機版 */
+        .top-navbar {
+          padding: 12px 16px;
+          padding-top: calc(12px + var(--safe-area-inset-top, 0px));
+          flex-wrap: wrap;
+          gap: 12px;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+        }
+        
+        .navbar-left {
+          gap: 16px;
+          flex: 1;
+          min-width: 0;
+        }
+        
+        .navbar-title {
+          font-size: 25px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        
+        .navbar-tabs {
+          display: none; /* 手機版隱藏標籤，改用底部導航 */
+        }
+        
+        .navbar-right {
+          gap: 8px;
+        }
+        
+        .user-info {
+          padding: 6px 12px;
+          font-size: 14px;
+        }
+        
+        .user-avatar {
+          width: 28px !important;
+          height: 28px !important;
+        }
+        
+        .user-name {
+          font-size: 14px;
+        }
+        
+        .login-btn, .logout-btn {
+          padding: 8px 16px;
+          font-size: 14px;
+        }
+        
+        /* 手機版抽屜按鈕顯示 */
+        .mobile-drawer-toggle {
+          display: block !important;
+        }
+        
+        /* 主內容區域為固定頁首留出空間 */
+        .mode3-page {
+          padding-top: 80px;
+        }
+      }
+      
       /* ===== 模式3：IP人設規劃模式樣式 ===== */
       .mode3-page {
         min-height: 100vh;
@@ -374,6 +710,206 @@
         border-radius: 0;
         min-height: 0;
         height: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+      }
+      
+      /* Mode3 訊息框樣式 */
+      #mode3-chatMessages .message.user {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        justify-content: flex-end !important;
+        margin-bottom: 16px !important;
+        background: transparent !important;
+        margin-left: auto !important;
+      }
+      
+      #mode3-chatMessages .message.user .message-content {
+        flex: 1 !important;
+        background: #dbeafe !important;
+        padding: 20px 40px !important;
+        padding-left: 50px !important;
+        border-radius: 12px !important;
+        border: 1px solid #3b82f6 !important;
+        color: #1e40af !important;
+        line-height: 1.6 !important;
+        text-align: right !important;
+        margin-right: 12px !important;
+        margin-left: 0 !important;
+        order: 1 !important;
+        font-size: 16px !important;
+        box-sizing: border-box !important;
+      }
+      
+      #mode3-chatMessages .message.user .message-avatar {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+        background: #3b82f6 !important;
+        color: white !important;
+        overflow: hidden !important;
+        order: 2 !important;
+      }
+      
+      #mode3-chatMessages .message.user .message-avatar img {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 50% !important;
+        object-fit: cover !important;
+        display: block !important;
+      }
+      
+      #mode3-chatMessages .message.user .message-avatar:has(img) {
+        background: transparent !important;
+      }
+      
+      /* Mode3 AI 訊息容器樣式 */
+      #mode3-chatMessages .message.ai,
+      #mode3-chatMessages .message.assistant {
+        display: flex !important;
+        margin-bottom: 16px !important;
+        align-items: flex-start !important;
+        background: transparent !important;
+      }
+      
+      /* Mode3 AI 對話泡泡內容樣式 */
+      #mode3-chatMessages .message.ai .message-content,
+      #mode3-chatMessages .message.assistant .message-content {
+        flex: 1 !important;
+        background: #f8fafc !important;
+        padding: 20px 40px !important;
+        border-radius: 12px !important;
+        border: 1px solid #e5e7eb !important;
+        color: #1f2937 !important;
+        margin-left: 12px !important;
+        font-size: 16px !important;
+        line-height: 1.6 !important;
+        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji" !important;
+        text-align: left !important;
+        box-sizing: border-box !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+      }
+      
+      /* Mode3 AI 頭像樣式 */
+      #mode3-chatMessages .message.ai .message-avatar,
+      #mode3-chatMessages .message.assistant .message-avatar {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 16px !important;
+        margin-right: 12px !important;
+        flex-shrink: 0 !important;
+        background: #10a37f !important;
+        color: white !important;
+      }
+      
+      /* Mode3 AI 對話泡泡段落樣式 */
+      #mode3-chatMessages .message.ai .message-content p,
+      #mode3-chatMessages .message.assistant .message-content p {
+        margin: 0 0 6px 0 !important;
+        line-height: 1.4 !important;
+      }
+      
+      #mode3-chatMessages .message.ai .message-content p:first-child,
+      #mode3-chatMessages .message.assistant .message-content p:first-child {
+        margin-top: 0 !important;
+      }
+      
+      #mode3-chatMessages .message.ai .message-content p:last-child,
+      #mode3-chatMessages .message.assistant .message-content p:last-child {
+        margin-bottom: 0 !important;
+      }
+      
+      /* Mode3 AI 對話泡泡列表樣式 */
+      #mode3-chatMessages .message.ai .message-content ul,
+      #mode3-chatMessages .message.assistant .message-content ul {
+        margin: 8px 0 !important;
+        padding-left: 20px !important;
+      }
+      
+      #mode3-chatMessages .message.ai .message-content li,
+      #mode3-chatMessages .message.assistant .message-content li {
+        margin: 4px 0 !important;
+      }
+      
+      /* Mode3 typing-indicator 樣式 */
+      #mode3-chatMessages .typing-indicator {
+        display: flex !important;
+        align-items: center !important;
+        font-style: italic !important;
+        color: #6b7280 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      
+      #mode3-chatMessages .typing-dots {
+        display: flex !important;
+        margin-left: 10px !important;
+      }
+      
+      #mode3-chatMessages .typing-dot {
+        width: 6px !important;
+        height: 6px !important;
+        margin: 0 2px !important;
+        background-color: #3b82f6 !important;
+        border-radius: 50% !important;
+        animation: dot-flashing 1s infinite alternate !important;
+      }
+      
+      #mode3-chatMessages .typing-dot:nth-child(2) {
+        animation-delay: 0.2s !important;
+      }
+      
+      #mode3-chatMessages .typing-dot:nth-child(3) {
+        animation-delay: 0.4s !important;
+      }
+      
+      @keyframes dot-flashing {
+        0% {
+          opacity: 0.3;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      
+      /* 手機版聊天訊息樣式 */
+      @media (max-width: 768px) {
+        #mode3-chatMessages {
+          padding: 16px 12px;
+          padding-top: 80px;
+        }
+        
+        #mode3-chatMessages .message.user .message-content {
+          padding: 15px 20px !important;
+          padding-left: 30px !important;
+          font-size: 14px !important;
+        }
+        
+        #mode3-chatMessages .message.ai .message-content,
+        #mode3-chatMessages .message.assistant .message-content {
+          padding: 15px 20px !important;
+          font-size: 14px !important;
+        }
+        
+        #mode3-chatMessages .message.user .message-avatar,
+        #mode3-chatMessages .message.ai .message-avatar,
+        #mode3-chatMessages .message.assistant .message-avatar {
+          width: 28px !important;
+          height: 28px !important;
+          font-size: 14px !important;
+        }
       }
       
       /* 輸入區域 */
@@ -545,6 +1081,37 @@
         <div class="auth-buttons" id="authButtons" style="display: none;">
           <button id="loginBtn" class="login-btn" onclick="goToLogin()" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">🔐 登入</button>
         </div>
+      </div>
+    </div>
+
+    <!-- 手機版抽屜 -->
+    <div class="mobile-drawer-overlay" id="mobileDrawerOverlay" onclick="closeMobileDrawer()"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+      <div class="mobile-drawer-header">
+        <h3>選單</h3>
+        <button class="mobile-drawer-close" onclick="closeMobileDrawer()">✕</button>
+      </div>
+      <div class="mobile-drawer-content">
+        <a href="index.html" class="mobile-drawer-item">
+          <span class="mobile-drawer-icon">🏠</span>
+          <span class="mobile-drawer-text">首頁</span>
+        </a>
+        <a href="mode1.html" class="mobile-drawer-item active">
+          <span class="mobile-drawer-icon">🎭</span>
+          <span class="mobile-drawer-text">IP人設規劃</span>
+        </a>
+        <a href="mode2.html" class="mobile-drawer-item">
+          <span class="mobile-drawer-icon">💬</span>
+          <span class="mobile-drawer-text">AI顧問</span>
+        </a>
+        <a href="mode3.html" class="mobile-drawer-item">
+          <span class="mobile-drawer-icon">⚡</span>
+          <span class="mobile-drawer-text">一鍵生成</span>
+        </a>
+        <a href="userDB.html" id="userDBMobileTab" class="mobile-drawer-item" style="display:none;">
+          <span class="mobile-drawer-icon">📊</span>
+          <span class="mobile-drawer-text">創作者資料庫</span>
+        </a>
       </div>
     </div>
 
@@ -1574,7 +2141,40 @@
 
       // 手機版抽屜切換
       function toggleMobileDrawer() {
-        console.log('Toggle mobile drawer');
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileDrawerOverlay');
+        
+        if (drawer && overlay) {
+          const isOpen = drawer.classList.contains('open');
+          
+          if (isOpen) {
+            closeMobileDrawer();
+          } else {
+            openMobileDrawer();
+          }
+        }
+      }
+
+      function openMobileDrawer() {
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileDrawerOverlay');
+        
+        if (drawer && overlay) {
+          drawer.classList.add('open');
+          overlay.style.display = 'block';
+          document.body.style.overflow = 'hidden';
+        }
+      }
+
+      function closeMobileDrawer() {
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileDrawerOverlay');
+        
+        if (drawer && overlay) {
+          drawer.classList.remove('open');
+          overlay.style.display = 'none';
+          document.body.style.overflow = '';
+        }
       }
     </script>
   </body>
