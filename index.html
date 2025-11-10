@@ -11086,7 +11086,7 @@
           <div id="homepage" class="page active page-enter">
             <div class="homepage">
               <!-- 未登入用戶（訪客）視圖 - 顯示 index_unsubscribed.html 的內容 -->
-              <div id="homepage-unsubscribed" class="homepage-view" style="display: none;">
+              <div id="homepage-unsubscribed" class="homepage-view" style="display: block;">
               <!-- Hero Section: 白＋藍冷系｜滿版全出血 -->
               <section class="rm-hero" style="position: relative; overflow: hidden; padding: 80px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw;">
                 <!-- 背景淡藍光暈（增強效果） -->
@@ -14236,6 +14236,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       async function handleModeCardClick(modeId) {
         console.log('Mode card clicked:', modeId);
         
+        // 在 index.html 中，使用 switchPage 切換頁面，不要跳轉到外部文件
+        // 檢查是否在 index.html 中（通過檢查是否有 homepage 頁面元素）
+        const homepage = document.getElementById('homepage');
+        if (homepage) {
+          // 在 index.html 中，使用 switchPage 切換頁面
+          await switchPage(modeId);
+          return;
+        }
+        
+        // 如果不在 index.html 中，才跳轉到外部文件
         // 使用 checkFeatureAccess 檢查登入和訂閱狀態
         if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
           const canAccess = await window.ReelMindCommon.checkFeatureAccess();
