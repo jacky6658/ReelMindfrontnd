@@ -6642,8 +6642,8 @@
       }
       @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
       .controls { display: flex; gap: 8px; margin-top: 12px; align-items:center; }
-      textarea { flex: 1; min-height: 40px; max-height: 140px; resize: vertical; border-radius: 10px; border:1px solid #d1d5db; background:#ffffff; color:#374151; padding: 10px 12px; line-height: 1.4; -webkit-appearance: none; }
-      button { padding: 10px 14px; border-radius: 10px; border:1px solid #d1d5db; background:#f9fafb; color:#374151; cursor:pointer; -webkit-appearance: none; }
+      textarea { flex: 1; min-height: 40px; max-height: 140px; resize: vertical; border-radius: 10px; border:1px solid #d1d5db; background:#ffffff; color:#374151; padding: 10px 12px; line-height: 1.4; -webkit-appearance: none; appearance: none; }
+      button { padding: 10px 14px; border-radius: 10px; border:1px solid #d1d5db; background:#f9fafb; color:#374151; cursor:pointer; -webkit-appearance: none; appearance: none; }
       button:disabled { opacity: .6; cursor:not-allowed; }
       .row { display:flex; gap:8px; flex-direction:column; }
       .meta { display:flex; gap:8px; margin-bottom:8px; align-items:center; flex-wrap:wrap; }
@@ -6661,7 +6661,7 @@
       .settings-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:16px; }
       .setting-item { display:flex; flex-direction:column; gap:6px; }
       .setting-item label { font-size:12px; color:#6b7280; font-weight:500; transition: color 0.3s ease; }
-      .setting-item input, .setting-item select { padding:8px 12px; border-radius:8px; border:1px solid #d1d5db; background:#ffffff; color:#374151; -webkit-appearance: none; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+      .setting-item input, .setting-item select { padding:8px 12px; border-radius:8px; border:1px solid #d1d5db; background:#ffffff; color:#374151; -webkit-appearance: none; appearance: none; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
       
       /* 深色模式：設定區塊 */
       .theme-dark .settings-block {
@@ -6760,10 +6760,10 @@
       /* iOS Safari 特定優化 */
       @supports (-webkit-touch-callout: none) {
         .chat { -webkit-overflow-scrolling: touch; }
-        textarea { -webkit-user-select: text; }
-        input, select { -webkit-user-select: text; }
-        .msg-bubble { -webkit-user-select: text; }
-        .result-item .content { -webkit-user-select: text; }
+        textarea { -webkit-user-select: text; user-select: text; }
+        input, select { -webkit-user-select: text; user-select: text; }
+        .msg-bubble { -webkit-user-select: text; user-select: text; }
+        .result-item .content { -webkit-user-select: text; user-select: text; }
       }
       
       /* 防止 iOS Safari 縮放 */
@@ -11030,7 +11030,7 @@
   </head>
   <body data-subscribed="false">
     <!-- 登入頁面 -->
-    <div id="loginPage" class="login-page">
+    <div id="loginPage" class="login-page" style="display: none;">
       <div class="login-container">
         <div class="login-header">
           <h1 class="login-title">ReelMind</h1>
@@ -11038,7 +11038,7 @@
         </div>
         
         <div class="login-buttons">
-          <button class="login-btn google-btn" onclick="goToLogin(); return false;">
+          <button class="login-btn google-btn" onclick="if(typeof goLogin === 'function') { goLogin(); } else if(typeof window.goLogin === 'function') { window.goLogin(); } else { goToLogin(); } return false;">
             <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE3LjY0IDkuMjA0NTVDMTcuNjQgOC41NjY0MSAxNy41ODI3IDcuOTUyMjcgMTcuNDc3MyA3LjM2MzY0SDkuMTgzNjRWMTAuODQ1NUgxMy44NDA5QzEzLjYzNjQgMTIuMzI1IDEyLjgxODIgMTMuNTU0NSAxMS42MzY0IDE0LjM0NTVDMTEuNjM2NCAxNC4zNDU1IDExLjYzNjQgMTQuMzQ1NSAxMS42MzY0IDE0LjM0NTVMMTMuNDU0NSAxNS45OTU1QzE0LjkwOTEgMTQuNjU0NSAxNy42NCAxMi4zMjUgMTcuNjQgOS4yMDQ1NVoiIGZpbGw9IjQyODVGNCIvPgo8cGF0aCBkPSJNOS4xODM2NCAxOC4wMDAyQzExLjQzMTggMTguMDAwMiAxMy4yNzI3IDE3LjI3MjcgMTQuNjM2NCAxNi4wOTU1TDEyLjgxODIgMTQuNDQ1NUMxMi4wOTU1IDE1LjAwOTEgMTEuMTU0NSAxNS40MzE4IDEwLjAwOTEgMTUuNDMxOEM3Ljc0NTQ1IDE1LjQzMTggNS44NDU0NSAxMy45NTQ1IDUuMTU0NTUgMTEuOTU0NUwzLjI3MjczIDEzLjU0NTVDNC42MzYzNiAxNi4wOTU1IDYuNzI3MjcgMTguMDAwMiA5LjE4MzY0IDE4LjAwMDJaIiBmaWxsPSIzNEE4NTMiLz4KPHBhdGggZD0iTTMuMjcyNzMgMTEuOTU0NUMzLjAwOTA5IDExLjE4MTggMi44NzI3MyAxMC4zNjM2IDIuODcyNzMgOS41MDAwMkMyLjg3MjczIDguNjM2MzYgMy4wMDkwOSA3LjgxODE4IDMuMjcyNzMgNy4wNDU0NUw1LjE1NDU1IDguNjM2MzZDNC45NTQ1NSA5LjM2MzY0IDQuODcyNzMgMTAuMTM2NCA0Ljg3MjczIDEwLjk1NDVDNC44NzI3MyAxMS43NzI3IDQuOTU0NTUgMTIuNTQ1NSAzLjI3MjczIDEzLjU0NTVMMy4yNzI3MyAxMS45NTQ1WiIgZmlsbD0iRkJCQzA0Ii8+CjxwYXRoIGQ9Ik05LjE4MzY0IDMuNTY4MThDMTEuMTU0NSAzLjU2ODE4IDEyLjYzNjQgNC4zNDA5MSAxMy40NTQ1IDUuMDQ1NDVMMTQuNjM2NCAzLjkwOTA5QzEzLjI3MjcgMi42MzYzNiAxMS40MzE4IDEuOTk5OTggOS4xODM2NCAxLjk5OTk4QzYuNzI3MjcgMS45OTk5OCA0LjYzNjM2IDMuOTA5MDkgMy4yNzI3MyA2LjQ1OTA5TDUuMTU0NTUgOC4wNDU0NUM1Ljg0NTQ1IDYuMDQ1NDUgNy43NDU0NSA0LjU2ODE4IDkuMTgzNjQgMy41NjgxOFoiIGZpbGw9IjM0QTg1MyIvPgo8L3N2Zz4K" alt="Google" class="google-icon">
             使用 Google 登入
           </button>
@@ -11048,7 +11048,7 @@
     </div>
 
     <!-- 主應用程式容器 -->
-    <div id="appContainer" class="app-container" style="display: none;">
+    <div id="appContainer" class="app-container" style="display: block;">
       <!-- 主內容區域 -->
       <div class="main-content" id="mainContent">
         <!-- 頂部導航欄 -->
@@ -11536,7 +11536,7 @@
                       </div>
                       <div style="font-size: 1rem; color: #64748B; margin-bottom: 12px; font-weight: 600; margin-top: 12px;">年費方案</div>
                       <div style="display: flex; align-items: flex-end; flex-wrap: nowrap; gap: 4px; margin-bottom: 8px;">
-                        <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #10B981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1;">NT$23,760</div>
+                        <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #10B981 0%, #059669 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; line-height: 1;">NT$23,760</div>
                         <div style="font-size: 0.9rem; color: #94A3B8; flex-shrink: 0; margin-bottom: 0.3rem;">/年</div>
                       </div>
                       <div style="font-size: 0.9rem; color: #10B981; font-weight: 600; margin-bottom: 4px;">平均每月 NT$1,980</div>
@@ -14509,6 +14509,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         document.getElementById('loginPage').style.display = 'flex';
         document.getElementById('appContainer').style.display = 'none';
       }
+      // 確保 goToLogin 在全局作用域中可用
+      window.goToLogin = goToLogin;
       
       // 檢查訂閱狀態並更新浮層
       async function checkSubscriptionStatus() {
