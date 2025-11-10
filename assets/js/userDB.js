@@ -1650,16 +1650,43 @@ window.deleteTopicRecordForUserDB = async function(genId, itemTitle) {
       });
       
       if (response.ok) {
+        const data = await response.json().catch(() => ({}));
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast('選題記錄已刪除', 3000);
+          window.ReelMindCommon.showToast(data.message || '選題記錄已刪除', 3000);
         }
         await loadTopicHistoryForUserDB();
         return;
-      } else if (response.status !== 404) {
-        console.warn('後端刪除API不存在或失敗，僅從前端移除');
+      } else {
+        // 處理錯誤響應
+        const errorData = await response.json().catch(() => ({ error: '刪除失敗' }));
+        if (response.status === 404) {
+          // 記錄不存在，僅從前端移除
+          const topicItem = document.querySelector(`[data-topic-id="${genId}"]`) || 
+                           document.querySelector(`.topic-item:has([onclick*="${genId}"])`);
+          if (topicItem) {
+            topicItem.remove();
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+              window.ReelMindCommon.showToast('選題記錄已從列表中移除', 3000);
+            }
+          }
+        } else if (response.status === 403) {
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('無權限刪除此選題記錄', 3000);
+          }
+        } else {
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast(errorData.error || '刪除失敗，請稍後再試', 3000);
+          }
+        }
+        return;
+      }
+    } else {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入', 3000);
       }
     }
     
+    // 如果沒有 token，僅從前端移除（降級處理）
     const topicItem = document.querySelector(`[data-topic-id="${genId}"]`) || 
                      document.querySelector(`.topic-item:has([onclick*="${genId}"])`);
     
@@ -1667,11 +1694,6 @@ window.deleteTopicRecordForUserDB = async function(genId, itemTitle) {
       topicItem.remove();
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('選題記錄已從列表中移除', 3000);
-      }
-    } else {
-      await loadTopicHistoryForUserDB();
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('選題記錄已刪除', 3000);
       }
     }
   } catch (error) {

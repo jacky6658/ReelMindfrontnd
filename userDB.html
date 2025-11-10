@@ -570,6 +570,322 @@
         animation: spin 1s linear infinite;
       }
       
+      /* ===== 腳本項目樣式 ===== */
+      .script-item {
+        background: #f8f9fa;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      
+      .script-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        cursor: pointer;
+        background: #fff;
+        border-bottom: 1px solid #e5e7eb;
+        transition: background-color 0.2s;
+      }
+      
+      .script-header:hover {
+        background: #f9fafb;
+      }
+      
+      .script-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex: 1;
+      }
+      
+      .script-number {
+        background: #3b82f6;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        width: 60px;
+        min-width: 60px;
+        max-width: 60px;
+        text-align: center;
+        white-space: nowrap;
+        display: inline-block;
+        box-sizing: border-box;
+      }
+      
+      .script-name {
+        font-weight: 500;
+        color: #1f2937;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+      
+      .script-name:hover {
+        background: #e5e7eb;
+      }
+      
+      .script-date {
+        color: #6b7280;
+        font-size: 14px;
+      }
+      
+      .script-toggle {
+        color: #6b7280;
+        font-size: 14px;
+      }
+      
+      .toggle-icon {
+        transition: transform 0.2s;
+      }
+      
+      .script-item.active .toggle-icon {
+        transform: rotate(180deg);
+      }
+      
+      .script-content {
+        padding: 16px;
+        background: #fff;
+        border-top: 1px solid #e5e7eb;
+      }
+      
+      .script-details {
+        margin-bottom: 16px;
+      }
+      
+      /* ===== 表格樣式 ===== */
+      .script-table {
+        overflow-x: auto;
+        margin: 16px 0;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+      }
+      
+      .script-table table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        min-width: 800px;
+      }
+      
+      .script-table th,
+      .script-table td {
+        border: 1px solid #e5e7eb;
+        padding: 12px;
+        text-align: left;
+        white-space: normal;
+        word-break: break-word;
+        vertical-align: top;
+      }
+      
+      .script-table th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #374151;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+      
+      .script-table td {
+        color: #4b5563;
+      }
+      
+      .script-table tbody tr:nth-child(even) {
+        background: #f9fafb;
+      }
+      
+      .script-table tbody tr:hover {
+        background: #f3f4f6;
+      }
+      
+      /* ===== 操作按鈕樣式 ===== */
+      .script-actions {
+        display: flex;
+        gap: 8px;
+        padding: 16px;
+        background: #f8f9fa;
+        border-top: 1px solid #e5e7eb;
+        flex-wrap: wrap;
+      }
+      
+      .action-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+      
+      .view-btn {
+        background: #3b82f6;
+        color: white;
+      }
+      
+      .view-btn:hover {
+        background: #2563eb;
+      }
+      
+      .download-pdf-btn {
+        background: #10b981;
+        color: white;
+      }
+      
+      .download-pdf-btn:hover {
+        background: #059669;
+      }
+      
+      .download-csv-btn {
+        background: #06b6d4;
+        color: white;
+      }
+      
+      .download-csv-btn:hover {
+        background: #0891b2;
+      }
+      
+      .delete-btn {
+        background: #ef4444;
+        color: white;
+      }
+      
+      .delete-btn:hover {
+        background: #dc2626;
+      }
+      
+      /* ===== 帳號定位項目樣式 ===== */
+      .positioning-record-item {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      
+      .record-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #e5e7eb;
+      }
+      
+      .record-number {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 16px;
+      }
+      
+      .record-date {
+        color: #6b7280;
+        font-size: 14px;
+      }
+      
+      .record-preview {
+        color: #4b5563;
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+      
+      .record-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      
+      /* ===== 選題項目樣式 ===== */
+      .topic-item {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      
+      .topic-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #e5e7eb;
+      }
+      
+      .topic-title {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 16px;
+      }
+      
+      .topic-date {
+        color: #6b7280;
+        font-size: 14px;
+      }
+      
+      .topic-content {
+        color: #4b5563;
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+      
+      .topic-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      
+      /* ===== IP人設規劃項目樣式 ===== */
+      .ip-planning-item {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      
+      .ip-planning-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #e5e7eb;
+      }
+      
+      .ip-planning-title {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 16px;
+      }
+      
+      .ip-planning-date {
+        color: #6b7280;
+        font-size: 14px;
+      }
+      
+      .ip-planning-content {
+        color: #4b5563;
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+      
+      .ip-planning-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      
       /* 手機版適配 */
       @media (max-width: 768px) {
         .user-db-page {
@@ -607,6 +923,103 @@
           max-width: 100%;
           overflow-x: hidden;
           word-wrap: break-word;
+        }
+        
+        /* 手機版表格樣式 */
+        .script-table {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          margin: 12px 0;
+          border-radius: 8px;
+          border: 1px solid #e5e7eb;
+        }
+        
+        .script-table table {
+          min-width: 800px;
+          font-size: 11px;
+          margin: 0;
+        }
+        
+        .script-table th,
+        .script-table td {
+          padding: 10px 8px;
+          white-space: normal;
+          word-break: break-word;
+          vertical-align: top;
+        }
+        
+        .script-table th {
+          font-size: 11px;
+          font-weight: 600;
+          background: #f8fafc;
+          position: sticky;
+          left: 0;
+          z-index: 1;
+        }
+        
+        .script-table td:first-child {
+          position: sticky;
+          left: 0;
+          background: white;
+          z-index: 1;
+          font-weight: 500;
+        }
+        
+        .script-table tbody tr:nth-child(even) td:first-child {
+          background: #f9fafb;
+        }
+        
+        .script-actions {
+          flex-direction: column;
+          gap: 10px;
+          padding: 12px;
+          background: #f8fafc;
+          border-top: 1px solid #e5e7eb;
+        }
+        
+        .action-btn {
+          padding: 12px 16px;
+          font-size: 14px;
+          width: 100%;
+        }
+        
+        .script-item {
+          margin-bottom: 16px;
+          border-radius: 12px;
+        }
+        
+        .script-header {
+          padding: 12px 16px;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        
+        .script-info {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+          width: 100%;
+        }
+        
+        .positioning-record-item,
+        .topic-item,
+        .ip-planning-item {
+          padding: 12px;
+          margin-bottom: 16px;
+        }
+        
+        .record-actions,
+        .topic-item-actions,
+        .ip-planning-actions {
+          flex-direction: column;
+          gap: 8px;
+        }
+        
+        .record-actions .action-btn,
+        .topic-item-actions .action-btn,
+        .ip-planning-actions .action-btn {
+          width: 100%;
+          padding: 12px 16px;
         }
       }
     </style>
