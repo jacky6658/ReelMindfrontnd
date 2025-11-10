@@ -59,9 +59,9 @@
         <div class="navbar-title clickable-title" onclick="window.location.href='index.html'">ReelMind</div>
         <div class="navbar-tabs">
           <a href="index.html" class="navbar-tab">首頁</a>
-          <a href="mode3.html" class="navbar-tab">IP人設規劃</a>
+          <a href="mode3.html" class="navbar-tab">一鍵生成</a>
           <a href="mode2.html" class="navbar-tab">AI顧問</a>
-          <a href="mode1.html" class="navbar-tab active">一鍵生成</a>
+          <a href="mode1.html" class="navbar-tab active">IP人設規劃</a>
           <a href="userDB.html" id="userDBTab" class="navbar-tab" style="display:none;">創作者資料庫</a>
         </div>
       </div>
@@ -263,7 +263,7 @@
 
     <!-- Mode1 專用 JavaScript（IP人設規劃） -->
     <script>
-      // 全局變數
+      // 全局變數（API_BASE_URL 從 config.js 的 window.APP_CONFIG 獲取）
       const API_BASE_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
       let ipPlanningToken = localStorage.getItem('ipPlanningToken') || '';
       let ipPlanningUser = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
