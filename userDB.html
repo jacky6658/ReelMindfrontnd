@@ -1,0 +1,1511 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>創作者資料庫 - ReelMind AI 短影音智能體 | 個人資料 × 我的腳本 × 帳號定位 × 訂單管理</title>
+    <meta name="title" content="創作者資料庫 - ReelMind AI 短影音智能體 | 個人資料 × 我的腳本 × 帳號定位 × 訂單管理" />
+    <meta name="description" content="ReelMind 創作者資料庫：管理您的個人資料、腳本記錄、帳號定位、選題內容、IP人設規劃、訂單記錄和系統設定。" />
+    <meta name="keywords" content="創作者資料庫,個人資料,腳本管理,帳號定位,IP人設規劃,短影音工具" />
+    <meta name="author" content="ReelMind AI" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="zh-Hant" />
+    <link rel="canonical" href="https://aivideonew.zeabur.app/userDB.html" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://aivideonew.zeabur.app/userDB.html" />
+    <meta property="og:title" content="創作者資料庫 - ReelMind AI 短影音智能體" />
+    <meta property="og:description" content="管理您的個人資料、腳本記錄、帳號定位、選題內容和訂單記錄。" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="創作者資料庫 - ReelMind AI 短影音智能體" />
+    <meta name="twitter:description" content="管理您的個人資料、腳本記錄、帳號定位、選題內容和訂單記錄。" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E" />
+    
+    <!-- CSS 文件 -->
+    <link rel="stylesheet" href="assets/css/variables.css" />
+    <link rel="stylesheet" href="assets/css/animations.css" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    
+    <!-- UserDB 專用樣式（從 index.html 提取） -->
+    <style>
+      /* ===== 導航欄樣式（電腦版和手機版） ===== */
+      .top-navbar {
+        background: var(--navbar-bg);
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 1px 3px var(--shadow);
+        padding-top: calc(16px + var(--safe-area-inset-top, 0px));
+        min-height: 60px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      .navbar-left {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+      
+      .navbar-title {
+        font-size: 30px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-right: auto;
+        transition: color 0.3s ease;
+      }
+      
+      .clickable-title {
+        cursor: pointer;
+        transition: color 0.2s ease;
+      }
+      
+      .clickable-title:hover {
+        color: #3b82f6;
+      }
+      
+      .navbar-tabs {
+        display: flex;
+        gap: 8px;
+      }
+      
+      .navbar-tab {
+        padding: 8px 16px;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+      }
+      
+      .navbar-tab.active {
+        background: var(--button-bg);
+        color: var(--button-text);
+      }
+      
+      .navbar-tab:hover:not(.active) {
+        background: var(--bg-tertiary);
+      }
+      
+      .navbar-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+        font-size: 14px;
+        transition: color 0.3s ease;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 8px;
+        transition: background 0.2s;
+      }
+      
+      .user-info:hover {
+        background: #f3f4f6;
+      }
+      
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #e5ecef;
+        object-fit: cover;
+        object-position: center;
+      }
+      
+      .user-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+      }
+      
+      .auth-buttons {
+        display: flex;
+        gap: 8px;
+      }
+      
+      .login-btn, .logout-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .login-btn {
+        background: #3b82f6;
+        color: white;
+      }
+      
+      .login-btn:hover {
+        background: #2563eb;
+      }
+      
+      .logout-btn {
+        background: #ef4444;
+        color: white;
+      }
+      
+      .logout-btn:hover {
+        background: #dc2626;
+      }
+      
+      /* 手機版抽屜按鈕 */
+      .mobile-drawer-toggle {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: var(--text-primary);
+        cursor: pointer;
+        padding: 8px;
+        margin-right: 12px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+      
+      .mobile-drawer-toggle:hover {
+        background-color: #f3f4f6;
+      }
+      
+      .hamburger-icon {
+        display: block;
+      }
+      
+      .mobile-drawer-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none;
+      }
+      
+      .mobile-drawer {
+        position: fixed;
+        top: 0;
+        left: -300px;
+        width: 280px;
+        height: 100%;
+        background: white;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      .mobile-drawer.open {
+        left: 0;
+      }
+      
+      .mobile-drawer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f8fafc;
+      }
+      
+      .mobile-drawer-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+      
+      .mobile-drawer-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+      
+      .mobile-drawer-close:hover {
+        background-color: #e5e7eb;
+      }
+      
+      .mobile-drawer-content {
+        padding: 20px 0;
+      }
+      
+      .mobile-drawer-item {
+        display: flex;
+        align-items: center;
+        padding: 16px 20px;
+        color: #374151;
+        text-decoration: none;
+        transition: background-color 0.2s;
+        border-left: 3px solid transparent;
+      }
+      
+      .mobile-drawer-item:hover {
+        background-color: #f8fafc;
+        color: #1f2937;
+      }
+      
+      .mobile-drawer-item.active {
+        background-color: #eff6ff;
+        color: #3b82f6;
+        border-left-color: #3b82f6;
+      }
+      
+      .mobile-drawer-icon {
+        font-size: 20px;
+        margin-right: 12px;
+        width: 24px;
+        text-align: center;
+      }
+      
+      .mobile-drawer-text {
+        font-size: 16px;
+        font-weight: 500;
+      }
+      
+      /* 桌面版樣式 - 隱藏手機版抽屜 */
+      @media (min-width: 769px) {
+        .mobile-drawer-toggle {
+          display: none !important;
+        }
+        
+        .mobile-drawer {
+          display: none !important;
+        }
+        
+        .mobile-drawer-overlay {
+          display: none !important;
+        }
+      }
+      
+      /* 響應式設計 - 手機版 */
+      @media (max-width: 768px) {
+        .top-navbar {
+          padding: 12px 16px;
+          padding-top: calc(12px + var(--safe-area-inset-top, 0px));
+          flex-wrap: wrap;
+          gap: 12px;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+        }
+        
+        .navbar-left {
+          gap: 16px;
+          flex: 1;
+          min-width: 0;
+        }
+        
+        .navbar-title {
+          font-size: 25px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        
+        .navbar-tabs {
+          display: none;
+        }
+        
+        .navbar-right {
+          gap: 8px;
+        }
+        
+        .user-info {
+          padding: 6px 12px;
+          font-size: 14px;
+        }
+        
+        .user-avatar {
+          width: 28px !important;
+          height: 28px !important;
+        }
+        
+        .user-name {
+          font-size: 14px;
+        }
+        
+        .login-btn, .logout-btn {
+          padding: 8px 16px;
+          font-size: 14px;
+        }
+        
+        .mobile-drawer-toggle {
+          display: block !important;
+        }
+        
+        .user-db-page {
+          padding-top: 80px;
+        }
+      }
+      
+      /* ===== 創作者資料庫樣式 ===== */
+      .user-db-page {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      
+      .page-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 24px;
+        text-align: center;
+      }
+      
+      .user-db-container {
+        display: flex;
+        gap: 24px;
+        min-height: 600px;
+      }
+      
+      .user-db-sidebar {
+        width: 280px;
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 1px 3px var(--shadow);
+        transition: background-color 0.3s ease;
+      }
+      
+      .sidebar-header {
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+        transition: border-color 0.3s ease;
+      }
+      
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      
+      .profile-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 2px solid var(--border-color);
+        transition: border-color 0.3s ease;
+      }
+      
+      .profile-info h3 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        transition: color 0.3s ease;
+      }
+      
+      .profile-info p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+        transition: color 0.3s ease;
+      }
+      
+      .sidebar-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        background: none;
+        text-align: left;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+      
+      .menu-item:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+      }
+      
+      .menu-item.active {
+        background: var(--button-bg);
+        color: var(--button-text);
+      }
+      
+      .menu-icon {
+        font-size: 16px;
+      }
+      
+      .menu-text {
+        font-weight: 500;
+      }
+      
+      .menu-divider {
+        height: 1px;
+        background: var(--border-color);
+        margin: 12px 0;
+        transition: background-color 0.3s ease;
+      }
+      
+      .logout-item {
+        color: #dc2626;
+      }
+      
+      .logout-item:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+      }
+      
+      .user-db-content {
+        flex: 1;
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px var(--shadow);
+        transition: background-color 0.3s ease;
+      }
+      
+      .db-section {
+        display: none;
+      }
+      
+      .db-section.active {
+        display: block;
+      }
+      
+      .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        transition: color 0.3s ease;
+      }
+      
+      .section-content {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        transition: color 0.3s ease;
+      }
+      
+      .profile-details {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: var(--bg-secondary);
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+      }
+      
+      .detail-item label {
+        font-weight: 600;
+        color: var(--text-primary);
+        min-width: 80px;
+        transition: color 0.3s ease;
+      }
+      
+      .detail-item span {
+        color: var(--text-secondary);
+        transition: color 0.3s ease;
+      }
+      
+      .loading-text {
+        text-align: center;
+        padding: 40px;
+        color: #6b7280;
+        font-size: 14px;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid #e5e7eb;
+        border-top: 3px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      /* 手機版適配 */
+      @media (max-width: 768px) {
+        .user-db-page {
+          padding: 16px;
+          padding-top: 80px;
+          max-width: 100%;
+          overflow-x: hidden;
+        }
+        
+        .user-db-container {
+          flex-direction: column;
+          max-width: 100%;
+          overflow-x: hidden;
+        }
+        
+        .user-db-sidebar {
+          width: 100%;
+          margin-bottom: 20px;
+          border-radius: 12px;
+          max-width: 100%;
+        }
+        
+        .user-db-content {
+          width: 100%;
+          max-width: 100%;
+          overflow-x: hidden;
+        }
+        
+        .db-section {
+          max-width: 100%;
+          overflow-x: hidden;
+        }
+        
+        .section-content {
+          max-width: 100%;
+          overflow-x: hidden;
+          word-wrap: break-word;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 導航欄 -->
+    <div class="top-navbar">
+      <div class="navbar-left">
+        <!-- 手機版抽屜按鈕 -->
+        <button class="mobile-drawer-toggle" onclick="toggleMobileDrawer()">
+          <span class="hamburger-icon">☰</span>
+        </button>
+        <div class="navbar-title clickable-title" onclick="window.location.href='index.html'">ReelMind</div>
+        <div class="navbar-tabs">
+          <a href="index.html" class="navbar-tab">首頁</a>
+          <a href="mode1.html" class="navbar-tab">IP人設規劃</a>
+          <a href="mode2.html" class="navbar-tab">AI顧問</a>
+          <a href="mode3.html" class="navbar-tab">一鍵生成</a>
+          <a href="userDB.html" class="navbar-tab active">創作者資料庫</a>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <div class="user-info" id="userInfo" style="display: none;" onclick="window.location.href='userDB.html'">
+          <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+          <span id="userName" class="user-name"></span>
+        </div>
+        <div class="auth-buttons" id="authButtons" style="display: none;">
+          <button id="loginBtn" class="login-btn" onclick="goToLogin()" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">🔐 登入</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 手機版抽屜 -->
+    <div class="mobile-drawer-overlay" id="mobileDrawerOverlay" onclick="closeMobileDrawer()"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+      <div class="mobile-drawer-header">
+        <h3>選單</h3>
+        <button class="mobile-drawer-close" onclick="closeMobileDrawer()">✕</button>
+      </div>
+      <div class="mobile-drawer-content">
+        <a href="index.html" class="mobile-drawer-item">
+          <span class="mobile-drawer-icon">🏠</span>
+          <span class="mobile-drawer-text">首頁</span>
+        </a>
+        <a href="mode1.html" class="mobile-drawer-item">
+          <span class="mobile-drawer-icon">🎭</span>
+          <span class="mobile-drawer-text">IP人設規劃</span>
+        </a>
+        <a href="mode2.html" class="mobile-drawer-item">
+          <span class="mobile-drawer-icon">💬</span>
+          <span class="mobile-drawer-text">AI顧問</span>
+        </a>
+        <a href="mode3.html" class="mobile-drawer-item">
+          <span class="mobile-drawer-icon">⚡</span>
+          <span class="mobile-drawer-text">一鍵生成</span>
+        </a>
+        <a href="userDB.html" class="mobile-drawer-item active">
+          <span class="mobile-drawer-icon">📊</span>
+          <span class="mobile-drawer-text">創作者資料庫</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 創作者資料庫頁面 -->
+    <div class="user-db-page">
+      <h2 class="page-title">👤 創作者資料庫</h2>
+      <div class="user-db-container">
+        <!-- 左側功能選單 -->
+        <div class="user-db-sidebar">
+          <div class="sidebar-header">
+            <div class="user-profile">
+              <img id="dbUserAvatar" class="profile-avatar" src="" alt="用戶頭像">
+              <div class="profile-info">
+                <h3 id="dbUserName">用戶名稱</h3>
+                <p id="dbUserEmail">user@example.com</p>
+              </div>
+            </div>
+          </div>
+          <nav class="sidebar-menu">
+            <div class="menu-item active" onclick="showDbSection('personalInfo')">
+              <span class="menu-icon">👤</span>
+              <span class="menu-text">個人資料</span>
+            </div>
+            <div class="menu-item" onclick="showDbSection('myScripts')">
+              <span class="menu-icon">💾</span>
+              <span class="menu-text">我的腳本</span>
+            </div>
+            <div class="menu-item" onclick="showDbSection('accountPositioning')">
+              <span class="menu-icon">🎯</span>
+              <span class="menu-text">帳號定位</span>
+            </div>
+            <div class="menu-item" onclick="showDbSection('topicRecords')">
+              <span class="menu-icon">💡</span>
+              <span class="menu-text">選題內容</span>
+            </div>
+            <div class="menu-item" onclick="showDbSection('ipPlanning')">
+              <span class="menu-icon">🎭</span>
+              <span class="menu-text">IP人設規劃</span>
+            </div>
+            <div class="menu-item" onclick="showDbSection('myOrders')">
+              <span class="menu-icon">💳</span>
+              <span class="menu-text">我的訂單</span>
+            </div>
+            <div class="menu-item" onclick="showDbSection('settings')">
+              <span class="menu-icon">⚙️</span>
+              <span class="menu-text">設定</span>
+            </div>
+            <div class="menu-item" onclick="showDbSection('usageStats')">
+              <span class="menu-icon">📊</span>
+              <span class="menu-text">使用統計</span>
+            </div>
+            <div class="menu-item" onclick="showDbSection('helpCenter')">
+              <span class="menu-icon">❓</span>
+              <span class="menu-text">幫助中心</span>
+            </div>
+            <div class="menu-divider"></div>
+            <div class="menu-item logout-item" onclick="logout()">
+              <span class="menu-icon">🚪</span>
+              <span class="menu-text">登出</span>
+            </div>
+          </nav>
+        </div>
+        <!-- 右側內容區域 -->
+        <div class="user-db-content">
+          <!-- 個人資料 -->
+          <div id="db-personalInfo" class="db-section active">
+            <h3 class="section-title">👤 個人資料</h3>
+            <div class="section-content">
+              <p>載入中...</p>
+            </div>
+          </div>
+          <!-- 我的腳本 -->
+          <div id="db-myScripts" class="db-section">
+            <h3 class="section-title">💾 我的腳本</h3>
+            <div class="section-content">
+              <p>載入中...</p>
+            </div>
+          </div>
+          <!-- 帳號定位 -->
+          <div id="db-accountPositioning" class="db-section">
+            <h3 class="section-title">🎯 帳號定位</h3>
+            <div class="section-content">
+              <p>載入中...</p>
+            </div>
+          </div>
+          <!-- 選題內容 -->
+          <div id="db-topicRecords" class="db-section">
+            <h3 class="section-title">💡 選題內容</h3>
+            <div class="section-content">
+              <p>載入中...</p>
+            </div>
+          </div>
+          <!-- IP人設規劃 -->
+          <div id="db-ipPlanning" class="db-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px;">
+              <h3 class="section-title">🎭 IP人設規劃</h3>
+              <button onclick="exportIpPlanningResults()" style="padding: 8px 16px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">📥 匯出</button>
+            </div>
+            <div class="section-content">
+              <div class="ip-planning-tabs" style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #E5E7EB;">
+                <button class="ip-planning-tab active" onclick="showIpPlanningType('profile')" style="padding: 8px 16px; border: none; background: transparent; cursor: pointer; border-bottom: 2px solid #3B82F6; color: #3B82F6; font-weight: 600;">IP Profile</button>
+                <button class="ip-planning-tab" onclick="showIpPlanningType('plan')" style="padding: 8px 16px; border: none; background: transparent; cursor: pointer; color: #6B7280;">14天規劃</button>
+                <button class="ip-planning-tab" onclick="showIpPlanningType('scripts')" style="padding: 8px 16px; border: none; background: transparent; cursor: pointer; color: #6B7280;">今日腳本</button>
+              </div>
+              <div id="ip-planning-content" class="ip-planning-content">
+                <div class="loading-text">載入中...</div>
+              </div>
+            </div>
+          </div>
+          <!-- 我的訂單 -->
+          <div id="db-myOrders" class="db-section">
+            <h3 class="section-title">💳 我的訂單</h3>
+            <div class="section-content" id="myOrdersContent">
+              <div class="loading-text">載入中...</div>
+            </div>
+          </div>
+          <!-- 設定 -->
+          <div id="db-settings" class="db-section">
+            <h3 class="section-title">⚙️ 設定</h3>
+            <div class="section-content" id="settingsContent">
+              <div class="settings-container">
+                <!-- BYOK 說明 -->
+                <div class="byok-notice" style="margin-bottom: 24px; padding: 16px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+                  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <span style="font-size: 24px;">🔑</span>
+                    <h4 style="margin: 0; color: #0369a1; font-size: 16px; font-weight: 600;">大型語言模型(LLM) API 金鑰管理</h4>
+                  </div>
+                  <p style="margin: 0; color: #0c4a6e; font-size: 14px; line-height: 1.6;">
+                    使用您自己的 API 金鑰可以獲得更高的使用額度和更穩定的服務
+                  </p>
+                </div>
+                
+                <div class="setting-group">
+                  <h4>🔑 大型語言模型(LLM) API 金鑰管理</h4>
+                  <div class="setting-item">
+                    <label for="llmProvider">選擇大型語言模型(LLM) 提供商</label>
+                    <select id="llmProvider" style="margin-bottom: 12px; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; width: 100%;">
+                      <option value="gemini">Google Gemini</option>
+                      <option value="openai">OpenAI (GPT)</option>
+                    </select>
+                  </div>
+                  <div class="setting-item" id="llmKeyContainer">
+                    <label for="llmApiKey">API 金鑰</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                      <input 
+                        type="password" 
+                        id="llmApiKey" 
+                        placeholder="輸入您的 API 金鑰"
+                        style="flex: 1; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px;"
+                      />
+                      <button 
+                        type="button" 
+                        onclick="toggleApiKeyVisibility()"
+                        style="padding: 8px 12px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer;"
+                      >
+                        <span id="toggleKeyIcon">👁️</span>
+                      </button>
+                    </div>
+                    <div id="savedKeyDisplay" style="display: none; margin-top: 8px;">
+                      <span style="color: #6b7280; font-size: 12px;">已保存的金鑰: <span id="savedKeyLast4"></span></span>
+                      <button 
+                        type="button" 
+                        onclick="clearSavedApiKey()"
+                        style="margin-left: 8px; padding: 4px 8px; font-size: 12px; color: #ef4444; background: none; border: none; cursor: pointer;"
+                      >
+                        清除
+                      </button>
+                    </div>
+                    <span class="setting-desc" style="margin-top: 8px; display: block; color: #6b7280; font-size: 12px;">
+                      您的 API 金鑰將以加密方式安全存儲在伺服器上，僅用於生成 AI 內容
+                    </span>
+                  </div>
+                  <div class="setting-item">
+                    <button onclick="saveApiKey()" style="margin-right: 8px; padding: 10px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">💾 保存金鑰</button>
+                    <button onclick="testApiKey()" style="padding: 10px 16px; background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; font-weight: 500;">🧪 測試金鑰</button>
+                    <span class="setting-desc" style="display: block; margin-top: 8px; color: #6b7280; font-size: 12px;">
+                      保存前建議先測試金鑰是否有效
+                    </span>
+                    <div id="testKeyResult" style="display: none; margin-top: 12px; padding: 12px; border-radius: 6px; font-size: 14px;"></div>
+                  </div>
+                </div>
+                
+                <div class="setting-group" style="margin-top: 32px;">
+                  <h4>📊 數據管理</h4>
+                  <div class="setting-item">
+                    <button onclick="exportUserData()" style="padding: 10px 16px; background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; font-weight: 500; margin-bottom: 8px;">📥 匯出我的資料</button>
+                    <span class="setting-desc" style="display: block; color: #6b7280; font-size: 12px;">匯出所有腳本、對話、定位記錄為 CSV 檔案</span>
+                  </div>
+                  <div class="setting-item">
+                    <button onclick="clearUserData()" style="padding: 10px 16px; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; border-radius: 6px; cursor: pointer; font-weight: 500; margin-bottom: 8px;">🗑️ 清除本地快取</button>
+                    <span class="setting-desc" style="display: block; color: #6b7280; font-size: 12px;">清除本地暫存數據</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 使用統計 -->
+          <div id="db-usageStats" class="db-section">
+            <h3 class="section-title">📊 使用統計</h3>
+            <div class="section-content" id="usageStatsContent">
+              <div class="stats-overview" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+                  <div class="stat-number" id="totalScripts" style="font-size: 32px; font-weight: 700; color: #3b82f6; margin-bottom: 8px;">0</div>
+                  <div class="stat-label" style="color: #6b7280; font-size: 14px;">已生成腳本</div>
+                </div>
+                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+                  <div class="stat-number" id="totalPositioning" style="font-size: 32px; font-weight: 700; color: #10b981; margin-bottom: 8px;">0</div>
+                  <div class="stat-label" style="color: #6b7280; font-size: 14px;">帳號定位記錄</div>
+                </div>
+                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+                  <div class="stat-number" id="totalTopics" style="font-size: 32px; font-weight: 700; color: #f59e0b; margin-bottom: 8px;">0</div>
+                  <div class="stat-label" style="color: #6b7280; font-size: 14px;">選題記錄</div>
+                </div>
+                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+                  <div class="stat-number" id="totalConversations" style="font-size: 32px; font-weight: 700; color: #8b5cf6; margin-bottom: 8px;">0</div>
+                  <div class="stat-label" style="color: #6b7280; font-size: 14px;">對話次數</div>
+                </div>
+              </div>
+              <div class="stats-chart" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <canvas id="usageChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <!-- 幫助中心 -->
+          <div id="db-helpCenter" class="db-section">
+            <h3 class="section-title">❓ 幫助中心</h3>
+            <div class="section-content" id="helpContent">
+              <div class="help-container">
+                <div class="help-section" style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;">🚀 快速開始</h4>
+                  <ul style="margin: 0; padding-left: 20px; color: #374151; line-height: 1.8;">
+                    <li>首次使用建議先嘗試「一鍵生成」功能</li>
+                    <li>點擊「開始」按鈕即可生成帳號定位、選題、腳本</li>
+                    <li>所有生成內容會自動保存到「我的腳本」</li>
+                  </ul>
+                </div>
+                <div class="help-section" style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;">📝 三大使用模式</h4>
+                  <ul style="margin: 0; padding-left: 20px; color: #374151; line-height: 1.8;">
+                    <li><strong>一鍵生成：</strong>快速生成定位、選題、腳本</li>
+                    <li><strong>AI顧問：</strong>深度對話，具備記憶功能</li>
+                    <li><strong>IP人設規劃：</strong>14天規劃與個人化資料庫</li>
+                  </ul>
+                </div>
+                <div class="help-section" style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;">💾 資料庫功能</h4>
+                  <ul style="margin: 0; padding-left: 20px; color: #374151; line-height: 1.8;">
+                    <li>所有生成內容自動保存</li>
+                    <li>可在「創作者資料庫」查看歷史記錄</li>
+                    <li>支持重命名、刪除、查看詳情</li>
+                  </ul>
+                </div>
+                <div class="help-section" style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;">❓ 常見問題</h4>
+                  <div class="faq-item" style="margin-bottom: 16px;">
+                    <strong style="display: block; margin-bottom: 4px; color: #1f2937;">Q: 如何保存腳本？</strong>
+                    <p style="margin: 0; color: #6b7280;">A: 點擊生成結果右上角的「保存」按鈕即可。</p>
+                  </div>
+                  <div class="faq-item" style="margin-bottom: 16px;">
+                    <strong style="display: block; margin-bottom: 4px; color: #1f2937;">Q: 可以匯出資料嗎？</strong>
+                    <p style="margin: 0; color: #6b7280;">A: 可以，在「設定」→「資料管理」中選擇匯出。</p>
+                  </div>
+                  <div class="faq-item">
+                    <strong style="display: block; margin-bottom: 4px; color: #1f2937;">Q: 如何刪除記錄？</strong>
+                    <p style="margin: 0; color: #6b7280;">A: 在「創作者資料庫」中找到對應記錄，點擊刪除按鈕。</p>
+                  </div>
+                </div>
+                <div class="help-section" style="padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;">📞 聯絡我們</h4>
+                  <p style="margin: 0 0 8px 0; color: #374151;">如有問題，請聯繫客服：</p>
+                  <ul style="margin: 0; padding-left: 20px; color: #374151; line-height: 1.8;">
+                    <li>Email: aiagent168168@gmail.com</li>
+                    <li>Discord: <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="color: #3b82f6; text-decoration: none;">加入社群</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 載入共用 JavaScript 檔案 -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/common.js"></script>
+    
+    <script>
+      // API_BASE_URL 已在 config.js 中定義為全局變數
+      // 這裡直接使用 window.APP_CONFIG，避免重複聲明
+      const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+      let ipPlanningToken = localStorage.getItem('ipPlanningToken') || '';
+      let ipPlanningUser = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
+
+      // 手機版抽屜切換
+      function toggleMobileDrawer() {
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileDrawerOverlay');
+        
+        if (drawer && overlay) {
+          const isOpen = drawer.classList.contains('open');
+          
+          if (isOpen) {
+            closeMobileDrawer();
+          } else {
+            openMobileDrawer();
+          }
+        }
+      }
+
+      function openMobileDrawer() {
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileDrawerOverlay');
+        
+        if (drawer && overlay) {
+          drawer.classList.add('open');
+          overlay.style.display = 'block';
+          document.body.style.overflow = 'hidden';
+        }
+      }
+
+      function closeMobileDrawer() {
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileDrawerOverlay');
+        
+        if (drawer && overlay) {
+          drawer.classList.remove('open');
+          overlay.style.display = 'none';
+          document.body.style.overflow = '';
+        }
+      }
+      
+      // 登入/登出函數（從 common.js 使用）
+      function goToLogin() {
+        if (window.ReelMindCommon && window.ReelMindCommon.goToLogin) {
+          window.ReelMindCommon.goToLogin();
+        } else {
+          window.location.href = 'index.html';
+        }
+      }
+      
+      function logout() {
+        if (window.ReelMindCommon && window.ReelMindCommon.autoLogout) {
+          window.ReelMindCommon.autoLogout('用戶主動登出');
+        } else {
+          localStorage.clear();
+          window.location.href = 'index.html';
+        }
+      }
+      
+      // 更新用戶資訊顯示
+      function updateUserInfo() {
+        const userInfoDiv = document.getElementById('userInfo');
+        const authButtonsDiv = document.getElementById('authButtons');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const dbUserAvatar = document.getElementById('dbUserAvatar');
+        const dbUserName = document.getElementById('dbUserName');
+        const dbUserEmail = document.getElementById('dbUserEmail');
+        
+        if (ipPlanningUser && ipPlanningToken) {
+          // 顯示用戶資訊
+          if (userInfoDiv) userInfoDiv.style.display = 'flex';
+          if (authButtonsDiv) authButtonsDiv.style.display = 'none';
+          
+          if (userAvatar && ipPlanningUser.picture) {
+            userAvatar.src = ipPlanningUser.picture;
+            userAvatar.alt = ipPlanningUser.name || '用戶頭像';
+          }
+          
+          if (userName) {
+            userName.textContent = ipPlanningUser.name || '用戶';
+          }
+          
+          if (dbUserAvatar && ipPlanningUser.picture) {
+            dbUserAvatar.src = ipPlanningUser.picture;
+            dbUserAvatar.alt = ipPlanningUser.name || '用戶頭像';
+          }
+          
+          if (dbUserName) {
+            dbUserName.textContent = ipPlanningUser.name || '用戶名稱';
+          }
+          
+          if (dbUserEmail) {
+            dbUserEmail.textContent = ipPlanningUser.email || 'user@example.com';
+          }
+        } else {
+          // 顯示登入按鈕
+          if (userInfoDiv) userInfoDiv.style.display = 'none';
+          if (authButtonsDiv) authButtonsDiv.style.display = 'flex';
+        }
+      }
+      
+      // 切換資料庫區塊
+      function showDbSection(sectionName) {
+        // 隱藏所有分區
+        document.querySelectorAll('.db-section').forEach(section => {
+          section.classList.remove('active');
+        });
+        
+        // 移除所有選單項的active狀態
+        document.querySelectorAll('.menu-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        
+        // 顯示選中的分區
+        const targetSection = document.getElementById(`db-${sectionName}`);
+        if (targetSection) {
+          targetSection.classList.add('active');
+        }
+        
+        // 添加對應選單項的active狀態
+        const targetMenuItem = document.querySelector(`[onclick="showDbSection('${sectionName}')"]`);
+        if (targetMenuItem) {
+          targetMenuItem.classList.add('active');
+        }
+        
+        // 根據分區載入相應數據
+        switch(sectionName) {
+          case 'personalInfo':
+            loadPersonalInfoForUserDB();
+            break;
+          case 'myScripts':
+            loadMyScriptsForUserDB();
+            break;
+          case 'settings':
+            loadSavedApiKey();
+            break;
+          case 'accountPositioning':
+            loadPositioningRecordsForUserDB();
+            break;
+          case 'topicRecords':
+            loadTopicHistoryForUserDB();
+            break;
+          case 'ipPlanning':
+            loadIpPlanningResultsForUserDB();
+            break;
+          case 'myOrders':
+            loadMyOrdersForUserDB();
+            break;
+          case 'usageStats':
+            loadUsageStatsForUserDB();
+            break;
+          case 'helpCenter':
+            // 幫助中心內容已在HTML中定義，無需動態載入
+            break;
+        }
+      }
+      
+      // 統一的載入動畫函數
+      function showLoadingAnimation(container, message = '載入中...') {
+        if (!container) return;
+        container.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; padding: 40px; gap: 12px; flex-direction: column;">
+            <div class="spinner" style="width: 24px; height: 24px; border: 3px solid #e5e7eb; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 8px;"></div>
+            <span style="color: #6b7280; font-size: 14px;">${message}</span>
+          </div>
+        `;
+      }
+      
+      // 格式化台灣時區時間
+      function formatTaiwanTime(dateString) {
+        if (!dateString) return '-';
+        try {
+          const date = new Date(dateString);
+          if (isNaN(date.getTime())) {
+            return dateString;
+          }
+          return date.toLocaleString('zh-TW', {
+            timeZone: 'Asia/Taipei',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        } catch (error) {
+          console.error('格式化台灣時區時間錯誤:', error);
+          return dateString;
+        }
+      }
+      
+      // 顯示 Toast 通知
+      function showToast(message, duration = 3000) {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast(message, duration);
+        } else {
+          alert(message);
+        }
+      }
+      
+      // 載入個人資料庫的個人資料
+      async function loadPersonalInfoForUserDB() {
+        const content = document.querySelector('#db-personalInfo .section-content');
+        if (!content) return;
+        
+        if (!ipPlanningUser) {
+          content.innerHTML = '<div class="loading-text">請先登入以查看個人資料</div>';
+          return;
+        }
+        
+        showLoadingAnimation(content, '載入個人資料中...');
+        
+        setTimeout(async () => {
+          await renderPersonalInfoContent();
+        }, 300);
+        
+        if (ipPlanningToken && !ipPlanningUser.created_at) {
+          try {
+            await fetchUserInfo();
+            if (ipPlanningUser && ipPlanningUser.created_at) {
+              renderPersonalInfoContent();
+            }
+          } catch (error) {
+            console.warn('無法從伺服器獲取最新資訊，使用本地資料');
+          }
+        }
+      }
+      
+      // 渲染個人資料內容
+      async function renderPersonalInfoContent() {
+        const content = document.querySelector('#db-personalInfo .section-content');
+        if (!content || !ipPlanningUser) return;
+        
+        let registrationTime = '未知';
+        if (ipPlanningUser.created_at) {
+          try {
+            const date = new Date(ipPlanningUser.created_at);
+            if (!isNaN(date.getTime())) {
+              registrationTime = date.toLocaleString('zh-TW', {
+                timeZone: 'Asia/Taipei',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+            }
+          } catch (e) {
+            registrationTime = ipPlanningUser.created_at;
+          }
+        }
+        
+        const isSubscribed = ipPlanningUser.is_subscribed !== false;
+        const subscriptionStatus = isSubscribed ? 
+          '<span style="color: #10b981; font-weight: bold;">✅ 已訂閱</span>' : 
+          '<span style="color: #ef4444; font-weight: bold;">❌ 未訂閱</span>';
+        
+        let expiresAt = null;
+        let daysLeft = null;
+        let expiresAtText = '未知';
+        let daysLeftText = '';
+        let expirationWarning = '';
+        
+        if (ipPlanningToken && ipPlanningUser?.user_id) {
+          try {
+            const subResponse = await fetch(`${API_URL}/api/user/subscription`, {
+              headers: {
+                'Authorization': `Bearer ${ipPlanningToken}`
+              }
+            });
+            
+            if (subResponse.ok) {
+              const subData = await subResponse.json();
+              if (subData.expires_at) {
+                expiresAt = new Date(subData.expires_at);
+                const now = new Date();
+                daysLeft = Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24));
+                
+                expiresAtText = expiresAt.toLocaleString('zh-TW', {
+                  timeZone: 'Asia/Taipei',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+                
+                if (daysLeft < 0) {
+                  daysLeftText = `<span style="color: #ef4444; font-weight: bold;">（已過期 ${Math.abs(daysLeft)} 天）</span>`;
+                  expirationWarning = '<div style="margin-top: 12px; padding: 12px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b;"><strong>⚠️ 訂閱已過期</strong><br>請前往訂閱頁面續費以繼續使用服務。</div>';
+                } else if (daysLeft <= 3) {
+                  daysLeftText = `<span style="color: #ef4444; font-weight: bold;">（剩餘 ${daysLeft} 天）</span>`;
+                  expirationWarning = '<div style="margin-top: 12px; padding: 12px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; color: #92400e;"><strong>⚠️ 訂閱即將到期</strong><br>請盡快前往訂閱頁面續費。</div>';
+                } else if (daysLeft <= 7) {
+                  daysLeftText = `<span style="color: #f59e0b; font-weight: bold;">（剩餘 ${daysLeft} 天）</span>`;
+                  expirationWarning = '<div style="margin-top: 12px; padding: 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; color: #92400e;"><strong>提醒</strong><br>您的訂閱將在 7 天內到期，請記得續費。</div>';
+                } else {
+                  daysLeftText = `<span style="color: #10b981;">（剩餘 ${daysLeft} 天）</span>`;
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('載入訂閱詳情失敗:', e);
+          }
+        }
+        
+        content.innerHTML = `
+          <div class="profile-details">
+            <div class="detail-item">
+              <label>姓名：</label>
+              <span>${escapeHtml(ipPlanningUser.name || '未設定')}</span>
+            </div>
+            <div class="detail-item">
+              <label>Email：</label>
+              <span>${escapeHtml(ipPlanningUser.email || '未設定')}</span>
+            </div>
+            <div class="detail-item">
+              <label>用戶ID：</label>
+              <span>${escapeHtml(ipPlanningUser.user_id || '未生成')}</span>
+            </div>
+            <div class="detail-item">
+              <label>註冊時間：</label>
+              <span>${escapeHtml(registrationTime)}</span>
+            </div>
+            <div class="detail-item">
+              <label>訂閱狀態：</label>
+              <span>${subscriptionStatus}</span>
+            </div>
+            ${isSubscribed ? `
+            <div class="detail-item">
+              <label>到期日期：</label>
+              <span>${escapeHtml(expiresAtText)} ${daysLeftText}</span>
+            </div>
+            ${expirationWarning}
+            <div class="detail-actions" style="margin-top: 16px;">
+              <a href="subscription.html" style="display: inline-block; padding: 8px 16px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500; margin-right: 8px;">
+                💳 續費訂閱
+              </a>
+            </div>
+            ` : `
+            <div class="detail-actions">
+              <a href="subscription.html" style="display: inline-block; padding: 8px 16px; background: #10b981; color: white; border-radius: 6px; text-decoration: none; font-weight: 500;">
+                ✨ 啟用訂閱
+              </a>
+            </div>
+            `}
+          </div>
+        `;
+      }
+      
+      // XSS 防護函數
+      function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+      
+      // 獲取用戶資訊
+      async function fetchUserInfo() {
+        if (!ipPlanningToken) return;
+        
+        try {
+          const response = await fetch(`${API_URL}/api/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${ipPlanningToken}`
+            }
+          });
+          
+          if (response.ok) {
+            const userData = await response.json();
+            ipPlanningUser = userData;
+            localStorage.setItem('ipPlanningUser', JSON.stringify(userData));
+            updateUserInfo();
+          } else if (response.status === 401) {
+            // Token 過期，嘗試刷新
+            if (window.Api && window.Api.refreshTokenIfNeeded) {
+              await window.Api.refreshTokenIfNeeded();
+              // 刷新後重試
+              if (ipPlanningToken) {
+                return fetchUserInfo();
+              }
+            }
+          }
+        } catch (error) {
+          console.error('獲取用戶資訊失敗:', error);
+        }
+      }
+      
+      // 初始化頁面
+      document.addEventListener('DOMContentLoaded', async () => {
+        // 檢查登入狀態
+        if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
+          const canAccess = await window.ReelMindCommon.checkFeatureAccess();
+          if (!canAccess) {
+            return; // checkFeatureAccess 已經處理了跳轉
+          }
+        }
+        
+        // 載入用戶資訊
+        if (window.Auth && window.Auth.getToken()) {
+          ipPlanningToken = window.Auth.getToken();
+        }
+        
+        if (window.ReelMindCommon && window.ReelMindCommon.getUser) {
+          ipPlanningUser = window.ReelMindCommon.getUser();
+        } else {
+          const userStr = localStorage.getItem('ipPlanningUser');
+          ipPlanningUser = userStr ? JSON.parse(userStr) : null;
+        }
+        
+        // 更新用戶資訊顯示
+        updateUserInfo();
+        
+        // 載入個人資料（預設顯示）
+        loadPersonalInfoForUserDB();
+        
+        // 如果沒有用戶資訊但有 token，嘗試獲取
+        if (ipPlanningToken && (!ipPlanningUser || !ipPlanningUser.user_id)) {
+          await fetchUserInfo();
+        }
+      });
+    </script>
+    
+    <!-- 注意：以下函數需要從 index.html 中提取，由於文件太大，建議放在獨立的 userDB.js 文件中 -->
+    <!-- 暫時在這裡添加占位符，實際函數需要從 index.html 提取 -->
+    <script>
+      // 以下函數需要從 index.html 中提取：
+      // - loadMyScriptsForUserDB()
+      // - displayScriptsForUserDB()
+      // - loadPositioningRecordsForUserDB()
+      // - displayPositioningRecordsForUserDB()
+      // - loadTopicHistoryForUserDB()
+      // - displayTopicRecordsForUserDB()
+      // - loadIpPlanningResultsForUserDB()
+      // - displayIpPlanningResultsForUserDB()
+      // - showIpPlanningType()
+      // - exportIpPlanningResults()
+      // - loadMyOrdersForUserDB()
+      // - displayOrdersForUserDB()
+      // - loadUsageStatsForUserDB()
+      // - saveApiKey()
+      // - testApiKey()
+      // - toggleApiKeyVisibility()
+      // - clearSavedApiKey()
+      // - loadSavedApiKey()
+      // - exportUserData()
+      // - clearUserData()
+      // - getLocalScripts()
+      // - 以及其他相關函數
+      
+      // 為了避免文件過大，這些函數應該放在獨立的 userDB.js 文件中
+      // 這裡先定義空的占位函數，避免錯誤
+      
+      async function loadMyScriptsForUserDB() {
+        const content = document.querySelector('#db-myScripts .section-content');
+        if (content) {
+          content.innerHTML = '<div class="loading-text">功能開發中...</div>';
+        }
+      }
+      
+      async function loadPositioningRecordsForUserDB() {
+        const content = document.querySelector('#db-accountPositioning .section-content');
+        if (content) {
+          content.innerHTML = '<div class="loading-text">功能開發中...</div>';
+        }
+      }
+      
+      async function loadTopicHistoryForUserDB() {
+        const content = document.querySelector('#db-topicRecords .section-content');
+        if (content) {
+          content.innerHTML = '<div class="loading-text">功能開發中...</div>';
+        }
+      }
+      
+      async function loadIpPlanningResultsForUserDB() {
+        const content = document.getElementById('ip-planning-content');
+        if (content) {
+          content.innerHTML = '<div class="loading-text">功能開發中...</div>';
+        }
+      }
+      
+      function showIpPlanningType(type) {
+        // 占位函數
+        console.log('showIpPlanningType:', type);
+      }
+      
+      function exportIpPlanningResults() {
+        showToast('功能開發中...', 3000);
+      }
+      
+      async function loadMyOrdersForUserDB() {
+        const content = document.querySelector('#myOrdersContent');
+        if (content) {
+          content.innerHTML = '<div class="loading-text">功能開發中...</div>';
+        }
+      }
+      
+      async function loadUsageStatsForUserDB() {
+        // 占位函數
+      }
+      
+      async function saveApiKey() {
+        showToast('功能開發中...', 3000);
+      }
+      
+      async function testApiKey() {
+        showToast('功能開發中...', 3000);
+      }
+      
+      function toggleApiKeyVisibility() {
+        const apiKeyInput = document.getElementById('llmApiKey');
+        const toggleIcon = document.getElementById('toggleKeyIcon');
+        
+        if (apiKeyInput && toggleIcon) {
+          if (apiKeyInput.type === 'password') {
+            apiKeyInput.type = 'text';
+            toggleIcon.textContent = '🙈';
+          } else {
+            apiKeyInput.type = 'password';
+            toggleIcon.textContent = '👁️';
+          }
+        }
+      }
+      
+      async function clearSavedApiKey() {
+        showToast('功能開發中...', 3000);
+      }
+      
+      async function loadSavedApiKey() {
+        // 占位函數
+      }
+      
+      async function exportUserData() {
+        showToast('功能開發中...', 3000);
+      }
+      
+      function clearUserData() {
+        if (confirm('確定要清除所有本地快取嗎？此操作無法復原。')) {
+          localStorage.clear();
+          showToast('本地快取已清除', 3000);
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        }
+      }
+    </script>
+  </body>
+</html>
+
