@@ -473,6 +473,40 @@
     window.dispatchEvent(new CustomEvent('page:ready'));
   }
 
+  /**
+   * 跳轉到登入頁面（Google OAuth）
+   */
+  async function goToLogin() {
+    try {
+      // 獲取當前頁面的 origin（用於 OAuth callback）
+      const fbParam = encodeURIComponent(window.location.origin);
+      
+      // 從後端取得 Google 認證 URL
+      let authUrl = null;
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/google?fb=${fbParam}`);
+        const data = await response.json();
+        authUrl = data && data.auth_url;
+      } catch (corsErr) {
+        console.warn('Fetch auth_url failed (likely CORS). Fallback to direct navigate.', corsErr);
+        // 如果 fetch 失敗（可能是 CORS），直接使用後端 URL
+        authUrl = `${API_BASE_URL}/api/auth/google?fb=${fbParam}`;
+      }
+      
+      if (authUrl) {
+        // 跳轉到 Google OAuth 頁面
+        window.location.href = authUrl;
+      } else {
+        // 如果無法獲取 auth_url，跳轉到首頁讓用戶登入
+        window.location.href = 'index.html';
+      }
+    } catch (error) {
+      console.error('登入錯誤:', error);
+      // 發生錯誤時，跳轉到首頁
+      window.location.href = 'index.html';
+    }
+  }
+
   // ===== 導出到 window 對象 =====
   window.ReelMindCommon = {
     // 認證相關
@@ -484,6 +518,7 @@
     checkFeatureAccess,
     isTokenExpired,
     autoLogout,
+    goToLogin,
     
     // 授權連結
     handleActivationToken,

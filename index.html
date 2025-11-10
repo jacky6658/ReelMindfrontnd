@@ -11060,16 +11060,16 @@
             <div class="navbar-title clickable-title" onclick="switchPage('homepage')">ReelMind</div>
             <div class="navbar-tabs">
               <a href="#homepage" class="navbar-tab" onclick="switchPage('homepage'); return false;">首頁</a>
-              <a href="#mode3" class="navbar-tab" onclick="switchPage('mode3'); return false;">IP人設規劃</a>
-              <a href="#mode2" class="navbar-tab" onclick="switchPage('mode2'); return false;">AI顧問</a>
-              <a href="#mode1" class="navbar-tab" onclick="switchPage('mode1'); return false;">一鍵生成</a>
+              <a href="mode3.html" class="navbar-tab">IP人設規劃</a>
+              <a href="mode2.html" class="navbar-tab">AI顧問</a>
+              <a href="mode1.html" class="navbar-tab">一鍵生成</a>
               <a href="#forum" class="navbar-tab" onclick="switchPage('forum'); return false;">論壇介紹</a>
               <a href="#guide" class="navbar-tab" onclick="switchPage('guide'); return false;">實戰指南</a>
-              <a href="#userDB" id="userDBTab" class="navbar-tab" onclick="switchPage('userDB'); return false;" style="display:none;">創作者資料庫</a>
+              <a href="userDB.html" id="userDBTab" class="navbar-tab" style="display:none;">創作者資料庫</a>
             </div>
           </div>
           <div class="navbar-right">
-            <div class="user-info" id="userInfo" style="display: none;" onclick="switchPage('userDB')">
+            <div class="user-info" id="userInfo" style="display: none;" onclick="window.location.href='userDB.html'">
               <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: center;">
             <span id="userName" class="user-name"></span>
           </div>
@@ -14225,13 +14225,38 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
           const canAccess = await window.ReelMindCommon.checkFeatureAccess();
           if (canAccess) {
-            // 可以訪問，切換到對應模式
-            switchPage(modeId);
+            // 可以訪問，跳轉到對應的獨立頁面
+            const pageMap = {
+              'mode1': 'mode1.html',
+              'mode2': 'mode2.html',
+              'mode3': 'mode3.html',
+              'userDB': 'userDB.html'
+            };
+            
+            const targetPage = pageMap[modeId];
+            if (targetPage) {
+              window.location.href = targetPage;
+            } else {
+              // 如果沒有對應的獨立頁面，使用原有的 switchPage
+              switchPage(modeId);
+            }
           }
           // 如果無法訪問，checkFeatureAccess 已經處理了登入/訂閱流程
         } else {
-          // 降級處理：直接切換
-          switchPage(modeId);
+          // 降級處理：直接跳轉到獨立頁面
+          const pageMap = {
+            'mode1': 'mode1.html',
+            'mode2': 'mode2.html',
+            'mode3': 'mode3.html',
+            'userDB': 'userDB.html'
+          };
+          
+          const targetPage = pageMap[modeId];
+          if (targetPage) {
+            window.location.href = targetPage;
+          } else {
+            switchPage(modeId);
+          }
         }
       }
       
