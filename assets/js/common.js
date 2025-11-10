@@ -467,15 +467,26 @@
       }
     }
     
-    // 檢查頁面權限
-    const hasPermission = await checkPagePermission();
+    // 檢查頁面權限（首頁 index.html 不需要檢查，允許未登入用戶訪問）
+    const isHomePage = window.location.pathname === '/' || 
+                       window.location.pathname.endsWith('/index.html') ||
+                       window.location.pathname.endsWith('/');
     
-    if (!hasPermission) {
-      // 沒有權限，已經導向到其他頁面，停止執行
-      return;
+    if (!isHomePage) {
+      // 非首頁才需要檢查權限
+      const hasPermission = await checkPagePermission();
+      
+      if (!hasPermission) {
+        // 沒有權限，已經導向到其他頁面，停止執行
+        return;
+      }
+    } else {
+      // 首頁：只檢查登入和訂閱狀態（不強制要求），用於更新 UI
+      await checkLoginStatus();
+      await checkSubscriptionStatus();
     }
     
-    // 有權限，觸發頁面載入完成事件
+    // 觸發頁面載入完成事件
     window.dispatchEvent(new CustomEvent('page:ready'));
   }
 
