@@ -151,6 +151,12 @@
         }
         
         return originalFetch(input, { ...initObj, headers: retryHeaders });
+      } else {
+        // Token 刷新失敗，可能是 token 已過期，觸發自動登出
+        console.warn('Token 刷新失敗，可能已過期');
+        if (window.ReelMindCommon && window.ReelMindCommon.autoLogout) {
+          window.ReelMindCommon.autoLogout('登入已過期，請重新登入');
+        }
       }
     }
     return first;

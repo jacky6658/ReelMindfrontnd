@@ -79,6 +79,80 @@
   }
 
   /**
+   * 檢查 token 是否過期
+   */
+  function isTokenExpired(token) {
+    if (!token) return true;
+    
+    try {
+      // JWT token 格式：header.payload.signature
+      const parts = token.split('.');
+      if (parts.length !== 3) return true;
+      
+      // 解碼 payload（base64url）
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      
+      // 檢查過期時間
+      if (payload.exp) {
+        const now = Math.floor(Date.now() / 1000);
+        return payload.exp < now;
+      }
+      
+      return false;
+    } catch (e) {
+      console.error('檢查 token 過期時出錯:', e);
+      return true; // 如果無法解析，視為過期
+    }
+  }
+
+  /**
+   * 自動登出（清除所有登入資訊）
+   */
+  function autoLogout(reason = '登入已過期，請重新登入') {
+    console.log('自動登出:', reason);
+    
+    // 清除所有登入相關的 localStorage
+    localStorage.removeItem('ipPlanningToken');
+    localStorage.removeItem('ipPlanningRefreshToken');
+    localStorage.removeItem('ipPlanningUser');
+    localStorage.removeItem('ipPlanningTokenUpdated');
+    localStorage.removeItem('subscriptionStatus');
+    
+    // 清除全局變數
+    ipPlanningToken = null;
+    ipPlanningUser = null;
+    
+    // 清除 CSRF Token 緩存
+    if (window.Api && window.Api.clearCsrfToken) {
+      window.Api.clearCsrfToken();
+    }
+    
+    // 更新頁面狀態
+    document.body.dataset.subscribed = 'false';
+    
+    // 觸發登出事件
+    try {
+      window.dispatchEvent(new CustomEvent('auth:logged-out', { detail: { reason } }));
+    } catch (e) {
+      console.warn('無法觸發登出事件:', e);
+    }
+    
+    // 顯示提示（如果 showToast 可用）
+    try {
+      if (typeof showToast === 'function') {
+        showToast('登入已過期，請重新登入', 3000);
+      }
+    } catch (e) {
+      console.warn('無法顯示登出提示:', e);
+    }
+    
+    // 重新載入頁面以更新 UI
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  }
+
+  /**
    * 檢查登入狀態（從後端 API 獲取最新狀態）
    */
   async function checkLoginStatus() {
@@ -99,10 +173,13 @@
       }
     }
 
-    // 如果已登入，檢查 token 是否過期
-    if (ipPlanningToken && ipPlanningUser) {
-      // 這裡可以添加 token 過期檢查邏輯
-      // 目前簡化處理，實際應該檢查 JWT 的 exp 欄位
+    // 檢查 token 是否過期
+    if (ipPlanningToken) {
+      if (isTokenExpired(ipPlanningToken)) {
+        console.warn('Token 已過期，自動登出');
+        autoLogout('登入已過期，請重新登入');
+        return false;
+      }
     }
 
     return isLoggedIn();
@@ -260,6 +337,40 @@
     return true;
   }
 
+  /**
+   * 檢查並處理功能訪問（登入 + 訂閱）
+   * 用於頁首按鈕和 mode-card 點擊
+   * 返回：true = 可以訪問，false = 需要登入/訂閱
+   */
+  async function checkFeatureAccess() {
+    // 先檢查登入狀態
+    const loggedIn = await checkLoginStatus();
+    
+    if (!loggedIn) {
+      // 未登入，觸發登入流程
+      // 保存目標功能到 sessionStorage，登入成功後使用
+      if (typeof goToLogin === 'function') {
+        goToLogin();
+      } else {
+        // 如果 goToLogin 不存在，顯示提示
+        alert('請先登入以使用此功能！');
+      }
+      return false;
+    }
+    
+    // 已登入，檢查訂閱狀態
+    await checkSubscriptionStatus();
+    const subscribed = isSubscribed();
+    
+    if (!subscribed) {
+      // 已登入但未訂閱，導向訂閱頁
+      window.location.href = '/subscription.html';
+      return false;
+    }
+    
+    return true;
+  }
+
   // ===== Toast 通知 =====
 
   /**
@@ -370,6 +481,9 @@
     checkLoginStatus,
     checkSubscriptionStatus,
     checkPagePermission,
+    checkFeatureAccess,
+    isTokenExpired,
+    autoLogout,
     
     // 授權連結
     handleActivationToken,
