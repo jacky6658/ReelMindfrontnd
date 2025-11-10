@@ -1766,11 +1766,11 @@
       
       // 初始化頁面
       document.addEventListener('DOMContentLoaded', async () => {
-        // 檢查登入狀態
+        // 檢查登入狀態（創作者資料庫允許未訂閱用戶訪問，至少可查看個人資訊和登出）
         if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
-          const canAccess = await window.ReelMindCommon.checkFeatureAccess();
+          const canAccess = await window.ReelMindCommon.checkFeatureAccess('userDB');
           if (!canAccess) {
-            return; // checkFeatureAccess 已經處理了跳轉
+            return; // checkFeatureAccess 已經處理了跳轉（未登入會導向登入）
           }
         }
         

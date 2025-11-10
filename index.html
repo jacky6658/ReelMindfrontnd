@@ -11065,11 +11065,11 @@
               <a href="mode3.html" class="navbar-tab">一鍵生成</a>
               <a href="#forum" class="navbar-tab" onclick="switchPage('forum'); return false;">論壇介紹</a>
               <a href="#guide" class="navbar-tab" onclick="switchPage('guide'); return false;">實戰指南</a>
-              <a href="userDB.html" id="userDBTab" class="navbar-tab" style="display:none;">創作者資料庫</a>
+              <a href="#" id="userDBTab" class="navbar-tab" style="display:none;" onclick="handleUserDBClick(); return false;">創作者資料庫</a>
             </div>
           </div>
           <div class="navbar-right">
-            <div class="user-info" id="userInfo" style="display: none;" onclick="window.location.href='userDB.html'">
+            <div class="user-info" id="userInfo" style="display: none;" onclick="handleUserDBClick()">
               <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: center;">
             <span id="userName" class="user-name"></span>
           </div>
@@ -13388,7 +13388,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (protectedPages.includes(pageId)) {
           // 使用 checkFeatureAccess 檢查登入和訂閱狀態
           if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
-            const canAccess = await window.ReelMindCommon.checkFeatureAccess();
+            // userDB 允許未訂閱用戶訪問（至少可查看個人資訊和登出）
+            const featureType = pageId === 'userDB' ? 'userDB' : null;
+            const canAccess = await window.ReelMindCommon.checkFeatureAccess(featureType);
             if (!canAccess) {
               // 需要登入或訂閱，已由 checkFeatureAccess 處理
               // 保持首頁顯示
@@ -13403,7 +13405,19 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const isSubscribed = document.body.dataset.subscribed === 'true';
             const isLoggedIn = ipPlanningToken && ipPlanningUser;
             
-            console.log('嘗試訪問受保護頁面:', pageId);
+            // userDB 允許未訂閱用戶訪問（至少可查看個人資訊和登出）
+            if (pageId === 'userDB') {
+              if (!isLoggedIn) {
+                // 未登入，導向登入
+                if (typeof goToLogin === 'function') {
+                  goToLogin();
+                }
+                return;
+              }
+              // 已登入即可訪問 userDB，不需要訂閱檢查
+            } else {
+              // 其他頁面需要訂閱
+              console.log('嘗試訪問受保護頁面:', pageId);
             console.log('訂閱狀態:', isSubscribed);
             console.log('登入狀態:', isLoggedIn);
             
@@ -14257,6 +14271,22 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           } else {
             switchPage(modeId);
           }
+        }
+      }
+      
+      // 處理創作者資料庫點擊
+      async function handleUserDBClick() {
+        // 使用 checkFeatureAccess 檢查登入狀態（創作者資料庫允許未訂閱用戶訪問）
+        if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
+          const canAccess = await window.ReelMindCommon.checkFeatureAccess('userDB');
+          if (canAccess) {
+            // 可以訪問，跳轉到創作者資料庫
+            window.location.href = 'userDB.html';
+          }
+          // 如果無法訪問（未登入），checkFeatureAccess 已經處理了登入流程
+        } else {
+          // 降級處理：直接跳轉
+          window.location.href = 'userDB.html';
         }
       }
       
@@ -24749,7 +24779,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           <span class="mobile-drawer-icon"><i class="fas fa-book-open"></i></span>
           <span class="mobile-drawer-text">實戰指南</span>
         </a>
-        <a href="#userDB" id="mobileUserDBTab" class="mobile-drawer-item" onclick="switchPage('userDB'); closeMobileDrawer(); return false;" style="display:none;">
+        <a href="#" id="mobileUserDBTab" class="mobile-drawer-item" onclick="handleUserDBClick(); closeMobileDrawer(); return false;" style="display:none;">
           <span class="mobile-drawer-icon">👤</span>
           <span class="mobile-drawer-text">資料庫</span>
       </a>

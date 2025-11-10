@@ -341,9 +341,136 @@ a{text-decoration:none;color:inherit}
   );
   animation: shimmer 3s infinite;
 }
+/* 導航欄樣式 */
+.subscription-navbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.subscription-navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.subscription-navbar-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.subscription-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.subscription-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.subscription-user-info:hover {
+  background: #f1f5f9;
+}
+
+.subscription-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.subscription-user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.subscription-logout-btn {
+  padding: 8px 16px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.subscription-logout-btn:hover {
+  background: #dc2626;
+}
+
+.subscription-back-btn {
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.subscription-back-btn:hover {
+  background: #f1f5f9;
+  border-color: var(--blue);
+}
+
+@media (max-width: 768px) {
+  .subscription-navbar {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+  
+  .subscription-navbar-title {
+    font-size: 20px;
+  }
+  
+  .subscription-user-name {
+    display: none;
+  }
+}
 </style>
 </head>
 <body>
+
+<!-- 導航欄 -->
+<nav class="subscription-navbar">
+  <div class="subscription-navbar-left">
+    <a href="index.html" class="subscription-navbar-title">ReelMind</a>
+  </div>
+  <div class="subscription-navbar-right" id="subscriptionNavbarRight">
+    <a href="index.html" class="subscription-back-btn">← 返回首頁</a>
+    <!-- 登入用戶資訊和登出按鈕（動態顯示） -->
+    <div id="subscriptionUserInfo" style="display: none;" class="subscription-user-info" onclick="window.location.href='userDB.html'">
+      <img id="subscriptionUserAvatar" class="subscription-user-avatar" src="" alt="用戶頭像" style="display: none;">
+      <span id="subscriptionUserName" class="subscription-user-name"></span>
+    </div>
+    <button id="subscriptionLogoutBtn" class="subscription-logout-btn" style="display: none;" onclick="handleSubscriptionLogout()">登出</button>
+  </div>
+</nav>
 
 <!-- HERO -->
 <header class="hero wrap" id="subscription-section">
@@ -886,6 +1013,56 @@ a{text-decoration:none;color:inherit}
       }, 1000);
     }
   });
+  
+  // 檢查登入狀態並顯示用戶資訊和登出按鈕
+  (function() {
+    const token = localStorage.getItem('ipPlanningToken');
+    const userStr = localStorage.getItem('ipPlanningUser');
+    
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const userInfo = document.getElementById('subscriptionUserInfo');
+        const userAvatar = document.getElementById('subscriptionUserAvatar');
+        const userName = document.getElementById('subscriptionUserName');
+        const logoutBtn = document.getElementById('subscriptionLogoutBtn');
+        
+        if (userInfo && userName) {
+          userName.textContent = user.name || user.email || '用戶';
+          userInfo.style.display = 'flex';
+        }
+        
+        if (userAvatar && user.picture) {
+          userAvatar.src = user.picture;
+          userAvatar.style.display = 'block';
+        }
+        
+        if (logoutBtn) {
+          logoutBtn.style.display = 'block';
+        }
+      } catch (e) {
+        console.warn('無法解析用戶資料:', e);
+      }
+    }
+  })();
+  
+  // 處理登出
+  function handleSubscriptionLogout() {
+    // 清除所有登入相關的 localStorage
+    localStorage.removeItem('ipPlanningToken');
+    localStorage.removeItem('ipPlanningRefreshToken');
+    localStorage.removeItem('ipPlanningUser');
+    localStorage.removeItem('ipPlanningTokenUpdated');
+    localStorage.removeItem('subscriptionStatus');
+    
+    // 清除 CSRF Token 緩存
+    if (window.Api && window.Api.clearCsrfToken) {
+      window.Api.clearCsrfToken();
+    }
+    
+    // 跳轉到首頁
+    window.location.href = 'index.html';
+  }
 </script>
 
 </body>

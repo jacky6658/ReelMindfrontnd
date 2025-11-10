@@ -340,9 +340,10 @@
   /**
    * 檢查並處理功能訪問（登入 + 訂閱）
    * 用於頁首按鈕和 mode-card 點擊
+   * @param {string} featureType - 功能類型：'userDB' 允許未訂閱用戶訪問（至少可查看個人資訊和登出），其他功能需要訂閱
    * 返回：true = 可以訪問，false = 需要登入/訂閱
    */
-  async function checkFeatureAccess() {
+  async function checkFeatureAccess(featureType = null) {
     // 先檢查登入狀態
     const loggedIn = await checkLoginStatus();
     
@@ -361,6 +362,11 @@
     // 已登入，檢查訂閱狀態
     await checkSubscriptionStatus();
     const subscribed = isSubscribed();
+    
+    // 創作者資料庫允許未訂閱用戶訪問（至少可查看個人資訊和登出）
+    if (featureType === 'userDB') {
+      return true; // 已登入即可訪問創作者資料庫
+    }
     
     if (!subscribed) {
       // 已登入但未訂閱，導向訂閱頁
