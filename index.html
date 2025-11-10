@@ -7711,6 +7711,19 @@
       }
       
       /* IP人設規劃使用說明按鈕和抽屜樣式 */
+      /* 只在 mode3 頁面激活時顯示 */
+      .mode3-instructions-btn-container,
+      .mode3-results-btn-container {
+        display: none;
+      }
+      
+      #mode3.active .mode3-instructions-btn-container,
+      #mode3.active .mode3-results-btn-container,
+      body.mode3-active .mode3-instructions-btn-container,
+      body.mode3-active .mode3-results-btn-container {
+        display: block;
+      }
+      
       .mode3-instructions-btn-container {
         position: fixed;
         top: 75px;
@@ -7723,6 +7736,21 @@
         top: 75px;
         left: 120px; /* 改到左邊 */
         z-index: 1001;
+      }
+      
+      /* 抽屜元素只在 mode3 激活時顯示 */
+      .mode3-instructions-overlay,
+      .mode3-instructions-drawer,
+      .mode3-results-overlay,
+      .mode3-results-drawer {
+        display: none;
+      }
+      
+      body.mode3-active .mode3-instructions-overlay.open,
+      body.mode3-active .mode3-instructions-drawer.open,
+      body.mode3-active .mode3-results-overlay.open,
+      body.mode3-active .mode3-results-drawer.open {
+        display: block;
       }
       
       .mode3-results-btn {
