@@ -12749,6 +12749,49 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       // 確保 goToLogin 在全局作用域中可用
       window.goToLogin = goToLogin;
       
+      // ===== 提前定義手機版抽屜函數，確保按鈕可以使用 =====
+      function toggleMobileDrawer() {
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileDrawerOverlay');
+        
+        if (drawer && overlay) {
+          const isOpen = drawer.classList.contains('open');
+          
+          if (isOpen) {
+            closeMobileDrawer();
+          } else {
+            openMobileDrawer();
+          }
+        }
+      }
+      
+      function openMobileDrawer() {
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileDrawerOverlay');
+        
+        if (drawer && overlay) {
+          drawer.classList.add('open');
+          overlay.style.display = 'block';
+          document.body.style.overflow = 'hidden'; // 防止背景滾動
+        }
+      }
+      
+      function closeMobileDrawer() {
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileDrawerOverlay');
+        
+        if (drawer && overlay) {
+          drawer.classList.remove('open');
+          overlay.style.display = 'none';
+          document.body.style.overflow = ''; // 恢復背景滾動
+        }
+      }
+      
+      // 確保函數在全局作用域中可用
+      window.toggleMobileDrawer = toggleMobileDrawer;
+      window.openMobileDrawer = openMobileDrawer;
+      window.closeMobileDrawer = closeMobileDrawer;
+      
       // 頁面控制函數
       // ===== XSS 防護函數 =====
       /**
@@ -24151,42 +24194,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
 
       // 手機版抽屜控制函數
-      function toggleMobileDrawer() {
-        const drawer = document.getElementById('mobileDrawer');
-        const overlay = document.getElementById('mobileDrawerOverlay');
-        
-        if (drawer && overlay) {
-          const isOpen = drawer.classList.contains('open');
-          
-          if (isOpen) {
-            closeMobileDrawer();
-          } else {
-            openMobileDrawer();
-          }
-        }
-      }
-
-      function openMobileDrawer() {
-        const drawer = document.getElementById('mobileDrawer');
-        const overlay = document.getElementById('mobileDrawerOverlay');
-        
-        if (drawer && overlay) {
-          drawer.classList.add('open');
-          overlay.style.display = 'block';
-          document.body.style.overflow = 'hidden'; // 防止背景滾動
-        }
-      }
-
-      function closeMobileDrawer() {
-        const drawer = document.getElementById('mobileDrawer');
-        const overlay = document.getElementById('mobileDrawerOverlay');
-        
-        if (drawer && overlay) {
-          drawer.classList.remove('open');
-          overlay.style.display = 'none';
-          document.body.style.overflow = ''; // 恢復背景滾動
-        }
-      }
+      // toggleMobileDrawer、openMobileDrawer、closeMobileDrawer 函數已在頁面頂部定義，這裡不需要重複定義
 
 
       // 在頁面載入時初始化模式3
