@@ -239,11 +239,12 @@
     <link rel="stylesheet" href="assets/css/animations.css" />
     <link rel="stylesheet" href="assets/css/styles.css" />
     <link rel="stylesheet" href="assets/css/main.css" />
-    <script defer src="/assets/js/config.js"></script>
-    <script defer src="/assets/js/auth.js"></script>
-    <script defer src="/assets/js/api.js"></script>
-    <script defer src="/assets/js/ui.js"></script>
-    <script defer src="/assets/js/bootstrap.js"></script>
+    <script defer src="assets/js/config.js"></script>
+    <script defer src="assets/js/common.js"></script>
+    <script defer src="assets/js/auth.js"></script>
+    <script defer src="assets/js/api.js"></script>
+    <script defer src="assets/js/ui.js"></script>
+    <script defer src="assets/js/bootstrap.js"></script>
     
     <style>
       /* 主題變數 */
@@ -11097,9 +11098,9 @@
             <div class="navbar-title clickable-title" onclick="switchPage('homepage')">ReelMind</div>
             <div class="navbar-tabs">
               <a href="#homepage" class="navbar-tab" onclick="switchPage('homepage'); return false;">首頁</a>
-              <a href="mode1.html" class="navbar-tab">IP人設規劃</a>
-              <a href="mode2.html" class="navbar-tab">AI顧問</a>
-              <a href="mode3.html" class="navbar-tab">一鍵生成</a>
+              <a href="mode1.html" class="navbar-tab" onclick="event.preventDefault(); (async function() { if(window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode1.html'; } } else { window.location.href = 'mode1.html'; } })(); return false;">IP人設規劃</a>
+              <a href="mode2.html" class="navbar-tab" onclick="event.preventDefault(); (async function() { if(window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode2.html'; } } else { window.location.href = 'mode2.html'; } })(); return false;">AI顧問</a>
+              <a href="mode3.html" class="navbar-tab" onclick="event.preventDefault(); (async function() { if(window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode3.html'; } } else { window.location.href = 'mode3.html'; } })(); return false;">一鍵生成</a>
               <a href="#forum" class="navbar-tab" onclick="switchPage('forum'); return false;">論壇介紹</a>
               <a href="#guide" class="navbar-tab" onclick="switchPage('guide'); return false;">實戰指南</a>
               <a href="#" id="userDBTab" class="navbar-tab" style="display:none;" onclick="handleUserDBClick(); return false;">創作者資料庫</a>
@@ -12564,105 +12565,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       </div>
 
     </div>
-          <div class="left-content">
-            <!-- 用戶需求設定區塊 -->
-      <div class="settings-block">
-              <h3 id="settingsToggle">📋 用戶需求設定 <span class="settings-toggle">▼</span></h3>
-        <div class="settings-content" id="settingsContent">
-          <div class="settings-grid">
-          <div class="setting-item">
-            <label>平台</label>
-                    <select id="platformSelect">
-              <option value="">選擇平台</option>
-              <option value="TikTok">TikTok</option>
-                      <option value="Instagram">Instagram Reels</option>
-                      <option value="YouTube">YouTube Shorts</option>
-                      <option value="Facebook">Facebook Reels</option>
-            </select>
-          </div>
-          <div class="setting-item">
-            <label>主題</label>
-                    <input type="text" id="topicInput" placeholder="例如:夏季變白挑戰/美白保養">
-          </div>
-          <div class="setting-item">
-            <label>腳本秒數</label>
-                    <select id="durationInput">
-                      <option value="15秒">15秒</option>
-                      <option value="30秒" selected>30秒</option>
-                      <option value="45秒">45秒</option>
-                      <option value="60秒">60秒</option>
-            </select>
-          </div>
-          <div class="setting-item">
-            <label>帳號定位</label>
-                    <input type="text" id="positioningInput" placeholder="如:健康×加密,輕鬆幽默">
-          </div>
-        </div>
-                <button id="applyBtn" class="apply-btn">套用設定</button>
-          </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- 右側面板：結果區塊（可切換） -->
-        <div class="right-panel">
-          <!-- 結果標籤切換 -->
-          <div class="result-tabs">
-            <button class="result-tab active" data-tab="positioning">🎯 帳號定位</button>
-            <button class="result-tab" data-tab="topics">💡 腳本選題</button>
-            <button class="result-tab" data-tab="script">📝 短影音腳本</button>
-          </div>
-          
-          <!-- 結果區塊容器 -->
-          <div class="results-container">
-            <!-- 帳號定位結果 -->
-            <div id="positioningResult" class="result-content" style="display: block;">
-              <div class="result-header">
-                <h3>帳號定位分析</h3>
-                <button class="generate-btn" onclick="generatePositioning()">一鍵生成帳號定位</button>
-              </div>
-              <div id="positioningContent" class="result-body">
-                請點選「一鍵生成帳號定位」按鈕開始
-              </div>
-              <div class="result-actions" id="positioningActions" style="display: none;">
-                <button class="save-btn" onclick="saveResult('positioning')">儲存</button>
-                <button class="regenerate-btn" onclick="regenerateResult('positioning')">再換一個</button>
-              </div>
-            </div>
-            
-            <!-- 腳本選題結果 -->
-            <div id="topicSelectionResult" class="result-content" style="display: none;">
-              <div class="result-header">
-                <h3>腳本選題推薦</h3>
-                <button class="generate-btn" onclick="generateTopics()">一鍵生成選題</button>
-              </div>
-              <div id="topicContent" class="result-body">
-                請點選「一鍵生成選題」按鈕開始
-              </div>
-              <div class="result-actions" id="topicActions" style="display: none;">
-                <button class="save-btn" onclick="saveResult('topics')">儲存</button>
-                <button class="regenerate-btn" onclick="regenerateResult('topics')">再換一個</button>
-              </div>
-            </div>
-            
-            <!-- 短影音腳本結果 -->
-            <div id="scriptResult" class="result-content" style="display: none;">
-              <div class="result-header">
-                <h3>短影音腳本生成</h3>
-                <button class="generate-btn" onclick="generateScript()">一鍵生成腳本</button>
-              </div>
-              <div id="scriptContent" class="result-body">
-                請點選「一鍵生成腳本」按鈕開始
-              </div>
-              <div class="result-actions" id="scriptActions" style="display: none;">
-                <button class="save-btn" onclick="saveScript()">儲存</button>
-                <button class="regenerate-btn" onclick="regenerateResult('script')">再換一個</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- 用戶抽屜 -->
       <div id="userDrawerOverlay" class="user-drawer-overlay" onclick="closeUserDrawer()"></div>
@@ -14077,9 +13979,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 前往登入頁面
       function goToLogin() {
-        // 跳轉到登入頁面（圖1）
-        document.getElementById('loginPage').style.display = 'flex';
-        document.getElementById('appContainer').style.display = 'none';
+        // 優先使用 common.js 中的 goToLogin（Google OAuth）
+        if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+          window.ReelMindCommon.goToLogin();
+          return;
+        }
+        // 降級處理：顯示登入頁面
+        const loginPage = document.getElementById('loginPage');
+        const appContainer = document.getElementById('appContainer');
+        if (loginPage) loginPage.style.display = 'flex';
+        if (appContainer) appContainer.style.display = 'none';
       }
       // 確保 goToLogin 在全局作用域中可用
       window.goToLogin = goToLogin;
