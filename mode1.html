@@ -42,6 +42,478 @@
     <link rel="stylesheet" href="assets/css/styles.css" />
     <link rel="stylesheet" href="assets/css/main.css" />
     
+    <!-- Mode1/Mode3 專用樣式（從 index.html 提取） -->
+    <style>
+      /* ===== 模式3：IP人設規劃模式樣式 ===== */
+      .mode3-page {
+        min-height: 100vh;
+        background: transparent;
+        padding: 0;
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .mode3-fixed {
+        position: relative;
+        width: 100%;
+        min-height: calc(100vh - 60px);
+        background: transparent;
+      }
+      
+      /* IP人設規劃使用說明按鈕和抽屜樣式 */
+      .mode3-instructions-btn-container {
+        position: fixed;
+        top: 75px;
+        left: 20px;
+        z-index: 1001;
+      }
+      
+      .mode3-results-btn-container {
+        position: fixed;
+        top: 75px;
+        left: 120px;
+        z-index: 1001;
+      }
+      
+      .mode3-instructions-btn, .mode3-results-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      
+      .mode3-instructions-btn {
+        background: #4f46e5;
+      }
+      
+      .mode3-instructions-btn:hover {
+        background: #4338ca;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(79, 70, 229, 0.4);
+      }
+      
+      .mode3-results-btn {
+        background: #10b981;
+      }
+      
+      .mode3-results-btn:hover {
+        background: #059669;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+      }
+      
+      /* 抽屜樣式 */
+      .mode3-instructions-overlay, .mode3-results-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+      
+      .mode3-instructions-overlay.open, .mode3-results-overlay.open {
+        opacity: 1;
+        visibility: visible;
+      }
+      
+      .mode3-instructions-drawer, .mode3-results-drawer {
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 400px;
+        height: 100%;
+        background: white;
+        z-index: 9999;
+        transition: right 0.3s ease;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+      }
+      
+      .mode3-results-drawer {
+        width: 500px;
+        right: -500px;
+      }
+      
+      .mode3-instructions-drawer.open {
+        right: 0;
+      }
+      
+      .mode3-results-drawer.open {
+        right: 0;
+      }
+      
+      .mode3-instructions-drawer-header, .mode3-results-drawer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f8fafc;
+      }
+      
+      .mode3-instructions-drawer-header h3, .mode3-results-drawer-header h3 {
+        margin: 0;
+        color: #1f2937;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      
+      .mode3-instructions-drawer-close, .mode3-results-drawer-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+      }
+      
+      .mode3-instructions-drawer-close:hover, .mode3-results-drawer-close:hover {
+        background: #e5e7eb;
+        color: #374151;
+      }
+      
+      .mode3-instructions-drawer-content, .mode3-results-drawer-content {
+        padding: 20px;
+        color: #374151;
+        line-height: 1.6;
+      }
+      
+      /* 使用說明步驟指南樣式 */
+      .mode3-step-guide {
+        margin: 16px 0;
+      }
+      
+      .mode3-step {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 16px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        border-left: 4px solid #4f46e5;
+      }
+      
+      .mode3-step-number {
+        width: 32px;
+        height: 32px;
+        background: #4f46e5;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+        margin-right: 12px;
+        flex-shrink: 0;
+      }
+      
+      .mode3-step-content {
+        flex: 1;
+      }
+      
+      .mode3-step-content strong {
+        color: #1f2937;
+        font-size: 14px;
+        display: block;
+        margin-bottom: 4px;
+      }
+      
+      .mode3-step-content p {
+        color: #6b7280;
+        font-size: 13px;
+        margin: 0;
+        line-height: 1.4;
+      }
+      
+      /* 生成內容類型樣式 */
+      .mode3-result-types {
+        margin: 12px 0;
+      }
+      
+      .mode3-result-type {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        border-left: 3px solid #10b981;
+      }
+      
+      .mode3-result-type strong {
+        color: #1f2937;
+        font-size: 13px;
+        display: block;
+        margin-bottom: 4px;
+      }
+      
+      .mode3-result-type p {
+        color: #6b7280;
+        font-size: 12px;
+        margin: 0;
+        line-height: 1.3;
+      }
+      
+      /* 生成結果標籤和內容 */
+      .mode3-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      
+      .mode3-tab {
+        padding: 10px 16px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-size: 14px;
+        color: #6b7280;
+        transition: all 0.2s ease;
+      }
+      
+      .mode3-tab.active {
+        color: #4f46e5;
+        border-bottom-color: #4f46e5;
+      }
+      
+      .mode3-tab:hover {
+        color: #4f46e5;
+      }
+      
+      .mode3-result-block {
+        display: none;
+      }
+      
+      .mode3-result-block.active {
+        display: block;
+      }
+      
+      .mode3-result-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+      }
+      
+      .mode3-action-btn {
+        flex: 1;
+        padding: 10px 16px;
+        background: #f3f4f6;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #374151;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      
+      .mode3-action-btn:hover {
+        background: #e5e7eb;
+        transform: translateY(-1px);
+      }
+      
+      .mode3-generate-btn {
+        padding: 12px 24px;
+        background: #4f46e5;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+      
+      .mode3-generate-btn:hover {
+        background: #4338ca;
+        transform: translateY(-1px);
+      }
+      
+      .mode3-result-placeholder {
+        text-align: center;
+        padding: 40px 20px;
+      }
+      
+      .mode3-placeholder-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+      }
+      
+      /* 聊天訊息區域 */
+      #mode3-chatMessages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 24px;
+        margin: 0;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        min-height: 0;
+        height: auto;
+      }
+      
+      /* 輸入區域 */
+      .input-row {
+        padding: 8px 24px 16px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .input-container {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        width: 100%;
+      }
+      
+      .input-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .input-row-inner {
+        display: flex;
+        gap: 8px;
+        align-items: flex-end;
+      }
+      
+      .chat-input {
+        flex: 1;
+        min-height: 44px;
+        max-height: 200px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+        background: #ffffff;
+        resize: vertical;
+        overflow-y: auto;
+        line-height: 1.5;
+      }
+      
+      .chat-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+      }
+      
+      .send-btn {
+        height: 44px;
+        min-width: 44px;
+        border-radius: 10px;
+        background: #3b82f6;
+        color: #ffffff;
+        border: none;
+        padding: 0 18px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .send-btn:hover:not(:disabled) {
+        background: #2563eb;
+      }
+      
+      .send-btn:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+      }
+      
+      /* 快速按鈕 */
+      .quick-buttons {
+        gap: 8px;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        width: 100%;
+        background: transparent;
+        box-sizing: border-box;
+      }
+      
+      .quick-btn {
+        background: transparent;
+        border: 1px solid #d1d5db;
+        color: #374151;
+        padding: 8px 16px;
+        border-radius: 16px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        font-weight: 400;
+        box-shadow: none;
+        width: auto;
+        min-width: fit-content;
+        flex-shrink: 0;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .quick-btn:hover {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: white;
+      }
+      
+      /* 手機版適配 */
+      @media (max-width: 768px) {
+        .mode3-instructions-drawer, .mode3-results-drawer {
+          width: 100%;
+          right: -100%;
+        }
+        
+        .mode3-instructions-btn-container {
+          top: 65px;
+          left: 15px;
+        }
+        
+        .mode3-results-btn-container {
+          top: 65px;
+          left: 80px;
+        }
+        
+        .mode3-instructions-btn, .mode3-results-btn {
+          padding: 10px 12px;
+          font-size: 13px;
+        }
+        
+        .mode3-instructions-text, .mode3-results-text {
+          display: none;
+        }
+      }
+    </style>
+    
     <!-- 共享 JavaScript（必須按順序載入） -->
     <script src="assets/js/config.js"></script>
     <script src="assets/js/security.js"></script>
