@@ -226,6 +226,22 @@ function switchTab(tabName) {
   }
 }
 
+// 顯示生成中動畫
+function showGeneratingAnimation(blockId, message = '生成中') {
+  const block = document.getElementById(blockId);
+  if (block) {
+    // 使用 escapeHtml 防止 XSS
+    const safeMessage = window.escapeHtml ? window.escapeHtml(message) : message;
+    block.innerHTML = `
+      <div class="generating-container">
+        <div class="generating-spinner"></div>
+        <div class="generating-text">${safeMessage}<span class="generating-dots"></span></div>
+      </div>
+    `;
+    block.classList.remove('has-content');
+  }
+}
+
 // 更新結果區塊內容
 function updateResultBlock(blockId, content, hasContent = true) {
   const block = document.getElementById(blockId);
@@ -260,8 +276,19 @@ async function generatePositioning() {
     return;
   }
   
-  updateResultBlock('positioningContent', '正在分析帳號定位...', false);
+  // 顯示生成中動畫
+  showGeneratingAnimation('positioningContent', '正在分析帳號定位');
   document.getElementById('positioningActions').style.display = 'flex';
+  
+  // 手機版：滾動到頂部（用戶需求設定區域）
+  if (window.innerWidth <= 768) {
+    const settingsBlock = document.querySelector('.settings-block');
+    if (settingsBlock) {
+      settingsBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
   
   try {
     const response = await fetch(`${API_URL}/api/generate/positioning`, {
@@ -364,17 +391,8 @@ async function generateTopics() {
   const topic = topicEl ? topicEl.value : '';
   const positioning = positioningEl ? positioningEl.value : '';
   
-  const positioningContent = document.getElementById('positioningContent').textContent.trim();
-  const isDefaultText = positioningContent.includes('請點選「一鍵生成帳號定位」按鈕開始') ||
-                       positioningContent.includes('點擊「一鍵生成帳號定位」') || 
-                       positioningContent.includes('開始分析');
-  
-  if (!positioningContent || isDefaultText) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('請先完成帳號定位', 3000);
-    }
-    return;
-  }
+  // 移除帳號定位的前置檢查，允許獨立生成選題
+  // 如果用戶有輸入帳號定位，則使用；如果沒有，則使用空值讓 AI 自行判斷
   
   if (!platform) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -383,8 +401,19 @@ async function generateTopics() {
     return;
   }
   
-  updateResultBlock('topicContent', '正在推薦選題...', false);
+  // 顯示生成中動畫
+  showGeneratingAnimation('topicContent', '正在推薦選題');
   document.getElementById('topicActions').style.display = 'flex';
+  
+  // 手機版：滾動到頂部（用戶需求設定區域）
+  if (window.innerWidth <= 768) {
+    const settingsBlock = document.querySelector('.settings-block');
+    if (settingsBlock) {
+      settingsBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
   
   try {
     const response = await fetch(`${API_URL}/api/generate/topics`, {
@@ -491,30 +520,8 @@ async function generateScript() {
   const topic = topicEl ? topicEl.value : '';
   const positioning = positioningEl ? positioningEl.value : '';
   
-  const positioningContent = document.getElementById('positioningContent').textContent.trim();
-  const topicContent = document.getElementById('topicContent').textContent.trim();
-  
-  const isPositioningDefault = positioningContent.includes('請點選「一鍵生成帳號定位」按鈕開始') || 
-                               positioningContent.includes('點擊「一鍵生成帳號定位」') || 
-                               positioningContent.includes('開始分析');
-  const isTopicDefault = topicContent.includes('請點選「一鍵生成選題」按鈕開始') ||
-                        topicContent.includes('完成帳號定位') || 
-                        topicContent.includes('進行選題') ||
-                        topicContent.includes('點擊「一鍵生成選題」');
-  
-  if (!positioningContent || isPositioningDefault) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('請先完成帳號定位', 3000);
-    }
-    return;
-  }
-  
-  if (!topicContent || isTopicDefault) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('請先完成選題推薦', 3000);
-    }
-    return;
-  }
+  // 移除帳號定位和選題的前置檢查，允許獨立生成腳本
+  // 如果用戶有輸入帳號定位或選題，則使用；如果沒有，則使用空值讓 AI 自行判斷
   
   if (!platform) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -531,8 +538,19 @@ async function generateScript() {
     return;
   }
   
-  updateResultBlock('scriptContent', '正在生成腳本...', false);
+  // 顯示生成中動畫
+  showGeneratingAnimation('scriptContent', '正在生成腳本');
   document.getElementById('scriptActions').style.display = 'flex';
+  
+  // 手機版：滾動到頂部（用戶需求設定區域）
+  if (window.innerWidth <= 768) {
+    const settingsBlock = document.querySelector('.settings-block');
+    if (settingsBlock) {
+      settingsBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
   
   try {
     const durationInput = document.getElementById('durationInput');
