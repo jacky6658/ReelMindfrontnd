@@ -11060,9 +11060,9 @@
             <div class="navbar-title clickable-title" onclick="switchPage('homepage')">ReelMind</div>
             <div class="navbar-tabs">
               <a href="#homepage" class="navbar-tab" onclick="switchPage('homepage'); return false;">首頁</a>
-              <a href="#mode1" class="navbar-tab" onclick="switchPage('mode1'); return false;">一鍵生成</a>
-              <a href="#mode2" class="navbar-tab" onclick="switchPage('mode2'); return false;">AI顧問</a>
               <a href="#mode3" class="navbar-tab" onclick="switchPage('mode3'); return false;">IP人設規劃</a>
+              <a href="#mode2" class="navbar-tab" onclick="switchPage('mode2'); return false;">AI顧問</a>
+              <a href="#mode1" class="navbar-tab" onclick="switchPage('mode1'); return false;">一鍵生成</a>
               <a href="#forum" class="navbar-tab" onclick="switchPage('forum'); return false;">論壇介紹</a>
               <a href="#guide" class="navbar-tab" onclick="switchPage('guide'); return false;">實戰指南</a>
               <a href="#userDB" id="userDBTab" class="navbar-tab" onclick="switchPage('userDB'); return false;" style="display:none;">創作者資料庫</a>
@@ -11652,11 +11652,11 @@
                           1
                         </div>
                         <div style="margin-top: 30px; margin-bottom: 24px;">
-                          <i class="fas fa-user-tie" style="font-size: 3rem; color: #3B82F6; margin-bottom: 16px;"></i>
+                          <i class="fas fa-magic" style="font-size: 3rem; color: #3B82F6; margin-bottom: 16px;"></i>
                         </div>
-                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">建立 IP 人設</h3>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">一鍵生成腳本</h3>
                         <p style="font-size: 1rem; color: #64748B; line-height: 1.7;">
-                          先使用「IP人設規劃模式」，透過聊天記錄你的人生曲線與品牌故事，AI 會協助建立專屬的 IP Profile 和 14 天內容規劃。
+                          使用「一鍵生成模式」，輸入平台與主題，AI 會根據你的 IP 人設自動生成符合風格的腳本、選題與帳號定位建議。
                         </p>
                       </div>
                       
@@ -11666,11 +11666,11 @@
                           2
                         </div>
                         <div style="margin-top: 30px; margin-bottom: 24px;">
-                          <i class="fas fa-magic" style="font-size: 3rem; color: #10B981; margin-bottom: 16px;"></i>
+                          <i class="fas fa-user-tie" style="font-size: 3rem; color: #10B981; margin-bottom: 16px;"></i>
                         </div>
-                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">一鍵生成腳本</h3>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">建立 IP 人設</h3>
                         <p style="font-size: 1rem; color: #64748B; line-height: 1.7;">
-                          使用「一鍵生成模式」，輸入平台與主題，AI 會根據你的 IP 人設自動生成符合風格的腳本、選題與帳號定位建議。
+                          先使用「IP人設規劃模式」，透過聊天記錄你的人生曲線與品牌故事，AI 會協助建立專屬的 IP Profile 和 14 天內容規劃。
                         </p>
                       </div>
                       
@@ -11693,7 +11693,7 @@
                     <div style="margin-top: 60px; padding: 32px; background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-radius: 20px; border: 2px solid #FCD34D; text-align: center;">
                       <p style="font-size: 1.1rem; color: #92400E; line-height: 1.7;">
                         <i class="fas fa-lightbulb" style="margin-right: 8px; color: #F59E0B;"></i>
-                        <strong style="font-weight: 700;">建議使用順序：</strong>先做 IP 人設 → 取得 14 天規劃 → 每日使用一鍵生成。AI 會記住你之前的內容並持續優化。
+                        <strong style="font-weight: 700;">建議使用順序：</strong>先使用一鍵生成快速產出內容 → 建立 IP 人設取得 14 天規劃 → 持續優化內容。AI 會記住你之前的內容並持續優化。
                       </p>
                     </div>
                   </div>
@@ -11712,20 +11712,20 @@
                     </div>
                     
                     <div class="mode-cards" style="position: relative; display: flex; justify-content: center; margin: 0 auto; max-width: 1200px;">
-                      <div class="mode-card" onclick="handleModeCardClick('mode1');">
-                        <div class="mode-card-icon"><i class="fas fa-magic"></i></div>
-                        <h3 class="mode-card-title">一鍵生成模式</h3>
-                        <p class="mode-card-desc">快速設定需求，依序生成帳號定位、選題和腳本，適合效率導向的用戶</p>
+                      <div class="mode-card" onclick="handleModeCardClick('mode3');">
+                        <div class="mode-card-icon"><i class="fas fa-user-tie"></i></div>
+                        <h3 class="mode-card-title">IP人設規劃模式</h3>
+                        <p class="mode-card-desc">透過聊天記錄人生曲線，AI協助擬定個人化IP Profile、14天規劃和腳本</p>
                       </div>
                       <div class="mode-card" onclick="handleModeCardClick('mode2');">
                         <div class="mode-card-icon"><i class="fas fa-comments"></i></div>
                         <h3 class="mode-card-title">AI顧問對話模式</h3>
                         <p class="mode-card-desc">與AI進行深度對話，靈活討論內容策略，適合需要創意討論的用戶</p>
                       </div>
-                      <div class="mode-card" onclick="handleModeCardClick('mode3');">
-                        <div class="mode-card-icon"><i class="fas fa-user-tie"></i></div>
-                        <h3 class="mode-card-title">IP人設規劃模式</h3>
-                        <p class="mode-card-desc">透過聊天記錄人生曲線，AI協助擬定個人化IP Profile、14天規劃和腳本</p>
+                      <div class="mode-card" onclick="handleModeCardClick('mode1');">
+                        <div class="mode-card-icon"><i class="fas fa-magic"></i></div>
+                        <h3 class="mode-card-title">一鍵生成模式</h3>
+                        <p class="mode-card-desc">快速設定需求，依序生成帳號定位、選題和腳本，適合效率導向的用戶</p>
                       </div>
                     </div>
                   </div>
