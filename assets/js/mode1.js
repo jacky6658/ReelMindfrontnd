@@ -192,7 +192,8 @@ async function sendMode3Message(message, conversationType = 'ip_planning') {
       body: JSON.stringify({
         message: message,
         history: [],
-        user_id: user?.user_id || null
+        user_id: user?.user_id || null,
+        conversation_type: 'ip_planning'  // 指定對話類型
       })
     });
     
@@ -480,7 +481,8 @@ async function generateMode3IPProfile() {
         profile: 'IP人設規劃專家',
         topic: 'IP Profile生成',
         style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，不要程式碼或技術格式',
-        duration: '30'
+        duration: '30',
+        conversation_type: 'ip_planning'  // 指定對話類型
       })
     });
     
@@ -549,7 +551,8 @@ async function generateMode314DayPlan() {
         profile: 'IP人設規劃專家',
         topic: '14天規劃生成',
         style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，不要程式碼或表格格式',
-        duration: '30'
+        duration: '30',
+        conversation_type: 'ip_planning'  // 指定對話類型
       })
     });
     
@@ -618,7 +621,8 @@ async function generateMode3TodayScripts() {
         profile: 'IP人設規劃專家',
         topic: '今日腳本生成',
         style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，不要程式碼或技術格式',
-        duration: '30'
+        duration: '30',
+        conversation_type: 'ip_planning'  // 指定對話類型
       })
     });
     

@@ -366,7 +366,8 @@ async function sendMessage(message) {
         style: null,
         profile: null,
         history: [],
-        user_id: ipPlanningUser?.user_id || null
+        user_id: ipPlanningUser?.user_id || null,
+        conversation_type: 'ai_advisor'  // 指定對話類型
       })
     });
     

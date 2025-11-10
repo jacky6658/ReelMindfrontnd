@@ -612,19 +612,36 @@
       }
       
       .structure-name {
-        font-size: 13px;
-        color: #6b7280;
+        font-size: 14px;
+        color: #374151;
         text-align: left;
-        line-height: 1.4;
-        font-weight: 500;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        line-height: 1.5;
+        font-weight: 600;
+        white-space: normal;
+        overflow: visible;
         flex: 1;
+        word-break: break-word;
       }
       
       .structure-btn.selected .structure-name {
         color: white;
+        font-weight: 600;
+      }
+      
+      .structure-desc {
+        font-size: 11px;
+        color: #6b7280;
+        text-align: left;
+        line-height: 1.4;
+        font-weight: 400;
+        margin-top: 4px;
+        white-space: normal;
+        overflow: visible;
+        word-break: break-word;
+      }
+      
+      .structure-btn.selected .structure-desc {
+        color: rgba(255, 255, 255, 0.9);
       }
       
       /* 一鍵生成使用說明 */
@@ -1023,23 +1040,38 @@
               <div class="structure-buttons">
                 <button class="structure-btn" data-structure="A" title="標準行銷三段式（Hook → Value → CTA）- 通用/帶貨，適合產品推廣、快速轉換">
                   <span class="structure-letter">A</span>
-                  <span class="structure-name">標準行銷三段式</span>
+                  <div class="structure-btn-content">
+                    <span class="structure-name">標準行銷三段式</span>
+                    <span class="structure-desc">Hook → Value → CTA，適合產品推廣</span>
+                  </div>
                 </button>
                 <button class="structure-btn" data-structure="B" title="問題 → 解決 → 證明 - 教育/建立信任，適合教學內容、建立專業形象">
                   <span class="structure-letter">B</span>
-                  <span class="structure-name">問題→解決→證明</span>
+                  <div class="structure-btn-content">
+                    <span class="structure-name">問題→解決→證明</span>
+                    <span class="structure-desc">教育/建立信任，適合教學內容</span>
+                  </div>
                 </button>
                 <button class="structure-btn" data-structure="C" title="Before → After → 秘密揭露 - 視覺反差/爆量，適合效果展示、吸引眼球">
                   <span class="structure-letter">C</span>
-                  <span class="structure-name">Before→After</span>
+                  <div class="structure-btn-content">
+                    <span class="structure-name">Before→After</span>
+                    <span class="structure-desc">視覺反差/爆量，適合效果展示</span>
+                  </div>
                 </button>
                 <button class="structure-btn" data-structure="D" title="教學知識型（迷思 → 原理 → 要點 → 行動）- 冷受眾，適合知識科普、教育內容">
                   <span class="structure-letter">D</span>
-                  <span class="structure-name">教學知識型</span>
+                  <div class="structure-btn-content">
+                    <span class="structure-name">教學知識型</span>
+                    <span class="structure-desc">迷思→原理→要點→行動，適合知識科普</span>
+                  </div>
                 </button>
                 <button class="structure-btn" data-structure="E" title="故事敘事型（起 → 承 → 轉 → 合）- 人設/口碑，適合個人品牌、情感連結">
                   <span class="structure-letter">E</span>
-                  <span class="structure-name">故事敘事型</span>
+                  <div class="structure-btn-content">
+                    <span class="structure-name">故事敘事型</span>
+                    <span class="structure-desc">起→承→轉→合，適合個人品牌</span>
+                  </div>
                 </button>
               </div>
             </div>
@@ -1070,6 +1102,89 @@
               <div class="step-number">3</div>
               <div class="step-content">
                 <strong>使用建議</strong>
+                <p>建議順序：帳號定位 → 選題推薦 → 腳本生成，但您也可以根據需求直接使用任何功能</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">4</div>
+              <div class="step-content">
+                <strong>儲存或重新生成</strong>
+                <p>滿意結果可點擊「儲存」，不滿意可點擊「再換一個」重新生成</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右側面板：結果區塊（可切換） -->
+      <div class="right-panel">
+        <!-- 結果標籤切換 -->
+        <div class="result-tabs">
+          <button class="result-tab active" data-tab="positioning">🎯 帳號定位</button>
+          <button class="result-tab" data-tab="topics">💡 腳本選題</button>
+          <button class="result-tab" data-tab="script">📝 短影音腳本</button>
+        </div>
+        
+        <!-- 結果區塊容器 -->
+        <div class="results-container">
+          <!-- 帳號定位結果 -->
+          <div id="positioningResult" class="result-content" style="display: block;">
+            <div class="result-header">
+              <h3>帳號定位分析</h3>
+              <button class="generate-btn" onclick="generatePositioning()">一鍵生成帳號定位</button>
+            </div>
+            <div id="positioningContent" class="result-body">
+              請點選「一鍵生成帳號定位」按鈕開始
+            </div>
+            <div class="result-actions" id="positioningActions" style="display: none;">
+              <button class="save-btn" onclick="saveResult('positioning')">儲存</button>
+              <button class="regenerate-btn" onclick="regenerateResult('positioning')">再換一個</button>
+            </div>
+          </div>
+          
+          <!-- 腳本選題結果 -->
+          <div id="topicSelectionResult" class="result-content" style="display: none;">
+            <div class="result-header">
+              <h3>腳本選題推薦</h3>
+              <button class="generate-btn" onclick="generateTopics()">一鍵生成選題</button>
+            </div>
+            <div id="topicContent" class="result-body">
+              請點選「一鍵生成選題」按鈕開始
+            </div>
+            <div class="result-actions" id="topicActions" style="display: none;">
+              <button class="save-btn" onclick="saveResult('topics')">儲存</button>
+              <button class="regenerate-btn" onclick="regenerateResult('topics')">再換一個</button>
+            </div>
+          </div>
+          
+          <!-- 短影音腳本結果 -->
+          <div id="scriptResult" class="result-content" style="display: none;">
+            <div class="result-header">
+              <h3>短影音腳本生成</h3>
+              <button class="generate-btn" onclick="generateScript()">一鍵生成腳本</button>
+            </div>
+            <div id="scriptContent" class="result-body">
+              請點選「一鍵生成腳本」按鈕開始
+            </div>
+            <div class="result-actions" id="scriptActions" style="display: none;">
+              <button class="save-btn" onclick="saveScript()">儲存</button>
+              <button class="regenerate-btn" onclick="regenerateResult('script')">再換一個</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 彈出提示框 -->
+    <div id="toast" class="toast" style="display: none;"></div>
+
+    <!-- Mode3 專用 JavaScript（一鍵生成） -->
+    <!-- 載入共用 JavaScript 檔案（config.js、auth.js、api.js、common.js 已在 head 中載入，這裡不再重複） -->
+    <script src="assets/js/mode3.js"></script>
+  </body>
+</html>
+
+
                 <p>建議順序：帳號定位 → 選題推薦 → 腳本生成，但您也可以根據需求直接使用任何功能</p>
               </div>
             </div>
