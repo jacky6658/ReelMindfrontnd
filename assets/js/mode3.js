@@ -7,6 +7,7 @@ const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.ap
 let currentPlatform = null;
 let currentTopic = null;
 let currentProfile = null;
+let selectedScriptStructure = null; // 選中的腳本結構（A/B/C/D/E）
 const styleInstruction = '格式要求：分段清楚，短句，每段換行，適度加入表情符號（如：✅✨🔥📌），避免口頭禪。絕對不要使用 ** 或任何 Markdown 格式符號，所有內容必須是純文字格式。';
 
 // 從 localStorage 獲取用戶資訊
@@ -28,6 +29,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // 初始化設定區塊
   initSettingsBlock();
+  
+  // 初始化腳本結構選擇按鈕
+  initScriptStructureButtons();
   
   // 初始化標籤切換
   initTabs();
@@ -115,29 +119,67 @@ function initSettingsBlock() {
       const duration = document.getElementById('durationInput')?.value;
       const positioning = document.getElementById('positioningInput')?.value;
       
-      if (platform) {
-        currentPlatform = platform;
-        currentTopic = topic;
-        currentProfile = positioning;
-        
-        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast('設定已套用', 2000);
-        }
-        
-        // 自動收合設定區塊
-        if (settingsContent) {
-          settingsContent.style.display = 'none';
-          if (instructions) instructions.style.display = 'none';
-          const toggleIcon = settingsToggle?.querySelector('.settings-toggle');
-          if (toggleIcon) toggleIcon.textContent = '▶';
-        }
-      } else {
+      if (!platform) {
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast('請選擇平台', 3000);
         }
+        return;
+      }
+      
+      if (!selectedScriptStructure) {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('請選擇腳本結構', 3000);
+        }
+        return;
+      }
+      
+      currentPlatform = platform;
+      currentTopic = topic;
+      currentProfile = positioning;
+      
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('設定已套用', 2000);
+      }
+      
+      // 自動收合設定區塊
+      if (settingsContent) {
+        settingsContent.style.display = 'none';
+        if (instructions) instructions.style.display = 'none';
+        const toggleIcon = settingsToggle?.querySelector('.settings-toggle');
+        if (toggleIcon) toggleIcon.textContent = '▶';
       }
     });
   }
+}
+
+// 初始化腳本結構選擇按鈕
+function initScriptStructureButtons() {
+  const structureButtons = document.querySelectorAll('.structure-btn');
+  
+  structureButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // 移除所有按鈕的選中狀態
+      structureButtons.forEach(b => b.classList.remove('selected'));
+      
+      // 添加選中狀態到當前按鈕
+      btn.classList.add('selected');
+      
+      // 保存選中的結構
+      selectedScriptStructure = btn.getAttribute('data-structure');
+      
+      // 顯示提示
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        const structureNames = {
+          'A': '標準行銷三段式',
+          'B': '問題→解決→證明',
+          'C': 'Before→After',
+          'D': '教學知識型',
+          'E': '故事敘事型'
+        };
+        window.ReelMindCommon.showToast(`已選擇：${structureNames[selectedScriptStructure]}`, 2000);
+      }
+    });
+  });
 }
 
 // 初始化標籤切換
@@ -481,11 +523,29 @@ async function generateScript() {
     return;
   }
   
+  // 檢查是否選擇了腳本結構
+  if (!selectedScriptStructure) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先選擇腳本結構', 3000);
+    }
+    return;
+  }
+  
   updateResultBlock('scriptContent', '正在生成腳本...', false);
   document.getElementById('scriptActions').style.display = 'flex';
   
   try {
     const durationInput = document.getElementById('durationInput');
+    
+    // 根據選擇的結構生成對應的提示詞
+    const structureMessages = {
+      'A': '請使用標準行銷三段式（Hook → Value → CTA）結構生成完整腳本',
+      'B': '請使用問題 → 解決 → 證明（Problem → Solution → Proof）結構生成完整腳本',
+      'C': '請使用Before → After → 秘密揭露結構生成完整腳本',
+      'D': '請使用教學知識型（迷思 → 原理 → 要點 → 行動）結構生成完整腳本',
+      'E': '請使用故事敘事型（起 → 承 → 轉 → 合）結構生成完整腳本'
+    };
+    
     const response = await fetch(`${API_URL}/api/generate/script`, {
       method: 'POST',
       headers: {
@@ -493,12 +553,13 @@ async function generateScript() {
         'Authorization': `Bearer ${ipPlanningToken}`
       },
       body: JSON.stringify({
-        message: '請幫我生成完整腳本',
+        message: structureMessages[selectedScriptStructure] || '請幫我生成完整腳本',
         platform: platform,
         topic: topic,
         duration: durationInput ? durationInput.value || '30' : '30',
         style: styleInstruction,
         profile: positioning,
+        script_structure: selectedScriptStructure, // 傳遞選中的結構
         history: [],
         user_id: ipPlanningUser?.user_id || null
       })

@@ -507,6 +507,106 @@
         transform: translateY(-1px);
       }
       
+      /* 常用腳本結構選擇 */
+      .script-structure-section {
+        margin: 20px 0;
+        padding: 16px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+      }
+      
+      .structure-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 12px;
+      }
+      
+      .structure-buttons {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+      }
+      
+      @media (max-width: 1024px) {
+        .structure-buttons {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .structure-buttons {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .structure-buttons {
+          grid-template-columns: 1fr;
+        }
+      }
+      
+      .structure-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 12px 8px;
+        background: white;
+        border: 2px solid #d1d5db;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 12px;
+        min-height: 70px;
+      }
+      
+      .structure-btn:hover {
+        border-color: #3b82f6;
+        background: #eff6ff;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+      }
+      
+      .structure-btn.selected {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: white;
+      }
+      
+      .structure-btn.selected .structure-letter {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+      
+      .structure-btn.selected .structure-name {
+        color: white;
+      }
+      
+      .structure-letter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: #f3f4f6;
+        color: #3b82f6;
+        border-radius: 50%;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      
+      .structure-name {
+        font-size: 11px;
+        color: #6b7280;
+        text-align: center;
+        line-height: 1.3;
+        font-weight: 500;
+      }
+      
       /* 一鍵生成使用說明 */
       .one-click-instructions {
         background: #f8fafc;
@@ -828,6 +928,34 @@
                 <input type="text" id="positioningInput" placeholder="如:健康×加密,輕鬆幽默">
               </div>
             </div>
+            
+            <!-- 常用腳本結構選擇 -->
+            <div class="script-structure-section">
+              <label class="structure-label">常用腳本結構</label>
+              <div class="structure-buttons">
+                <button class="structure-btn" data-structure="A" title="標準行銷三段式（Hook → Value → CTA）- 通用/帶貨，適合產品推廣、快速轉換">
+                  <span class="structure-letter">A</span>
+                  <span class="structure-name">標準行銷三段式</span>
+                </button>
+                <button class="structure-btn" data-structure="B" title="問題 → 解決 → 證明 - 教育/建立信任，適合教學內容、建立專業形象">
+                  <span class="structure-letter">B</span>
+                  <span class="structure-name">問題→解決→證明</span>
+                </button>
+                <button class="structure-btn" data-structure="C" title="Before → After → 秘密揭露 - 視覺反差/爆量，適合效果展示、吸引眼球">
+                  <span class="structure-letter">C</span>
+                  <span class="structure-name">Before→After</span>
+                </button>
+                <button class="structure-btn" data-structure="D" title="教學知識型（迷思 → 原理 → 要點 → 行動）- 冷受眾，適合知識科普、教育內容">
+                  <span class="structure-letter">D</span>
+                  <span class="structure-name">教學知識型</span>
+                </button>
+                <button class="structure-btn" data-structure="E" title="故事敘事型（起 → 承 → 轉 → 合）- 人設/口碑，適合個人品牌、情感連結">
+                  <span class="structure-letter">E</span>
+                  <span class="structure-name">故事敘事型</span>
+                </button>
+              </div>
+            </div>
+            
             <button id="applyBtn" class="apply-btn">套用設定</button>
           </div>
         </div>
@@ -840,7 +968,7 @@
               <div class="step-number">1</div>
               <div class="step-content">
                 <strong>設定需求</strong>
-                <p>選擇平台、輸入主題、設定秒數和帳號定位，然後點擊「套用設定」</p>
+                <p>選擇平台、輸入主題、設定秒數和帳號定位，選擇腳本結構（A/B/C/D/E），然後點擊「套用設定」</p>
               </div>
             </div>
             <div class="step">
