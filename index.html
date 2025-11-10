@@ -6642,8 +6642,8 @@
       }
       @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
       .controls { display: flex; gap: 8px; margin-top: 12px; align-items:center; }
-      textarea { flex: 1; min-height: 40px; max-height: 140px; resize: vertical; border-radius: 10px; border:1px solid #d1d5db; background:#ffffff; color:#374151; padding: 10px 12px; line-height: 1.4; -webkit-appearance: none; appearance: none; }
-      button { padding: 10px 14px; border-radius: 10px; border:1px solid #d1d5db; background:#f9fafb; color:#374151; cursor:pointer; -webkit-appearance: none; appearance: none; }
+      textarea { flex: 1; min-height: 40px; max-height: 140px; resize: vertical; border-radius: 10px; border:1px solid #d1d5db; background:#ffffff; color:#374151; padding: 10px 12px; line-height: 1.4; -webkit-appearance: none; }
+      button { padding: 10px 14px; border-radius: 10px; border:1px solid #d1d5db; background:#f9fafb; color:#374151; cursor:pointer; -webkit-appearance: none; }
       button:disabled { opacity: .6; cursor:not-allowed; }
       .row { display:flex; gap:8px; flex-direction:column; }
       .meta { display:flex; gap:8px; margin-bottom:8px; align-items:center; flex-wrap:wrap; }
@@ -6661,7 +6661,7 @@
       .settings-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:16px; }
       .setting-item { display:flex; flex-direction:column; gap:6px; }
       .setting-item label { font-size:12px; color:#6b7280; font-weight:500; transition: color 0.3s ease; }
-      .setting-item input, .setting-item select { padding:8px 12px; border-radius:8px; border:1px solid #d1d5db; background:#ffffff; color:#374151; -webkit-appearance: none; appearance: none; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+      .setting-item input, .setting-item select { padding:8px 12px; border-radius:8px; border:1px solid #d1d5db; background:#ffffff; color:#374151; -webkit-appearance: none; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
       
       /* 深色模式：設定區塊 */
       .theme-dark .settings-block {
@@ -6760,10 +6760,10 @@
       /* iOS Safari 特定優化 */
       @supports (-webkit-touch-callout: none) {
         .chat { -webkit-overflow-scrolling: touch; }
-        textarea { -webkit-user-select: text; user-select: text; }
-        input, select { -webkit-user-select: text; user-select: text; }
-        .msg-bubble { -webkit-user-select: text; user-select: text; }
-        .result-item .content { -webkit-user-select: text; user-select: text; }
+        textarea { -webkit-user-select: text; }
+        input, select { -webkit-user-select: text; }
+        .msg-bubble { -webkit-user-select: text; }
+        .result-item .content { -webkit-user-select: text; }
       }
       
       /* 防止 iOS Safari 縮放 */
@@ -11173,7 +11173,7 @@
                     </div>
                     
                     <!-- 主標題 -->
-                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent leading-tight">
+                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent leading-tight" style="cursor: default;">
                       ReelMind 能為你做什麼？
                     </h2>
                     
@@ -11564,7 +11564,7 @@
                       </div>
                       <div style="font-size: 1rem; color: #64748B; margin-bottom: 12px; font-weight: 600; margin-top: 12px;">年費方案</div>
                       <div style="display: flex; align-items: flex-end; flex-wrap: nowrap; gap: 4px; margin-bottom: 8px;">
-                        <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #10B981 0%, #059669 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; line-height: 1;">NT$23,760</div>
+                        <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #10B981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1;">NT$23,760</div>
                         <div style="font-size: 0.9rem; color: #94A3B8; flex-shrink: 0; margin-bottom: 0.3rem;">/年</div>
                       </div>
                       <div style="font-size: 0.9rem; color: #10B981; font-weight: 600; margin-bottom: 4px;">平均每月 NT$1,980</div>
