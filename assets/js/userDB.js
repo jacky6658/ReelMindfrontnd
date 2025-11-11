@@ -189,19 +189,24 @@ function displayScriptsForUserDB(scripts) {
     return timeA - timeB;
   });
   
-  container.innerHTML = sortedScripts.map((script, index) => `
-    <div class="script-item" data-script-id="${script.id}">
-      <div class="script-header" onclick="toggleScriptForUserDB(${script.id})">
+  container.innerHTML = sortedScripts.map((script, index) => {
+    // 轉義 script.id 以防止 XSS（雖然主要是數字，但為了安全）
+    const safeScriptId = String(script.id || '').replace(/['"\\]/g, '');
+    const escapedScriptId = escapeHtml(safeScriptId);
+    
+    return `
+    <div class="script-item" data-script-id="${escapedScriptId}">
+      <div class="script-header" onclick="toggleScriptForUserDB('${safeScriptId.replace(/'/g, "\\'")}')">
         <div class="script-info">
           <span class="script-number">編號${String(index + 1).padStart(2, '0')}</span>
-          <span class="script-name" onclick="editScriptNameForUserDB(${script.id}, event)">${escapeHtml(script.name || script.title || '未命名腳本')}</span>
+          <span class="script-name" onclick="editScriptNameForUserDB('${safeScriptId.replace(/'/g, "\\'")}', event)">${escapeHtml(script.name || script.title || '未命名腳本')}</span>
           <span class="script-date">${formatTaiwanTime(script.created_at)}</span>
         </div>
         <div class="script-toggle">
           <span class="toggle-icon">▼</span>
         </div>
       </div>
-      <div class="script-content" id="script-${script.id}" style="display: none;">
+      <div class="script-content" id="script-${escapedScriptId}" style="display: none;">
         <div class="script-details">
           <div class="script-table">
             <table>
@@ -222,14 +227,15 @@ function displayScriptsForUserDB(scripts) {
           </div>
         </div>
       </div>
-      <div class="script-actions" id="actions-${script.id}" style="display: none;">
-        <button class="action-btn view-btn" onclick="viewFullScriptForUserDB(${script.id})">查看完整結果</button>
-        <button class="action-btn download-pdf-btn" onclick="downloadScriptPDF(${script.id})">下載PDF檔案</button>
-        <button class="action-btn download-csv-btn" onclick="downloadScriptCSV(${script.id})">下載CSV檔案</button>
-        <button class="action-btn delete-btn" onclick="deleteScriptForUserDB(${script.id})">刪除</button>
+      <div class="script-actions" id="actions-${escapedScriptId}" style="display: none;">
+        <button class="action-btn view-btn" onclick="viewFullScriptForUserDB('${safeScriptId.replace(/'/g, "\\'")}')">查看完整結果</button>
+        <button class="action-btn download-pdf-btn" onclick="downloadScriptPDF('${safeScriptId.replace(/'/g, "\\'")}')">下載PDF檔案</button>
+        <button class="action-btn download-csv-btn" onclick="downloadScriptCSV('${safeScriptId.replace(/'/g, "\\'")}')">下載CSV檔案</button>
+        <button class="action-btn delete-btn" onclick="deleteScriptForUserDB('${safeScriptId.replace(/'/g, "\\'")}')">刪除</button>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 // 生成腳本表格
@@ -253,14 +259,23 @@ function generateScriptTable(scriptData) {
       const subtitle = escapeHtml(row.subtitle || '-');
       const sfx = escapeHtml(row.sfx || '-');
       
+      // 轉義 timeRange 以防止 XSS（雖然主要是數字，但為了安全）
+      const escapedTimeRange = escapeHtml(String(timeRange));
+      
+      // 轉義 title 屬性中的值（雙重轉義，因為 title 屬性在 HTML 中）
+      const escapedShotDescTitle = shotDesc.replace(/"/g, '&quot;');
+      const escapedDialogueTitle = dialogue.replace(/"/g, '&quot;');
+      const escapedSubtitleTitle = subtitle.replace(/"/g, '&quot;');
+      const escapedSfxTitle = sfx.replace(/"/g, '&quot;');
+      
       tableRows += `
         <tr>
-          <td>${timeRange}</td>
+          <td>${escapedTimeRange}</td>
           <td>${section}</td>
-          <td title="${shotDesc}">${shotDesc}</td>
-          <td title="${dialogue}">${dialogue}</td>
-          <td title="${subtitle}">${subtitle}</td>
-          <td title="${sfx}">${sfx}</td>
+          <td title="${escapedShotDescTitle}">${shotDesc}</td>
+          <td title="${escapedDialogueTitle}">${dialogue}</td>
+          <td title="${escapedSubtitleTitle}">${subtitle}</td>
+          <td title="${escapedSfxTitle}">${sfx}</td>
         </tr>
       `;
     });
@@ -297,12 +312,19 @@ function generateScriptTable(scriptData) {
               escapeHtml(visualLines[timeIndex].substring(0, 50) + '...') : escapeHtml(visualLines[timeIndex]);
           }
           
+          // 轉義 timeRange 以防止 XSS
+          const escapedTimeRange = escapeHtml(String(timeRange));
+          
+          // 轉義 title 屬性中的值（雙重轉義，因為 title 屬性在 HTML 中）
+          const escapedVisualTitle = (hasVisualData && visualLines[timeIndex] ? escapeHtml(visualLines[timeIndex]) : visualDescription).replace(/"/g, '&quot;');
+          const escapedContentTitle = escapeHtml(cleanContent).replace(/"/g, '&quot;');
+          
           tableRows += `
             <tr>
-              <td>${timeRange}</td>
+              <td>${escapedTimeRange}</td>
               <td>${sectionType}</td>
-              <td title="${hasVisualData && visualLines[timeIndex] ? escapeHtml(visualLines[timeIndex]) : visualDescription}">${visualDescription}</td>
-              <td title="${escapeHtml(cleanContent)}">${displayContent}</td>
+              <td title="${escapedVisualTitle}">${visualDescription}</td>
+              <td title="${escapedContentTitle}">${displayContent}</td>
               <td>-</td>
               <td>-</td>
             </tr>
@@ -349,9 +371,21 @@ window.toggleScriptForUserDB = function(scriptId) {
 // 編輯腳本名稱
 window.editScriptNameForUserDB = function(scriptId, event) {
   if (event) event.stopPropagation();
-  const scriptNameElement = document.querySelector(`[data-script-id="${scriptId}"] .script-name`);
+  
+  // 驗證和清理 scriptId 參數以防止 XSS
+  if (!scriptId || typeof scriptId !== 'string' && typeof scriptId !== 'number') {
+    console.error('無效的 scriptId:', scriptId);
+    return;
+  }
+  const safeScriptId = String(scriptId).replace(/[^a-zA-Z0-9_-]/g, '');
+  if (!safeScriptId) {
+    console.error('清理後的 scriptId 為空:', scriptId);
+    return;
+  }
+  
+  const scriptNameElement = document.querySelector(`[data-script-id="${safeScriptId}"] .script-name`);
   if (!scriptNameElement) {
-    console.error('找不到腳本名稱元素:', scriptId);
+    console.error('找不到腳本名稱元素:', safeScriptId);
     return;
   }
   const currentName = scriptNameElement.textContent;
@@ -1232,8 +1266,8 @@ function displayPositioningRecordsForUserDB(records) {
         </div>
         <div class="record-preview">${preview}</div>
         <div class="record-actions">
-          <button class="action-btn view-btn" onclick="viewPositioningDetailForUserDB(${record.id}, '${recordNumber}')">查看完整結果</button>
-          <button class="action-btn delete-btn" onclick="deletePositioningRecordForUserDB(${record.id})">刪除</button>
+          <button class="action-btn view-btn" onclick="viewPositioningDetailForUserDB('${String(record.id).replace(/'/g, "\\'")}', '${String(recordNumber).replace(/'/g, "\\'")}')">查看完整結果</button>
+          <button class="action-btn delete-btn" onclick="deletePositioningRecordForUserDB('${String(record.id).replace(/'/g, "\\'")}')">刪除</button>
         </div>
       </div>
     `;
@@ -1574,14 +1608,18 @@ function displayTopicRecordsForUserDB(generations) {
     const savedItemTitle = localStorage.getItem(itemTitleKey);
     const itemTitle = escapeHtml(savedItemTitle || '在此輸入你的標題');
     
+    // 轉義 gen.id 以防止 XSS
+    const safeGenId = String(gen.id || gen.created_at || index).replace(/['"\\]/g, '');
+    const escapedGenId = escapeHtml(safeGenId);
+    
     return `
-      <div class="topic-item" data-topic-id="${gen.id || gen.created_at || index}" style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+      <div class="topic-item" data-topic-id="${escapedGenId}" style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
         <div class="topic-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;">
           <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             <span class="topic-number" style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; width: 60px; min-width: 60px; max-width: 60px; text-align: center; white-space: nowrap; display: inline-block; box-sizing: border-box;">編號${String(index + 1).padStart(2, '0')}</span>
             <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-              <h4 class="topic-item-title" data-title-key="${itemTitleKey}" style="margin: 0; color: #1f2937; font-size: 1rem; font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;" onclick="editTopicItemTitle(this, '${itemTitleKey}')" title="點擊編輯標題">${itemTitle}</h4>
-              <span class="topic-edit-icon" style="cursor: pointer; color: #6B7280; font-size: 0.8rem; opacity: 0.6; transition: opacity 0.2s;" onclick="editTopicItemTitle(this.previousElementSibling, '${itemTitleKey}')" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
+              <h4 class="topic-item-title" data-title-key="${escapeHtml(itemTitleKey).replace(/'/g, "\\'")}" style="margin: 0; color: #1f2937; font-size: 1rem; font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;" onclick="editTopicItemTitle(this, '${escapeHtml(itemTitleKey).replace(/'/g, "\\'")}')" title="點擊編輯標題">${itemTitle}</h4>
+              <span class="topic-edit-icon" style="cursor: pointer; color: #6B7280; font-size: 0.8rem; opacity: 0.6; transition: opacity 0.2s;" onclick="editTopicItemTitle(this.previousElementSibling, '${escapeHtml(itemTitleKey).replace(/'/g, "\\'")}')" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
             </div>
           </div>
           <span class="topic-date" style="color: #6b7280; font-size: 14px;">${date}</span>
@@ -1594,52 +1632,52 @@ function displayTopicRecordsForUserDB(generations) {
         ` : ''}
         <div class="topic-content-sections" style="display: flex; flex-direction: column; gap: 16px;">
           ${sections.hotTopics ? `
-          <div class="topic-section" data-section-id="hotTopics-${gen.id || index}" style="background: #f9fafb; border-left: 3px solid #3b82f6; border-radius: 4px; overflow: hidden;">
-            <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('hotTopics-${gen.id || index}')">
+          <div class="topic-section" data-section-id="hotTopics-${escapeHtml(String(gen.id || index))}" style="background: #f9fafb; border-left: 3px solid #3b82f6; border-radius: 4px; overflow: hidden;">
+            <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('hotTopics-${String(gen.id || index).replace(/'/g, "\\'")}')">
               <h5 style="margin: 0; color: #1f2937; font-size: 14px; font-weight: 600;">🔥 熱門選題方向</h5>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span class="topic-section-toggle" style="font-size: 12px; color: #6b7280;">▼</span>
               </div>
             </div>
-            <div class="topic-section-content" id="hotTopics-${gen.id || index}-content" style="padding: 0 12px 12px 12px; color: #374151; line-height: 1.6; font-size: 14px; display: block;">${formatText(sections.hotTopics)}</div>
+            <div class="topic-section-content" id="hotTopics-${escapeHtml(String(gen.id || index))}-content" style="padding: 0 12px 12px 12px; color: #374151; line-height: 1.6; font-size: 14px; display: block;">${formatText(sections.hotTopics)}</div>
           </div>
           ` : ''}
           ${sections.specificSuggestions ? `
-          <div class="topic-section" data-section-id="specificSuggestions-${gen.id || index}" style="background: #f9fafb; border-left: 3px solid #10b981; border-radius: 4px; overflow: hidden;">
-            <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('specificSuggestions-${gen.id || index}')">
+          <div class="topic-section" data-section-id="specificSuggestions-${escapeHtml(String(gen.id || index))}" style="background: #f9fafb; border-left: 3px solid #10b981; border-radius: 4px; overflow: hidden;">
+            <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('specificSuggestions-${String(gen.id || index).replace(/'/g, "\\'")}')">
               <h5 style="margin: 0; color: #1f2937; font-size: 14px; font-weight: 600;">💡 選題的具體建議</h5>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span class="topic-section-toggle" style="font-size: 12px; color: #6b7280;">▼</span>
               </div>
             </div>
-            <div class="topic-section-content" id="specificSuggestions-${gen.id || index}-content" style="padding: 0 12px 12px 12px; color: #374151; line-height: 1.6; font-size: 14px; display: block;">${formatText(sections.specificSuggestions)}</div>
+            <div class="topic-section-content" id="specificSuggestions-${escapeHtml(String(gen.id || index))}-content" style="padding: 0 12px 12px 12px; color: #374151; line-height: 1.6; font-size: 14px; display: block;">${formatText(sections.specificSuggestions)}</div>
           </div>
           ` : ''}
           ${sections.strategies ? `
-          <div class="topic-section" data-section-id="strategies-${gen.id || index}" style="background: #f9fafb; border-left: 3px solid #f59e0b; border-radius: 4px; overflow: hidden;">
-            <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('strategies-${gen.id || index}')">
+          <div class="topic-section" data-section-id="strategies-${escapeHtml(String(gen.id || index))}" style="background: #f9fafb; border-left: 3px solid #f59e0b; border-radius: 4px; overflow: hidden;">
+            <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('strategies-${String(gen.id || index).replace(/'/g, "\\'")}')">
               <h5 style="margin: 0; color: #1f2937; font-size: 14px; font-weight: 600;">📋 選題策略和技巧</h5>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span class="topic-section-toggle" style="font-size: 12px; color: #6b7280;">▼</span>
               </div>
             </div>
-            <div class="topic-section-content" id="strategies-${gen.id || index}-content" style="padding: 0 12px 12px 12px; color: #374151; line-height: 1.6; font-size: 14px; display: block;">${formatText(sections.strategies)}</div>
+            <div class="topic-section-content" id="strategies-${escapeHtml(String(gen.id || index))}-content" style="padding: 0 12px 12px 12px; color: #374151; line-height: 1.6; font-size: 14px; display: block;">${formatText(sections.strategies)}</div>
           </div>
           ` : ''}
           ${sections.contentPlanning ? `
-          <div class="topic-section" data-section-id="contentPlanning-${gen.id || index}" style="background: #f9fafb; border-left: 3px solid #8b5cf6; border-radius: 4px; overflow: hidden;">
-            <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('contentPlanning-${gen.id || index}')">
+          <div class="topic-section" data-section-id="contentPlanning-${escapeHtml(String(gen.id || index))}" style="background: #f9fafb; border-left: 3px solid #8b5cf6; border-radius: 4px; overflow: hidden;">
+            <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('contentPlanning-${String(gen.id || index).replace(/'/g, "\\'")}')">
               <h5 style="margin: 0; color: #1f2937; font-size: 14px; font-weight: 600;">📅 內容規劃建議</h5>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span class="topic-section-toggle" style="font-size: 12px; color: #6b7280;">▼</span>
               </div>
             </div>
-            <div class="topic-section-content" id="contentPlanning-${gen.id || index}-content" style="padding: 0 12px 12px 12px; color: #374151; line-height: 1.6; font-size: 14px; display: block;">${formatText(sections.contentPlanning)}</div>
+            <div class="topic-section-content" id="contentPlanning-${escapeHtml(String(gen.id || index))}-content" style="padding: 0 12px 12px 12px; color: #374151; line-height: 1.6; font-size: 14px; display: block;">${formatText(sections.contentPlanning)}</div>
           </div>
           ` : ''}
           ${sections.timeline ? `
-          <div class="topic-section" data-section-id="timeline-${gen.id || index}" style="background: #f9fafb; border-left: 3px solid #ef4444; border-radius: 4px; overflow: hidden;">
-            <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('timeline-${gen.id || index}')">
+          <div class="topic-section" data-section-id="timeline-${escapeHtml(String(gen.id || index))}" style="background: #f9fafb; border-left: 3px solid #ef4444; border-radius: 4px; overflow: hidden;">
+            <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('timeline-${String(gen.id || index).replace(/'/g, "\\'")}')">
               <h5 style="margin: 0; color: #1f2937; font-size: 14px; font-weight: 600;">⏰ 執行時程建議</h5>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span class="topic-section-toggle" style="font-size: 12px; color: #6b7280;">▼</span>
@@ -1649,19 +1687,19 @@ function displayTopicRecordsForUserDB(generations) {
           </div>
           ` : ''}
           ${!sections.hotTopics && !sections.specificSuggestions && !sections.strategies && !sections.contentPlanning && !sections.timeline ? `
-          <div class="topic-section" data-section-id="default-${gen.id || index}" style="background: #f9fafb; border-left: 3px solid #6b7280; border-radius: 4px; overflow: hidden;">
-            <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('default-${gen.id || index}')">
+          <div class="topic-section" data-section-id="default-${escapedGenId}" style="background: #f9fafb; border-left: 3px solid #6b7280; border-radius: 4px; overflow: hidden;">
+            <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('default-${safeGenId.replace(/'/g, "\\'")}')">
               <h5 style="margin: 0; color: #1f2937; font-size: 14px; font-weight: 600;">📄 內容</h5>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span class="topic-section-toggle" style="font-size: 12px; color: #6b7280;">▼</span>
               </div>
             </div>
-            <div class="topic-section-content" id="default-${gen.id || index}-content" style="padding: 0 12px 12px 12px; color: #374151; line-height: 1.6; font-size: 14px; display: block;">${formatText(gen.content)}</div>
+            <div class="topic-section-content" id="default-${escapedGenId}-content" style="padding: 0 12px 12px 12px; color: #374151; line-height: 1.6; font-size: 14px; display: block;">${formatText(gen.content)}</div>
           </div>
           ` : ''}
         </div>
         <div class="topic-item-actions" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
-          <button class="action-btn delete-btn" onclick="deleteTopicRecordForUserDB('${gen.id || gen.created_at || index}', '${itemTitle}')" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">🗑️ 刪除</button>
+          <button class="action-btn delete-btn" onclick="deleteTopicRecordForUserDB('${safeGenId.replace(/'/g, "\\'")}', '${itemTitle.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">🗑️ 刪除</button>
         </div>
       </div>
     `;
@@ -1934,18 +1972,27 @@ function displayIpPlanningResultsForUserDB(results) {
     const defaultTitle = currentType === 'profile' ? 'IP Profile' : currentType === 'plan' ? '14天規劃' : '今日腳本';
     const title = escapeHtml(savedTitle || result.title || defaultTitle);
     
+    // 轉義 result.id 以防止 XSS
+    const safeResultId = String(result.id || '').replace(/['"\\]/g, '');
+    const escapedResultId = escapeHtml(safeResultId);
+    
+    // 轉義 result.content（如果包含 HTML，需要額外處理）
+    // 注意：如果 result.content 是 Markdown 或 HTML，可能需要不同的處理方式
+    // 這裡假設 result.content 是純文本或已轉義的 HTML
+    const safeContent = result.content ? escapeHtml(String(result.content)) : '';
+    
     return `
-      <div class="ip-planning-item" data-result-id="${result.id}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+      <div class="ip-planning-item" data-result-id="${escapedResultId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
         <div class="ip-planning-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-            <h4 class="ip-planning-item-title" data-result-id="${result.id}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; position: relative; padding-right: 24px;" onclick="editIpPlanningItemTitle(${result.id}, event)" title="點擊編輯標題">${title}</h4>
-            <span class="ip-planning-item-edit-icon" data-result-id="${result.id}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none;" onclick="editIpPlanningItemTitle(${result.id}, event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
-            <input type="text" class="ip-planning-item-title-input" data-result-id="${result.id}" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; max-width: 300px;" onblur="saveIpPlanningItemTitle(${result.id})" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle(${result.id})">
+            <h4 class="ip-planning-item-title" data-result-id="${escapedResultId}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; position: relative; padding-right: 24px;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="點擊編輯標題">${title}</h4>
+            <span class="ip-planning-item-edit-icon" data-result-id="${escapedResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
+            <input type="text" class="ip-planning-item-title-input" data-result-id="${escapedResultId}" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; max-width: 300px;" onblur="saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')">
           </div>
           <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
         </div>
         <div class="ip-planning-content-item" style="color: #374151; line-height: 1.6; max-height: 300px; overflow-y: auto;">
-          ${result.content}
+          ${safeContent}
         </div>
       </div>
     `;
@@ -2068,9 +2115,20 @@ function exportIpPlanningResults() {
 window.editIpPlanningItemTitle = function(resultId, event) {
   if (event) event.stopPropagation();
   
-  const titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${resultId}"]`);
-  const inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${resultId}"]`);
-  const editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${resultId}"]`);
+  // 驗證和清理 resultId 參數以防止 XSS
+  if (!resultId || (typeof resultId !== 'string' && typeof resultId !== 'number')) {
+    console.error('無效的 resultId:', resultId);
+    return;
+  }
+  const safeResultId = String(resultId).replace(/[^a-zA-Z0-9_-]/g, '');
+  if (!safeResultId) {
+    console.error('清理後的 resultId 為空:', resultId);
+    return;
+  }
+  
+  const titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${safeResultId}"]`);
+  const inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${safeResultId}"]`);
+  const editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${safeResultId}"]`);
   
   if (titleElement && inputElement) {
     const currentTitle = titleElement.textContent.trim();
