@@ -1075,10 +1075,19 @@ async function renderPersonalInfoContent() {
         <span>${escapeHtml(expiresAtText)} ${daysLeftText}</span>
       </div>
       ${expirationWarning}
-      <div class="detail-actions" style="margin-top: 16px;">
-        <a href="/subscription.html" style="display: inline-block; padding: 8px 16px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500; margin-right: 8px;">
+      <div class="detail-actions" style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+        <a href="/subscription.html" style="display: inline-block; padding: 8px 16px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500;">
           💳 續費訂閱
         </a>
+        ${userInfo.auto_renew !== false ? `
+        <button onclick="cancelAutoRenewForUserDB()" style="display: inline-block; padding: 8px 16px; background: #EF4444; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px;">
+          🚫 取消自動續費
+        </button>
+        ` : `
+        <div style="display: inline-block; padding: 8px 16px; background: #F3F4F6; color: #6B7280; border-radius: 6px; font-weight: 500; font-size: 14px;">
+          ✅ 已取消自動續費
+        </div>
+        `}
       </div>
       ` : `
       <div class="detail-actions">
@@ -1097,18 +1106,36 @@ async function fetchUserInfo() {
   
   try {
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    const response = await fetch(`${API_URL}/api/auth/me`, {
-      headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`
-      }
-    });
     
-    if (response.ok) {
-      const userData = await response.json();
+    // 同時獲取用戶基本資訊和訂閱狀態
+    const [userResponse, subscriptionResponse] = await Promise.all([
+      fetch(`${API_URL}/api/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${ipPlanningToken}`
+        }
+      }),
+      fetch(`${API_URL}/api/user/subscription`, {
+        headers: {
+          'Authorization': `Bearer ${ipPlanningToken}`
+        }
+      }).catch(() => null) // 如果訂閱 API 失敗，不影響基本資訊
+    ]);
+    
+    if (userResponse.ok) {
+      const userData = await userResponse.json();
+      
+      // 如果訂閱 API 成功，合併 auto_renew 資訊
+      if (subscriptionResponse && subscriptionResponse.ok) {
+        const subscriptionData = await subscriptionResponse.json();
+        userData.auto_renew = subscriptionData.auto_renew !== false; // 預設為 true
+      } else {
+        userData.auto_renew = true; // 預設值
+      }
+      
       ipPlanningUser = userData;
       localStorage.setItem('ipPlanningUser', JSON.stringify(userData));
       updateUserInfo();
-    } else if (response.status === 401) {
+    } else if (userResponse.status === 401) {
       if (window.Api && window.Api.refreshTokenIfNeeded) {
         await window.Api.refreshTokenIfNeeded();
         if (ipPlanningToken) {
@@ -1118,6 +1145,55 @@ async function fetchUserInfo() {
     }
   } catch (error) {
     console.error('獲取用戶資訊失敗:', error);
+  }
+}
+
+// 取消自動續費
+async function cancelAutoRenewForUserDB() {
+  if (!ipPlanningToken) {
+    alert('請先登入');
+    return;
+  }
+  
+  if (!confirm('確定要取消自動續費嗎？\n\n取消後，訂閱到期時將不會自動續費，您需要手動續費以繼續使用服務。')) {
+    return;
+  }
+  
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/user/subscription/auto-renew`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        auto_renew: false
+      })
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      
+      // 更新本地用戶資訊
+      if (ipPlanningUser) {
+        ipPlanningUser.auto_renew = false;
+        localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+      }
+      
+      // 重新載入個人資料區塊以更新顯示
+      if (typeof loadPersonalInfoForUserDB === 'function') {
+        loadPersonalInfoForUserDB();
+      }
+      
+      alert('✅ 已成功取消自動續費');
+    } else {
+      const errorData = await response.json().catch(() => ({ error: '未知錯誤' }));
+      alert('❌ 取消自動續費失敗：' + (errorData.error || '請稍後再試'));
+    }
+  } catch (error) {
+    console.error('取消自動續費失敗:', error);
+    alert('❌ 取消自動續費失敗，請稍後再試');
   }
 }
 

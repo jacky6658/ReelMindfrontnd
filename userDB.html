@@ -1717,10 +1717,19 @@
               <span>${escapeHtml(expiresAtText)} ${daysLeftText}</span>
             </div>
             ${expirationWarning}
-            <div class="detail-actions" style="margin-top: 16px;">
-              <a href="subscription.html" style="display: inline-block; padding: 8px 16px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500; margin-right: 8px;">
+            <div class="detail-actions" style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="subscription.html" style="display: inline-block; padding: 8px 16px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500;">
                 💳 續費訂閱
               </a>
+              ${userInfo.auto_renew !== false ? `
+              <button onclick="cancelAutoRenewForUserDB()" style="display: inline-block; padding: 8px 16px; background: #EF4444; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px;">
+                🚫 取消自動續費
+              </button>
+              ` : `
+              <div style="display: inline-block; padding: 8px 16px; background: #F3F4F6; color: #6B7280; border-radius: 6px; font-weight: 500; font-size: 14px;">
+                ✅ 已取消自動續費
+              </div>
+              `}
             </div>
             ` : `
             <div class="detail-actions">
