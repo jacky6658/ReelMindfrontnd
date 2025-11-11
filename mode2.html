@@ -483,7 +483,7 @@
       .instructions-toggle-btn {
         position: fixed;
         top: 90px;
-        right: 20px;
+        left: 20px;
         background: #3b82f6;
         color: white;
         padding: 8px 16px;
@@ -655,8 +655,8 @@
       #chatMessages {
         flex: 1;
         overflow-y: auto;
-        padding: 16px 24px;
-        padding-top: 20px !important; /* 增加上邊距，避免被頁首擋到 */
+        padding: 20px 24px 16px 24px !important; /* 增加上邊距，避免被頁首擋到 */
+        padding-top: 30px !important; /* 進一步增加上邊距，確保用戶消息不被擋住 */
         margin: 0;
         background: transparent;
         border: none;
@@ -678,6 +678,7 @@
         align-items: flex-start !important;
         justify-content: flex-end !important;
         margin-bottom: 16px !important;
+        margin-top: 8px !important; /* 增加上邊距，確保不被其他元素擋住 */
         background: transparent !important;
         margin-left: auto !important;
         width: 100% !important;
@@ -685,7 +686,7 @@
         overflow-x: hidden !important;
         box-sizing: border-box !important;
         position: relative !important;
-        z-index: 10 !important;
+        z-index: 100 !important; /* 提高 z-index，確保在最上層 */
       }
       
       #chatMessages .message.user .message-content {
@@ -708,7 +709,8 @@
         line-height: 1.5 !important;
         min-width: 200px !important;
         position: relative !important;
-        z-index: 11 !important;
+        z-index: 101 !important; /* 提高 z-index，確保在最上層 */
+        max-width: calc(100% - 50px) !important; /* 確保不會超出容器 */
       }
       
       #chatMessages .message.user .message-avatar {
@@ -771,6 +773,7 @@
         box-sizing: border-box !important;
         word-wrap: break-word !important;
         overflow-wrap: break-word !important;
+        white-space: pre-wrap !important; /* 保留換行符 */
         color: #0c4a6e !important;
         background: #f0f9ff !important;
         font-size: 14px !important;
@@ -1002,7 +1005,7 @@
       @media (max-width: 768px) {
         .instructions-toggle-btn {
           top: 75px;
-          right: 15px;
+          left: 15px;
           padding: 6px 12px;
           font-size: 12px;
         }
@@ -1020,13 +1023,15 @@
         
         #chatMessages {
           padding: 16px 12px;
-          padding-top: 80px;
+          padding-top: 80px !important; /* 手機版增加上邊距 */
         }
         
         #chatMessages .message.user .message-content {
           padding: 15px 20px !important;
           padding-left: 30px !important;
           font-size: 14px !important;
+          max-width: calc(100% - 40px) !important; /* 手機版也確保不超出容器 */
+          z-index: 101 !important; /* 確保在最上層 */
         }
         
         #chatMessages .message.ai .message-content,
@@ -1224,9 +1229,9 @@
             </div>
             <!-- 快速按鈕區域 - 放在輸入框內底部 -->
             <div class="quick-buttons" id="quickButtons">
-              <button class="quick-btn" data-text="我要如何開始？">我要如何開始？</button>
-              <button class="quick-btn" data-text="我要怎麼帳號定位">我要怎麼帳號定位</button>
-              <button class="quick-btn" data-text="什麼是腳本選題">什麼是腳本選題</button>
+              <button class="quick-btn" data-text="腳本結構有哪些">腳本結構有哪些</button>
+              <button class="quick-btn" data-text="生成腳本">生成腳本</button>
+              <button class="quick-btn" data-text="規劃一週腳本">規劃一週腳本</button>
             </div>
           </div>
         </div>

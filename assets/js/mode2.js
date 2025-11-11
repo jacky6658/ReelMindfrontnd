@@ -377,12 +377,29 @@ function createMessage(role, content) {
   contentDiv.className = 'message-content';
   
   if (role === 'assistant' && content) {
+    // 處理換行：將單個換行符轉換成 <br>，確保腳本結構選項能正確換行顯示
+    let processedContent = content;
+    // 如果內容包含連續的腳本結構選項（如 "A. Hook → Value → CTA B. 問題→解決 → 證明"），確保每個選項獨立一行
+    // 檢測模式：字母 + 點號 + 空格 + 內容 + 空格 + 字母 + 點號
+    processedContent = processedContent.replace(/([ABCDE])\.\s+([^ABCDE\n]+?)(?=\s+[ABCDE]\.)/g, '$1. $2\n');
+    
     if (window.safeRenderMarkdown) {
-      contentDiv.innerHTML = window.safeRenderMarkdown(content);
+      let html = window.safeRenderMarkdown(processedContent);
+      // 確保換行符被轉換成 <br>
+      html = html.replace(/\n/g, '<br>');
+      contentDiv.innerHTML = html;
     } else if (typeof marked !== 'undefined') {
-      contentDiv.innerHTML = marked.parse(content);
+      // 確保 marked 的 breaks 選項啟用
+      if (!marked.getDefaults || !marked.getDefaults().breaks) {
+        marked.setOptions({ breaks: true, gfm: true });
+      }
+      let html = marked.parse(processedContent);
+      // 確保換行符被轉換成 <br>
+      html = html.replace(/\n/g, '<br>');
+      contentDiv.innerHTML = html;
     } else {
-      contentDiv.textContent = content;
+      // 純文字模式，將換行符轉換成 <br>
+      contentDiv.innerHTML = processedContent.replace(/\n/g, '<br>');
     }
     // 對代碼塊進行語法高亮
     if (typeof hljs !== 'undefined') {
@@ -502,14 +519,22 @@ async function sendMessage(message) {
       // 在訊息中添加強化的提示，讓 AI 必須先詢問結構或提供多種選項，而不是直接生成 A 結構
       enhancedMessage = `${message}\n\n[重要系統提示：用戶要求提供腳本。請務必遵守以下規則：
 1. 絕對不要直接生成腳本，必須先詢問用戶想要的腳本結構（A/B/C/D/E）
-2. 當詢問腳本結構時，必須使用換行格式，每個選項獨立一行，例如：
-   「想用哪種腳本結構呢？
+2. ⚠️ 極重要格式要求：當詢問腳本結構時，必須使用換行格式，每個選項獨立一行，並且每個選項後面必須加上兩個換行符（空一行），例如：
+   想用哪種腳本結構呢？
+   
    A. 標準行銷三段式
+   
    B. 問題 → 解決 → 證明
+   
    C. Before → After → 秘密揭露
+   
    D. 教學知識型
-   E. 故事敘事型」
+   
+   E. 故事敘事型
+   
    絕對不要在同一行用斜線分隔顯示所有選項（如：A / B / C / D / E）
+   絕對不要在同一行顯示多個選項（如：A. Hook → Value → CTA B. 問題→解決 → 證明）
+   每個選項必須獨立一行，並且選項之間要有空行分隔
 3. 或者提供多種結構選項讓用戶選擇，以表格形式呈現，包含以下五種結構的詳細說明：
 
 A. 標準行銷三段式（Hook → Value → CTA）【通用/帶貨】
@@ -656,12 +681,29 @@ E. 故事敘事型（起 → 承 → 轉 → 合）【人設/口碑】
               }
               
               fullContent += parsed.content;
+              // 處理換行：將單個換行符轉換成 <br>，確保腳本結構選項能正確換行顯示
+              let processedContent = fullContent;
+              // 如果內容包含連續的腳本結構選項（如 "A. Hook → Value → CTA B. 問題→解決 → 證明"），確保每個選項獨立一行
+              // 檢測模式：字母 + 點號 + 空格 + 內容 + 空格 + 字母 + 點號
+              processedContent = processedContent.replace(/([ABCDE])\.\s+([^ABCDE\n]+?)(?=\s+[ABCDE]\.)/g, '$1. $2\n');
+              
               if (window.safeRenderMarkdown) {
-                contentDiv.innerHTML = window.safeRenderMarkdown(fullContent);
+                let html = window.safeRenderMarkdown(processedContent);
+                // 確保換行符被轉換成 <br>
+                html = html.replace(/\n/g, '<br>');
+                contentDiv.innerHTML = html;
               } else if (typeof marked !== 'undefined') {
-                contentDiv.innerHTML = marked.parse(fullContent);
+                // 確保 marked 的 breaks 選項啟用
+                if (!marked.getDefaults || !marked.getDefaults().breaks) {
+                  marked.setOptions({ breaks: true, gfm: true });
+                }
+                let html = marked.parse(processedContent);
+                // 確保換行符被轉換成 <br>
+                html = html.replace(/\n/g, '<br>');
+                contentDiv.innerHTML = html;
               } else {
-                contentDiv.textContent = fullContent;
+                // 純文字模式，將換行符轉換成 <br>
+                contentDiv.innerHTML = processedContent.replace(/\n/g, '<br>');
               }
               
               // 對代碼塊進行語法高亮
