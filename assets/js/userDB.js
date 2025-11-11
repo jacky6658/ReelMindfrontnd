@@ -1999,10 +1999,59 @@ function displayIpPlanningResultsForUserDB(results) {
     const safeResultId = String(result.id || '').replace(/['"\\]/g, '');
     const escapedResultId = escapeHtml(safeResultId);
     
-    // 轉義 result.content（如果包含 HTML，需要額外處理）
-    // 注意：如果 result.content 是 Markdown 或 HTML，可能需要不同的處理方式
-    // 這裡假設 result.content 是純文本或已轉義的 HTML
-    const safeContent = result.content ? escapeHtml(String(result.content)) : '';
+    // 處理 result.content：如果包含 HTML 標籤，需要安全地渲染
+    // 使用 DOMParser 來解析和清理 HTML，只允許安全的標籤
+    let safeContent = '';
+    if (result.content) {
+      const contentStr = String(result.content);
+      // 檢查是否包含 HTML 標籤
+      if (/<[^>]+>/.test(contentStr)) {
+        // 包含 HTML，使用 DOMParser 解析並清理
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(contentStr, 'text/html');
+          const body = doc.body;
+          
+          // 只允許安全的 HTML 標籤
+          const allowedTags = ['p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'strong', 'em', 'b', 'i', 'u', 'span', 'div', 'blockquote'];
+          const allowedAttributes = ['style', 'class'];
+          
+          // 清理所有不允許的標籤和屬性
+          const cleanNode = (node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const tagName = node.tagName.toLowerCase();
+              if (!allowedTags.includes(tagName)) {
+                // 替換為文本節點
+                const textNode = document.createTextNode(node.textContent);
+                node.parentNode?.replaceChild(textNode, node);
+                return;
+              }
+              
+              // 清理屬性
+              const attrs = Array.from(node.attributes);
+              attrs.forEach(attr => {
+                if (!allowedAttributes.includes(attr.name.toLowerCase())) {
+                  node.removeAttribute(attr.name);
+                }
+              });
+              
+              // 遞歸處理子節點
+              Array.from(node.childNodes).forEach(child => cleanNode(child));
+            }
+          };
+          
+          Array.from(body.childNodes).forEach(child => cleanNode(child));
+          safeContent = body.innerHTML;
+        } catch (e) {
+          console.warn('HTML 解析失敗，使用轉義文本:', e);
+          // 如果解析失敗，轉義所有 HTML
+          safeContent = escapeHtml(contentStr).replace(/\n/g, '<br>');
+        }
+      } else {
+        // 純文本，轉義並保留換行
+        safeContent = escapeHtml(contentStr).replace(/\n/g, '<br>');
+      }
+    }
     
     return `
       <div class="ip-planning-item" data-result-id="${escapedResultId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
