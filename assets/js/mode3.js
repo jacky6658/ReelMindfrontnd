@@ -7,7 +7,11 @@
 if (typeof window.API_URL === 'undefined') {
   window.API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
 }
-const API_URL = window.API_URL;
+// 使用 window 對象避免 const 重複聲明錯誤（如果腳本被載入兩次）
+// 檢查是否已經在當前作用域中聲明過 API_URL
+if (typeof API_URL === 'undefined') {
+  var API_URL = window.API_URL; // 使用 var 而不是 const，避免重複聲明錯誤
+}
 let currentPlatform = null;
 let currentTopic = null;
 let currentProfile = null;
