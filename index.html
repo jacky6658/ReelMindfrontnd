@@ -12952,7 +12952,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 顯示選中的頁面
         const targetPage = document.getElementById(pageId);
+        const homepage = document.getElementById('homepage');
+        
         if (targetPage) {
+          // 先隱藏所有頁面
+          document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+          });
+          
+          // 顯示選中的頁面
           targetPage.classList.add('active');
           console.log('✅ Switched to page:', pageId);
           
@@ -12964,14 +12972,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             }, 100);
           }
           
-          // 確保首頁被隱藏（如果切換到其他頁面）
-          if (pageId !== 'homepage') {
-            const homepage = document.getElementById('homepage');
-            if (homepage) {
-              homepage.classList.remove('active');
-            }
-          }
-          
           // 如果是 userDB，自動顯示個人資料分區
           if (pageId === 'userDB') {
             // 延遲執行，確保 DOM 已完全渲染
@@ -12981,6 +12981,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               }
             }, 100);
           }
+          
+          // 如果是 forum 或 guide，確保頁面正確顯示
+          if (pageId === 'forum' || pageId === 'guide') {
+            console.log('✅', pageId === 'forum' ? '論壇介紹' : '實戰指南', '頁面已激活');
+            // 滾動到頂部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
         } else {
           console.error('❌ Page not found:', pageId);
           // 如果找不到頁面，檢查是否是 forum 或 guide
@@ -12988,24 +12995,35 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             // forum 和 guide 頁面存在，但可能被隱藏了，強制顯示
             const forumPage = document.getElementById('forum');
             const guidePage = document.getElementById('guide');
-            const homepage = document.getElementById('homepage');
             
-            // 先隱藏首頁
-            if (homepage) {
-              homepage.classList.remove('active');
-            }
+            // 先隱藏所有頁面
+            document.querySelectorAll('.page').forEach(page => {
+              page.classList.remove('active');
+            });
             
             if (pageId === 'forum' && forumPage) {
               forumPage.classList.add('active');
-              console.log('✅ Forum page activated');
+              console.log('✅ Forum page activated (fallback)');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (pageId === 'guide' && guidePage) {
               guidePage.classList.add('active');
-              console.log('✅ Guide page activated');
+              console.log('✅ Guide page activated (fallback)');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
               console.error('❌ 找不到頁面元素:', pageId, 'forum:', !!forumPage, 'guide:', !!guidePage);
+              // 如果還是找不到，顯示首頁
+              if (homepage) {
+                homepage.classList.add('active');
+                console.warn('⚠️ 無法找到頁面，顯示首頁');
+              }
             }
           } else {
             console.error('❌ 未知的頁面ID:', pageId);
+            // 如果找不到頁面，顯示首頁
+            if (homepage) {
+              homepage.classList.add('active');
+              console.warn('⚠️ 無法找到頁面，顯示首頁');
+            }
           }
         }
         

@@ -526,16 +526,17 @@
       
       .structure-buttons {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
         gap: 10px;
       }
       
-      @media (max-width: 1200px) {
+      /* 電腦版（> 768px）：垂直排列（單列），按鈕寬度大於長度 */
+      @media (min-width: 769px) {
         .structure-buttons {
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: 1fr;
         }
       }
       
+      /* 手機版：保持原有響應式設計（2列或1列） */
       @media (max-width: 768px) {
         .structure-buttons {
           grid-template-columns: repeat(2, 1fr);
