@@ -269,10 +269,31 @@ function initChatGPTFeatures() {
     
     if (messageInput) {
       // 自動調整高度
-      messageInput.addEventListener('input', autoResizeTextarea);
+      messageInput.addEventListener('input', () => {
+        autoResizeTextarea();
+        // 確保在輸入時快速按鈕保持顯示
+        const quickButtons = document.getElementById('quickButtons');
+        if (quickButtons && !isSending) {
+          quickButtons.style.display = 'flex';
+          quickButtons.style.visibility = 'visible';
+          quickButtons.style.opacity = '1';
+        }
+      });
       
       // 鍵盤事件：Enter發送，Shift+Enter換行
       messageInput.addEventListener('keydown', (e) => {
+        // 確保空白鍵不會觸發任何會隱藏快速按鈕的邏輯
+        if (e.key === ' ') {
+          // 空白鍵正常輸入，不做任何處理，確保快速按鈕保持顯示
+          const quickButtons = document.getElementById('quickButtons');
+          if (quickButtons) {
+            quickButtons.style.display = 'flex';
+            quickButtons.style.visibility = 'visible';
+            quickButtons.style.opacity = '1';
+          }
+          return;
+        }
+        
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           if (!sendBtn.disabled && !isSending) {
@@ -311,7 +332,14 @@ async function handleSendMessage() {
   if (!messageInput || isSending) return;
   
   const message = messageInput.value.trim();
-  if (!message) return;
+  if (!message) {
+    // 如果訊息為空，確保快速按鈕仍然顯示
+    const quickButtons = document.getElementById('quickButtons');
+    if (quickButtons) {
+      quickButtons.style.display = 'flex';
+    }
+    return;
+  }
   
   isSending = true;
   await sendMessage(message);
@@ -437,8 +465,8 @@ async function sendMessage(message) {
     }
   }
   
-  // 隱藏快速按鈕
-  if (quickButtons) {
+  // 隱藏快速按鈕（只在真正發送訊息時隱藏）
+  if (quickButtons && message && message.trim()) {
     quickButtons.style.display = 'none';
   }
   
@@ -474,7 +502,15 @@ async function sendMessage(message) {
       // 在訊息中添加強化的提示，讓 AI 必須先詢問結構或提供多種選項，而不是直接生成 A 結構
       enhancedMessage = `${message}\n\n[重要系統提示：用戶要求提供腳本。請務必遵守以下規則：
 1. 絕對不要直接生成腳本，必須先詢問用戶想要的腳本結構（A/B/C/D/E）
-2. 或者提供多種結構選項讓用戶選擇，以表格形式呈現，包含以下五種結構的詳細說明：
+2. 當詢問腳本結構時，必須使用換行格式，每個選項獨立一行，例如：
+   「想用哪種腳本結構呢？
+   A. 標準行銷三段式
+   B. 問題 → 解決 → 證明
+   C. Before → After → 秘密揭露
+   D. 教學知識型
+   E. 故事敘事型」
+   絕對不要在同一行用斜線分隔顯示所有選項（如：A / B / C / D / E）
+3. 或者提供多種結構選項讓用戶選擇，以表格形式呈現，包含以下五種結構的詳細說明：
 
 A. 標準行銷三段式（Hook → Value → CTA）【通用/帶貨】
    - 30秒版本：Hook 0–5s / Value 5–25s / CTA 25–30s
@@ -670,9 +706,12 @@ E. 故事敘事型（起 → 承 → 轉 → 合）【人設/口碑】
     sendBtn.disabled = false;
   }
   
-  // 顯示快速按鈕
-  if (quickButtons) {
+  // 顯示快速按鈕（確保總是顯示，除非正在發送訊息）
+  if (quickButtons && !isSending) {
     quickButtons.style.display = 'flex';
+    // 強制顯示，防止被其他樣式覆蓋
+    quickButtons.style.visibility = 'visible';
+    quickButtons.style.opacity = '1';
   }
   
   // 滾動到底部

@@ -1399,6 +1399,12 @@
             
             // 鍵盤事件：Enter發送，Shift+Enter換行
             messageInput.addEventListener('keydown', (e) => {
+              // 確保空白鍵不會觸發任何會隱藏快速按鈕的邏輯
+              if (e.key === ' ') {
+                // 空白鍵正常輸入，不做任何處理
+                return;
+              }
+              
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 if (!sendBtn.disabled && !isSending) {
