@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>付款結果｜ReelMind</title>
+<meta name="description" content="ReelMind 付款結果頁面">
+<meta name="theme-color" content="#2563EB" />
+<style>
+:root{
+  --bg:#F8FAFC; --ink:#0F172A; --sub:#475569; --line:#E2E8F0; --card:#FFFFFF;
+  --blue:#2563EB; --blue-deep:#1D4ED8; --ok:#16A34A; --warn:#F59E0B; --red:#DC2626;
+  --shadow:0 16px 40px rgba(2,6,23,.08); --r:16px;
+}
+*{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Noto Sans TC","PingFang TC",Segoe UI,Roboto,Arial}
+a{text-decoration:none;color:inherit}
+.wrap{width:100%} .safe{max-width:1120px;margin:0 auto;padding:0 16px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--line)}
+.card .body{padding:40px 20px;text-align:center}
+.h2{font-size:28px;font-weight:900;margin:0 0 12px}
+.sub{color:var(--sub);margin:0 0 24px;font-size:16px;line-height:1.6}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 24px;border-radius:999px;font-weight:700;cursor:pointer;border:none;font-size:16px;transition:all 0.2s}
+.btn.blue{background:var(--blue);color:white}
+.btn.blue:hover{background:var(--blue-deep)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--bg)}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.icon{font-size:64px;margin-bottom:20px}
+.success .icon{color:var(--ok)}
+.error .icon{color:var(--red)}
+.pending .icon{color:var(--warn)}
+</style>
+</head>
+<body>
+<main class="wrap" style="padding:60px 0">
+  <div class="safe">
+    <section class="card" id="resultCard">
+      <div class="body">
+        <!-- 內容將由 JavaScript 動態生成 -->
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+  // 從 URL 參數讀取付款結果
+  const urlParams = new URLSearchParams(window.location.search);
+  const status = urlParams.get('status') || urlParams.get('RtnCode');
+  const orderId = urlParams.get('order_id') || urlParams.get('MerchantTradeNo') || urlParams.get('orderId');
+  const message = urlParams.get('message') || urlParams.get('RtnMsg');
+  const paymentType = urlParams.get('PaymentType');
+  
+  const card = document.getElementById('resultCard');
+  const body = card.querySelector('.body');
+  
+  // 判斷付款狀態
+  // ECPay 的 RtnCode: 1=成功, 其他=失敗
+  const isSuccess = status === 'success' || status === '1';
+  const isPending = status === 'pending' || paymentType === 'ATM' || paymentType === 'CVS';
+  const isError = !isSuccess && !isPending;
+  
+  if (isSuccess) {
+    // 付款成功
+    body.className = 'body success';
+    body.innerHTML = `
+      <div class="icon">✅</div>
+      <h2 class="h2" style="color: var(--ok);">付款成功！</h2>
+      <p class="sub">感謝您的訂閱，您的帳號已開通使用權限</p>
+      ${orderId ? `<p style="color: var(--sub); font-size: 14px; margin-bottom: 24px;">訂單編號：${orderId}</p>` : ''}
+      <div class="row">
+        <button class="btn blue" onclick="window.location.href='/'">開始使用</button>
+        <button class="btn ghost" onclick="window.location.href='subscription.html'">返回訂閱頁</button>
+      </div>
+    `;
+    
+    // 嘗試更新訂閱狀態（如果已登入）
+    updateSubscriptionStatus();
+    
+  } else if (isPending) {
+    // 待付款（ATM/超商）
+    body.className = 'body pending';
+    body.innerHTML = `
+      <div class="icon">⏳</div>
+      <h2 class="h2" style="color: var(--warn);">待完成付款</h2>
+      <p class="sub">您選擇了 ${paymentType === 'ATM' ? 'ATM' : '超商'} 付款方式，請完成付款後，系統會自動開通您的帳號</p>
+      ${orderId ? `<p style="color: var(--sub); font-size: 14px; margin-bottom: 24px;">訂單編號：${orderId}</p>` : ''}
+      <div class="row">
+        <button class="btn blue" onclick="checkOrderStatus('${orderId}')">檢查付款狀態</button>
+        <button class="btn ghost" onclick="window.location.href='subscription.html'">返回訂閱頁</button>
+      </div>
+    `;
+    
+  } else {
+    // 付款失敗
+    body.className = 'body error';
+    body.innerHTML = `
+      <div class="icon">❌</div>
+      <h2 class="h2" style="color: var(--red);">付款失敗</h2>
+      <p class="sub">${message || '付款過程中發生錯誤，請稍後再試或聯繫客服'}</p>
+      ${orderId ? `<p style="color: var(--sub); font-size: 14px; margin-bottom: 24px;">訂單編號：${orderId}</p>` : ''}
+      <div class="row">
+        <button class="btn blue" onclick="window.location.href='subscription.html'">重新訂閱</button>
+        <button class="btn ghost" onclick="window.location.href='/'">返回首頁</button>
+      </div>
+    `;
+  }
+  
+  // 更新訂閱狀態
+  async function updateSubscriptionStatus() {
+    try {
+      const token = localStorage.getItem('ipPlanningToken');
+      if (!token) return;
+      
+      // 嘗試重新載入用戶資訊以更新訂閱狀態
+      const response = await fetch('https://aivideobackend.zeabur.app/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const userInfo = await response.json();
+        if (userInfo.is_subscribed) {
+          // 更新本地儲存的用戶資訊
+          const userStr = localStorage.getItem('ipPlanningUser');
+          if (userStr) {
+            const user = JSON.parse(userStr);
+            user.is_subscribed = true;
+            localStorage.setItem('ipPlanningUser', JSON.stringify(user));
+          }
+        }
+      }
+    } catch (error) {
+      console.error('更新訂閱狀態失敗:', error);
+    }
+  }
+  
+  // 檢查訂單狀態（用於 ATM/超商付款）
+  async function checkOrderStatus(orderId) {
+    if (!orderId) {
+      alert('無法查詢訂單狀態');
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('ipPlanningToken') || '';
+      const response = await fetch(`https://aivideobackend.zeabur.app/api/user/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const order = data.orders?.find(o => o.order_id === orderId);
+        
+        if (order) {
+          if (order.payment_status === 'paid') {
+            alert('付款成功！您的帳號已開通');
+            window.location.href = '/';
+          } else {
+            alert('尚未完成付款，請完成付款後再試');
+          }
+        } else {
+          alert('找不到訂單資訊');
+        }
+      } else {
+        alert('無法查詢訂單狀態');
+      }
+    } catch (error) {
+      console.error('檢查訂單狀態失敗:', error);
+      alert('檢查訂單狀態失敗，請稍後再試');
+    }
+  }
+</script>
+</body>
+</html>
+
