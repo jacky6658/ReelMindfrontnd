@@ -13576,6 +13576,29 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           updateHomepageView();
         }, 500);
         
+        // 處理 hash 導航（例如從其他頁面跳轉過來的 #forum 或 #guide）
+        const handleHashNavigation = () => {
+          const hash = window.location.hash;
+          if (hash) {
+            const pageId = hash.replace('#', '');
+            // 只處理已知的頁面 ID
+            const validPages = ['homepage', 'forum', 'guide', 'userDB', 'guide-article1', 'guide-article2', 'guide-article3'];
+            if (validPages.includes(pageId)) {
+              console.log('🔗 檢測到 hash 導航:', pageId);
+              // 延遲執行，確保頁面已完全載入
+              setTimeout(() => {
+                switchPage(pageId);
+              }, 300);
+            }
+          }
+        };
+        
+        // 頁面載入時處理 hash
+        handleHashNavigation();
+        
+        // 監聽 hash 變化（當用戶在同一個頁面內點擊 hash 連結時）
+        window.addEventListener('hashchange', handleHashNavigation);
+        
         // 檢查 URL 參數中是否有 token（OAuth callback fallback）
         const tokenParam = urlParams.get('token');
         if (tokenParam && !activationToken) {  // 避免與授權 token 衝突
