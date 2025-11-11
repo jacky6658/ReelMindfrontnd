@@ -341,7 +341,7 @@
         }
         
         /* 聊天訊息區域可滾動 */
-        #mode3-chatMessages {
+        .mode3-page #mode3-chatMessages {
           flex: 1 1 auto !important;
           overflow-y: auto !important;
           overflow-x: hidden !important;
@@ -349,19 +349,19 @@
           overscroll-behavior: contain;
           min-height: 0 !important;
           max-height: none !important;
-          padding: 0 !important;
+          padding: 16px 24px !important;
           margin: 0 !important;
-          padding-bottom: 0 !important;
+          padding-bottom: 16px !important;
           margin-bottom: 0 !important;
         }
         
         /* 輸入區域固定在底部，確保可見 */
-        .input-row {
+        .mode3-page .input-row {
           display: flex !important;
           flex-direction: column !important;
           flex-shrink: 0 !important;
           flex-grow: 0 !important;
-          padding: 0 24px 8px 24px !important; /* 移除上 padding，只保留左右和下 */
+          padding: 12px 24px 16px 24px !important;
           margin: 0 !important;
           visibility: visible !important;
           opacity: 1 !important;
@@ -373,11 +373,12 @@
           background: transparent !important;
           width: 100% !important;
           box-sizing: border-box !important;
-          overflow: visible !important; /* 確保快速按鈕可見 */
+          overflow: visible !important;
+          border-top: 1px solid #e5e7eb !important;
         }
         
         /* 確保輸入容器和快速按鈕可見 */
-        .input-container {
+        .mode3-page .input-container {
           display: flex !important;
           visibility: visible !important;
           opacity: 1 !important;
@@ -387,7 +388,7 @@
           margin: 0 !important;
         }
         
-        .input-wrapper {
+        .mode3-page .input-wrapper {
           display: flex !important;
           flex-direction: column !important;
           visibility: visible !important;
@@ -396,21 +397,51 @@
           flex-shrink: 0 !important;
           padding: 0 !important;
           margin: 0 !important;
+          gap: 8px !important;
         }
         
-        /* 輸入框內部減少 padding */
-        .input-row-inner {
-          margin-bottom: 2px !important; /* 進一步減少與快速按鈕的間距 */
+        /* 輸入框內部 */
+        .mode3-page .input-row-inner {
+          display: flex !important;
+          gap: 8px !important;
+          align-items: flex-end !important;
+          margin-bottom: 0 !important;
           padding: 0 !important;
         }
         
+        /* 輸入框樣式 */
+        .mode3-page .chat-input {
+          flex: 1 !important;
+          min-height: 44px !important;
+          max-height: 120px !important;
+          padding: 10px 16px !important;
+          border: 1px solid #d1d5db !important;
+          border-radius: 12px !important;
+          font-size: 14px !important;
+          resize: none !important;
+          overflow-y: auto !important;
+        }
+        
+        /* 發送按鈕 */
+        .mode3-page .send-btn {
+          width: 44px !important;
+          height: 44px !important;
+          min-width: 44px !important;
+          flex-shrink: 0 !important;
+          padding: 0 !important;
+          border-radius: 12px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        
         /* 快速按鈕區域確保可見 */
-        .quick-buttons {
+        .mode3-page .quick-buttons {
           display: flex !important;
           visibility: visible !important;
           opacity: 1 !important;
           width: 100% !important;
-          margin-top: 2px !important; /* 最小上邊距 */
+          margin-top: 0 !important;
           margin-bottom: 0 !important;
           gap: 8px !important;
           flex-wrap: wrap !important;
@@ -419,11 +450,25 @@
         }
         
         /* 快速按鈕確保可見 */
-        .quick-btn {
+        .mode3-page .quick-btn {
           display: inline-flex !important;
           visibility: visible !important;
           opacity: 1 !important;
           flex-shrink: 0 !important;
+          padding: 8px 16px !important;
+          border: 1px solid #d1d5db !important;
+          border-radius: 8px !important;
+          background: white !important;
+          color: #374151 !important;
+          font-size: 14px !important;
+          cursor: pointer !important;
+          transition: all 0.2s !important;
+        }
+        
+        .mode3-page .quick-btn:hover {
+          background: #f3f4f6 !important;
+          border-color: #3b82f6 !important;
+          color: #3b82f6 !important;
         }
       }
       
