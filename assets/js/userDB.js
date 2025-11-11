@@ -1259,7 +1259,7 @@ function displayPositioningRecordsForUserDB(records) {
     const preview = escapeHtml(record.content.substring(0, 100) + (record.content.length > 100 ? '...' : ''));
     
     return `
-      <div class="positioning-record-item" data-record-id="${record.id}">
+      <div class="positioning-record-item" data-record-id="${escapeHtml(String(record.id || ''))}">
         <div class="record-header">
           <span class="record-number">編號 ${recordNumber}</span>
           <span class="record-date">${date}</span>
@@ -1276,7 +1276,21 @@ function displayPositioningRecordsForUserDB(records) {
 
 // 查看帳號定位詳細內容
 window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
-  if (!ipPlanningUser?.user_id) return;
+  if (!ipPlanningUser?.user_id) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入', 3000);
+    }
+    return;
+  }
+  
+  // 驗證和清理參數
+  if (!recordId) {
+    console.error('無效的 recordId:', recordId);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('無效的記錄 ID', 3000);
+    }
+    return;
+  }
   
   try {
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
@@ -1288,7 +1302,16 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
     
     if (response.ok) {
       const data = await response.json();
-      const record = data.records.find(r => r.id === recordId);
+      const records = data.records || [];
+      
+      // 轉換 recordId 為字符串和數字進行比較（因為後端可能返回數字或字符串）
+      const record = records.find(r => {
+        const rId = String(r.id || '');
+        const searchId = String(recordId || '');
+        return rId === searchId || r.id == recordId; // 使用 == 進行寬鬆比較
+      });
+      
+      console.log('查找記錄:', { recordId, record, recordsCount: records.length });
       
       if (record) {
         // 創建彈出視窗（使用內聯樣式確保顯示）
