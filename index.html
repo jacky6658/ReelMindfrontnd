@@ -13683,10 +13683,21 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             console.log('✅ 從 localStorage 更新登入狀態');
             console.log('👤 用戶資訊:', ipPlanningUser);
             updateAuthUI(true);
-            showMainApp();
             // 立即更新用戶資訊顯示
             updateUserInfo().then(async () => {
               await checkSubscriptionStatus();
+              
+              // 檢查是否有待處理的訂閱方案
+              const pendingPlan = sessionStorage.getItem('pendingSubscriptionPlan');
+              if (pendingPlan) {
+                // 清除待處理方案
+                sessionStorage.removeItem('pendingSubscriptionPlan');
+                // 導向到訂閱頁面
+                window.location.href = `subscription.html?plan=${pendingPlan}`;
+                return;
+              }
+              
+              showMainApp();
               console.log('✅ DEBUG: Login state updated from localStorage');
             }).catch(err => {
               console.error('❌ 更新用戶資訊失敗:', err);
@@ -13880,38 +13891,33 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       async function handleSubscriptionClick(plan) {
         console.log('Subscription button clicked:', plan);
         
-        // ECPay 固定付款連結
-        const ecpayLinks = {
-          monthly: 'https://p.ecpay.com.tw/22232B9',
-          yearly: 'https://p.ecpay.com.tw/480808B'
-        };
+        // 檢查登入狀態
+        let loggedIn = false;
+        if (window.ReelMindCommon && window.ReelMindCommon.checkLoginStatus) {
+          loggedIn = await window.ReelMindCommon.checkLoginStatus();
+        } else {
+          // 備用檢查方式
+          const token = localStorage.getItem('ipPlanningToken');
+          loggedIn = !!token;
+        }
         
-        // 直接跳轉到對應的 ECPay 付款頁面
-        if (ecpayLinks[plan]) {
-          window.open(ecpayLinks[plan], '_blank');
+        if (!loggedIn) {
+          // 未登入：必須先登入才能訂閱
+          alert('請先登入後再訂閱服務！');
+          if (typeof goToLogin === 'function') {
+            // 保存目標方案到 sessionStorage，登入成功後使用
+            sessionStorage.setItem('pendingSubscriptionPlan', plan);
+            goToLogin();
+          } else {
+            // 如果沒有 goToLogin 函數，導向首頁登入區塊
+            window.location.href = 'index.html#login';
+          }
           return;
         }
         
-        // 如果沒有對應的連結，使用原有邏輯（向後兼容）
-        // 先檢查登入狀態
-        if (window.ReelMindCommon && window.ReelMindCommon.checkLoginStatus) {
-          const loggedIn = await window.ReelMindCommon.checkLoginStatus();
-          
-          if (!loggedIn) {
-            // 未登入，先跳轉登入
-            if (typeof goToLogin === 'function') {
-              // 保存目標方案到 sessionStorage，登入成功後使用
-              sessionStorage.setItem('pendingSubscriptionPlan', plan);
-              goToLogin();
-            } else {
-              alert('請先登入以訂閱服務！');
-            }
-            return;
-          }
-        }
-        
-        // 已登入，直接跳轉到訂閱頁
-        window.location.href = `subscription.html?plan=${plan}`;
+        // 已登入：使用 API 動態建立訂單（自動授權）
+        // 導向到 checkout.html 填寫付款資訊
+        window.location.href = `checkout.html?plan=${plan}`;
       }
       
       // 在登入成功後與訂閱狀態載入時，同步本地 user.is_subscribed 欄位
@@ -21134,10 +21140,31 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   window.history.replaceState({}, document.title, window.location.pathname + (newHash ? '#' + newHash : ''));
                   // 授權處理完成後，再次檢查訂閱狀態並顯示主應用程式
                   await checkSubscriptionStatus();
+                  
+                  // 檢查是否有待處理的訂閱方案
+                  const pendingPlan = sessionStorage.getItem('pendingSubscriptionPlan');
+                  if (pendingPlan) {
+                    // 清除待處理方案
+                    sessionStorage.removeItem('pendingSubscriptionPlan');
+                    // 導向到訂閱頁面
+                    window.location.href = `subscription.html?plan=${pendingPlan}`;
+                    return;
+                  }
+                  
                   showMainApp();
                   updateHomepageView();
                 } else {
-                  // 沒有授權連結，直接顯示主應用程式
+                  // 沒有授權連結，檢查是否有待處理的訂閱方案
+                  const pendingPlan = sessionStorage.getItem('pendingSubscriptionPlan');
+                  if (pendingPlan) {
+                    // 清除待處理方案
+                    sessionStorage.removeItem('pendingSubscriptionPlan');
+                    // 導向到訂閱頁面
+                    window.location.href = `subscription.html?plan=${pendingPlan}`;
+                    return;
+                  }
+                  
+                  // 直接顯示主應用程式
                   showMainApp();
                   updateHomepageView();
                 }
@@ -21257,6 +21284,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 }, 150);
               })();
                 console.log('DEBUG: Subscription status checked');
+                
+                // 檢查是否有待處理的訂閱方案
+                const pendingPlan = sessionStorage.getItem('pendingSubscriptionPlan');
+                if (pendingPlan) {
+                  // 清除待處理方案
+                  sessionStorage.removeItem('pendingSubscriptionPlan');
+                  // 導向到訂閱頁面
+                  window.location.href = `subscription.html?plan=${pendingPlan}`;
+                  return;
+                }
                 
                 // 顯示成功提示
                 showToast('登入成功！', 2000);
@@ -21491,11 +21528,21 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           updateAuthUI(true);
           
-          // 顯示主應用程式（會隱藏登入頁面、顯示首頁）
-          showMainApp();
-          
           // 檢查並更新訂閱狀態
           await checkSubscriptionStatus();
+          
+          // 檢查是否有待處理的訂閱方案
+          const pendingPlan = sessionStorage.getItem('pendingSubscriptionPlan');
+          if (pendingPlan) {
+            // 清除待處理方案
+            sessionStorage.removeItem('pendingSubscriptionPlan');
+            // 導向到訂閱頁面
+            window.location.href = `subscription.html?plan=${pendingPlan}`;
+            return;
+          }
+          
+          // 顯示主應用程式（會隱藏登入頁面、顯示首頁）
+          showMainApp();
           
           // 清除 guestMode 標記（如果有）
           localStorage.removeItem('guestMode');

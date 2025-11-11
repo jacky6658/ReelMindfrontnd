@@ -1054,37 +1054,16 @@ a{text-decoration:none;color:inherit}
     const token = localStorage.getItem('ipPlanningToken');
     const loggedIn = !!token;
     
-    if (loggedIn) {
-      // 已登入：使用 API 動態建立訂單（自動授權）
-      // 導向到 checkout.html 填寫付款資訊
-      window.location.href = `checkout.html?plan=${plan}`;
-    } else {
-      // 未登入：使用固定連結（快速付款，但需手動處理訂閱狀態）
-      const ecpayLinks = {
-        monthly: 'https://p.ecpay.com.tw/22232B9',
-        yearly: 'https://p.ecpay.com.tw/480808B'
-      };
-      
-      // 提示用戶建議登入以享受自動授權
-      const useFixedLink = confirm(
-        '您尚未登入。\n\n' +
-        '建議先登入後再訂閱，可享受：\n' +
-        '✅ 自動授權帳號\n' +
-        '✅ 訂單追蹤\n' +
-        '✅ 完整服務體驗\n\n' +
-        '點擊「確定」使用快速付款（需手動處理訂閱狀態）\n' +
-        '點擊「取消」返回登入'
-      );
-      
-      if (useFixedLink && ecpayLinks[plan]) {
-        // 使用固定連結
-        window.open(ecpayLinks[plan], '_blank');
-      } else {
-        // 導向登入（可以導向首頁的登入區塊）
-        alert('請先登入以訂閱服務！');
-        window.location.href = 'index.html#login';
-      }
+    if (!loggedIn) {
+      // 未登入：必須先登入才能訂閱
+      alert('請先登入後再訂閱服務！');
+      window.location.href = 'index.html#login';
+      return;
     }
+    
+    // 已登入：使用 API 動態建立訂單（自動授權）
+    // 導向到 checkout.html 填寫付款資訊
+    window.location.href = `checkout.html?plan=${plan}`;
   }
   
   // 處理登出
