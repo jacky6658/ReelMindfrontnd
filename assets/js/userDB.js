@@ -81,11 +81,11 @@ async function loadMyScriptsForUserDB() {
   const localScripts = getLocalScripts();
   console.log('本地腳本數量:', localScripts.length);
   
-  // 如果有本地腳本，短暫延遲後顯示
+  // 如果有本地腳本，立即顯示（避免閃爍）
   if (localScripts.length > 0 && content) {
-    setTimeout(() => {
-      displayScriptsForUserDB(localScripts);
-    }, 300);
+    displayScriptsForUserDB(localScripts);
+  } else if (content) {
+    showLoadingAnimation(content, '載入中...');
   }
   
   // 從後端 API 獲取腳本列表
@@ -105,17 +105,10 @@ async function loadMyScriptsForUserDB() {
       console.log('腳本列表數據:', data);
       const serverScripts = data.scripts || [];
       
-      // 合併本地和後端腳本
+      // 合併本地和後端腳本（後端優先，因為後端是權威數據源）
       const scriptMap = new Map();
       
-      // 先添加本地腳本
-      localScripts.forEach(script => {
-        if (script.id) {
-          scriptMap.set(script.id, script);
-        }
-      });
-      
-      // 再添加後端腳本
+      // 先添加後端腳本（優先）
       serverScripts.forEach(script => {
         if (script.id) {
           scriptMap.set(script.id, script);
@@ -125,9 +118,19 @@ async function loadMyScriptsForUserDB() {
         }
       });
       
-      // 轉換為陣列並顯示
+      // 再添加本地腳本（僅當後端沒有時）
+      localScripts.forEach(script => {
+        if (script.id && !scriptMap.has(script.id)) {
+          scriptMap.set(script.id, script);
+        }
+      });
+      
+      // 轉換為陣列並更新本地儲存
       const mergedScripts = Array.from(scriptMap.values());
       console.log('合併後的腳本數量:', mergedScripts.length);
+      
+      // 更新本地儲存（同步後端數據）
+      localStorage.setItem('user_scripts', JSON.stringify(mergedScripts));
       
       if (content) {
         if (mergedScripts.length > 0) {
@@ -147,18 +150,21 @@ async function loadMyScriptsForUserDB() {
       }
     } else if (response.status === 404) {
       console.log('腳本載入失敗: API不存在');
+      // 如果後端 API 不存在，只顯示本地腳本
       if (content && localScripts.length === 0) {
         content.innerHTML = '<div class="loading-text">腳本功能即將上線，請稍後再試</div>';
       }
     } else {
       const errorData = await response.json().catch(() => ({}));
       console.log('腳本載入失敗:', errorData);
+      // 如果後端載入失敗，只顯示本地腳本（不顯示錯誤訊息，避免影響用戶體驗）
       if (content && localScripts.length === 0) {
         content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
       }
     }
   } catch (error) {
     console.error('Load scripts error:', error);
+    // 如果後端載入失敗，只顯示本地腳本（不顯示錯誤訊息，避免影響用戶體驗）
     if (content && localScripts.length === 0) {
       content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
     }
@@ -585,26 +591,63 @@ window.deleteScriptForUserDB = async function(scriptId) {
   }
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    const response = await fetch(`${API_URL}/api/scripts/${scriptId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`,
-        'Content-Type': 'application/json'
+    // 先從本地儲存中移除（立即更新 UI）
+    const localScripts = getLocalScripts();
+    const updatedScripts = localScripts.filter(script => script.id != scriptId);
+    localStorage.setItem('user_scripts', JSON.stringify(updatedScripts));
+    
+    // 立即更新顯示，避免閃爍
+    const container = document.querySelector('#db-myScripts .section-content');
+    if (container && updatedScripts.length > 0) {
+      displayScriptsForUserDB(updatedScripts);
+    } else if (container) {
+      container.innerHTML = '<div class="loading-text">還沒有儲存的腳本，請先使用一鍵生成功能創建腳本</div>';
+    }
+    
+    // 嘗試從後端刪除（如果失敗也不影響本地刪除）
+    try {
+      const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+      const response = await fetch(`${API_URL}/api/scripts/${scriptId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${ipPlanningToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+    
+      if (response.ok) {
+        console.log('後端腳本刪除成功');
+        // 重新載入以同步後端數據
+        await loadMyScriptsForUserDB();
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('腳本已刪除', 3000);
+        }
+      } else if (response.status === 404) {
+        // 後端找不到腳本（可能已經刪除或不存在），但本地已刪除，視為成功
+        console.log('後端腳本不存在（可能已刪除），本地已刪除');
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('腳本已刪除', 3000);
+        }
+        // 重新載入以同步後端數據
+        await loadMyScriptsForUserDB();
+      } else {
+        // 其他錯誤，但本地已刪除，記錄錯誤但不影響用戶體驗
+        const errorData = await response.json().catch(() => ({}));
+        console.warn('後端刪除失敗，但本地已刪除:', errorData);
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('腳本已從本地刪除', 3000);
+        }
+        // 重新載入以同步後端數據
+        await loadMyScriptsForUserDB();
       }
-    });
-  
-    if (response.ok) {
-      const localScripts = getLocalScripts();
-      const updatedScripts = localScripts.filter(script => script.id != scriptId);
-      localStorage.setItem('user_scripts', JSON.stringify(updatedScripts));
-      
-      loadMyScriptsForUserDB();
+    } catch (apiError) {
+      // API 調用失敗，但本地已刪除，記錄錯誤但不影響用戶體驗
+      console.warn('後端刪除 API 調用失敗，但本地已刪除:', apiError);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('腳本已刪除', 3000);
+        window.ReelMindCommon.showToast('腳本已從本地刪除', 3000);
       }
-    } else {
-      throw new Error('刪除失敗');
+      // 重新載入以同步後端數據
+      await loadMyScriptsForUserDB();
     }
   } catch (error) {
     console.error('Delete script error:', error);
@@ -1214,31 +1257,66 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
       const record = data.records.find(r => r.id === recordId);
       
       if (record) {
+        // 創建彈出視窗（使用內聯樣式確保顯示）
         const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `
-          <div class="modal-content">
-            <div class="modal-header">
-              <h3>帳號定位詳細內容 - 編號 ${recordNumber}</h3>
-              <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 10000;
+          padding: 20px;
+          box-sizing: border-box;
+        `;
+        
+        // 點擊背景關閉
+        modal.onclick = function(e) {
+          if (e.target === modal) {
+            modal.remove();
+          }
+        };
+        
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+          background: white;
+          border-radius: 12px;
+          max-width: 800px;
+          width: 100%;
+          max-height: 90vh;
+          overflow: hidden;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+          display: flex;
+          flex-direction: column;
+        `;
+        
+        modalContent.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #e5e7eb;">
+            <h3 style="margin: 0; color: #1f2937; font-size: 20px; font-weight: 600;">帳號定位詳細內容 - 編號 ${recordNumber}</h3>
+            <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #6b7280; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">×</button>
+          </div>
+          <div style="padding: 24px; overflow-y: auto; flex: 1;">
+            <div style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e5e7eb;">
+              <span style="color: #6b7280; font-size: 14px;">建立時間：</span>
+              <span style="color: #1f2937; font-size: 14px; margin-left: 8px;">${formatTaiwanTime(record.created_at)}</span>
             </div>
-            <div class="modal-body">
-              <div class="record-detail">
-                <div class="detail-meta">
-                  <span class="detail-label">建立時間：</span>
-                  <span class="detail-value">${formatTaiwanTime(record.created_at)}</span>
-                </div>
-                <div class="detail-content">
-                  <div class="content-text">${escapeHtml(record.content).replace(/\n/g, '<br>')}</div>
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button class="action-btn" onclick="this.closest('.modal-overlay').remove()">關閉</button>
-            </div>
+            <div style="color: #374151; line-height: 1.8; font-size: 15px; white-space: pre-wrap;">${escapeHtml(record.content).replace(/\n/g, '<br>')}</div>
+          </div>
+          <div style="padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end;">
+            <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">關閉</button>
           </div>
         `;
         
+        // 阻止點擊內容區域關閉
+        modalContent.onclick = function(e) {
+          e.stopPropagation();
+        };
+        
+        modal.appendChild(modalContent);
         document.body.appendChild(modal);
       } else {
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1638,10 +1716,38 @@ window.deleteTopicRecordForUserDB = async function(genId, itemTitle) {
     return;
   }
   
+  // 查找要刪除的項目
+  const topicItem = document.querySelector(`[data-topic-id="${genId}"]`) || 
+                   document.querySelector(`.topic-item:has([onclick*="${genId}"])`);
+  
+  // 檢查 genId 是否為有效的整數
+  // 後端 API 期望 gen_id 為整數，如果不是整數，則僅從前端移除
+  const cleanGenId = String(genId).trim();
+  const isNumericId = /^\d+$/.test(cleanGenId);
+  const numericGenId = isNumericId ? parseInt(cleanGenId, 10) : null;
+  
+  // 如果不是有效的數字 ID，僅從前端移除
+  if (!isNumericId || !numericGenId) {
+    if (topicItem) {
+      topicItem.remove();
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('選題記錄已從列表中移除', 3000);
+      }
+    }
+    return;
+  }
+  
+  // 先從前端移除，提供即時反饋
+  let itemRemoved = false;
+  if (topicItem) {
+    topicItem.remove();
+    itemRemoved = true;
+  }
+  
   try {
     if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
       const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-      const response = await fetch(`${API_URL}/api/generations/${genId}`, {
+      const response = await fetch(`${API_URL}/api/generations/${numericGenId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${ipPlanningToken}`,
@@ -1654,26 +1760,38 @@ window.deleteTopicRecordForUserDB = async function(genId, itemTitle) {
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast(data.message || '選題記錄已刪除', 3000);
         }
-        await loadTopicHistoryForUserDB();
+        // 如果前端還沒移除，重新載入列表
+        if (!itemRemoved) {
+          await loadTopicHistoryForUserDB();
+        }
         return;
       } else {
         // 處理錯誤響應
         const errorData = await response.json().catch(() => ({ error: '刪除失敗' }));
         if (response.status === 404) {
-          // 記錄不存在，僅從前端移除
-          const topicItem = document.querySelector(`[data-topic-id="${genId}"]`) || 
-                           document.querySelector(`.topic-item:has([onclick*="${genId}"])`);
-          if (topicItem) {
-            topicItem.remove();
-            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-              window.ReelMindCommon.showToast('選題記錄已從列表中移除', 3000);
-            }
+          // 記錄不存在，已經從前端移除了，顯示成功訊息
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('選題記錄已從列表中移除', 3000);
+          }
+        } else if (response.status === 422) {
+          // 422 Unprocessable Content - 通常是 ID 格式問題或驗證失敗
+          // 已經從前端移除了，顯示成功訊息（從用戶角度，項目已經被移除）
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('選題記錄已從列表中移除', 3000);
           }
         } else if (response.status === 403) {
+          // 如果沒有權限，恢復顯示
+          if (itemRemoved) {
+            await loadTopicHistoryForUserDB();
+          }
           if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
             window.ReelMindCommon.showToast('無權限刪除此選題記錄', 3000);
           }
         } else {
+          // 其他錯誤，恢復顯示
+          if (itemRemoved) {
+            await loadTopicHistoryForUserDB();
+          }
           if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
             window.ReelMindCommon.showToast(errorData.error || '刪除失敗，請稍後再試', 3000);
           }
@@ -1681,34 +1799,21 @@ window.deleteTopicRecordForUserDB = async function(genId, itemTitle) {
         return;
       }
     } else {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('請先登入', 3000);
-      }
-    }
-    
-    // 如果沒有 token，僅從前端移除（降級處理）
-    const topicItem = document.querySelector(`[data-topic-id="${genId}"]`) || 
-                     document.querySelector(`.topic-item:has([onclick*="${genId}"])`);
-    
-    if (topicItem) {
-      topicItem.remove();
+      // 如果沒有 token，已經從前端移除了，顯示成功訊息
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('選題記錄已從列表中移除', 3000);
       }
+      return;
     }
   } catch (error) {
     console.error('Delete topic record error:', error);
-    const topicItem = document.querySelector(`[data-topic-id="${genId}"]`) || 
-                     document.querySelector(`.topic-item:has([onclick*="${genId}"])`);
-    if (topicItem) {
-      topicItem.remove();
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('選題記錄已從列表中移除', 3000);
-      }
-    } else {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('刪除失敗，請稍後再試', 3000);
-      }
+    // 錯誤時，如果前端已經移除，就保持移除狀態（從用戶角度，項目已經被移除）
+    // 如果還沒移除，則重新載入列表
+    if (!itemRemoved) {
+      await loadTopicHistoryForUserDB();
+    }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('選題記錄已從列表中移除', 3000);
     }
   }
 }
