@@ -356,7 +356,7 @@
           flex-direction: column !important;
           flex-shrink: 0 !important;
           flex-grow: 0 !important;
-          padding: 12px 24px !important;
+          padding: 12px 24px 12px 24px !important;
           margin: 0 !important;
           visibility: visible !important;
           opacity: 1 !important;
@@ -368,6 +368,41 @@
           background: transparent !important;
           width: 100% !important;
           box-sizing: border-box !important;
+          overflow: visible !important; /* 確保快速按鈕可見 */
+        }
+        
+        /* 確保輸入容器和快速按鈕可見 */
+        .input-container {
+          display: flex !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          width: 100% !important;
+        }
+        
+        .input-wrapper {
+          display: flex !important;
+          flex-direction: column !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          width: 100% !important;
+        }
+        
+        /* 快速按鈕區域確保可見 */
+        .quick-buttons {
+          display: flex !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          width: 100% !important;
+          margin-top: 8px !important;
+          gap: 8px !important;
+          flex-wrap: wrap !important;
+        }
+        
+        /* 快速按鈕確保可見 */
+        .quick-btn {
+          display: inline-flex !important;
+          visibility: visible !important;
+          opacity: 1 !important;
         }
       }
       
@@ -490,14 +525,14 @@
         position: fixed;
         top: 75px;
         left: 20px;
-        z-index: 1001;
+        z-index: 1002;
       }
       
       .mode3-results-btn-container {
         position: fixed;
         top: 75px;
         left: 120px;
-        z-index: 1001;
+        z-index: 1002;
       }
       
       .mode3-instructions-btn, .mode3-results-btn {
@@ -513,6 +548,8 @@
         cursor: pointer;
         transition: all 0.2s ease;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        white-space: nowrap; /* 防止文字換行 */
+        overflow: visible; /* 確保文字不被裁切 */
       }
       
       .mode3-instructions-btn {
@@ -1238,11 +1275,11 @@
         </button>
       </div>
       
-      <!-- 生成結果按鈕 -->
+      <!-- 一鍵生成按鈕 -->
       <div class="mode3-results-btn-container">
         <button class="mode3-results-btn" onclick="toggleMode3ResultsDrawer()">
           <span class="mode3-results-icon">📊</span>
-          <span class="mode3-results-text">生成結果</span>
+          <span class="mode3-results-text">一鍵生成</span>
         </button>
       </div>
 
