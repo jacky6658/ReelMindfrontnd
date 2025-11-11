@@ -1259,6 +1259,7 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
       if (record) {
         // 創建彈出視窗（使用內聯樣式確保顯示）
         const modal = document.createElement('div');
+        modal.className = 'positioning-detail-modal-overlay';
         modal.style.cssText = `
           position: fixed;
           top: 0;
@@ -1297,7 +1298,7 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
         modalContent.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #e5e7eb;">
             <h3 style="margin: 0; color: #1f2937; font-size: 20px; font-weight: 600;">帳號定位詳細內容 - 編號 ${recordNumber}</h3>
-            <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #6b7280; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">×</button>
+            <button class="positioning-modal-close-btn" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #6b7280; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">×</button>
           </div>
           <div style="padding: 24px; overflow-y: auto; flex: 1;">
             <div style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e5e7eb;">
@@ -1307,7 +1308,7 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
             <div style="color: #374151; line-height: 1.8; font-size: 15px; white-space: pre-wrap;">${escapeHtml(record.content).replace(/\n/g, '<br>')}</div>
           </div>
           <div style="padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end;">
-            <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">關閉</button>
+            <button class="positioning-modal-close-btn" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">關閉</button>
           </div>
         `;
         
@@ -1316,8 +1317,18 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
           e.stopPropagation();
         };
         
+        // 為關閉按鈕添加事件監聽器（避免 onclick 中的語法錯誤）
         modal.appendChild(modalContent);
         document.body.appendChild(modal);
+        
+        // 使用事件委派處理關閉按鈕
+        const closeButtons = modalContent.querySelectorAll('.positioning-modal-close-btn');
+        closeButtons.forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            modal.remove();
+          });
+        });
       } else {
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast('找不到該記錄', 3000);

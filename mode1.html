@@ -347,7 +347,8 @@
           -webkit-overflow-scrolling: touch;
           overscroll-behavior: contain;
           min-height: 0 !important;
-          padding-bottom: 5px !important; /* 減少 padding，為輸入欄位留更多空間 */
+          padding-bottom: 0 !important; /* 移除 padding，為輸入欄位留更多空間 */
+          margin-bottom: 0 !important;
         }
         
         /* 輸入區域固定在底部，確保可見 */
@@ -356,7 +357,7 @@
           flex-direction: column !important;
           flex-shrink: 0 !important;
           flex-grow: 0 !important;
-          padding: 10px 24px 10px 24px !important; /* 減少上下 padding */
+          padding: 4px 24px 8px 24px !important; /* 大幅減少上下 padding */
           margin: 0 !important;
           visibility: visible !important;
           opacity: 1 !important;
@@ -378,6 +379,8 @@
           opacity: 1 !important;
           width: 100% !important;
           flex-shrink: 0 !important;
+          padding: 0 !important;
+          margin: 0 !important;
         }
         
         .input-wrapper {
@@ -387,6 +390,13 @@
           opacity: 1 !important;
           width: 100% !important;
           flex-shrink: 0 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        
+        /* 輸入框內部減少 padding */
+        .input-row-inner {
+          margin-bottom: 4px !important; /* 減少與快速按鈕的間距 */
         }
         
         /* 快速按鈕區域確保可見 */
@@ -395,7 +405,8 @@
           visibility: visible !important;
           opacity: 1 !important;
           width: 100% !important;
-          margin-top: 8px !important;
+          margin-top: 4px !important; /* 進一步減少上邊距 */
+          margin-bottom: 0 !important;
           gap: 8px !important;
           flex-wrap: wrap !important;
           flex-shrink: 0 !important;
