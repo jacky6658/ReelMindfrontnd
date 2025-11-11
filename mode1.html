@@ -342,11 +342,14 @@
           -webkit-overflow-scrolling: touch;
           overscroll-behavior: contain;
           min-height: 0;
+          padding-bottom: 20px; /* 為輸入欄位留出空間，避免內容被遮擋 */
         }
         
-        /* 輸入區域固定在底部 */
+        /* 輸入區域固定在底部，但往上移動 */
         .input-row {
           flex-shrink: 0;
+          padding: 8px 24px 12px 24px !important; /* 減少底部 padding，讓輸入欄位往上移動 */
+          margin-bottom: 0 !important;
         }
       }
       
@@ -1223,10 +1226,9 @@
             </div>
             <!-- 快速按鈕區域 -->
             <div class="quick-buttons" id="mode3-quickButtons">
-              <button class="quick-btn" data-text="我想分享我的專業經驗">專業經驗</button>
-              <button class="quick-btn" data-text="我想建立個人品牌">個人品牌</button>
-              <button class="quick-btn" data-text="我想分享生活故事">生活故事</button>
-              <button class="quick-btn" data-text="我想做知識分享">知識分享</button>
+              <button class="quick-btn" data-text="重新定位">重新定位</button>
+              <button class="quick-btn" data-text="生成14天規劃">生成14天規劃</button>
+              <button class="quick-btn" data-text="生成3隻腳本">生成3隻腳本</button>
             </div>
           </div>
         </div>

@@ -342,11 +342,14 @@
           -webkit-overflow-scrolling: touch;
           overscroll-behavior: contain;
           min-height: 0;
+          padding-bottom: 20px; /* 為輸入欄位留出空間，避免內容被遮擋 */
         }
         
-        /* 輸入區域固定在底部 */
+        /* 輸入區域固定在底部，但往上移動 */
         .input-row {
           flex-shrink: 0;
+          padding: 8px 24px 12px 24px !important; /* 減少底部 padding，讓輸入欄位往上移動 */
+          margin-bottom: 0 !important;
         }
       }
       
