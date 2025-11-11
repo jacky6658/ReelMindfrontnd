@@ -13880,6 +13880,19 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       async function handleSubscriptionClick(plan) {
         console.log('Subscription button clicked:', plan);
         
+        // ECPay 固定付款連結
+        const ecpayLinks = {
+          monthly: 'https://p.ecpay.com.tw/BD7949C',
+          yearly: 'https://p.ecpay.com.tw/D49A28E'
+        };
+        
+        // 直接跳轉到對應的 ECPay 付款頁面
+        if (ecpayLinks[plan]) {
+          window.open(ecpayLinks[plan], '_blank');
+          return;
+        }
+        
+        // 如果沒有對應的連結，使用原有邏輯（向後兼容）
         // 先檢查登入狀態
         if (window.ReelMindCommon && window.ReelMindCommon.checkLoginStatus) {
           const loggedIn = await window.ReelMindCommon.checkLoginStatus();
