@@ -347,7 +347,7 @@
           -webkit-overflow-scrolling: touch;
           overscroll-behavior: contain;
           min-height: 0 !important;
-          padding-bottom: 10px;
+          padding-bottom: 5px !important; /* 減少 padding，為輸入欄位留更多空間 */
         }
         
         /* 輸入區域固定在底部，確保可見 */
@@ -356,7 +356,7 @@
           flex-direction: column !important;
           flex-shrink: 0 !important;
           flex-grow: 0 !important;
-          padding: 12px 24px 12px 24px !important;
+          padding: 10px 24px 10px 24px !important; /* 減少上下 padding */
           margin: 0 !important;
           visibility: visible !important;
           opacity: 1 !important;
@@ -377,6 +377,7 @@
           visibility: visible !important;
           opacity: 1 !important;
           width: 100% !important;
+          flex-shrink: 0 !important;
         }
         
         .input-wrapper {
@@ -385,6 +386,7 @@
           visibility: visible !important;
           opacity: 1 !important;
           width: 100% !important;
+          flex-shrink: 0 !important;
         }
         
         /* 快速按鈕區域確保可見 */
@@ -396,6 +398,8 @@
           margin-top: 8px !important;
           gap: 8px !important;
           flex-wrap: wrap !important;
+          flex-shrink: 0 !important;
+          padding: 0 !important;
         }
         
         /* 快速按鈕確保可見 */
@@ -403,6 +407,7 @@
           display: inline-flex !important;
           visibility: visible !important;
           opacity: 1 !important;
+          flex-shrink: 0 !important;
         }
       }
       
