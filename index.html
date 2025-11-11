@@ -13718,21 +13718,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         checkLoginStatus().then(() => {
           console.log('✅ 登入狀態檢查完成');
           
-          // 初始化首頁視圖（在 checkLoginStatus 之後，因為它會更新訂閱狀態）
-          setTimeout(() => {
-            updateHomepageView();
-          }, 100);
-          
-          // 檢查訂閱狀態
-          checkSubscriptionStatus().then(() => {
-            console.log('✅ 訂閱狀態檢查完成');
-            
-            // 如果已登入，載入用戶歷史資訊
-            if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
-              console.log('📚 開始載入用戶歷史資訊...');
+          // 注意：updateUserInfo() 中已經調用了 checkSubscriptionStatus() 和 updateHomepageView()
+          // 這裡不需要重複調用，避免重複執行
+          // 如果已登入，確保載入用戶歷史資訊（updateUserInfo 中已有，但這裡作為備用）
+          if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
+            console.log('📚 備用：載入用戶歷史資訊...');
+            // 延遲執行，確保訂閱狀態已更新
+            setTimeout(() => {
               loadUserHistory();
-            }
-          });
+            }, 1000);
+          }
         });
         
         // 確保 Highlight.js 載入後初始化（因為使用了 defer）
@@ -14055,7 +14050,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             }
           }
           console.log('👤 更新用戶資訊顯示...');
-          updateUserInfo();
+          await updateUserInfo(); // 修復：添加 await 確保異步操作完成
         } else {
           // 未登入時顯示登入按鈕
           console.log('🔐 未登入，顯示登入按鈕');
@@ -14138,17 +14133,20 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 更新用戶資訊後，檢查訂閱狀態
         console.log('📊 檢查訂閱狀態...');
         await checkSubscriptionStatus();
-        
-        // 更新首頁視圖
-        console.log('🏠 更新首頁視圖...');
-        updateHomepageView();
+        // 注意：checkSubscriptionStatus() 中已經調用了 updateHomepageView()
+        // 但為了確保訂閱狀態已完全更新，再次調用 updateHomepageView()
+        setTimeout(() => {
+          console.log('🏠 確認首頁視圖（訂閱狀態已更新）...');
+          updateHomepageView();
+        }, 200);
         
         // 如果已登入，載入用戶歷史資訊（對話記錄、生成記錄、記憶等）
         if (isLoggedIn && ipPlanningUser && ipPlanningUser.user_id) {
           console.log('📚 載入用戶歷史資訊（對話記錄、生成記錄、記憶等）...');
+          // 延遲執行，確保訂閱狀態和首頁視圖已更新
           setTimeout(() => {
             loadUserHistory();
-          }, 500);
+          }, 1000);
         }
       }
       
@@ -14186,6 +14184,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               if (refreshed) {
                 // Token 刷新成功，使用新 token 重試
                 console.log('✅ Token 刷新成功，重新獲取用戶資訊...');
+                // 重新獲取最新的 token（刷新後可能已更新）
+                const refreshedToken = localStorage.getItem('ipPlanningToken');
+                if (refreshedToken) {
+                  ipPlanningToken = refreshedToken;
+                }
                 response = await fetch('https://aivideobackend.zeabur.app/api/auth/me', {
                   headers: {
                     'Authorization': `Bearer ${ipPlanningToken}`
@@ -14219,23 +14222,41 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 // 立即更新 UI 顯示（用戶頭像和名稱）
                 const userNameEl = document.getElementById('userName');
                 const userAvatarEl = document.getElementById('userAvatar');
+                const authButtons = document.querySelector('.auth-buttons');
+                const userInfo = document.getElementById('userInfo');
+                
+                // 確保顯示用戶資訊，隱藏登入按鈕
+                if (authButtons) authButtons.style.display = 'none';
+                if (userInfo) {
+                  userInfo.style.display = 'flex';
+                }
+                
                 if (userNameEl) {
-                  userNameEl.textContent = ipPlanningUser.name || '用戶';
+                  userNameEl.textContent = ipPlanningUser.name || ipPlanningUser.displayName || '用戶';
                   console.log('✅ UI 更新用戶名稱:', userNameEl.textContent);
                 }
-                if (userAvatarEl && ipPlanningUser.picture) {
-                  userAvatarEl.src = ipPlanningUser.picture;
-                  console.log('✅ UI 更新用戶頭像:', ipPlanningUser.picture);
+                if (userAvatarEl) {
+                  if (ipPlanningUser.picture || ipPlanningUser.avatar) {
+                    userAvatarEl.src = ipPlanningUser.picture || ipPlanningUser.avatar;
+                    userAvatarEl.alt = ipPlanningUser.name || '用戶';
+                    console.log('✅ UI 更新用戶頭像:', userAvatarEl.src);
+                  } else {
+                    // 如果沒有頭像，使用 Google 預設頭像生成器
+                    const name = ipPlanningUser.name || ipPlanningUser.displayName || 'User';
+                    userAvatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=32&bold=true`;
+                    userAvatarEl.alt = name;
+                    console.log('⚠️ 用戶沒有頭像，使用生成頭像');
+                  }
                 }
               }
               
               // 更新訂閱狀態
               // 處理各種可能的返回類型
+              // 注意：undefined 視為未訂閱（需要明確的 true/1 才視為已訂閱）
               const isSubscribed = userInfo.is_subscribed === true || 
                                   userInfo.is_subscribed === 1 || 
                                   userInfo.is_subscribed === 'true' ||
-                                  userInfo.is_subscribed === '1' ||
-                                  userInfo.is_subscribed === undefined;
+                                  userInfo.is_subscribed === '1';
               
               if (isSubscribed) {
                 document.body.dataset.subscribed = 'true';
@@ -15057,12 +15078,46 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
       
       // 更新認證 UI
-      function updateAuthUI(isLoggedIn) {
-        if (isLoggedIn) {
-          // 更新用戶資訊顯示
-          updateUserInfo();
-          loginBtn.style.display = 'none';
-          updateUserDrawer(ipPlanningUser);
+      async function updateAuthUI(isLoggedIn) {
+        const authButtons = document.querySelector('.auth-buttons');
+        const userInfoEl = document.getElementById('userInfo');
+        const loginBtnEl = document.getElementById('loginBtn');
+        const userNameEl = document.getElementById('userName');
+        const userAvatarEl = document.getElementById('userAvatar');
+        
+        if (isLoggedIn && ipPlanningToken && ipPlanningUser) {
+          // 已登入：顯示用戶資訊，隱藏登入按鈕
+          if (authButtons) authButtons.style.display = 'none';
+          if (loginBtnEl) loginBtnEl.style.display = 'none';
+          
+          if (userInfoEl) {
+            userInfoEl.style.display = 'flex';
+            // 更新用戶名稱
+            if (userNameEl) {
+              userNameEl.textContent = ipPlanningUser.name || ipPlanningUser.displayName || '用戶';
+            }
+            // 更新用戶頭像
+            if (userAvatarEl) {
+              if (ipPlanningUser.picture || ipPlanningUser.avatar) {
+                userAvatarEl.src = ipPlanningUser.picture || ipPlanningUser.avatar;
+                userAvatarEl.alt = ipPlanningUser.name || '用戶';
+              } else {
+                // 如果沒有頭像，使用 Google 預設頭像生成器
+                const name = ipPlanningUser.name || ipPlanningUser.displayName || 'User';
+                userAvatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=32&bold=true`;
+                userAvatarEl.alt = name;
+              }
+            }
+            // 確保點擊用戶資訊可以打開創作者資料庫
+            userInfoEl.setAttribute('onclick', 'handleUserDBClick()');
+            userInfoEl.style.cursor = 'pointer';
+          }
+          
+          // 更新用戶抽屜
+          if (typeof updateUserDrawer === 'function') {
+            updateUserDrawer(ipPlanningUser);
+          }
+          
           // 顯示個人資料庫分頁
           const userDBTab = document.getElementById('userDBTab');
           if (userDBTab) {
@@ -15074,11 +15129,24 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             bottomUserDBTab.style.display = 'flex';
           }
           // 更新個人資料庫用戶資訊
-          updateDbUserInfo();
+          if (typeof updateDbUserInfo === 'function') {
+            updateDbUserInfo();
+          }
+          
+          // 調用完整的 updateUserInfo 函數（async 版本）
+          if (typeof updateUserInfo === 'function') {
+            await updateUserInfo();
+          }
         } else {
-          userInfo.style.display = 'none';
-          loginBtn.style.display = 'block';
-          closeUserDrawer();
+          // 未登入：顯示登入按鈕，隱藏用戶資訊
+          if (userInfoEl) userInfoEl.style.display = 'none';
+          if (authButtons) authButtons.style.display = 'flex';
+          if (loginBtnEl) loginBtnEl.style.display = 'block';
+          
+          if (typeof closeUserDrawer === 'function') {
+            closeUserDrawer();
+          }
+          
           // 隱藏個人資料庫分頁
           const userDBTab = document.getElementById('userDBTab');
           if (userDBTab) {
