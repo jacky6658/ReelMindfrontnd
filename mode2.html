@@ -316,6 +316,14 @@
       
       /* 響應式設計 - 手機版 */
       @media (max-width: 768px) {
+        /* 固定頁面背景，不允許滾動 */
+        html, body {
+          height: 100vh !important;
+          overflow: hidden !important;
+          position: fixed !important;
+          width: 100% !important;
+        }
+        
         /* 頂部導航欄手機版 */
         .top-navbar {
           padding: 12px 16px;
@@ -374,9 +382,31 @@
           display: block !important;
         }
         
-        /* 主內容區域為固定頁首留出空間 */
+        /* 主內容區域為固定頁首留出空間，固定高度 */
         .mode2-page {
           padding-top: 80px;
+          height: 100vh !important;
+          overflow: hidden !important;
+          display: flex !important;
+          flex-direction: column !important;
+        }
+        
+        /* 聊天容器固定高度，只讓訊息區域可滾動 */
+        .chat-container {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          min-height: 0;
+        }
+        
+        /* 聊天訊息區域可滾動 */
+        #chatMessages {
+          flex: 1;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
         }
       }
       

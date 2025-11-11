@@ -63,6 +63,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
   
+  // 更新用戶資訊顯示
+  updateUserInfo();
+  
+  // 載入用戶記憶（長期記憶和短期記憶）- 在權限檢查之前載入，確保日誌能輸出
+  if (isLoggedIn && ipPlanningUser?.user_id) {
+    console.log('📚 開始載入用戶記憶...');
+    await loadUserMemory();
+  } else {
+    console.warn('⚠️ 無法載入記憶：用戶未登入或缺少用戶ID');
+  }
+  
   // 檢查認證和訂閱狀態
   if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
     const canAccess = await window.ReelMindCommon.checkFeatureAccess();
@@ -71,14 +82,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       return; // checkFeatureAccess 已經處理了跳轉
     }
     console.log('✅ 權限檢查通過，可以訪問此功能');
-  }
-  
-  // 更新用戶資訊顯示
-  updateUserInfo();
-  
-  // 載入用戶記憶（長期記憶和短期記憶）
-  if (isLoggedIn && ipPlanningUser?.user_id) {
-    await loadUserMemory();
   }
   
   // 初始化聊天功能
@@ -477,23 +480,30 @@ async function sendMessage(message) {
     });
     
     if (!response.ok) {
+      // 如果請求失敗，移除載入動畫並顯示錯誤
+      chatMessages.removeChild(typingIndicator);
+      const errorMessage = createMessage('assistant', '❌ 發生錯誤，請稍後再試。');
+      chatMessages.appendChild(errorMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    // 移除載入動畫
-    chatMessages.removeChild(typingIndicator);
-    
-    // 創建AI回應容器
+    // 創建AI回應容器（先創建，但內容先顯示載入動畫）
     const aiMessage = createMessage('assistant', '');
-    chatMessages.appendChild(aiMessage);
-    
     const contentDiv = aiMessage.querySelector('.message-content');
+    // 先將載入動畫移到 AI 訊息容器中
+    contentDiv.innerHTML = typingIndicator.querySelector('.message-content').innerHTML;
+    // 移除舊的載入動畫
+    chatMessages.removeChild(typingIndicator);
+    // 添加 AI 訊息容器
+    chatMessages.appendChild(aiMessage);
     
     // 處理串流回應
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
     let fullContent = '';
+    let hasReceivedContent = false; // 標記是否已收到內容
     
     while (true) {
       const { done, value } = await reader.read();
@@ -521,6 +531,12 @@ async function sendMessage(message) {
           try {
             const parsed = JSON.parse(data);
             if (parsed.content) {
+              // 第一次收到內容時，移除載入動畫
+              if (!hasReceivedContent) {
+                hasReceivedContent = true;
+                contentDiv.innerHTML = ''; // 清空載入動畫
+              }
+              
               fullContent += parsed.content;
               if (window.safeRenderMarkdown) {
                 contentDiv.innerHTML = window.safeRenderMarkdown(fullContent);
