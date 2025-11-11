@@ -77,11 +77,72 @@ document.addEventListener('DOMContentLoaded', async function() {
   // 更新用戶資訊顯示
   updateUserInfo();
   
+  // 載入用戶記憶（長期記憶和短期記憶）
+  if (isLoggedIn && ipPlanningUser?.user_id) {
+    await loadUserMemory();
+  }
+  
   // 初始化聊天功能
   initMode3Chat();
   
   console.log('✅ ========== Mode1 頁面初始化完成 ==========');
 });
+
+// 載入用戶記憶（長期記憶和短期記憶）
+async function loadUserMemory() {
+  if (!ipPlanningUser?.user_id || !ipPlanningToken) {
+    console.warn('⚠️ 無法載入記憶：缺少用戶ID或Token');
+    return;
+  }
+  
+  try {
+    console.log('🧠 ========== 開始載入用戶記憶 ==========');
+    console.log('👤 用戶ID:', ipPlanningUser.user_id);
+    
+    // 使用完整記憶端點（包含 STM + LTM）
+    const memoryResponse = await fetch(`${API_URL}/api/user/memory/full/${ipPlanningUser.user_id}`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`
+      }
+    });
+    
+    console.log('🧠 記憶響應狀態:', memoryResponse.status);
+    
+    if (memoryResponse.ok) {
+      const memoryData = await memoryResponse.json();
+      console.log('✅ 用戶記憶數據:', memoryData);
+      
+      // 顯示短期記憶（STM）
+      if (memoryData.stm) {
+        console.log('📝 短期記憶 (STM):', {
+          '最近對話輪數': memoryData.stm.recent_turns_count || 0,
+          '有摘要': memoryData.stm.has_summary ? '是' : '否',
+          '更新時間': memoryData.stm.updated_at ? new Date(memoryData.stm.updated_at * 1000).toLocaleString('zh-TW') : 'N/A'
+        });
+      }
+      
+      // 顯示長期記憶（LTM）
+      if (memoryData.ltm && memoryData.ltm.memory_text) {
+        const ltmPreview = memoryData.ltm.memory_text.length > 200 
+          ? memoryData.ltm.memory_text.substring(0, 200) + '...' 
+          : memoryData.ltm.memory_text;
+        console.log('📚 長期記憶 (LTM) 預覽:', ltmPreview);
+      }
+      
+      // 顯示記憶摘要
+      if (memoryData.summary) {
+        console.log('📋 記憶摘要:', memoryData.summary);
+      }
+      
+      console.log('✅ ========== 用戶記憶載入完成 ==========');
+    } else {
+      const errorText = await memoryResponse.text();
+      console.error('❌ 載入用戶記憶失敗:', memoryResponse.status, errorText);
+    }
+  } catch (error) {
+    console.error('❌ 載入用戶記憶時出錯:', error);
+  }
+}
 
 // 更新用戶資訊顯示
 function updateUserInfo() {
