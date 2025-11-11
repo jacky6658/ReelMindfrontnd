@@ -12878,8 +12878,23 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       async function switchPage(pageId) {
         console.log('switchPage called with:', pageId);
         
-        // 需要訂閱才能訪問的頁面列表
-        const protectedPages = ['mode1', 'mode2', 'mode3', 'userDB'];
+        // mode1/mode2/mode3 已分離到獨立頁面，不應通過 switchPage 訪問
+        if (['mode1', 'mode2', 'mode3'].includes(pageId)) {
+          console.warn('這些頁面已分離到獨立文件，請直接跳轉');
+          // 可以選擇直接跳轉或返回
+          const pageMap = {
+            'mode1': 'mode1.html',  // IP人設規劃 → mode1.html
+            'mode2': 'mode2.html',  // AI顧問 → mode2.html
+            'mode3': 'mode3.html'   // 一鍵生成 → mode3.html
+          };
+          if (pageMap[pageId]) {
+            window.location.href = pageMap[pageId];
+          }
+          return;
+        }
+        
+        // 需要訂閱才能訪問的頁面列表（只保留 userDB，因為 mode1/mode2/mode3 已分離）
+        const protectedPages = ['userDB'];
         
         // 檢查是否為受保護的頁面
         if (protectedPages.includes(pageId)) {
@@ -12921,75 +12936,19 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 return;
               }
               // 已登入即可訪問 userDB，不需要訂閱檢查
-            } else {
-              // 其他頁面需要訂閱
-              console.log('嘗試訪問受保護頁面:', pageId);
-            console.log('訂閱狀態:', isSubscribed);
-            console.log('登入狀態:', isLoggedIn);
-            
-            // 未登入，顯示登入提示
-            if (!isLoggedIn) {
-              console.warn('未登入 - 需要登入');
-              if (typeof goToLogin === 'function') {
-                goToLogin();
-              } else {
-                alert('請先登入以使用此功能！');
-              }
-              // 保持首頁顯示
-              const homepage = document.getElementById('homepage');
-              if (homepage) {
-                homepage.classList.add('active');
-              }
-              return;
-            }
-            
-            // 已登入但未訂閱，導向訂閱頁
-            if (isLoggedIn && !isSubscribed) {
-              console.warn('已登入但未訂閱 - 導向訂閱頁');
-              window.location.href = '/subscription.html';
-              return;
             }
           }
         }
         
         // 移除所有頁面的 mode2-active 和 mode3-active 類（防止 body 滾動被鎖定）
+        // 注意：mode2 和 mode3 已分離到獨立頁面，這裡只處理 index.html 中的頁面
         document.body.classList.remove('mode2-active', 'mode3-active');
         document.documentElement.classList.remove('mode2-active', 'mode3-active');
         
         // 隱藏所有頁面
         document.querySelectorAll('.page').forEach(page => {
           page.classList.remove('active');
-          // 移除 mode2 和 mode3 頁面的 fig1 類（如果存在）
-          if (page.id === 'mode2' || page.id === 'mode3') {
-            page.classList.remove('fig1');
-          }
         });
-        
-        // 隱藏 AI 顧問的輸入欄位和快速按鈕（當切換到其他頁面時）
-        const quickButtons = document.getElementById('quickButtons');
-        const inputRow = document.querySelector('#mode2 .input-row');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        
-        if (pageId !== 'mode2') {
-          // 切換到其他頁面時，移除 inline style 讓 CSS 規則生效（隱藏）
-          if (quickButtons) {
-            quickButtons.style.display = 'none';
-            quickButtons.removeAttribute('style');
-          }
-          if (inputRow) {
-            inputRow.style.display = 'none';
-            inputRow.removeAttribute('style');
-          }
-          if (messageInput) {
-            messageInput.style.display = 'none';
-            messageInput.removeAttribute('style');
-          }
-          if (sendBtn) {
-            sendBtn.style.display = 'none';
-            sendBtn.removeAttribute('style');
-          }
-        }
         
         // 顯示選中的頁面
         const targetPage = document.getElementById(pageId);
@@ -13003,55 +12962,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             if (homepage) {
               homepage.classList.remove('active');
             }
-          }
-          
-          // 如果是 mode2，添加 mode2-active 類並確保有 fig1 類
-          if (pageId === 'mode2') {
-            targetPage.classList.add('fig1');
-            document.body.classList.add('mode2-active');
-            document.documentElement.classList.add('mode2-active');
-            console.log('Mode2 activated, body scroll locked');
-            
-            // 顯示 AI 顧問的輸入欄位和快速按鈕
-            // 移除 inline style，讓 CSS 規則生效（因為 #mode2.active 已經有 active 類）
-            if (quickButtons) {
-              quickButtons.removeAttribute('style');
-            }
-            if (inputRow) {
-              inputRow.removeAttribute('style');
-            }
-            if (messageInput) {
-              messageInput.removeAttribute('style');
-            }
-            if (sendBtn) {
-              sendBtn.removeAttribute('style');
-            }
-            
-            // 初始化 ChatGPT 功能（包括 Enter 鍵發送）
-            setTimeout(() => {
-              if (typeof initChatGPTFeatures === 'function') {
-                initChatGPTFeatures();
-              }
-              // 載入歷史對話記錄
-              if (typeof loadMode2History === 'function') {
-                loadMode2History();
-              }
-            }, 100);
-          }
-          
-          // 如果是 mode3，添加 mode3-active 類並確保有 fig1 類
-          if (pageId === 'mode3') {
-            targetPage.classList.add('fig1');
-            document.body.classList.add('mode3-active');
-            document.documentElement.classList.add('mode3-active');
-            console.log('Mode3 activated, body scroll locked');
-            
-            // 初始化 Mode3 聊天功能（包括 Enter 鍵發送）
-            setTimeout(() => {
-              if (typeof initMode3Chat === 'function') {
-                initMode3Chat();
-              }
-            }, 100);
           }
           
           // 如果是 userDB，自動顯示個人資料分區
@@ -13865,10 +13775,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         // 可以訪問，跳轉到對應的獨立頁面
+        // 注意：映射關係與導航欄標籤一致
         const pageMap = {
-          'mode1': 'mode3.html',  // 一鍵生成模式 → mode3.html
-          'mode2': 'mode2.html',  // AI顧問模式 → mode2.html
-          'mode3': 'mode1.html',  // IP人設規劃模式 → mode1.html
+          'mode1': 'mode1.html',  // IP人設規劃 → mode1.html
+          'mode2': 'mode2.html',  // AI顧問 → mode2.html
+          'mode3': 'mode3.html',  // 一鍵生成 → mode3.html
           'userDB': 'userDB.html'
         };
         
@@ -23701,8 +23612,31 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
 
       // ===== 模式3：IP人設規劃模式函數 =====
+      // 注意：mode3 功能已分離到 mode3.html 和 mode3.js，以下代碼已廢棄
+      // 保留註釋以標記原位置，實際代碼已移除
       
-      // 切換說明欄位顯示/隱藏
+      /* 已移除的 mode3 函數（已遷移到 mode3.js）：
+      - toggleMode3Instructions()
+      - addMode3Message()
+      - addMode3LoadingMessage()
+      - removeMode3LoadingMessage()
+      - updateMode3Message()
+      - updateMode3LastMessage()
+      - switchMode3Tab()
+      - generateMode3IPProfile()
+      - generateMode314DayPlan()
+      - generateMode3TodayScripts()
+      - saveMode3Result()
+      - regenerateMode3Result()
+      - exportMode3Result()
+      - initializeMode3()
+      - loadMode3History()
+      - displayMode3History()
+      - toggleMode3InstructionsDrawer()
+      - toggleMode3ResultsDrawer()
+      */
+      
+      // 以下為保留的兼容性函數（如果其他地方有調用）
       function toggleMode3Instructions() {
         const instructions = document.querySelector('.mode3-instructions');
         const chatMessages = document.querySelector('.mode3-chat-messages');
@@ -24475,18 +24409,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       // 手機版抽屜控制函數
       // toggleMobileDrawer、openMobileDrawer、closeMobileDrawer 函數已在頁面頂部定義，這裡不需要重複定義
 
-
-      // 在頁面載入時初始化模式3
-      window.addEventListener('load', function() {
-        setTimeout(() => {
-          try {
-            initializeMode3();
-          } catch (error) {
-            console.error('初始化錯誤:', error);
-          }
-        }, 1000);
-      });
-    }
+      // 注意：mode3 初始化代碼已移除，因為 mode3 功能已分離到 mode3.html 和 mode3.js
     </script>
     
     <!-- IP人設規劃使用說明抽屜 -->
