@@ -327,11 +327,12 @@
         
         /* 主內容區域固定高度，使用 flex 布局 */
         .mode3-page {
-          height: 100vh !important;
+          height: calc(100vh - 60px) !important; /* 減去導航欄高度 */
+          margin-top: 60px !important; /* 為導航欄留出空間 */
           overflow: hidden !important;
           display: flex !important;
           flex-direction: column !important;
-          padding-top: 60px; /* 為導航欄留出空間 */
+          padding-top: 0 !important;
         }
         
         /* 聊天訊息區域可滾動 */
@@ -347,9 +348,18 @@
         
         /* 輸入區域固定在底部，但往上移動 */
         .input-row {
-          flex-shrink: 0;
+          display: flex !important;
+          flex-direction: column !important;
+          flex-shrink: 0 !important;
           padding: 8px 24px 12px 24px !important; /* 減少底部 padding，讓輸入欄位往上移動 */
           margin-bottom: 0 !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          height: auto !important;
+          min-height: auto !important;
+          max-height: none !important;
+          z-index: 100 !important;
+          position: relative !important;
         }
       }
       
@@ -1092,6 +1102,23 @@
       
       /* 手機版適配 */
       @media (max-width: 768px) {
+        /* 快速按鈕手機版：並排不換行，節省空間 */
+        .quick-buttons {
+          flex-wrap: nowrap !important; /* 不換行 */
+          gap: 6px !important; /* 減少間距 */
+          overflow-x: auto !important; /* 如果內容太寬，允許橫向滾動 */
+          -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
+        }
+        
+        .quick-btn {
+          flex: 1 1 auto !important; /* 平均分配空間 */
+          min-width: 0 !important; /* 允許縮小 */
+          padding: 6px 8px !important; /* 減少 padding 節省空間 */
+          font-size: 12px !important; /* 稍微減小字體 */
+          white-space: nowrap !important; /* 文字不換行 */
+          overflow: hidden !important; /* 隱藏溢出文字 */
+          text-overflow: ellipsis !important; /* 溢出顯示省略號 */
+        }
         .mode3-instructions-drawer, .mode3-results-drawer {
           width: 100%;
           right: -100%;
