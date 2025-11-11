@@ -337,6 +337,7 @@
           display: flex !important;
           flex-direction: column !important;
           box-sizing: border-box !important;
+          padding: 0 !important;
         }
         
         /* 聊天訊息區域可滾動 */
@@ -347,7 +348,10 @@
           -webkit-overflow-scrolling: touch;
           overscroll-behavior: contain;
           min-height: 0 !important;
-          padding-bottom: 0 !important; /* 移除 padding，為輸入欄位留更多空間 */
+          max-height: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          padding-bottom: 0 !important;
           margin-bottom: 0 !important;
         }
         
@@ -357,7 +361,7 @@
           flex-direction: column !important;
           flex-shrink: 0 !important;
           flex-grow: 0 !important;
-          padding: 4px 24px 8px 24px !important; /* 大幅減少上下 padding */
+          padding: 0 24px 8px 24px !important; /* 移除上 padding，只保留左右和下 */
           margin: 0 !important;
           visibility: visible !important;
           opacity: 1 !important;
@@ -396,7 +400,8 @@
         
         /* 輸入框內部減少 padding */
         .input-row-inner {
-          margin-bottom: 4px !important; /* 減少與快速按鈕的間距 */
+          margin-bottom: 2px !important; /* 進一步減少與快速按鈕的間距 */
+          padding: 0 !important;
         }
         
         /* 快速按鈕區域確保可見 */
@@ -405,7 +410,7 @@
           visibility: visible !important;
           opacity: 1 !important;
           width: 100% !important;
-          margin-top: 4px !important; /* 進一步減少上邊距 */
+          margin-top: 2px !important; /* 最小上邊距 */
           margin-bottom: 0 !important;
           gap: 8px !important;
           flex-wrap: wrap !important;
@@ -1076,6 +1081,8 @@
         display: flex;
         gap: 8px;
         align-items: flex-end;
+        margin: 0 !important;
+        padding: 0 !important;
       }
       
       .chat-input {
