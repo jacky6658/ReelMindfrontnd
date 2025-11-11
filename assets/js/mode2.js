@@ -463,11 +463,21 @@ async function sendMessage(message) {
       headers['Authorization'] = `Bearer ${ipPlanningToken}`;
     }
     
+    // 檢查用戶訊息是否包含腳本相關請求，如果是，添加結構選擇提示
+    let enhancedMessage = message;
+    const scriptKeywords = ['腳本', '腳本建議', '生成腳本', '寫腳本', '腳本結構', '腳本格式', '腳本範例'];
+    const isScriptRequest = scriptKeywords.some(keyword => message.includes(keyword));
+    
+    if (isScriptRequest) {
+      // 在訊息中添加提示，讓 AI 主動詢問結構或提供多種選項
+      enhancedMessage = `${message}\n\n[系統提示：當提供腳本建議時，請主動詢問用戶想要的腳本結構（A/B/C/D/E），或提供多種結構選項讓用戶選擇。每種結構請簡要說明其特點和適用場景，並以表格或列表形式呈現，方便用戶比較選擇。]`;
+    }
+    
     const response = await fetch(endpoint, {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        message: message,
+        message: enhancedMessage,
         platform: null,
         topic: null,
         duration: null,
