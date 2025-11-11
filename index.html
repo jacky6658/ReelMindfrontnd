@@ -12956,6 +12956,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           targetPage.classList.add('active');
           console.log('✅ Switched to page:', pageId);
           
+          // 如果切換到首頁，更新首頁視圖（確保訂閱狀態正確顯示）
+          if (pageId === 'homepage') {
+            console.log('🏠 切換到首頁，更新首頁視圖...');
+            setTimeout(() => {
+              updateHomepageView();
+            }, 100);
+          }
+          
           // 確保首頁被隱藏（如果切換到其他頁面）
           if (pageId !== 'homepage') {
             const homepage = document.getElementById('homepage');
@@ -13543,6 +13551,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 啟動 token 監控（每分鐘檢查一次）
         startTokenMonitor();
+        
+        // 初始化時更新首頁視圖（確保訂閱狀態正確顯示）
+        console.log('🏠 初始化時更新首頁視圖...');
+        setTimeout(() => {
+          updateHomepageView();
+        }, 500);
         
         // 檢查 URL 參數中是否有 token（OAuth callback fallback）
         const tokenParam = urlParams.get('token');
@@ -20761,31 +20775,41 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           });
         });
         
-        // 設定區塊摺疊/展開功能
-        settingsToggleEl.addEventListener('click', () => {
-          const isCollapsed = settingsContentEl.classList.contains('collapsed');
-          const toggleIcon = settingsToggleEl.querySelector('.settings-toggle');
-          
-          if (isCollapsed) {
-            settingsContentEl.classList.remove('collapsed');
-            toggleIcon.textContent = '▼';
-          } else {
-            settingsContentEl.classList.add('collapsed');
-            toggleIcon.textContent = '▶';
-          }
-        });
+        // 設定區塊摺疊/展開功能（檢查元素是否存在）
+        const settingsToggleEl = document.getElementById('settingsToggle') || document.querySelector('.settings-toggle');
+        const settingsContentEl = document.getElementById('settingsContent') || document.querySelector('.settings-content');
+        if (settingsToggleEl && settingsContentEl) {
+          settingsToggleEl.addEventListener('click', () => {
+            const isCollapsed = settingsContentEl.classList.contains('collapsed');
+            const toggleIcon = settingsToggleEl.querySelector('.settings-toggle');
+            
+            if (isCollapsed) {
+              settingsContentEl.classList.remove('collapsed');
+              if (toggleIcon) toggleIcon.textContent = '▼';
+            } else {
+              settingsContentEl.classList.add('collapsed');
+              if (toggleIcon) toggleIcon.textContent = '▶';
+            }
+          });
+        }
         
         // 登入按鈕功能 - 已經在 HTML 中設定 onclick="goToLogin()"，不需要再次綁定
         // loginBtn.addEventListener('click', login);
         
-        // 聊天功能
-        sendBtn.addEventListener('click', sendMessage);
+        // 聊天功能（檢查元素是否存在）
+        const sendBtn = document.getElementById('sendBtn');
+        const messageInput = document.getElementById('messageInput');
         
-        // 輸入框事件監聽器
-        messageInput.addEventListener('input', autoResizeTextarea);
+        if (sendBtn && typeof sendMessage === 'function') {
+          sendBtn.addEventListener('click', sendMessage);
+        }
         
-        // 初始化發送按鈕狀態
-        autoResizeTextarea();
+        // 輸入框事件監聽器（檢查元素是否存在）
+        if (messageInput && typeof autoResizeTextarea === 'function') {
+          messageInput.addEventListener('input', autoResizeTextarea);
+          // 初始化發送按鈕狀態
+          autoResizeTextarea();
+        }
         
         // 快速按鈕功能 - 只綁定到 mode1 的快速按鈕（如果存在的話）
         // 注意：mode2 和 mode3 的快速按鈕有各自獨立的事件監聽器

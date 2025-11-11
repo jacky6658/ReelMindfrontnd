@@ -12,20 +12,8 @@ let currentMode3ConversationType = 'ip_planning';
 
 // 頁面初始化
 document.addEventListener('DOMContentLoaded', async function() {
-  // 檢查權限（需要登入和訂閱）
-  if (window.ReelMindCommon) {
-    const hasAccess = await window.ReelMindCommon.checkFeatureAccess();
-    if (!hasAccess) {
-      return;
-    }
-  }
-
-  // 更新用戶資訊顯示
-  updateUserInfo();
+  console.log('🚀 ========== Mode1 (IP人設規劃) 頁面初始化 ==========');
   
-  // 初始化聊天功能
-  initMode3Chat();
-
   // 載入用戶資訊
   if (window.Auth && window.Auth.getToken()) {
     ipPlanningToken = window.Auth.getToken();
@@ -37,6 +25,62 @@ document.addEventListener('DOMContentLoaded', async function() {
     const userStr = localStorage.getItem('ipPlanningUser');
     ipPlanningUser = userStr ? JSON.parse(userStr) : null;
   }
+  
+  // 檢查並顯示用戶狀態
+  const isLoggedIn = !!(ipPlanningToken && ipPlanningUser);
+  console.log('🔐 登入狀態:', isLoggedIn ? '✅ 已登入' : '❌ 未登入');
+  
+  if (isLoggedIn) {
+    console.log('👤 用戶資訊:', {
+      user_id: ipPlanningUser?.user_id || 'N/A',
+      name: ipPlanningUser?.name || ipPlanningUser?.displayName || 'N/A',
+      email: ipPlanningUser?.email || 'N/A',
+      picture: ipPlanningUser?.picture || ipPlanningUser?.avatar || 'N/A'
+    });
+    
+    // 檢查訂閱狀態
+    let isSubscribed = false;
+    if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+      isSubscribed = window.ReelMindCommon.isSubscribed();
+    } else {
+      // 降級處理：檢查多個來源
+      const backendSubscribed = document.body.dataset.subscribed === 'true';
+      const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
+      const localSubscribed = localSubscriptionStatus === 'active';
+      const userSubscribed = !!(ipPlanningUser && (
+        ipPlanningUser.is_subscribed === true || 
+        ipPlanningUser.is_subscribed === 1 || 
+        ipPlanningUser.is_subscribed === '1' ||
+        ipPlanningUser.is_subscribed === 'true'
+      ));
+      isSubscribed = backendSubscribed || localSubscribed || userSubscribed;
+    }
+    
+    console.log('💳 訂閱狀態:', isSubscribed ? '✅ 已訂閱' : '❌ 未訂閱');
+    console.log('📊 訂閱狀態詳情:', {
+      'document.body.dataset.subscribed': document.body.dataset.subscribed,
+      'localStorage.subscriptionStatus': localStorage.getItem('subscriptionStatus'),
+      'user.is_subscribed': ipPlanningUser?.is_subscribed
+    });
+  }
+  
+  // 檢查權限（需要登入和訂閱）
+  if (window.ReelMindCommon) {
+    const hasAccess = await window.ReelMindCommon.checkFeatureAccess();
+    if (!hasAccess) {
+      console.warn('⚠️ 權限檢查失敗，無法訪問此功能');
+      return;
+    }
+    console.log('✅ 權限檢查通過，可以訪問此功能');
+  }
+
+  // 更新用戶資訊顯示
+  updateUserInfo();
+  
+  // 初始化聊天功能
+  initMode3Chat();
+  
+  console.log('✅ ========== Mode1 頁面初始化完成 ==========');
 });
 
 // 更新用戶資訊顯示
