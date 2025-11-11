@@ -327,12 +327,12 @@
         
         /* 主內容區域固定高度，使用 flex 布局 */
         .mode2-page {
-          height: calc(100vh - 60px) !important; /* 減去導航欄高度 */
-          margin-top: 60px !important; /* 為導航欄留出空間 */
+          height: 100vh !important;
+          padding-top: 60px !important; /* 為導航欄留出空間 */
           overflow: hidden !important;
           display: flex !important;
           flex-direction: column !important;
-          padding-top: 0 !important;
+          box-sizing: border-box !important;
         }
         
         /* 聊天訊息區域可滾動 */
@@ -343,16 +343,16 @@
           -webkit-overflow-scrolling: touch;
           overscroll-behavior: contain;
           min-height: 0;
-          padding-bottom: 20px; /* 為輸入欄位留出空間，避免內容被遮擋 */
+          padding-bottom: 10px; /* 為輸入欄位留出空間 */
         }
         
-        /* 輸入區域固定在底部，但往上移動 */
+        /* 輸入區域固定在底部，往上移動更多 */
         .input-row {
           display: flex !important;
           flex-direction: column !important;
           flex-shrink: 0 !important;
-          padding: 8px 24px 12px 24px !important; /* 減少底部 padding，讓輸入欄位往上移動 */
-          margin-bottom: 0 !important;
+          padding: 6px 24px 6px 24px !important; /* 進一步減少上下 padding，讓輸入欄位更往上 */
+          margin: 0 !important;
           visibility: visible !important;
           opacity: 1 !important;
           height: auto !important;
@@ -360,6 +360,7 @@
           max-height: none !important;
           z-index: 100 !important;
           position: relative !important;
+          background: transparent !important;
         }
       }
       
