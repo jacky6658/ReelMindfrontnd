@@ -359,7 +359,7 @@
           max-height: none !important;
           padding: 16px 24px !important;
           margin: 0 !important;
-          padding-bottom: 0 !important;
+          padding-bottom: 40px !important;
           margin-bottom: 0 !important;
         }
         
@@ -371,6 +371,7 @@
           flex-grow: 0 !important;
           padding: 8px 24px 8px 24px !important;
           margin: 0 !important;
+          margin-top: -300px !important;
           visibility: visible !important;
           opacity: 1 !important;
           height: auto !important;
@@ -381,6 +382,16 @@
           background: transparent !important;
           width: 100% !important;
           box-sizing: border-box !important;
+        }
+        
+        /* 確保快速按鈕在輸入欄位內顯示 */
+        .mode3-page .input-wrapper .quick-buttons {
+          display: flex !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          width: 100% !important;
+          margin-bottom: 8px !important;
+          order: -1 !important;
         }
         
       }

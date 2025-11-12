@@ -826,7 +826,15 @@ async function generateMode314DayPlan() {
 // 生成一週腳本
 async function generateMode3WeeklyScripts() {
   const resultBlock = document.getElementById('mode3-weekly-result') || document.getElementById('mode3-scripts-result');
+  if (!resultBlock) {
+    console.error('找不到結果區塊');
+    return;
+  }
   const button = resultBlock.querySelector('.mode3-generate-btn');
+  if (!button) {
+    console.error('找不到生成按鈕');
+    return;
+  }
   
   button.disabled = true;
   button.innerHTML = '<span>⏳</span> 生成中...';
@@ -959,18 +967,44 @@ async function saveMode3Result() {
     
     let resultType = '';
     let title = '';
-    if (activeTab.textContent.includes('Profile')) {
-      resultType = 'profile';
+    const tabText = activeTab.textContent;
+    if (tabText.includes('帳號定位')) {
+      resultType = 'positioning';
+      title = '帳號定位';
+    } else if (tabText.includes('選題方向')) {
+      resultType = 'topics';
+      title = '選題方向（影片類型配比）';
+    } else if (tabText.includes('一週腳本')) {
+      resultType = 'weekly';
+      title = '一週腳本';
+    }
+    // 保留舊的匹配邏輯作為備用
+    else if (tabText.includes('Profile')) {
+      resultType = 'positioning';
       title = 'IP Profile';
-    } else if (activeTab.textContent.includes('規劃')) {
-      resultType = 'plan';
+    } else if (tabText.includes('規劃')) {
+      resultType = 'topics';
       title = '14天短影音規劃';
-    } else if (activeTab.textContent.includes('腳本')) {
-      resultType = 'scripts';
-      title = '今日3支腳本';
+    } else if (tabText.includes('腳本')) {
+      resultType = 'weekly';
+      title = '今日腳本';
     }
     
-    const resultBlock = document.getElementById(`mode3-${resultType}-result`);
+    if (!resultType) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('無法識別結果類型', 3000);
+      }
+      return;
+    }
+    
+    const resultBlock = document.getElementById(`mode3-${resultType}-result`) || 
+                       document.getElementById(`mode3-${resultType === 'positioning' ? 'profile' : resultType === 'topics' ? 'plan' : 'scripts'}-result`);
+    if (!resultBlock) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('找不到結果區塊', 3000);
+      }
+      return;
+    }
     const content = resultBlock.querySelector('.mode3-result-content');
     
     if (!content || !content.innerHTML.trim()) {
@@ -1061,10 +1095,46 @@ function exportMode3Result() {
     return;
   }
   
-  const tabName = activeTab.textContent.includes('Profile') ? 'profile' : 
-                 activeTab.textContent.includes('規劃') ? 'plan' : 'scripts';
+  const tabText = activeTab.textContent;
+  let tabName = '';
+  let title = '';
+  if (tabText.includes('帳號定位')) {
+    tabName = 'positioning';
+    title = '帳號定位';
+  } else if (tabText.includes('選題方向')) {
+    tabName = 'topics';
+    title = '選題方向（影片類型配比）';
+  } else if (tabText.includes('一週腳本')) {
+    tabName = 'weekly';
+    title = '一週腳本';
+  }
+  // 保留舊的匹配邏輯作為備用
+  else if (tabText.includes('Profile')) {
+    tabName = 'positioning';
+    title = 'IP Profile';
+  } else if (tabText.includes('規劃')) {
+    tabName = 'topics';
+    title = '14天規劃';
+  } else if (tabText.includes('腳本')) {
+    tabName = 'weekly';
+    title = '今日腳本';
+  }
   
-  const resultBlock = document.getElementById(`mode3-${tabName}-result`);
+  if (!tabName) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('無法識別結果類型', 3000);
+    }
+    return;
+  }
+  
+  const resultBlock = document.getElementById(`mode3-${tabName}-result`) || 
+                     document.getElementById(`mode3-${tabName === 'positioning' ? 'profile' : tabName === 'topics' ? 'plan' : 'scripts'}-result`);
+  if (!resultBlock) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('找不到結果區塊', 3000);
+    }
+    return;
+  }
   const content = resultBlock.querySelector('.mode3-result-content');
   
   if (!content || !content.innerHTML.trim()) {
@@ -1077,7 +1147,7 @@ function exportMode3Result() {
   try {
     const textContent = content.innerText || content.textContent || '';
     
-    const csvContent = `類型,標題,內容,匯出時間\n"${tabName}","${tabName === 'profile' ? 'IP Profile' : tabName === 'plan' ? '14天規劃' : '今日腳本'}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW', {
+    const csvContent = `類型,標題,內容,匯出時間\n"${tabName}","${title || (tabName === 'positioning' ? '帳號定位' : tabName === 'topics' ? '選題方向' : '一週腳本')}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW', {
       timeZone: 'Asia/Taipei',
       year: 'numeric',
       month: '2-digit',
