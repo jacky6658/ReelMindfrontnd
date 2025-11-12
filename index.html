@@ -20965,7 +20965,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           positioning: null
         };
 
-        applyBtn.addEventListener('click', () => {
+        // 檢查 applyBtn 是否存在（避免 null 錯誤）
+        if (applyBtn) {
+          applyBtn.addEventListener('click', () => {
           const platform = platformSelect.value;
           const topic = topicInput.value;
           const positioning = positioningInput.value;
@@ -20990,7 +20992,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           } else {
             showToast('請選擇平台', 3000);
           }
-        });
+          });
+        } // 結束 if (applyBtn) 檢查
         
         // 測試連線和顯示結果功能已整合到其他按鈕中
         

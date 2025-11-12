@@ -377,6 +377,43 @@
     return true;
   }
 
+  // ===== 性能優化工具 =====
+
+  /**
+   * 防抖函數
+   * @param {Function} func - 要防抖的函數
+   * @param {number} wait - 等待時間（毫秒）
+   * @returns {Function} 防抖後的函數
+   */
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  /**
+   * 節流函數
+   * @param {Function} func - 要節流的函數
+   * @param {number} limit - 時間限制（毫秒）
+   * @returns {Function} 節流後的函數
+   */
+  function throttle(func, limit) {
+    let inThrottle;
+    return function(...args) {
+      if (!inThrottle) {
+        func.apply(this, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
+      }
+    };
+  }
+
   // ===== 載入狀態管理 =====
 
   /**

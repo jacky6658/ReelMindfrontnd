@@ -147,11 +147,11 @@ async function loadUserMemory() {
 // 更新用戶資訊顯示
 // 使用 common.js 中的統一函數
 function updateUserInfo() {
+  // 直接調用 common.js 中的函數，避免無限遞迴
   if (window.ReelMindCommon && window.ReelMindCommon.updateUserInfo) {
     window.ReelMindCommon.updateUserInfo();
-  } else if (window.updateUserInfo) {
-    window.updateUserInfo();
   }
+  // 不再調用 window.updateUserInfo()，因為它可能指向自己，導致無限遞迴
 }
 
 // 初始化 Mode3 聊天功能
