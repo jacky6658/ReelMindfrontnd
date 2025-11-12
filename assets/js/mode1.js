@@ -194,18 +194,68 @@ function initMode3Chat() {
     }
   });
   
-  // 快速按鈕
+  // 快速按鈕事件處理（保留作為備用，主要使用 onclick）
   quickButtons.addEventListener('click', (e) => {
     e.stopPropagation();
     const btn = e.target.closest('.quick-btn');
     if (btn && btn.closest('.mode3-page') && quickButtons.id === 'mode3-quickButtons') {
       e.preventDefault();
+      // 如果按鈕有 onclick，不處理（由 onclick 處理）
+      if (btn.onclick) {
+        return;
+      }
+      // 降級處理：如果有 data-text，使用舊方式
       const text = btn.getAttribute('data-text');
       if (text) {
         sendMode3Message(text, 'ip_planning');
       }
     }
   });
+}
+
+// 處理快速按鈕點擊
+function handleQuickButton(type) {
+  switch(type) {
+    case 'ip-profile':
+      // 打開右側抽屜，顯示 IP Profile 標籤
+      toggleMode3ResultsDrawer();
+      switchMode3Tab('profile', null);
+      // 如果還沒有生成，自動生成
+      const profileResult = document.getElementById('mode3-profile-result');
+      if (profileResult && profileResult.querySelector('.mode3-result-placeholder')) {
+        generateMode3IPProfile();
+      } else {
+        // 如果已經有內容，LLM 告知用戶目前的 IP Profile
+        sendMode3Message('請告知我目前的 IP Profile，基於我們之前的對話內容。', 'ip_planning');
+      }
+      break;
+    case '14day-plan':
+      // 打開右側抽屜，顯示 14天規劃 標籤
+      toggleMode3ResultsDrawer();
+      switchMode3Tab('plan', null);
+      // 如果還沒有生成，自動生成
+      const planResult = document.getElementById('mode3-plan-result');
+      if (planResult && planResult.querySelector('.mode3-result-placeholder')) {
+        generateMode314DayPlan();
+      } else {
+        // 如果已經有內容，LLM 根據之前討論的影片類型配比再次告知規劃
+        sendMode3Message('請根據我們之前討論的影片類型配比，再次告知我的14天規劃。', 'ip_planning');
+      }
+      break;
+    case 'today-script':
+      // 打開右側抽屜，顯示 今日腳本 標籤
+      toggleMode3ResultsDrawer();
+      switchMode3Tab('scripts', null);
+      // 詢問用戶要使用哪個腳本結構
+      sendMode3Message('請根據目前資料庫的5個腳本結構（A/B/C/D/E），詢問我要使用哪一個腳本結構來產出今日的腳本。', 'ip_planning');
+      break;
+    case 'reposition':
+      // 重新定位：LLM 會先詢問
+      sendMode3Message('我想要重新定位，請先詢問我想要重新定位哪個方面？', 'ip_planning');
+      break;
+    default:
+      console.warn('未知的快速按鈕類型:', type);
+  }
 }
 
 // 發送 Mode3 訊息
@@ -417,10 +467,21 @@ function renderMode3Markdown(text) {
   }
   // 其次使用 marked（如果可用）
   if (typeof marked !== 'undefined') {
+    // 確保 marked 支援表格和換行
+    if (!marked.getDefaults || !marked.getDefaults().gfm) {
+      marked.setOptions({ 
+        gfm: true,  // GitHub Flavored Markdown（支援表格）
+        breaks: true,  // 支援換行
+        tables: true  // 明確啟用表格支援
+      });
+    }
     const html = marked.parse(text);
     // 使用 DOMPurify 清理（如果可用）
     if (typeof DOMPurify !== 'undefined') {
-      return DOMPurify.sanitize(html);
+      return DOMPurify.sanitize(html, {
+        ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],  // 允許表格標籤
+        ADD_ATTR: ['colspan', 'rowspan']  // 允許表格屬性
+      });
     }
     return html;
   }
@@ -657,12 +718,12 @@ async function generateMode314DayPlan() {
         'Authorization': `Bearer ${ipPlanningToken}`
       },
       body: JSON.stringify({
-        message: '請根據我們的對話內容和IP Profile，生成一份14天短影音規劃表。請使用自然語言、友善的語氣，以清晰易懂的方式呈現每一天的規劃。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。絕對不要出現任何程式碼、表格符號或複雜的結構化格式。每一天的規劃請包含：1.**每日主題**：用一句話說明當天的主題 2.**內容方向**：用2-3句自然語言描述內容重點 3.**拍攝建議**：用簡短易懂的句子說明拍攝要點 4.**發布時間**：建議發布時段 5.**互動策略**：用一句話說明如何與觀眾互動。請將每一天的內容用清晰的段落分隔，讓用戶容易閱讀。',
+        message: '請根據我們的對話內容和IP Profile，生成一份14天短影音規劃表。請使用自然語言、友善的語氣，以清晰易懂的方式呈現每一天的規劃。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現14天規劃**，表格欄位包含：日期、主題、內容方向、拍攝建議、發布時間、互動策略。每一天的規劃請包含：1.**每日主題**：用一句話說明當天的主題 2.**內容方向**：用2-3句自然語言描述內容重點 3.**拍攝建議**：用簡短易懂的句子說明拍攝要點 4.**發布時間**：建議發布時段 5.**互動策略**：用一句話說明如何與觀眾互動。請確保表格格式正確，使用 Markdown 表格語法（| 欄位1 | 欄位2 | ... |）。',
         user_id: ipPlanningUser?.user_id || 'anonymous',
         platform: '短影音平台',
         profile: 'IP人設規劃專家',
         topic: '14天規劃生成',
-        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，不要程式碼或表格格式',
+        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現14天規劃',
         duration: '30',
         conversation_type: 'ip_planning'  // 指定對話類型
       })
@@ -719,6 +780,10 @@ async function generateMode3TodayScripts() {
   button.disabled = true;
   button.innerHTML = '<span>⏳</span> 生成中...';
   
+  // 清空之前的內容
+  resultBlock.innerHTML = '<div class="mode3-result-content"><p>正在生成腳本...</p></div>';
+  const contentDiv = resultBlock.querySelector('.mode3-result-content');
+  
   try {
     const response = await fetch(`${API_URL}/api/chat/stream`, {
       method: 'POST',
@@ -727,55 +792,88 @@ async function generateMode3TodayScripts() {
         'Authorization': `Bearer ${ipPlanningToken}`
       },
       body: JSON.stringify({
-        message: '請根據我們的對話內容和IP Profile，生成今日3支短影音腳本。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。絕對不要出現任何程式碼、技術術語或複雜的結構化格式。每支腳本請包含：1.**主題標題**：用一句話清楚說明這支影片的主題 2.**開場鉤子**：用自然語言寫出吸引人的開場，讓觀眾想繼續看下去 3.**核心內容**：用2-3句自然語言說明影片要傳達的價值 4.**行動呼籲**：用一句話引導觀眾採取行動 5.**畫面描述**：用簡短易懂的句子描述畫面應該呈現什麼 6.**發佈文案**：寫一段適合社群媒體的文案。請將每支腳本用清晰的段落分隔，讓用戶容易閱讀和使用。',
+        message: '請根據我們的對話內容和IP Profile，生成今日1支短影音腳本。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現腳本內容**，表格欄位包含：時間、段落、台詞、畫面描述、字幕文字、音效與轉場。每支腳本請包含：1.**主題標題**：用一句話清楚說明這支影片的主題 2.**開場鉤子**：用自然語言寫出吸引人的開場，讓觀眾想繼續看下去 3.**核心內容**：用2-3句自然語言說明影片要傳達的價值 4.**行動呼籲**：用一句話引導觀眾採取行動 5.**畫面描述**：用簡短易懂的句子描述畫面應該呈現什麼 6.**發佈文案**：寫一段適合社群媒體的文案。請確保表格格式正確，使用 Markdown 表格語法（| 欄位1 | 欄位2 | ... |）。',
         user_id: ipPlanningUser?.user_id || 'anonymous',
         platform: '短影音平台',
         profile: 'IP人設規劃專家',
         topic: '今日腳本生成',
-        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，不要程式碼或技術格式',
+        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現腳本內容',
         duration: '30',
         conversation_type: 'ip_planning'  // 指定對話類型
       })
     });
     
-    if (response.ok) {
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let content = '';
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let fullContent = '';
+    let hasReceivedContent = false;
+    
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        console.log('✅ 流式回應完成，總內容長度:', fullContent.length);
+        break;
+      }
       
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') continue;
-            
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content) {
-                content += parsed.content;
-              }
-            } catch (e) {
-              // 忽略解析錯誤
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
+          if (data === '[DONE]') {
+            console.log('✅ 收到 [DONE] 標記');
+            continue;
+          }
+          
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.type === 'token' && parsed.content) {
+              fullContent += parsed.content;
+              hasReceivedContent = true;
+              // 實時更新顯示
+              const renderedContent = renderMode3Markdown(fullContent);
+              contentDiv.innerHTML = renderedContent;
+            } else if (parsed.type === 'end') {
+              console.log('✅ 收到 end 標記');
+              break;
+            } else if (parsed.type === 'error') {
+              throw new Error(parsed.content || '生成失敗');
+            } else if (parsed.content) {
+              // 兼容舊格式
+              fullContent += parsed.content;
+              hasReceivedContent = true;
+              const renderedContent = renderMode3Markdown(fullContent);
+              contentDiv.innerHTML = renderedContent;
             }
+          } catch (e) {
+            console.warn('解析 JSON 錯誤:', e, '原始數據:', data);
+            // 繼續處理，不中斷流程
           }
         }
       }
-      
-      const renderedContent = renderMode3Markdown(content);
-      resultBlock.innerHTML = `<div class="mode3-result-content">${renderedContent}</div>`;
-      button.innerHTML = '<span>🚀</span> 重新生成';
-      button.disabled = false;
-    } else {
-      throw new Error('生成失敗');
     }
+    
+    // 最終更新顯示
+    if (fullContent) {
+      const renderedContent = renderMode3Markdown(fullContent);
+      contentDiv.innerHTML = renderedContent;
+      console.log('✅ 腳本生成完成，最終內容長度:', fullContent.length);
+    } else if (!hasReceivedContent) {
+      throw new Error('未收到任何內容，請重試');
+    }
+    
+    button.innerHTML = '<span>🚀</span> 重新生成';
+    button.disabled = false;
   } catch (error) {
-    console.error('生成今日腳本失敗:', error);
+    console.error('❌ 生成今日腳本失敗:', error);
+    contentDiv.innerHTML = `<p style="color: #dc2626;">生成失敗：${escapeHtml(error.message || '未知錯誤')}</p><p>請檢查網路連線或稍後再試。</p>`;
     button.innerHTML = '<span>❌</span> 生成失敗，請重試';
     button.disabled = false;
   }

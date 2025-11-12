@@ -369,7 +369,7 @@
           flex-direction: column !important;
           flex-shrink: 0 !important;
           flex-grow: 0 !important;
-          padding: 12px 24px 16px 24px !important;
+          padding: 12px 24px calc(16px + var(--safe-area-inset-bottom, 0px)) 24px !important;
           margin: 0 !important;
           visibility: visible !important;
           opacity: 1 !important;
@@ -850,6 +850,86 @@
         display: block;
       }
       
+      /* Markdown 表格樣式 */
+      .mode3-result-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        font-size: 14px;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      
+      .mode3-result-content table thead {
+        background: #f8fafc;
+        border-bottom: 2px solid #e5e7eb;
+      }
+      
+      .mode3-result-content table th {
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        color: #374151;
+        white-space: nowrap;
+        border-right: 1px solid #e5e7eb;
+      }
+      
+      .mode3-result-content table th:last-child {
+        border-right: none;
+      }
+      
+      .mode3-result-content table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+        transition: background-color 0.2s ease;
+      }
+      
+      .mode3-result-content table tbody tr:hover {
+        background-color: #f9fafb;
+      }
+      
+      .mode3-result-content table tbody tr:last-child {
+        border-bottom: none;
+      }
+      
+      .mode3-result-content table td {
+        padding: 12px 16px;
+        color: #4b5563;
+        border-right: 1px solid #e5e7eb;
+        vertical-align: top;
+      }
+      
+      .mode3-result-content table td:last-child {
+        border-right: none;
+      }
+      
+      .mode3-result-content table tbody tr:nth-child(even) {
+        background-color: #f9fafb;
+      }
+      
+      .mode3-result-content table tbody tr:nth-child(even):hover {
+        background-color: #f3f4f6;
+      }
+      
+      /* 響應式表格 */
+      @media (max-width: 768px) {
+        .mode3-result-content table {
+          font-size: 12px;
+        }
+        
+        .mode3-result-content table th,
+        .mode3-result-content table td {
+          padding: 8px 12px;
+        }
+        
+        .mode3-result-content table {
+          display: block;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+      }
+      
       .mode3-result-actions {
         display: flex;
         gap: 10px;
@@ -1121,7 +1201,7 @@
       
       /* 輸入區域 */
       .input-row {
-        padding: 8px 24px 16px 24px;
+        padding: 8px 24px calc(16px + var(--safe-area-inset-bottom, 0px)) 24px;
         display: flex;
         flex-direction: column;
         gap: 12px;
@@ -1233,6 +1313,15 @@
       
       /* 手機版適配 */
       @media (max-width: 768px) {
+        /* 輸入區域手機版：增加底部 padding，確保不被截斷 */
+        .input-row {
+          padding: 8px 16px calc(20px + var(--safe-area-inset-bottom, 0px)) 16px !important;
+        }
+        
+        .mode3-page .input-row {
+          padding: 12px 16px calc(20px + var(--safe-area-inset-bottom, 0px)) 16px !important;
+        }
+        
         /* 快速按鈕手機版：並排不換行，節省空間 */
         .quick-buttons {
           flex-wrap: nowrap !important; /* 不換行 */
@@ -1378,9 +1467,10 @@
           <div class="input-wrapper">
             <!-- 快速按鈕區域（移到輸入欄位上方） -->
             <div class="quick-buttons" id="mode3-quickButtons">
-              <button class="quick-btn" data-text="重新定位">重新定位</button>
-              <button class="quick-btn" data-text="生成14天規劃">生成14天規劃</button>
-              <button class="quick-btn" data-text="生成3隻腳本">生成3隻腳本</button>
+              <button class="quick-btn" onclick="handleQuickButton('ip-profile')">IP Profile</button>
+              <button class="quick-btn" onclick="handleQuickButton('14day-plan')">14天規劃</button>
+              <button class="quick-btn" onclick="handleQuickButton('today-script')">今日腳本</button>
+              <button class="quick-btn" onclick="handleQuickButton('reposition')">重新定位</button>
             </div>
             <div class="input-row-inner">
               <textarea id="mode3-messageInput" class="chat-input" placeholder="向AI顧問提問..." rows="1"></textarea>
