@@ -361,7 +361,7 @@
           max-height: none !important;
           padding: 24px 32px !important; /* 增加內邊距，讓對話框更大 */
           margin: 0 !important;
-          padding-bottom: 60px !important; /* 增加底部 padding */
+          padding-bottom: 200px !important; /* 增加底部 padding，為輸入欄位留出空間 */
           margin-bottom: 0 !important;
         }
         
@@ -373,15 +373,17 @@
           flex-grow: 0 !important;
           padding: 12px 32px 16px 32px !important; /* 增加左右 padding，與對話框對齊 */
           margin: 0 !important;
-          margin-top: auto !important; /* 使用 auto 將輸入欄位推到底部 */
           visibility: visible !important;
           opacity: 1 !important;
           height: auto !important;
           min-height: auto !important;
           max-height: none !important;
           z-index: 100 !important;
-          position: relative !important;
-          background: transparent !important;
+          position: absolute !important; /* 使用絕對定位固定在底部 */
+          bottom: 0 !important; /* 固定在底部 */
+          left: 0 !important;
+          right: 0 !important;
+          background: #ffffff !important; /* 添加背景色，避免被遮擋 */
           width: 100% !important;
           box-sizing: border-box !important;
         }
