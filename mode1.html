@@ -345,7 +345,7 @@
           flex-direction: column !important;
           box-sizing: border-box !important;
           padding: 0 !important;
-          padding-bottom: 400px !important;
+          padding-bottom: 300px !important;
           background: #ffffff !important;
         }
         
@@ -372,7 +372,7 @@
           flex-grow: 0 !important;
           padding: 8px 24px 8px 24px !important;
           margin: 0 !important;
-          margin-top: -400px !important;
+          margin-top: -300px !important;
           visibility: visible !important;
           opacity: 1 !important;
           height: auto !important;
@@ -519,14 +519,14 @@
       /* IP人設規劃使用說明按鈕和抽屜樣式 */
       .mode3-instructions-btn-container {
         position: fixed;
-        top: 75px;
+        top: 90px;
         left: 20px;
         z-index: 1002;
       }
       
       .mode3-results-btn-container {
         position: fixed;
-        top: 75px;
+        top: 90px;
         left: 120px;
         z-index: 1002;
       }
@@ -1286,12 +1286,12 @@
         }
         
         .mode3-instructions-btn-container {
-          top: 65px;
+          top: 80px;
           left: 15px;
         }
         
         .mode3-results-btn-container {
-          top: 65px;
+          top: 80px;
           left: 80px;
         }
         
@@ -1323,7 +1323,6 @@
         <div class="navbar-tabs">
           <a href="index.html" class="navbar-tab">首頁</a>
           <a href="mode1.html" class="navbar-tab active">IP人設規劃</a>
-          <a href="mode2.html" class="navbar-tab">AI顧問</a>
           <a href="mode3.html" class="navbar-tab">一鍵生成</a>
           <a href="index.html#forum" class="navbar-tab">論壇介紹</a>
           <a href="index.html#guide" class="navbar-tab">實戰指南</a>
@@ -1357,10 +1356,6 @@
         <a href="mode1.html" class="mobile-drawer-item active">
           <span class="mobile-drawer-icon">🎭</span>
           <span class="mobile-drawer-text">IP人設規劃</span>
-        </a>
-        <a href="mode2.html" class="mobile-drawer-item">
-          <span class="mobile-drawer-icon">💬</span>
-          <span class="mobile-drawer-text">AI顧問</span>
         </a>
         <a href="mode3.html" class="mobile-drawer-item">
           <span class="mobile-drawer-icon">⚡</span>
@@ -1414,7 +1409,7 @@
               <button class="quick-btn" onclick="handleQuickButton('reposition')">重新定位</button>
             </div>
             <div class="input-row-inner">
-              <textarea id="mode3-messageInput" class="chat-input" placeholder="向AI顧問提問..." rows="1"></textarea>
+              <textarea id="mode3-messageInput" class="chat-input" placeholder="向AI提問..." rows="1"></textarea>
               <button id="mode3-sendBtn" class="send-btn" disabled>
                 <i class="fas fa-paper-plane"></i>
               </button>

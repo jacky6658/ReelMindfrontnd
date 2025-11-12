@@ -861,19 +861,12 @@
         border-top-color: var(--border-color) !important;
       }
       
-      /* ========== 深色模式：Mode2 AI顧問模式 ========== */
-      .theme-dark .mode2-page {
-        background: var(--gradient-primary) !important;
-      }
-      
       /* 深色模式：AI 對話泡泡 - 強制覆蓋所有白色背景，背景改為深色，文字改為純白色 */
       /* 使用最高特異性來覆蓋淺色模式的 !important */
       .theme-dark .message.ai .message-content,
       .theme-dark .message.assistant .message-content,
       .theme-dark .message.ai[style*="background"] .message-content,
       .theme-dark .message.assistant[style*="background"] .message-content,
-      .theme-dark #mode2 .message.ai .message-content,
-      .theme-dark #mode2 .message.assistant .message-content,
       .theme-dark #chatMessages .message.ai .message-content,
       .theme-dark #chatMessages .message.assistant .message-content {
         background: var(--gradient-card) !important; /* 深色背景 */
@@ -885,8 +878,6 @@
       /* 強制覆蓋所有可能的白色背景 - 使用更強的特異性 */
       .theme-dark .message.ai .message-content[style],
       .theme-dark .message.assistant .message-content[style],
-      .theme-dark #mode2 .message.ai .message-content[style],
-      .theme-dark #mode2 .message.assistant .message-content[style],
       .theme-dark #chatMessages .message.ai .message-content[style],
       .theme-dark #chatMessages .message.assistant .message-content[style] {
         background: var(--gradient-card) !important; /* 深色背景 */
@@ -976,7 +967,6 @@
       /* 深色模式：聊天消息容器 */
       .theme-dark .chat-messages,
       .theme-dark #chatMessages,
-      .theme-dark #mode2 #chatMessages,
       .theme-dark #mode3 #mode3-chatMessages,
       .theme-dark #mode3 #mode3-chat-messages {
         background: var(--bg-secondary) !important;
@@ -992,7 +982,7 @@
         background: var(--bg-secondary) !important;
       }
       
-      /* Mode2 說明抽屜 */
+      /* 說明抽屜 */
       .theme-dark .instructions-drawer {
         background: var(--gradient-card) !important;
         border-color: var(--border-color) !important;
@@ -1751,7 +1741,6 @@
       .theme-dark button[class*="suggestion"],
       .theme-dark button[class*="quick"],
       .theme-dark .input-wrapper .quick-btn,
-      .theme-dark .mode2 .quick-btn,
       .theme-dark .mode3 .quick-btn,
       .theme-dark #mode3 .quick-btn,
       .theme-dark .mode3-quick-btn {
@@ -1794,7 +1783,6 @@
       .theme-dark button[class*="suggestion"]:hover,
       .theme-dark button[class*="quick"]:hover,
       .theme-dark .input-wrapper .quick-btn:hover,
-      .theme-dark .mode2 .quick-btn:hover,
       .theme-dark .mode3 .quick-btn:hover,
       .theme-dark #mode3 .quick-btn:hover {
         background: var(--accent-blue) !important;
@@ -1804,25 +1792,6 @@
         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
       }
       
-      /* 深色模式：Mode2 快速按鈕文字改為白色（確保所有情況都覆蓋） */
-      .theme-dark .mode2 .quick-btn,
-      .theme-dark .mode2 .suggestion-btn,
-      .theme-dark #mode2 .quick-btn,
-      .theme-dark #mode2 .suggestion-btn,
-      .theme-dark .mode2.fig1 .quick-btn,
-      .theme-dark .mode2.fig1 .suggestion-btn,
-      .theme-dark .mode2.fig1 .input-wrapper .quick-btn {
-        color: #ffffff !important;
-      }
-      
-      .theme-dark .mode2 .quick-btn[style*="color"],
-      .theme-dark .mode2 .suggestion-btn[style*="color"],
-      .theme-dark #mode2 .quick-btn[style*="color"],
-      .theme-dark #mode2 .suggestion-btn[style*="color"],
-      .theme-dark .mode2.fig1 .quick-btn[style*="color"],
-      .theme-dark .mode2.fig1 .suggestion-btn[style*="color"] {
-        color: #ffffff !important;
-      }
       
       .theme-dark .send-btn {
         background: var(--button-bg) !important;
@@ -2375,13 +2344,6 @@
         }
       }
       
-      /* mode2頁面特殊樣式 - 滿版顯示 */
-      .mode2 .page-content {
-        padding: 0;
-        max-width: none;
-        width: 100%;
-      }
-      
       /* 首頁樣式 */
       .homepage {
         display: flex;
@@ -2679,19 +2641,6 @@
         align-items: center;
         gap: 8px;
         transition: color 0.3s ease;
-      }
-      
-      /* 模式2：AI顧問對話頁面 */
-      .mode2-page {
-        display: flex;
-        flex-direction: column;
-        height: calc(100vh - 140px);
-        min-height: 600px;
-        position: relative;
-        max-width: none;
-        width: 100%;
-        margin: 0;
-        padding: 0;
       }
       
       /* 說明按鈕 */
@@ -3406,7 +3355,7 @@
         .top-navbar { justify-content: space-between; }
         .navbar-left { flex: 1; }
         .navbar-title { margin-left: auto; }
-        /* 一鍵生成/AI顧問/IP人設卡片加寬 */
+        /* 一鍵生成/IP人設卡片加寬 */
         .mode-cards { grid-template-columns: 1fr; }
         .mode-card { width: 100%; max-width: none; }
       }
@@ -3488,7 +3437,7 @@
         min-height: 600px;
       }
 
-      /* ===== AI顧問聊天訊息樣式 - ChatGPT 風格 ===== */
+      /* ===== 聊天訊息樣式 - ChatGPT 風格 ===== */
       
       /* 聊天訊息容器 - 採用更簡潔的設計 */
       .message {
@@ -3749,12 +3698,11 @@
         }
       }
       
-      /* 輸入欄位：預設隱藏，只在 mode2 和 mode3 頁面顯示 */
+      /* 輸入欄位：預設隱藏，只在 mode3 頁面顯示 */
       .input-row {
         display: none !important;
       }
       
-      #mode2.active .input-row,
       #mode3.active .input-row {
         display: flex !important;
         flex-direction: column !important;
@@ -3766,7 +3714,6 @@
         gap: 12px; /* 輸入框和快速按鈕之間的間距 */
       }
       
-      #mode2.active .input-container,
       #mode3.active .input-container {
         display: flex !important;
         gap: 12px;
@@ -3871,7 +3818,7 @@
         color: white;
       }
       
-      /* Mode3 現在使用與 Mode2 相同的結構，顯示/隱藏邏輯由 .input-row 控制 */
+      /* Mode3 顯示/隱藏邏輯由 .input-row 控制 */
       
       /* 優化聊天訊息樣式 */
       .msg {
@@ -4063,7 +4010,7 @@
       }
 
       /* ChatGPT 風格快速按鈕 */
-      /* 快速按鈕和輸入欄位：預設隱藏，只在 mode2 頁面顯示 */
+      /* 快速按鈕和輸入欄位：預設隱藏，只在 mode3 頁面顯示 */
       .quick-buttons,
       #quickButtons,
       .input-row,
@@ -4072,14 +4019,6 @@
         display: none !important;
       }
       
-      /* 只在 mode2 頁面且為 active 時顯示 */
-      #mode2.active .quick-buttons,
-      #mode2.active #quickButtons,
-      #mode2.active .input-row,
-      #mode2.active #messageInput,
-      #mode2.active #sendBtn {
-        display: flex !important;
-      }
       
       #mode2.active #messageInput {
         display: block !important;
