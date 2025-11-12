@@ -250,9 +250,29 @@ function initSettingsBlock() {
       currentTopic = topic;
       currentProfile = positioning;
       
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('設定已套用', 2000);
-      }
+      // 顯示通知（確保一定會顯示）
+      const showNotification = (message, duration = 3000) => {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast(message, duration);
+        } else {
+          const toastEl = document.getElementById('toast');
+          if (toastEl) {
+            toastEl.textContent = message;
+            toastEl.style.display = 'block';
+            toastEl.style.opacity = '1';
+            setTimeout(() => {
+              toastEl.style.opacity = '0';
+              setTimeout(() => {
+                toastEl.style.display = 'none';
+              }, 300);
+            }, duration);
+          } else {
+            alert(message);
+          }
+        }
+      };
+      
+      showNotification('✅ 設定已套用', 2000);
       
       // 自動收合設定區塊
       if (settingsContent) {
@@ -460,31 +480,7 @@ async function generatePositioning() {
     
     switchTab('positioning');
     
-    // 自動保存帳號定位到後端
-    if (result && ipPlanningToken && ipPlanningUser) {
-      try {
-        const saveResponse = await fetch(`${API_URL}/api/user/positioning/save`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${ipPlanningToken}`
-          },
-          body: JSON.stringify({
-            user_id: ipPlanningUser.user_id,
-            content: result
-          })
-        });
-        
-        if (saveResponse.ok) {
-          const saveData = await saveResponse.json();
-          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast(`帳號定位已自動儲存（編號：${saveData.record_number}）`, 2000);
-          }
-        }
-      } catch (saveError) {
-        console.error('自動儲存失敗:', saveError);
-      }
-    }
+    // 移除自動儲存功能，改由用戶手動決定是否儲存
     
   } catch (error) {
     updateResultBlock('positioningContent', '生成失敗，請稍後再試', false);
@@ -589,31 +585,7 @@ async function generateTopics() {
     
     switchTab('topics');
     
-    // 自動保存選題內容到後端
-    if (generationEnded && result && result.trim() && ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
-      try {
-        const saveResponse = await fetch(`${API_URL}/api/generations`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${ipPlanningToken}`
-          },
-          body: JSON.stringify({
-            user_id: ipPlanningUser.user_id,
-            content: result,
-            platform: platform,
-            topic: topic || '選題推薦'
-          })
-        });
-        
-        if (saveResponse.ok) {
-          const saveData = await saveResponse.json();
-          console.log('選題已自動儲存:', saveData);
-        }
-      } catch (saveError) {
-        console.error('自動儲存選題失敗:', saveError);
-      }
-    }
+    // 移除自動儲存功能，改由用戶手動決定是否儲存
     
   } catch (error) {
     updateResultBlock('topicContent', '生成失敗，請稍後再試', false);
@@ -785,23 +757,80 @@ async function saveResult(type) {
         
         if (response.ok) {
           const data = await response.json();
-          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast(`帳號定位已儲存（編號：${data.record_number}）`, 3000);
-          }
+          // 顯示通知（確保一定會顯示）
+          const showNotification = (message, duration = 3000) => {
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+              window.ReelMindCommon.showToast(message, duration);
+            } else {
+              const toastEl = document.getElementById('toast');
+              if (toastEl) {
+                toastEl.textContent = message;
+                toastEl.style.display = 'block';
+                toastEl.style.opacity = '1';
+                setTimeout(() => {
+                  toastEl.style.opacity = '0';
+                  setTimeout(() => {
+                    toastEl.style.display = 'none';
+                  }, 300);
+                }, duration);
+              } else {
+                alert(message);
+              }
+            }
+          };
+          showNotification(`✅ 帳號定位已儲存（編號：${data.record_number}）`, 3000);
         } else {
           throw new Error('儲存失敗');
         }
       } catch (error) {
         console.error('儲存錯誤:', error);
-        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast('儲存失敗，請稍後再試', 3000);
-        }
+        // 顯示通知（確保一定會顯示）
+        const showNotification = (message, duration = 3000) => {
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast(message, duration);
+          } else {
+            const toastEl = document.getElementById('toast');
+            if (toastEl) {
+              toastEl.textContent = message;
+              toastEl.style.display = 'block';
+              toastEl.style.opacity = '1';
+              setTimeout(() => {
+                toastEl.style.opacity = '0';
+                setTimeout(() => {
+                  toastEl.style.display = 'none';
+                }, 300);
+              }, duration);
+            } else {
+              alert(message);
+            }
+          }
+        };
+        showNotification('❌ 儲存失敗，請稍後再試', 3000);
       }
     } else {
       localStorage.setItem(`saved_${type}`, content);
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast(`${type === 'topics' ? '選題' : '腳本'}已儲存`, 2000);
-      }
+      // 顯示通知（確保一定會顯示）
+      const showNotification = (message, duration = 3000) => {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast(message, duration);
+        } else {
+          const toastEl = document.getElementById('toast');
+          if (toastEl) {
+            toastEl.textContent = message;
+            toastEl.style.display = 'block';
+            toastEl.style.opacity = '1';
+            setTimeout(() => {
+              toastEl.style.opacity = '0';
+              setTimeout(() => {
+                toastEl.style.display = 'none';
+              }, 300);
+            }, duration);
+          } else {
+            alert(message);
+          }
+        }
+      };
+      showNotification(`✅ ${type === 'topics' ? '選題' : '腳本'}已儲存`, 2000);
     }
   }
 }
@@ -881,6 +910,36 @@ async function saveScript() {
 
 // 重新生成結果
 async function regenerateResult(type) {
+  // 顯示通知：開始重新生成
+  const showNotification = (message, duration = 3000) => {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast(message, duration);
+    } else {
+      const toastEl = document.getElementById('toast');
+      if (toastEl) {
+        toastEl.textContent = message;
+        toastEl.style.display = 'block';
+        toastEl.style.opacity = '1';
+        setTimeout(() => {
+          toastEl.style.opacity = '0';
+          setTimeout(() => {
+            toastEl.style.display = 'none';
+          }, 300);
+        }, duration);
+      } else {
+        alert(message);
+      }
+    }
+  };
+  
+  const typeNames = {
+    'positioning': '帳號定位',
+    'topics': '選題推薦',
+    'script': '短影音腳本'
+  };
+  
+  showNotification(`正在重新生成${typeNames[type]}...`, 2000);
+  
   switch(type) {
     case 'positioning':
       await generatePositioning();
@@ -892,6 +951,11 @@ async function regenerateResult(type) {
       await generateScript();
       break;
   }
+  
+  // 生成完成後顯示通知
+  setTimeout(() => {
+    showNotification(`✅ ${typeNames[type]}已重新生成`, 2000);
+  }, 500);
 }
 
 // 登入函數
