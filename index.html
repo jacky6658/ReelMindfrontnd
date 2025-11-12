@@ -3,6 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <style>
+      /* 防止頁面載入時顯示內容，等 JavaScript 載入完成後再顯示 */
+      body:not(.page-loaded) {
+        opacity: 0;
+        visibility: hidden;
+        overflow: hidden;
+      }
+      body.page-loaded {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease-in;
+      }
+    </style>
     
     <!-- Primary SEO Meta Tags -->
     <title>ReelMind | AI 短影音智能體 - AI 生成腳本 × AI 帳號定位 × 爆款短影音</title>
@@ -12736,35 +12749,17 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
     <div id="toast" class="toast" style="display: none;"></div>
     <script>
       // ===== 提前定義 goToLogin 函數，確保按鈕可以使用 =====
-      function goToLogin(showMessage = true) {
-        // 如果 showMessage 為 true，先顯示提示訊息
-        if (showMessage && typeof showToast === 'function') {
-          showToast('⚠️ 請先登入以使用此功能', 3000);
-          // 延遲跳轉，讓用戶看到提示訊息
-          setTimeout(() => {
-            // 優先使用 common.js 中的 goToLogin（Google OAuth）
-            if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
-              window.ReelMindCommon.goToLogin();
-              return;
-            }
-            // 降級處理：顯示登入頁面
-            const loginPage = document.getElementById('loginPage');
-            const appContainer = document.getElementById('appContainer');
-            if (loginPage) loginPage.style.display = 'flex';
-            if (appContainer) appContainer.style.display = 'none';
-          }, 1500);
-        } else {
-          // 直接跳轉（不顯示提示訊息）
-          if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
-            window.ReelMindCommon.goToLogin();
-            return;
-          }
-          // 降級處理：顯示登入頁面
-          const loginPage = document.getElementById('loginPage');
-          const appContainer = document.getElementById('appContainer');
-          if (loginPage) loginPage.style.display = 'flex';
-          if (appContainer) appContainer.style.display = 'none';
+      function goToLogin(showMessage = false) {
+        // 優先使用 common.js 中的 goToLogin（直接跳轉到 Google OAuth）
+        if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+          window.ReelMindCommon.goToLogin();
+          return;
         }
+        // 降級處理：顯示登入頁面
+        const loginPage = document.getElementById('loginPage');
+        const appContainer = document.getElementById('appContainer');
+        if (loginPage) loginPage.style.display = 'flex';
+        if (appContainer) appContainer.style.display = 'none';
       }
       // 確保 goToLogin 在全局作用域中可用
       window.goToLogin = goToLogin;
@@ -13504,6 +13499,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 初始化頁面
       document.addEventListener('DOMContentLoaded', function() {
+        // 標記頁面已載入，顯示內容
+        document.body.classList.add('page-loaded');
+        
         // ⚠️ 優先處理授權連結（必須在其他初始化之前）
         // 檢查 URL 參數中是否有 activation_token（授權連結）
         const urlParams = new URLSearchParams(window.location.search);
@@ -18372,14 +18370,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             root.classList.add('theme-dark');
             root.style.colorScheme = 'dark';
           } else if (theme === 'auto') {
-            // 自動模式：根據系統設定
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-              root.classList.add('theme-dark');
-              root.style.colorScheme = 'dark';
-            } else {
-              root.classList.add('theme-light');
-              root.style.colorScheme = 'light';
-            }
+            // 自動模式：根據系統設定（但預設使用淺色模式）
+            // 為了統一兩個網域的顯示，暫時禁用自動模式，強制使用淺色模式
+            // if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            //   root.classList.add('theme-dark');
+            //   root.style.colorScheme = 'dark';
+            // } else {
+            //   root.classList.add('theme-light');
+            //   root.style.colorScheme = 'light';
+            // }
+            // 強制使用淺色模式
+            root.classList.add('theme-light');
+            root.style.colorScheme = 'light';
           } else {
             root.classList.add('theme-light');
             root.style.colorScheme = 'light';
@@ -18628,7 +18630,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 頁面載入時套用主題和語言
       function initializeDisplayPreferences() {
-        const theme = localStorage.getItem('user_theme') || 'light';
+        // 統一使用淺色模式作為預設（兩個網域都使用相同的主題）
+        // 強制使用淺色模式，確保兩個網域顯示一致
+        const theme = 'light'; // 強制使用淺色模式
+        localStorage.setItem('user_theme', 'light'); // 更新 localStorage，確保一致性
+        
         const language = localStorage.getItem('user_language') || 'zh-TW';
         applyTheme(theme);
         applyLanguage(language);

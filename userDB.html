@@ -45,8 +45,8 @@
         background: var(--navbar-bg);
         border-bottom: 1px solid var(--border-color);
         padding: 16px 24px;
-        display: flex;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
         align-items: center;
         box-shadow: 0 1px 3px var(--shadow);
         padding-top: calc(16px + var(--safe-area-inset-top, 0px));
@@ -61,14 +61,16 @@
         display: flex;
         align-items: center;
         gap: 24px;
+        justify-content: flex-start;
       }
       
       .navbar-title {
         font-size: 30px;
         font-weight: 600;
         color: var(--text-primary);
-        margin-right: auto;
+        text-align: center;
         transition: color 0.3s ease;
+        justify-self: center;
       }
       
       .clickable-title {
@@ -111,6 +113,7 @@
         display: flex;
         align-items: center;
         gap: 16px;
+        justify-content: flex-end;
       }
       
       .user-info {
@@ -335,6 +338,11 @@
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          text-align: center;
+        }
+        
+        .top-navbar {
+          grid-template-columns: auto 1fr auto;
         }
         
         .navbar-tabs {
@@ -1036,7 +1044,6 @@
         <button class="mobile-drawer-toggle" onclick="toggleMobileDrawer()">
           <span class="hamburger-icon">☰</span>
         </button>
-        <div class="navbar-title clickable-title" onclick="window.location.href='index.html'">ReelMind</div>
         <div class="navbar-tabs">
           <a href="index.html" class="navbar-tab">首頁</a>
           <a href="mode1.html" class="navbar-tab">IP人設規劃</a>
@@ -1047,6 +1054,7 @@
           <a href="userDB.html" class="navbar-tab active">創作者資料庫</a>
         </div>
       </div>
+      <div class="navbar-title clickable-title" onclick="window.location.href='index.html'">ReelMind</div>
       <div class="navbar-right">
         <div class="user-info" id="userInfo" style="display: none;" onclick="window.location.href='userDB.html'">
           <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
@@ -1438,12 +1446,20 @@
       }
       
       function logout() {
-        if (window.ReelMindCommon && window.ReelMindCommon.autoLogout) {
-          window.ReelMindCommon.autoLogout('用戶主動登出');
-        } else {
-          localStorage.clear();
-          window.location.href = 'index.html';
+        // 清除所有登入相關的 localStorage
+        localStorage.removeItem('ipPlanningToken');
+        localStorage.removeItem('ipPlanningRefreshToken');
+        localStorage.removeItem('ipPlanningUser');
+        localStorage.removeItem('ipPlanningTokenUpdated');
+        localStorage.removeItem('subscriptionStatus');
+        
+        // 清除 CSRF Token 緩存
+        if (window.Api && window.Api.clearCsrfToken) {
+          window.Api.clearCsrfToken();
         }
+        
+        // 直接跳轉到首頁（不顯示中間頁面）
+        window.location.href = 'index.html';
       }
       
       // 更新用戶資訊顯示

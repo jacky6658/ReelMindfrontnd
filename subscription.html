@@ -1047,7 +1047,8 @@ a{text-decoration:none;color:inherit}
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        window.location.href = 'checkout.html?plan=monthly';
+        // 調用 handleSubscriptionClick 進行登入檢查
+        handleSubscriptionClick('monthly');
         return false;
       }, true);
       
