@@ -94,14 +94,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadUserMemory();
   }
   
-  // 初始化設定區塊
-  initSettingsBlock();
+  // 初始化步驟式流程
+  initStepFlow();
+  
+  // 初始化按鈕選擇器（平台、目標）
+  initButtonSelectors();
   
   // 初始化腳本結構選擇按鈕
   initScriptStructureButtons();
   
-  // 初始化標籤切換
+  // 初始化標籤切換（Step 3 結果頁面）
   initTabs();
+  
+  // 初始化表單驗證
+  initFormValidation();
   
   console.log('✅ ========== Mode3 頁面初始化完成 ==========');
 });
@@ -285,6 +291,279 @@ function initSettingsBlock() {
   }
 }
 
+// 初始化步驟式流程
+function initStepFlow() {
+  let currentStep = 1;
+  
+  // Step 1 → Step 2
+  const nextToStep2Btn = document.getElementById('nextToStep2');
+  if (nextToStep2Btn) {
+    nextToStep2Btn.addEventListener('click', () => {
+      if (validateStep1()) {
+        updateConfirmContent();
+        goToStep(2);
+      }
+    });
+  }
+  
+  // Step 2 → Step 1 (返回)
+  const backToStep1Btn = document.getElementById('backToStep1');
+  if (backToStep1Btn) {
+    backToStep1Btn.addEventListener('click', () => {
+      goToStep(1);
+    });
+  }
+  
+  // Step 2 → Step 3 (生成)
+  const generateAllBtn = document.getElementById('generateAll');
+  if (generateAllBtn) {
+    generateAllBtn.addEventListener('click', async () => {
+      await generateAll();
+    });
+  }
+  
+  // 重新生成按鈕
+  const regenerateAllBtn = document.getElementById('regenerateAll');
+  if (regenerateAllBtn) {
+    regenerateAllBtn.addEventListener('click', () => {
+      goToStep(1);
+      // 重置表單
+      resetForm();
+    });
+  }
+}
+
+// 切換步驟
+function goToStep(step) {
+  // 隱藏所有步驟內容
+  document.querySelectorAll('.step-content').forEach(el => {
+    el.classList.remove('active');
+  });
+  
+  // 顯示對應步驟
+  if (step === 1) {
+    const stepEl = document.getElementById('step1');
+    if (stepEl) stepEl.classList.add('active');
+  } else if (step === 2) {
+    const stepEl = document.getElementById('step2');
+    if (stepEl) stepEl.classList.add('active');
+  } else if (step === 3) {
+    // Step 3 有兩個狀態：載入中和結果
+    // 預設顯示結果頁面（如果已有結果）
+    const resultStep = document.getElementById('step3Result');
+    const loadingStep = document.getElementById('step3Loading');
+    
+    // 檢查是否已有結果
+    const hasResults = document.getElementById('positioningContent')?.textContent.trim() && 
+                       document.getElementById('positioningContent')?.textContent.trim() !== '正在生成...';
+    
+    if (hasResults && resultStep) {
+      resultStep.classList.add('active');
+    } else if (loadingStep) {
+      loadingStep.classList.add('active');
+    }
+  }
+  
+  // 更新進度指示器
+  updateProgressIndicator(step);
+  
+  // 滾動到頂部
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 更新進度指示器
+function updateProgressIndicator(currentStep) {
+  for (let i = 1; i <= 3; i++) {
+    const circle = document.getElementById(`stepCircle${i}`);
+    const label = document.getElementById(`stepLabel${i}`);
+    const connector = document.getElementById(`connector${i}`);
+    
+    if (i < currentStep) {
+      // 已完成
+      if (circle) circle.className = 'progress-step-circle completed';
+      if (label) label.className = 'progress-step-label';
+      if (connector) connector.className = 'progress-step-connector active';
+    } else if (i === currentStep) {
+      // 當前步驟
+      if (circle) circle.className = 'progress-step-circle active';
+      if (label) label.className = 'progress-step-label active';
+      if (i > 1 && connector) {
+        const prevConnector = document.getElementById(`connector${i - 1}`);
+        if (prevConnector) prevConnector.className = 'progress-step-connector active';
+      }
+    } else {
+      // 未完成
+      if (circle) circle.className = 'progress-step-circle inactive';
+      if (label) label.className = 'progress-step-label inactive';
+      if (i > 1 && connector) {
+        const prevConnector = document.getElementById(`connector${i - 1}`);
+        if (prevConnector) prevConnector.className = 'progress-step-connector inactive';
+      }
+    }
+  }
+}
+
+// 初始化按鈕選擇器（平台、目標）
+function initButtonSelectors() {
+  // 目標選擇器
+  document.querySelectorAll('.button-selector[data-goal]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // 找到最近的 .button-grid 父元素，只移除該組內的按鈕選中狀態
+      const buttonGrid = btn.closest('.button-grid');
+      if (buttonGrid) {
+        buttonGrid.querySelectorAll('.button-selector[data-goal]').forEach(b => {
+          b.classList.remove('selected');
+        });
+      }
+      
+      // 添加選中狀態
+      btn.classList.add('selected');
+      checkStep1Validation();
+    });
+  });
+  
+  // 平台選擇器
+  document.querySelectorAll('.button-selector[data-platform]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // 找到最近的 .button-grid 父元素，只移除該組內的按鈕選中狀態
+      const buttonGrid = btn.closest('.button-grid');
+      if (buttonGrid) {
+        buttonGrid.querySelectorAll('.button-selector[data-platform]').forEach(b => {
+          b.classList.remove('selected');
+        });
+      }
+      
+      // 添加選中狀態
+      btn.classList.add('selected');
+      checkStep1Validation();
+    });
+  });
+}
+
+// 初始化表單驗證
+function initFormValidation() {
+  // 監聽所有必填項的變化
+  const requiredInputs = ['topicInput', 'positioningInput', 'durationInput'];
+  requiredInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', checkStep1Validation);
+      el.addEventListener('change', checkStep1Validation);
+    }
+  });
+  
+  // 監聽結構選擇
+  document.querySelectorAll('.structure-btn').forEach(btn => {
+    btn.addEventListener('click', checkStep1Validation);
+  });
+  
+  // 初始檢查
+  checkStep1Validation();
+}
+
+// 檢查 Step 1 表單驗證
+function checkStep1Validation() {
+  const topic = document.getElementById('topicInput')?.value.trim();
+  const positioning = document.getElementById('positioningInput')?.value.trim();
+  const duration = document.getElementById('durationInput')?.value;
+  const goal = document.querySelector('.button-selector[data-goal].selected');
+  const platform = document.querySelector('.button-selector[data-platform].selected');
+  const structure = document.querySelector('.structure-btn.selected');
+  
+  const isValid = topic && positioning && duration && goal && platform && structure;
+  
+  const nextBtn = document.getElementById('nextToStep2');
+  if (nextBtn) {
+    nextBtn.disabled = !isValid;
+  }
+  
+  return isValid;
+}
+
+// 驗證 Step 1
+function validateStep1() {
+  if (!checkStep1Validation()) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請填寫所有必填項', 3000);
+    }
+    return false;
+  }
+  return true;
+}
+
+// 更新確認頁面內容
+function updateConfirmContent() {
+  const topic = document.getElementById('topicInput')?.value.trim();
+  const positioning = document.getElementById('positioningInput')?.value.trim();
+  const duration = document.getElementById('durationInput')?.value;
+  const goal = document.querySelector('.button-selector[data-goal].selected')?.getAttribute('data-goal');
+  const platform = document.querySelector('.button-selector[data-platform].selected')?.getAttribute('data-platform');
+  const structure = document.querySelector('.structure-btn.selected')?.getAttribute('data-structure');
+  const style = document.getElementById('styleInput')?.value.trim();
+  
+  const structureNames = {
+    'A': '標準行銷三段式',
+    'B': '問題→解決→證明',
+    'C': 'Before→After',
+    'D': '教學知識型',
+    'E': '故事敘事型'
+  };
+  
+  const confirmContent = document.getElementById('confirmContent');
+  if (confirmContent) {
+    confirmContent.innerHTML = `
+      <div>
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">主題或產品</p>
+        <p style="font-weight: 500; font-size: 16px;">${topic}</p>
+      </div>
+      <div>
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">帳號定位</p>
+        <p style="font-weight: 500; font-size: 16px;">${positioning}</p>
+      </div>
+      <div>
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">影片目標</p>
+        <p style="font-weight: 500; font-size: 16px;">${goal}</p>
+      </div>
+      <div>
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">社群平台</p>
+        <p style="font-weight: 500; font-size: 16px;">${platform}</p>
+      </div>
+      <div>
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">腳本秒數</p>
+        <p style="font-weight: 500; font-size: 16px;">${duration}秒</p>
+      </div>
+      <div>
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">腳本結構</p>
+        <p style="font-weight: 500; font-size: 16px;">${structureNames[structure] || structure}</p>
+      </div>
+      ${style ? `
+      <div>
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">補充說明</p>
+        <p style="font-weight: 500; font-size: 16px;">${style}</p>
+      </div>
+      ` : ''}
+    `;
+  }
+}
+
+// 重置表單
+function resetForm() {
+  document.getElementById('topicInput').value = '';
+  document.getElementById('positioningInput').value = '';
+  document.getElementById('durationInput').value = '30';
+  document.getElementById('styleInput').value = '';
+  document.querySelectorAll('.button-selector').forEach(btn => btn.classList.remove('selected'));
+  document.querySelectorAll('.structure-btn').forEach(btn => btn.classList.remove('selected'));
+  selectedScriptStructure = null;
+  checkStep1Validation();
+}
+
 // 初始化腳本結構選擇按鈕
 function initScriptStructureButtons() {
   const structureButtons = document.querySelectorAll('.structure-btn');
@@ -311,6 +590,9 @@ function initScriptStructureButtons() {
         };
         window.ReelMindCommon.showToast(`已選擇：${structureNames[selectedScriptStructure]}`, 2000);
       }
+      
+      // 觸發表單驗證
+      checkStep1Validation();
     });
   });
 }
@@ -392,7 +674,317 @@ function updateResultBlock(blockId, content, hasContent = true) {
   }
 }
 
-// 生成帳號定位
+// 一次性生成所有內容（定位、選題、腳本）
+async function generateAll() {
+  // 獲取表單數據
+  const topic = document.getElementById('topicInput')?.value.trim();
+  const positioning = document.getElementById('positioningInput')?.value.trim();
+  const duration = document.getElementById('durationInput')?.value;
+  const goal = document.querySelector('.button-selector[data-goal].selected')?.getAttribute('data-goal');
+  const platform = document.querySelector('.button-selector[data-platform].selected')?.getAttribute('data-platform');
+  const structure = document.querySelector('.structure-btn.selected')?.getAttribute('data-structure');
+  const style = document.getElementById('styleInput')?.value.trim() || styleInstruction;
+  
+  if (!topic || !positioning || !duration || !goal || !platform || !structure) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請填寫所有必填項', 3000);
+    }
+    return;
+  }
+  
+  // 切換到載入頁面
+  document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+  const loadingStep = document.getElementById('step3Loading');
+  if (loadingStep) {
+    loadingStep.classList.add('active');
+  }
+  updateProgressIndicator(3);
+  
+  // 保存當前設定
+  currentPlatform = platform;
+  currentTopic = topic;
+  currentProfile = positioning;
+  selectedScriptStructure = structure;
+  
+  // 顯示初始狀態
+  updateResultBlock('positioningContent', '正在生成...', false);
+  updateResultBlock('topicContent', '正在生成...', false);
+  updateResultBlock('scriptContent', '正在生成...', false);
+  
+  try {
+    // 同時發起三個生成請求
+    const [positioningResult, topicsResult, scriptResult] = await Promise.allSettled([
+      generatePositioningStream(platform, topic, positioning, style),
+      generateTopicsStream(platform, topic, positioning, style),
+      generateScriptStream(platform, topic, positioning, duration, structure, style)
+    ]);
+    
+    // 處理結果
+    if (positioningResult.status === 'fulfilled') {
+      updateResultBlock('positioningContent', positioningResult.value, true);
+      document.getElementById('positioningActions').style.display = 'flex';
+    } else {
+      updateResultBlock('positioningContent', '生成失敗，請稍後再試', false);
+    }
+    
+    if (topicsResult.status === 'fulfilled') {
+      updateResultBlock('topicContent', topicsResult.value, true);
+      document.getElementById('topicActions').style.display = 'flex';
+    } else {
+      updateResultBlock('topicContent', '生成失敗，請稍後再試', false);
+    }
+    
+    if (scriptResult.status === 'fulfilled') {
+      updateResultBlock('scriptContent', scriptResult.value, true);
+      document.getElementById('scriptActions').style.display = 'flex';
+    } else {
+      updateResultBlock('scriptContent', '生成失敗，請稍後再試', false);
+    }
+    
+    // 切換到結果頁面
+    if (loadingStep) {
+      loadingStep.classList.remove('active');
+    }
+    const resultStep = document.getElementById('step3Result');
+    if (resultStep) {
+      resultStep.classList.add('active');
+    }
+    
+    // 顯示成功通知
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('✅ 生成完成！', 3000);
+    }
+    
+    // 自動切換到第一個標籤
+    switchTab('positioning');
+    
+  } catch (error) {
+    console.error('生成失敗:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('生成失敗，請稍後再試', 3000);
+    }
+    
+    // 切換到結果頁面（即使失敗也顯示）
+    if (loadingStep) {
+      loadingStep.classList.remove('active');
+    }
+    const resultStep = document.getElementById('step3Result');
+    if (resultStep) {
+      resultStep.classList.add('active');
+    }
+  }
+}
+
+// 生成帳號定位（Stream 版本，返回 Promise）
+async function generatePositioningStream(platform, topic, positioning, style) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch(`${API_URL}/api/generate/positioning`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ipPlanningToken}`
+        },
+        body: JSON.stringify({
+          message: '請幫我進行帳號定位分析',
+          platform: platform,
+          topic: topic,
+          duration: '30',
+          style: style,
+          profile: positioning,
+          history: [],
+          user_id: ipPlanningUser?.user_id || null
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('生成失敗');
+      }
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let result = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.type === 'token' && data.content) {
+                result += data.content;
+                // 實時更新（可選）
+                updateResultBlock('positioningContent', result, true);
+              } else if (data.type === 'end') {
+                break;
+              } else if (data.type === 'error') {
+                throw new Error(data.message || '生成失敗');
+              }
+            } catch (e) {
+              console.error('解析錯誤:', e);
+            }
+          }
+        }
+      }
+      
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// 生成選題（Stream 版本，返回 Promise）
+async function generateTopicsStream(platform, topic, positioning, style) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch(`${API_URL}/api/generate/topics`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ipPlanningToken}`
+        },
+        body: JSON.stringify({
+          message: '請幫我推薦選題',
+          platform: platform,
+          topic: topic,
+          duration: '30',
+          style: style,
+          profile: positioning,
+          history: [],
+          user_id: ipPlanningUser?.user_id || null
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('生成失敗');
+      }
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let result = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.type === 'token' && data.content) {
+                result += data.content;
+                // 實時更新（可選）
+                updateResultBlock('topicContent', result, true);
+              } else if (data.type === 'end') {
+                break;
+              } else if (data.type === 'error') {
+                throw new Error(data.message || '生成失敗');
+              }
+            } catch (e) {
+              console.error('解析錯誤:', e);
+            }
+          }
+        }
+      }
+      
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// 生成腳本（Stream 版本，返回 Promise）
+async function generateScriptStream(platform, topic, positioning, duration, structure, style) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const structureMessages = {
+        'A': '請使用標準行銷三段式（Hook → Value → CTA）結構生成完整腳本',
+        'B': '請使用問題 → 解決 → 證明（Problem → Solution → Proof）結構生成完整腳本',
+        'C': '請使用Before → After → 秘密揭露結構生成完整腳本',
+        'D': '請使用教學知識型（迷思 → 原理 → 要點 → 行動）結構生成完整腳本',
+        'E': '請使用故事敘事型（起 → 承 → 轉 → 合）結構生成完整腳本'
+      };
+      
+      const durationNum = duration.toString().replace('秒', '');
+      
+      const response = await fetch(`${API_URL}/api/generate/script`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ipPlanningToken}`
+        },
+        body: JSON.stringify({
+          message: structureMessages[structure] || '請幫我生成完整腳本',
+          platform: platform,
+          topic: topic,
+          duration: durationNum,
+          style: style,
+          profile: positioning,
+          script_structure: structure,
+          history: [],
+          user_id: ipPlanningUser?.user_id || null
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('生成失敗');
+      }
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let result = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.type === 'token' && data.content) {
+                result += data.content;
+                // 實時更新（可選）
+                updateResultBlock('scriptContent', result, true);
+              } else if (data.type === 'end') {
+                break;
+              } else if (data.type === 'error') {
+                throw new Error(data.message || '生成失敗');
+              }
+            } catch (e) {
+              console.error('解析錯誤:', e);
+            }
+          }
+        }
+      }
+      
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// 生成帳號定位（保留原有函數以支援獨立生成）
 async function generatePositioning() {
   const platformEl = document.getElementById('platformSelect');
   const topicEl = document.getElementById('topicInput');
@@ -659,7 +1251,7 @@ async function generateScript() {
         message: structureMessages[selectedScriptStructure] || '請幫我生成完整腳本',
         platform: platform,
         topic: topic,
-        duration: durationInput ? durationInput.value || '30' : '30',
+        duration: durationInput ? (durationInput.value || '30').replace('秒', '') : '30',
         style: styleInstruction,
         profile: positioning,
         script_structure: selectedScriptStructure, // 傳遞選中的結構
@@ -837,10 +1429,14 @@ async function saveResult(type) {
 
 // 儲存腳本
 async function saveScript() {
+  console.log('saveScript() 被調用');
+  
   // 輔助函數：顯示通知（確保一定會顯示）
   const showNotification = (message, duration = 3000) => {
+    console.log('顯示通知:', message);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast(message, duration);
+      console.log('使用 ReelMindCommon.showToast');
     } else {
       // 備用方案：使用 alert 或創建簡單的 toast
       const toastEl = document.getElementById('toast');
@@ -848,6 +1444,7 @@ async function saveScript() {
         toastEl.textContent = message;
         toastEl.style.display = 'block';
         toastEl.style.opacity = '1';
+        console.log('使用 toast 元素');
         setTimeout(() => {
           toastEl.style.opacity = '0';
           setTimeout(() => {
@@ -855,23 +1452,27 @@ async function saveScript() {
           }, 300);
         }, duration);
       } else {
+        console.log('使用 alert 備用方案');
         alert(message);
       }
     }
   };
   
   if (!ipPlanningUser || !ipPlanningUser.user_id || !ipPlanningToken) {
+    console.log('用戶未登入');
     showNotification('請先登入', 3000);
     return;
   }
   
   const content = document.getElementById('scriptContent').textContent;
   if (!content || content.includes('請點選「一鍵生成腳本」按鈕開始') || content.includes('請先完成')) {
+    console.log('沒有可儲存的內容');
     showNotification('沒有可儲存的內容', 3000);
     return;
   }
   
   // 顯示儲存中提示
+  console.log('開始儲存腳本...');
   showNotification('正在儲存...', 2000);
   
   try {
@@ -892,18 +1493,22 @@ async function saveScript() {
     
     if (response.ok) {
       const data = await response.json().catch(() => ({}));
+      console.log('腳本儲存成功:', data);
       showNotification('✅ 腳本儲存成功！', 3000);
     } else if (response.status === 404) {
       localStorage.setItem(`saved_script_${Date.now()}`, content);
+      console.log('腳本已儲存到本地（API 不存在）');
       showNotification('✅ 腳本已儲存到本地！', 3000);
     } else {
       const errorData = await response.json().catch(() => ({ error: '儲存失敗' }));
+      console.error('儲存失敗:', errorData);
       throw new Error(errorData.error || '儲存失敗');
     }
   } catch (error) {
     console.error('Save script error:', error);
     // 儲存到本地作為備份
     localStorage.setItem(`saved_script_${Date.now()}`, content);
+    console.log('腳本已儲存到本地（伺服器儲存失敗）');
     showNotification('⚠️ 腳本已儲存到本地（伺服器儲存失敗）', 3000);
   }
 }

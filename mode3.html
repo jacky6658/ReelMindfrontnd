@@ -481,6 +481,7 @@
         width: 64px;
         height: 2px;
         transition: all 0.3s;
+        position: relative;
       }
       
       .progress-step-connector.active {
@@ -489,6 +490,28 @@
       
       .progress-step-connector.inactive {
         background: #e5e7eb;
+      }
+      
+      /* 連接線箭頭 */
+      .progress-step-connector::after {
+        content: '';
+        position: absolute;
+        right: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-left: 6px solid;
+        border-top: 4px solid transparent;
+        border-bottom: 4px solid transparent;
+      }
+      
+      .progress-step-connector.active::after {
+        border-left-color: #2563eb;
+      }
+      
+      .progress-step-connector.inactive::after {
+        border-left-color: #e5e7eb;
       }
       
       @media (max-width: 768px) {
@@ -1393,12 +1416,6 @@
     <!-- Mode3 頁面內容（一鍵生成 - 步驟式流程） -->
     <div class="page-content">
       <div class="step-flow-container">
-        <!-- 返回按鈕 -->
-        <button class="back-button" onclick="window.location.href='index.html'">
-          <span>←</span>
-          <span>返回首頁</span>
-        </button>
-        
         <!-- 進度步驟指示器 -->
         <div class="progress-steps">
           <div class="progress-step">
