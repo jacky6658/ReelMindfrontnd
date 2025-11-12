@@ -369,8 +369,9 @@
           flex-direction: column !important;
           flex-shrink: 0 !important;
           flex-grow: 0 !important;
-          padding: 12px 24px calc(16px + var(--safe-area-inset-bottom, 0px)) 24px !important;
+          padding: 12px 24px calc(32px + var(--safe-area-inset-bottom, 0px)) 24px !important;
           margin: 0 !important;
+          margin-bottom: 0 !important;
           visibility: visible !important;
           opacity: 1 !important;
           height: auto !important;
@@ -1201,10 +1202,11 @@
       
       /* 輸入區域 */
       .input-row {
-        padding: 8px 24px calc(16px + var(--safe-area-inset-bottom, 0px)) 24px;
+        padding: 8px 24px calc(32px + var(--safe-area-inset-bottom, 0px)) 24px;
         display: flex;
         flex-direction: column;
         gap: 12px;
+        margin-bottom: 0;
       }
       
       .input-container {
@@ -1563,45 +1565,45 @@
       <div class="mode3-results-drawer-content">
         <!-- 結果標籤 -->
         <div class="mode3-tabs">
-          <button class="mode3-tab active" onclick="switchMode3Tab('profile', event)">《IP Profile》</button>
-          <button class="mode3-tab" onclick="switchMode3Tab('plan', event)">《14天短影音規劃表》</button>
-          <button class="mode3-tab" onclick="switchMode3Tab('scripts', event)">《今日3支腳本》</button>
+          <button class="mode3-tab active" onclick="switchMode3Tab('positioning', event)">《帳號定位》</button>
+          <button class="mode3-tab" onclick="switchMode3Tab('topics', event)">《選題方向（影片類型配比）》</button>
+          <button class="mode3-tab" onclick="switchMode3Tab('weekly', event)">《一週腳本》</button>
         </div>
 
         <!-- 結果內容 -->
         <div class="mode3-results-content">
-          <!-- IP Profile 結果 -->
-          <div id="mode3-profile-result" class="mode3-result-block active">
+          <!-- 帳號定位結果 -->
+          <div id="mode3-positioning-result" class="mode3-result-block active">
             <div class="mode3-result-placeholder">
-              <div class="mode3-placeholder-icon">🎭</div>
-              <h4>IP Profile</h4>
-              <p>與AI對話後，將在此顯示您的個人品牌檔案</p>
-              <button class="mode3-generate-btn" onclick="generateMode3IPProfile()">
-                <span>🚀</span> 生成IP Profile
+              <div class="mode3-placeholder-icon">🎯</div>
+              <h4>帳號定位</h4>
+              <p>與AI對話後，將在此顯示您的帳號定位分析</p>
+              <button class="mode3-generate-btn" onclick="generateMode3Positioning()">
+                <span>🚀</span> 生成帳號定位
               </button>
             </div>
           </div>
 
-          <!-- 14天規劃結果 -->
-          <div id="mode3-plan-result" class="mode3-result-block">
+          <!-- 選題方向（影片類型配比）結果 -->
+          <div id="mode3-topics-result" class="mode3-result-block">
             <div class="mode3-result-placeholder">
-              <div class="mode3-placeholder-icon">📅</div>
-              <h4>14天短影音規劃</h4>
-              <p>基於您的IP Profile，生成詳細的內容規劃</p>
-              <button class="mode3-generate-btn" onclick="generateMode314DayPlan()">
-                <span>🚀</span> 生成14天規劃
+              <div class="mode3-placeholder-icon">📊</div>
+              <h4>選題方向（影片類型配比）</h4>
+              <p>根據您的帳號定位，生成選題方向和影片類型配比建議</p>
+              <button class="mode3-generate-btn" onclick="generateMode3TopicsWithRatio()">
+                <span>🚀</span> 生成選題方向
               </button>
             </div>
           </div>
 
-          <!-- 今日腳本結果 -->
-          <div id="mode3-scripts-result" class="mode3-result-block">
+          <!-- 一週腳本結果 -->
+          <div id="mode3-weekly-result" class="mode3-result-block">
             <div class="mode3-result-placeholder">
               <div class="mode3-placeholder-icon">📝</div>
-              <h4>今日3支腳本</h4>
-              <p>根據您的規劃，生成今日可用的腳本</p>
-              <button class="mode3-generate-btn" onclick="generateMode3TodayScripts()">
-                <span>🚀</span> 生成今日腳本
+              <h4>一週腳本</h4>
+              <p>根據您的選題方向，生成一週的短影音腳本</p>
+              <button class="mode3-generate-btn" onclick="generateMode3WeeklyScripts()">
+                <span>🚀</span> 生成一週腳本
               </button>
             </div>
           </div>

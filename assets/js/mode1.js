@@ -217,35 +217,35 @@ function initMode3Chat() {
 function handleQuickButton(type) {
   switch(type) {
     case 'ip-profile':
-      // 打開右側抽屜，顯示 IP Profile 標籤
+      // 打開右側抽屜，顯示 帳號定位 標籤
       toggleMode3ResultsDrawer();
-      switchMode3Tab('profile', null);
+      switchMode3Tab('positioning', null);
       // 如果還沒有生成，自動生成
-      const profileResult = document.getElementById('mode3-profile-result');
-      if (profileResult && profileResult.querySelector('.mode3-result-placeholder')) {
-        generateMode3IPProfile();
+      const positioningResult = document.getElementById('mode3-positioning-result');
+      if (positioningResult && positioningResult.querySelector('.mode3-result-placeholder')) {
+        generateMode3Positioning();
       } else {
         // 如果已經有內容，LLM 告知用戶目前的 IP Profile
         sendMode3Message('請告知我目前的 IP Profile，基於我們之前的對話內容。', 'ip_planning');
       }
       break;
     case '14day-plan':
-      // 打開右側抽屜，顯示 14天規劃 標籤
+      // 打開右側抽屜，顯示 選題方向 標籤
       toggleMode3ResultsDrawer();
-      switchMode3Tab('plan', null);
+      switchMode3Tab('topics', null);
       // 如果還沒有生成，自動生成
-      const planResult = document.getElementById('mode3-plan-result');
-      if (planResult && planResult.querySelector('.mode3-result-placeholder')) {
-        generateMode314DayPlan();
+      const topicsResult = document.getElementById('mode3-topics-result');
+      if (topicsResult && topicsResult.querySelector('.mode3-result-placeholder')) {
+        generateMode3TopicsWithRatio();
       } else {
         // 如果已經有內容，LLM 根據之前討論的影片類型配比再次告知規劃
         sendMode3Message('請根據我們之前討論的影片類型配比，再次告知我的14天規劃。', 'ip_planning');
       }
       break;
     case 'today-script':
-      // 打開右側抽屜，顯示 今日腳本 標籤
+      // 打開右側抽屜，顯示 一週腳本 標籤
       toggleMode3ResultsDrawer();
-      switchMode3Tab('scripts', null);
+      switchMode3Tab('weekly', null);
       // 詢問用戶要使用哪個腳本結構
       sendMode3Message('請根據目前資料庫的5個腳本結構（A/B/C/D/E），詢問我要使用哪一個腳本結構來產出今日的腳本。', 'ip_planning');
       break;
@@ -620,22 +620,55 @@ function switchMode3Tab(tabName, event) {
   } else {
     const tabs = document.querySelectorAll('.mode3-tab');
     tabs.forEach(tab => {
-      if (tab.textContent.includes(tabName === 'profile' ? 'IP Profile' : tabName === 'plan' ? '14天' : '今日')) {
+      const tabText = tab.textContent;
+      if (tabName === 'positioning' && tabText.includes('帳號定位')) {
+        tab.classList.add('active');
+      } else if (tabName === 'topics' && tabText.includes('選題方向')) {
+        tab.classList.add('active');
+      } else if (tabName === 'weekly' && tabText.includes('一週腳本')) {
+        tab.classList.add('active');
+      }
+      // 保留舊的匹配邏輯作為備用
+      else if (tabName === 'profile' && tabText.includes('IP Profile')) {
+        tab.classList.add('active');
+      } else if (tabName === 'plan' && tabText.includes('14天')) {
+        tab.classList.add('active');
+      } else if (tabName === 'scripts' && tabText.includes('今日')) {
         tab.classList.add('active');
       }
     });
   }
   
-  const resultBlock = document.getElementById(`mode3-${tabName}-result`);
+  // 優先使用新的 ID，如果不存在則使用舊的 ID
+  let resultBlock = document.getElementById(`mode3-${tabName}-result`);
+  if (!resultBlock) {
+    // 映射舊的標籤名稱到新的 ID
+    if (tabName === 'profile') {
+      resultBlock = document.getElementById('mode3-positioning-result');
+    } else if (tabName === 'plan') {
+      resultBlock = document.getElementById('mode3-topics-result');
+    } else if (tabName === 'scripts') {
+      resultBlock = document.getElementById('mode3-weekly-result');
+    }
+  }
+  
   if (resultBlock) {
     resultBlock.classList.add('active');
   }
 }
 
-// 生成IP Profile
-async function generateMode3IPProfile() {
-  const resultBlock = document.getElementById('mode3-profile-result');
+// 生成帳號定位
+async function generateMode3Positioning() {
+  const resultBlock = document.getElementById('mode3-positioning-result') || document.getElementById('mode3-profile-result');
+  if (!resultBlock) {
+    console.error('找不到結果區塊');
+    return;
+  }
   const button = resultBlock.querySelector('.mode3-generate-btn');
+  if (!button) {
+    console.error('找不到生成按鈕');
+    return;
+  }
   
   button.disabled = true;
   button.innerHTML = '<span>⏳</span> 生成中...';
@@ -648,11 +681,11 @@ async function generateMode3IPProfile() {
         'Authorization': `Bearer ${ipPlanningToken}`
       },
       body: JSON.stringify({
-        message: '請根據我們的對話內容，生成一份完整的IP Profile。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。絕對不要出現任何程式碼、技術術語或複雜的結構化格式。內容包含：1.**人設標籤**：列出3-5個標籤，用自然語言描述 2.**一句話定位**：用一句話清楚說明個人定位 3.**品牌原型**：簡潔描述品牌原型和特質 4.**語氣設定**：用友善的語言說明語氣特點 5.**核心價值觀**：列出3-5個核心價值，用簡短句子說明 6.**禁語清單**：列出應該避免使用的詞彙和表達方式 7.**視覺設定**：描述視覺風格、配色、字體等，用自然語言 8.**KPI指標**：說明關鍵指標，用易懂的方式呈現',
+        message: '請根據我們的對話內容，生成帳號定位分析。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。內容包含：1.**目標受眾**：清楚說明目標受眾是誰 2.**傳達目標**：說明想要達成的目標（例如：進群、portally、建立品牌等） 3.**帳號定位**：用一句話清楚說明帳號定位 4.**內容方向**：描述主要內容方向 5.**風格調性**：說明帳號的風格和調性 6.**差異化優勢**：說明與其他帳號的差異化優勢',
         user_id: ipPlanningUser?.user_id || 'anonymous',
         platform: '短影音平台',
         profile: 'IP人設規劃專家',
-        topic: 'IP Profile生成',
+        topic: '帳號定位生成',
         style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，不要程式碼或技術格式',
         duration: '30',
         conversation_type: 'ip_planning'  // 指定對話類型
@@ -696,16 +729,29 @@ async function generateMode3IPProfile() {
       throw new Error('生成失敗');
     }
   } catch (error) {
-    console.error('生成IP Profile失敗:', error);
+    console.error('生成帳號定位失敗:', error);
     button.innerHTML = '<span>❌</span> 生成失敗，請重試';
     button.disabled = false;
   }
 }
 
-// 生成14天規劃
-async function generateMode314DayPlan() {
-  const resultBlock = document.getElementById('mode3-plan-result');
+// 保留舊函數作為備用（向後兼容）
+async function generateMode3IPProfile() {
+  return generateMode3Positioning();
+}
+
+// 生成選題方向（影片類型配比）
+async function generateMode3TopicsWithRatio() {
+  const resultBlock = document.getElementById('mode3-topics-result') || document.getElementById('mode3-plan-result');
+  if (!resultBlock) {
+    console.error('找不到結果區塊');
+    return;
+  }
   const button = resultBlock.querySelector('.mode3-generate-btn');
+  if (!button) {
+    console.error('找不到生成按鈕');
+    return;
+  }
   
   button.disabled = true;
   button.innerHTML = '<span>⏳</span> 生成中...';
@@ -718,12 +764,12 @@ async function generateMode314DayPlan() {
         'Authorization': `Bearer ${ipPlanningToken}`
       },
       body: JSON.stringify({
-        message: '請根據我們的對話內容和IP Profile，生成一份14天短影音規劃表。請使用自然語言、友善的語氣，以清晰易懂的方式呈現每一天的規劃。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現14天規劃**，表格欄位包含：日期、主題、內容方向、拍攝建議、發布時間、互動策略。每一天的規劃請包含：1.**每日主題**：用一句話說明當天的主題 2.**內容方向**：用2-3句自然語言描述內容重點 3.**拍攝建議**：用簡短易懂的句子說明拍攝要點 4.**發布時間**：建議發布時段 5.**互動策略**：用一句話說明如何與觀眾互動。請確保表格格式正確，使用 Markdown 表格語法（| 欄位1 | 欄位2 | ... |）。',
+        message: '請根據我們的對話內容和帳號定位，生成選題方向和影片類型配比建議。請參考知識庫中的「內容策略矩陣」，理解其邏輯而非記憶範例。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現選題方向和配比**，表格欄位包含：影片類型、佔比、目的、內容方向。請根據用戶的帳號定位、目標受眾、傳達目標來判斷適合的內容類型和配比，不要使用固定配比。如果用戶的主題不符合範例類別，請根據邏輯自創新類型並合理配置比例。',
         user_id: ipPlanningUser?.user_id || 'anonymous',
         platform: '短影音平台',
         profile: 'IP人設規劃專家',
-        topic: '14天規劃生成',
-        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現14天規劃',
+        topic: '選題方向生成',
+        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現選題方向和配比',
         duration: '30',
         conversation_type: 'ip_planning'  // 指定對話類型
       })
@@ -766,15 +812,20 @@ async function generateMode314DayPlan() {
       throw new Error('生成失敗');
     }
   } catch (error) {
-    console.error('生成14天規劃失敗:', error);
+    console.error('生成選題方向失敗:', error);
     button.innerHTML = '<span>❌</span> 生成失敗，請重試';
     button.disabled = false;
   }
 }
 
-// 生成今日腳本
-async function generateMode3TodayScripts() {
-  const resultBlock = document.getElementById('mode3-scripts-result');
+// 保留舊函數作為備用（向後兼容）
+async function generateMode314DayPlan() {
+  return generateMode3TopicsWithRatio();
+}
+
+// 生成一週腳本
+async function generateMode3WeeklyScripts() {
+  const resultBlock = document.getElementById('mode3-weekly-result') || document.getElementById('mode3-scripts-result');
   const button = resultBlock.querySelector('.mode3-generate-btn');
   
   button.disabled = true;
@@ -792,12 +843,12 @@ async function generateMode3TodayScripts() {
         'Authorization': `Bearer ${ipPlanningToken}`
       },
       body: JSON.stringify({
-        message: '請根據我們的對話內容和IP Profile，生成今日1支短影音腳本。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現腳本內容**，表格欄位包含：時間、段落、台詞、畫面描述、字幕文字、音效與轉場。每支腳本請包含：1.**主題標題**：用一句話清楚說明這支影片的主題 2.**開場鉤子**：用自然語言寫出吸引人的開場，讓觀眾想繼續看下去 3.**核心內容**：用2-3句自然語言說明影片要傳達的價值 4.**行動呼籲**：用一句話引導觀眾採取行動 5.**畫面描述**：用簡短易懂的句子描述畫面應該呈現什麼 6.**發佈文案**：寫一段適合社群媒體的文案。請確保表格格式正確，使用 Markdown 表格語法（| 欄位1 | 欄位2 | ... |）。',
+        message: '請根據我們的對話內容、帳號定位和選題方向，生成一週的短影音腳本。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現一週腳本**，表格欄位包含：日期、主題、時間、段落、台詞、畫面描述、字幕文字、音效與轉場。每支腳本請包含：1.**主題標題**：用一句話清楚說明這支影片的主題 2.**開場鉤子**：用自然語言寫出吸引人的開場，讓觀眾想繼續看下去 3.**核心內容**：用2-3句自然語言說明影片要傳達的價值 4.**行動呼籲**：用一句話引導觀眾採取行動 5.**畫面描述**：用簡短易懂的句子描述畫面應該呈現什麼 6.**發佈文案**：寫一段適合社群媒體的文案。請確保表格格式正確，使用 Markdown 表格語法（| 欄位1 | 欄位2 | ... |）。',
         user_id: ipPlanningUser?.user_id || 'anonymous',
         platform: '短影音平台',
         profile: 'IP人設規劃專家',
-        topic: '今日腳本生成',
-        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現腳本內容',
+        topic: '一週腳本生成',
+        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現一週腳本',
         duration: '30',
         conversation_type: 'ip_planning'  // 指定對話類型
       })
@@ -872,11 +923,16 @@ async function generateMode3TodayScripts() {
     button.innerHTML = '<span>🚀</span> 重新生成';
     button.disabled = false;
   } catch (error) {
-    console.error('❌ 生成今日腳本失敗:', error);
+    console.error('❌ 生成一週腳本失敗:', error);
     contentDiv.innerHTML = `<p style="color: #dc2626;">生成失敗：${escapeHtml(error.message || '未知錯誤')}</p><p>請檢查網路連線或稍後再試。</p>`;
     button.innerHTML = '<span>❌</span> 生成失敗，請重試';
     button.disabled = false;
   }
+}
+
+// 保留舊函數作為備用（向後兼容）
+async function generateMode3TodayScripts() {
+  return generateMode3WeeklyScripts();
 }
 
 // 儲存結果
@@ -976,15 +1032,21 @@ async function saveMode3Result() {
 function regenerateMode3Result() {
   const activeTab = document.querySelector('.mode3-tab.active');
   if (activeTab) {
-    const tabName = activeTab.textContent.includes('Profile') ? 'profile' : 
-                   activeTab.textContent.includes('規劃') ? 'plan' : 'scripts';
-    
-    if (tabName === 'profile') {
-      generateMode3IPProfile();
-    } else if (tabName === 'plan') {
-      generateMode314DayPlan();
-    } else if (tabName === 'scripts') {
-      generateMode3TodayScripts();
+    const tabText = activeTab.textContent;
+    if (tabText.includes('帳號定位')) {
+      generateMode3Positioning();
+    } else if (tabText.includes('選題方向')) {
+      generateMode3TopicsWithRatio();
+    } else if (tabText.includes('一週腳本')) {
+      generateMode3WeeklyScripts();
+    }
+    // 保留舊的匹配邏輯作為備用
+    else if (tabText.includes('Profile')) {
+      generateMode3Positioning();
+    } else if (tabText.includes('規劃')) {
+      generateMode3TopicsWithRatio();
+    } else if (tabText.includes('腳本')) {
+      generateMode3WeeklyScripts();
     }
   }
 }
