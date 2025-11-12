@@ -369,9 +369,8 @@
           flex-direction: column !important;
           flex-shrink: 0 !important;
           flex-grow: 0 !important;
-          padding: 12px 24px calc(32px + var(--safe-area-inset-bottom, 0px)) 24px !important;
+          padding: 10px 24px !important;
           margin: 0 !important;
-          margin-bottom: 0 !important;
           visibility: visible !important;
           opacity: 1 !important;
           height: auto !important;
@@ -379,12 +378,9 @@
           max-height: none !important;
           z-index: 100 !important;
           position: relative !important;
-          background: #ffffff !important;
+          background: transparent !important;
           width: 100% !important;
           box-sizing: border-box !important;
-          overflow: visible !important;
-          border-top: 1px solid #e5e7eb !important;
-          box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05) !important;
         }
         
         /* 確保輸入容器和快速按鈕可見 */
@@ -1202,11 +1198,26 @@
       
       /* 輸入區域 */
       .input-row {
-        padding: 8px 24px calc(32px + var(--safe-area-inset-bottom, 0px)) 24px;
+        background: transparent;
+        border: none;
+        padding: 8px 24px 16px 24px;
         display: flex;
         flex-direction: column;
         gap: 12px;
-        margin-bottom: 0;
+        position: static !important;
+        bottom: auto !important;
+        left: auto !important;
+        right: auto !important;
+        z-index: auto !important;
+        min-height: auto !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        height: auto !important;
+        border-radius: 0 !important;
+        max-height: none !important;
+        flex-shrink: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
       }
       
       .input-container {
@@ -1315,13 +1326,13 @@
       
       /* 手機版適配 */
       @media (max-width: 768px) {
-        /* 輸入區域手機版：增加底部 padding，確保不被截斷 */
+        /* 輸入區域手機版 */
         .input-row {
-          padding: 8px 16px calc(20px + var(--safe-area-inset-bottom, 0px)) 16px !important;
+          padding: 8px 12px 16px 12px !important;
         }
         
         .mode3-page .input-row {
-          padding: 12px 16px calc(20px + var(--safe-area-inset-bottom, 0px)) 16px !important;
+          padding: 10px 12px 16px 12px !important;
         }
         
         /* 快速按鈕手機版：並排不換行，節省空間 */
