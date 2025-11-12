@@ -377,10 +377,92 @@
     return true;
   }
 
+  // ===== 載入狀態管理 =====
+
+  /**
+   * 統一的載入狀態管理
+   * 防止多個載入動畫同時顯示
+   */
+  let loadingStateCount = 0;
+  let globalLoadingElement = null;
+
+  /**
+   * HTML 轉義函數（用於載入訊息）
+   */
+  function escapeHtml(text) {
+    if (text == null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+  }
+
+  /**
+   * 顯示全局載入動畫
+   */
+  function showGlobalLoading(message = '載入中...') {
+    loadingStateCount++;
+    
+    if (!globalLoadingElement) {
+      globalLoadingElement = document.createElement('div');
+      globalLoadingElement.id = 'global-loading';
+      globalLoadingElement.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        backdrop-filter: blur(4px);
+      `;
+      globalLoadingElement.innerHTML = `
+        <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <div class="spinner" style="width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
+          <div style="color: #1f2937; font-size: 16px; font-weight: 500;">${escapeHtml(message)}</div>
+        </div>
+      `;
+      // 添加動畫樣式（如果還沒有）
+      if (!document.getElementById('loading-spinner-style')) {
+        const style = document.createElement('style');
+        style.id = 'loading-spinner-style';
+        style.textContent = `
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      document.body.appendChild(globalLoadingElement);
+    } else {
+      // 更新訊息
+      const messageEl = globalLoadingElement.querySelector('div[style*="color: #1f2937"]');
+      if (messageEl) {
+        messageEl.textContent = message;
+      }
+    }
+  }
+
+  /**
+   * 隱藏全局載入動畫
+   */
+  function hideGlobalLoading() {
+    loadingStateCount = Math.max(0, loadingStateCount - 1);
+    
+    if (loadingStateCount === 0 && globalLoadingElement) {
+      globalLoadingElement.remove();
+      globalLoadingElement = null;
+    }
+  }
+
   // ===== Toast 通知 =====
 
   /**
    * 顯示 Toast 通知
+   * 支援多行訊息（使用 \n 分隔）
    */
   function showToast(message, duration = 3000) {
     // 創建或獲取 toast 元素
@@ -406,7 +488,16 @@
       document.body.appendChild(toastEl);
     }
     
-    toastEl.textContent = message;
+    // 支援多行訊息（使用 \n 分隔）
+    if (message.includes('\n')) {
+      toastEl.innerHTML = message.split('\n').map(line => {
+        const div = document.createElement('div');
+        div.textContent = line;
+        return div.outerHTML;
+      }).join('');
+    } else {
+      toastEl.textContent = message;
+    }
     toastEl.style.display = 'block';
     toastEl.style.opacity = '1';
     
@@ -524,6 +615,98 @@
     }
   }
 
+  /**
+   * 更新用戶資訊顯示（統一函數）
+   */
+  function updateUserInfo() {
+    const userInfo = document.getElementById('userInfo');
+    const authButtons = document.getElementById('authButtons');
+    const userAvatar = document.getElementById('userAvatar');
+    const userName = document.getElementById('userName');
+    const userDBTab = document.getElementById('userDBTab');
+    const userDBMobileTab = document.getElementById('userDBMobileTab');
+    
+    if (ipPlanningUser && ipPlanningToken) {
+      if (userInfo) {
+        userInfo.style.display = 'flex';
+        if (userAvatar && ipPlanningUser.picture) {
+          userAvatar.src = ipPlanningUser.picture;
+        }
+        if (userName) {
+          userName.textContent = ipPlanningUser.name || ipPlanningUser.email || '用戶';
+        }
+      }
+      if (authButtons) {
+        authButtons.style.display = 'none';
+      }
+      if (userDBTab) {
+        userDBTab.style.display = 'block';
+      }
+      if (userDBMobileTab) {
+        userDBMobileTab.style.display = 'block';
+      }
+    } else {
+      if (userInfo) {
+        userInfo.style.display = 'none';
+      }
+      if (authButtons) {
+        authButtons.style.display = 'flex';
+      }
+      if (userDBTab) {
+        userDBTab.style.display = 'none';
+      }
+      if (userDBMobileTab) {
+        userDBMobileTab.style.display = 'none';
+      }
+    }
+  }
+
+  /**
+   * 手機版抽屜切換（統一函數）
+   */
+  function toggleMobileDrawer() {
+    const drawer = document.getElementById('mobileDrawer');
+    const overlay = document.getElementById('mobileDrawerOverlay');
+    
+    if (drawer && overlay) {
+      const isOpen = drawer.classList.contains('open');
+      
+      if (isOpen) {
+        closeMobileDrawer();
+      } else {
+        openMobileDrawer();
+      }
+    }
+  }
+
+  /**
+   * 打開手機版抽屜（統一函數）
+   */
+  function openMobileDrawer() {
+    const drawer = document.getElementById('mobileDrawer');
+    const overlay = document.getElementById('mobileDrawerOverlay');
+    
+    if (drawer && overlay) {
+      drawer.classList.add('open');
+      overlay.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  /**
+   * 關閉手機版抽屜（統一函數）
+   */
+  function closeMobileDrawer() {
+    const drawer = document.getElementById('mobileDrawer');
+    const overlay = document.getElementById('mobileDrawerOverlay');
+    
+    if (drawer && overlay) {
+      drawer.classList.remove('open');
+      overlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  }
+
   // ===== 導出到 window 對象 =====
   window.ReelMindCommon = {
     // 認證相關
@@ -543,13 +726,34 @@
     // Toast 通知
     showToast,
     
+    // 載入狀態管理
+    showGlobalLoading,
+    hideGlobalLoading,
+    
+    // 性能優化工具
+    debounce,
+    throttle,
+    
     // 頁面初始化
     initPage,
+    
+    // UI 函數（統一導出）
+    updateUserInfo,
+    toggleMobileDrawer,
+    openMobileDrawer,
+    closeMobileDrawer,
     
     // 獲取全局變數（用於調試）
     getToken: () => ipPlanningToken,
     getUser: () => ipPlanningUser
   };
+
+  // 為了向後兼容，也直接導出到 window（供 HTML 中的 onclick 使用）
+  window.goToLogin = goToLogin;
+  window.updateUserInfo = updateUserInfo;
+  window.toggleMobileDrawer = toggleMobileDrawer;
+  window.openMobileDrawer = openMobileDrawer;
+  window.closeMobileDrawer = closeMobileDrawer;
 
   // ===== 自動初始化（當 DOM 載入完成時） =====
   if (document.readyState === 'loading') {

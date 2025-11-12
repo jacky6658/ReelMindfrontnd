@@ -6,6 +6,9 @@
 <title>訂閱 ReelMind｜付費即使用，無免費體驗</title>
 <meta name="description" content="ReelMind 單一訂閱制：AI 顧問、AI 一鍵生成、IP 人設規劃與創作者資料庫。付費即使用，無免費體驗。支援信用卡、LINE Pay、Apple Pay 等多種支付方式。">
 <meta name="theme-color" content="#2563EB" />
+<!-- HTTP 快取標頭 -->
+<meta http-equiv="Cache-Control" content="public, max-age=3600">
+<meta http-equiv="Expires" content="3600">
 <style>
 :root{
   --bg:#F8FAFC; --ink:#0F172A; --sub:#475569; --line:#E2E8F0; --card:#FFFFFF;
@@ -595,13 +598,55 @@ a{text-decoration:none;color:inherit}
     return urlParams.get(name);
   }
 
+  // Toast 通知函數（如果 common.js 未載入，使用降級方案）
+  function showToast(message, duration = 3000) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast(message, duration);
+      return;
+    }
+    // 降級方案：創建簡單的 toast
+    let toastEl = document.getElementById('toast');
+    if (!toastEl) {
+      toastEl = document.createElement('div');
+      toastEl.id = 'toast';
+      toastEl.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #1f2937;
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 10000;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+        max-width: 400px;
+        word-wrap: break-word;
+      `;
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = message;
+    toastEl.style.display = 'block';
+    toastEl.style.opacity = '1';
+    setTimeout(() => {
+      toastEl.style.opacity = '0';
+      setTimeout(() => {
+        toastEl.style.display = 'none';
+      }, 300);
+    }, duration);
+  }
+
   async function checkout(){
     // 登入檢查：未登入先導回登入畫面
     try {
       var token = localStorage.getItem('ipPlanningToken') || '';
       if (!token) {
-        alert('請先登入後再訂閱');
-        try { window.location.href = '/' + '#login'; } catch(_) {}
+        showToast('請先登入後再訂閱', 3000);
+        setTimeout(() => {
+          try { window.location.href = '/' + '#login'; } catch(_) {}
+        }, 1500);
         return;
       }
     } catch(_) {}
@@ -630,20 +675,20 @@ a{text-decoration:none;color:inherit}
     
     // 前端簡單檢查
     if(!payload.name || !payload.email){
-      alert('請填寫姓名與電子信箱');
+      showToast('請填寫姓名與電子信箱', 3000);
       return;
     }
     
     // 驗證 Email 格式
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(payload.email)) {
-      alert('請輸入有效的電子信箱');
+      showToast('請輸入有效的電子信箱', 3000);
       return;
     }
     
     // 如果選擇公司發票，檢查統編
     if (payload.invoiceType === 'company' && !payload.vat) {
-      alert('選擇公司發票時，請填寫統一編號');
+      showToast('選擇公司發票時，請填寫統一編號', 3000);
       return;
     }
     
@@ -670,13 +715,13 @@ a{text-decoration:none;color:inherit}
         document.body.innerHTML = html;
       } else {
         const errorData = await response.json().catch(() => ({ error: '建立訂單失敗' }));
-        alert(errorData.error || '建立訂單失敗，請稍後再試');
+        showToast(errorData.error || '建立訂單失敗，請稍後再試', 4000);
         checkoutBtn.disabled = false;
         checkoutBtn.textContent = originalText;
       }
     } catch (error) {
       console.error('付款錯誤:', error);
-      alert('付款處理失敗，請稍後再試');
+      showToast('付款處理失敗，請稍後再試', 4000);
       checkoutBtn.disabled = false;
       checkoutBtn.textContent = originalText;
     }

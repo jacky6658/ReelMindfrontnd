@@ -147,95 +147,17 @@ async function loadUserMemory() {
 }
 
 // 更新用戶資訊顯示
+// 使用 common.js 中的統一函數
 function updateUserInfo() {
-  const userInfo = document.getElementById('userInfo');
-  const authButtons = document.getElementById('authButtons');
-  const userAvatar = document.getElementById('userAvatar');
-  const userName = document.getElementById('userName');
-  const userDBTab = document.getElementById('userDBTab');
-  const userDBMobileTab = document.getElementById('userDBMobileTab');
-  
-  if (ipPlanningUser && ipPlanningToken) {
-    if (userInfo) {
-      userInfo.style.display = 'flex';
-      if (userAvatar && ipPlanningUser.picture) {
-        userAvatar.src = ipPlanningUser.picture;
-      }
-      if (userName) {
-        userName.textContent = ipPlanningUser.name || ipPlanningUser.email || '用戶';
-      }
-    }
-    if (authButtons) {
-      authButtons.style.display = 'none';
-    }
-    if (userDBTab) {
-      userDBTab.style.display = 'block';
-    }
-    if (userDBMobileTab) {
-      userDBMobileTab.style.display = 'block';
-    }
-  } else {
-    if (userInfo) {
-      userInfo.style.display = 'none';
-    }
-    if (authButtons) {
-      authButtons.style.display = 'flex';
-    }
-    if (userDBTab) {
-      userDBTab.style.display = 'none';
-    }
-    if (userDBMobileTab) {
-      userDBMobileTab.style.display = 'none';
-    }
+  if (window.ReelMindCommon && window.ReelMindCommon.updateUserInfo) {
+    window.ReelMindCommon.updateUserInfo();
+  } else if (window.updateUserInfo) {
+    window.updateUserInfo();
   }
 }
 
-// 跳轉到登入頁面
-async function goToLogin() {
-  if (window.ReelMindCommon && window.ReelMindCommon.goToLogin) {
-    await window.ReelMindCommon.goToLogin();
-  } else {
-    window.location.href = 'index.html';
-  }
-}
-
-// 手機版抽屜切換
-function toggleMobileDrawer() {
-  const drawer = document.getElementById('mobileDrawer');
-  const overlay = document.getElementById('mobileDrawerOverlay');
-  
-  if (drawer && overlay) {
-    const isOpen = drawer.classList.contains('open');
-    
-    if (isOpen) {
-      closeMobileDrawer();
-    } else {
-      openMobileDrawer();
-    }
-  }
-}
-
-function openMobileDrawer() {
-  const drawer = document.getElementById('mobileDrawer');
-  const overlay = document.getElementById('mobileDrawerOverlay');
-  
-  if (drawer && overlay) {
-    drawer.classList.add('open');
-    overlay.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-  }
-}
-
-function closeMobileDrawer() {
-  const drawer = document.getElementById('mobileDrawer');
-  const overlay = document.getElementById('mobileDrawerOverlay');
-  
-  if (drawer && overlay) {
-    drawer.classList.remove('open');
-    overlay.style.display = 'none';
-    document.body.style.overflow = '';
-  }
-}
+// 使用 common.js 中的統一函數（已導出到 window）
+// goToLogin, toggleMobileDrawer, openMobileDrawer, closeMobileDrawer 現在都在 common.js 中統一管理
 
 // 切換說明抽屜
 function toggleInstructionsDrawer() {
@@ -398,8 +320,15 @@ function createMessage(role, content) {
       html = html.replace(/\n/g, '<br>');
       contentDiv.innerHTML = html;
     } else {
-      // 純文字模式，將換行符轉換成 <br>
-      contentDiv.innerHTML = processedContent.replace(/\n/g, '<br>');
+      // 純文字模式，將換行符轉換成 <br>，並轉義 HTML 防止 XSS
+      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
+        if (text == null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+      });
+      const safeContent = escapeHtml(processedContent).replace(/\n/g, '<br>');
+      contentDiv.innerHTML = safeContent;
     }
     // 對代碼塊進行語法高亮
     if (typeof hljs !== 'undefined') {
@@ -428,6 +357,7 @@ function createTypingIndicator() {
   
   const contentDiv = document.createElement('div');
   contentDiv.className = 'message-content';
+  // 使用靜態 HTML，無需轉義（不包含用戶輸入）
   contentDiv.innerHTML = `
     <div class="typing-indicator">
       <span>AI正在思考中</span>
@@ -702,8 +632,15 @@ E. 故事敘事型（起 → 承 → 轉 → 合）【人設/口碑】
                 html = html.replace(/\n/g, '<br>');
                 contentDiv.innerHTML = html;
               } else {
-                // 純文字模式，將換行符轉換成 <br>
-                contentDiv.innerHTML = processedContent.replace(/\n/g, '<br>');
+                // 純文字模式，將換行符轉換成 <br>，並轉義 HTML 防止 XSS
+                const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
+                  if (text == null || text === undefined) return '';
+                  const div = document.createElement('div');
+                  div.textContent = String(text);
+                  return div.innerHTML;
+                });
+                const safeContent = escapeHtml(processedContent).replace(/\n/g, '<br>');
+                contentDiv.innerHTML = safeContent;
               }
               
               // 對代碼塊進行語法高亮

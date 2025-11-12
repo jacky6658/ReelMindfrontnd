@@ -39,10 +39,12 @@ function formatTaiwanTime(dateString) {
 // 顯示載入動畫
 function showLoadingAnimation(container, message = '載入中...') {
   if (!container) return;
+  // 使用 escapeHtml 防止 XSS 攻擊
+  const safeMessage = escapeHtml(message);
   container.innerHTML = `
     <div style="display: flex; align-items: center; justify-content: center; padding: 40px; gap: 12px; flex-direction: column;">
       <div class="spinner" style="width: 24px; height: 24px; border: 3px solid #e5e7eb; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 8px;"></div>
-      <span style="color: #6b7280; font-size: 14px;">${message}</span>
+      <span style="color: #6b7280; font-size: 14px;">${safeMessage}</span>
     </div>
   `;
 }
@@ -1197,8 +1199,15 @@ async function cancelAutoRenewForUserDB() {
   }
 }
 
-// 更新用戶資訊顯示
+// 更新用戶資訊顯示（使用 common.js 的統一函數，但保留部分自定義邏輯）
 function updateUserInfo() {
+  // 優先使用 common.js 的統一函數
+  if (window.ReelMindCommon && window.ReelMindCommon.updateUserInfo) {
+    window.ReelMindCommon.updateUserInfo();
+    return;
+  }
+  
+  // 降級處理：只更新用戶名和頭像
   if (!ipPlanningUser) return;
   
   const userNameEl = document.getElementById('userName');

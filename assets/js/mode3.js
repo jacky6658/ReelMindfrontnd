@@ -169,29 +169,12 @@ async function loadUserMemory() {
 }
 
 // 更新用戶資訊顯示
+// 使用 common.js 中的統一函數
 function updateUserInfo() {
-  if (window.ReelMindCommon && window.ReelMindCommon.isLoggedIn()) {
-    const user = window.ReelMindCommon.getUser();
-    if (user) {
-      const userInfo = document.getElementById('userInfo');
-      const userAvatar = document.getElementById('userAvatar');
-      const userName = document.getElementById('userName');
-      const authButtons = document.getElementById('authButtons');
-      const userDBTab = document.getElementById('userDBTab');
-      
-      if (userInfo && userAvatar && userName) {
-        userAvatar.src = user.picture || user.avatar || 'https://via.placeholder.com/32';
-        userName.textContent = user.name || '用戶';
-        userInfo.style.display = 'flex';
-        if (authButtons) authButtons.style.display = 'none';
-        if (userDBTab) userDBTab.style.display = 'inline-block';
-      }
-    }
-  } else {
-    const userInfo = document.getElementById('userInfo');
-    const authButtons = document.getElementById('authButtons');
-    if (userInfo) userInfo.style.display = 'none';
-    if (authButtons) authButtons.style.display = 'block';
+  if (window.ReelMindCommon && window.ReelMindCommon.updateUserInfo) {
+    window.ReelMindCommon.updateUserInfo();
+  } else if (window.updateUserInfo) {
+    window.updateUserInfo();
   }
 }
 
@@ -469,21 +452,36 @@ function initFormValidation() {
 
 // 檢查 Step 1 表單驗證
 function checkStep1Validation() {
-  const topic = document.getElementById('topicInput')?.value.trim();
-  const positioning = document.getElementById('positioningInput')?.value.trim();
-  const duration = document.getElementById('durationInput')?.value;
-  const goal = document.querySelector('.button-selector[data-goal].selected');
-  const platform = document.querySelector('.button-selector[data-platform].selected');
-  const structure = document.querySelector('.structure-btn.selected');
-  
-  const isValid = topic && positioning && duration && goal && platform && structure;
-  
-  const nextBtn = document.getElementById('nextToStep2');
-  if (nextBtn) {
-    nextBtn.disabled = !isValid;
+  try {
+    const topicInput = document.getElementById('topicInput');
+    const positioningInput = document.getElementById('positioningInput');
+    const durationInput = document.getElementById('durationInput');
+    
+    const topic = topicInput?.value?.trim() || '';
+    const positioning = positioningInput?.value?.trim() || '';
+    const duration = durationInput?.value || '';
+    const goal = document.querySelector('.button-selector[data-goal].selected');
+    const platform = document.querySelector('.button-selector[data-platform].selected');
+    const structure = document.querySelector('.structure-btn.selected');
+    
+    const isValid = !!(topic && positioning && duration && goal && platform && structure);
+    
+    const nextBtn = document.getElementById('nextToStep2');
+    if (nextBtn) {
+      nextBtn.disabled = !isValid;
+    } else {
+      console.warn('nextToStep2 按鈕不存在');
+    }
+    
+    return isValid;
+  } catch (error) {
+    console.error('表單驗證錯誤:', error);
+    const nextBtn = document.getElementById('nextToStep2');
+    if (nextBtn) {
+      nextBtn.disabled = true;
+    }
+    return false;
   }
-  
-  return isValid;
 }
 
 // 驗證 Step 1
@@ -499,13 +497,26 @@ function validateStep1() {
 
 // 更新確認頁面內容
 function updateConfirmContent() {
-  const topic = document.getElementById('topicInput')?.value.trim();
-  const positioning = document.getElementById('positioningInput')?.value.trim();
-  const duration = document.getElementById('durationInput')?.value;
-  const goal = document.querySelector('.button-selector[data-goal].selected')?.getAttribute('data-goal');
-  const platform = document.querySelector('.button-selector[data-platform].selected')?.getAttribute('data-platform');
-  const structure = document.querySelector('.structure-btn.selected')?.getAttribute('data-structure');
-  const style = document.getElementById('styleInput')?.value.trim();
+  // 獲取 HTML 轉義函數（XSS 防護）
+  const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
+    if (text == null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+  });
+  
+  const topicInput = document.getElementById('topicInput');
+  const positioningInput = document.getElementById('positioningInput');
+  const durationInput = document.getElementById('durationInput');
+  const styleInput = document.getElementById('styleInput');
+  
+  const topic = topicInput?.value.trim() || '';
+  const positioning = positioningInput?.value.trim() || '';
+  const duration = durationInput?.value || '30';
+  const goal = document.querySelector('.button-selector[data-goal].selected')?.getAttribute('data-goal') || '';
+  const platform = document.querySelector('.button-selector[data-platform].selected')?.getAttribute('data-platform') || '';
+  const structure = document.querySelector('.structure-btn.selected')?.getAttribute('data-structure') || '';
+  const style = styleInput?.value.trim() || '';
   
   const structureNames = {
     'A': '標準行銷三段式',
@@ -516,48 +527,58 @@ function updateConfirmContent() {
   };
   
   const confirmContent = document.getElementById('confirmContent');
-  if (confirmContent) {
-    confirmContent.innerHTML = `
-      <div>
-        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">主題或產品</p>
-        <p style="font-weight: 500; font-size: 16px;">${topic}</p>
-      </div>
-      <div>
-        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">帳號定位</p>
-        <p style="font-weight: 500; font-size: 16px;">${positioning}</p>
-      </div>
-      <div>
-        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">影片目標</p>
-        <p style="font-weight: 500; font-size: 16px;">${goal}</p>
-      </div>
-      <div>
-        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">社群平台</p>
-        <p style="font-weight: 500; font-size: 16px;">${platform}</p>
-      </div>
-      <div>
-        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">腳本秒數</p>
-        <p style="font-weight: 500; font-size: 16px;">${duration}秒</p>
-      </div>
-      <div>
-        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">腳本結構</p>
-        <p style="font-weight: 500; font-size: 16px;">${structureNames[structure] || structure}</p>
-      </div>
-      ${style ? `
-      <div>
-        <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">補充說明</p>
-        <p style="font-weight: 500; font-size: 16px;">${style}</p>
-      </div>
-      ` : ''}
-    `;
+  if (!confirmContent) {
+    console.warn('confirmContent 元素不存在');
+    return;
   }
+  
+  // 使用 HTML 轉義防止 XSS 攻擊
+  confirmContent.innerHTML = `
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">主題或產品</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(topic)}</p>
+    </div>
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">帳號定位</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(positioning)}</p>
+    </div>
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">影片目標</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(goal)}</p>
+    </div>
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">社群平台</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(platform)}</p>
+    </div>
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">腳本秒數</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(duration)}秒</p>
+    </div>
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">腳本結構</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(structureNames[structure] || structure)}</p>
+    </div>
+    ${style ? `
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">補充說明</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(style)}</p>
+    </div>
+    ` : ''}
+  `;
 }
 
 // 重置表單
 function resetForm() {
-  document.getElementById('topicInput').value = '';
-  document.getElementById('positioningInput').value = '';
-  document.getElementById('durationInput').value = '30';
-  document.getElementById('styleInput').value = '';
+  const topicInput = document.getElementById('topicInput');
+  const positioningInput = document.getElementById('positioningInput');
+  const durationInput = document.getElementById('durationInput');
+  const styleInput = document.getElementById('styleInput');
+  
+  if (topicInput) topicInput.value = '';
+  if (positioningInput) positioningInput.value = '';
+  if (durationInput) durationInput.value = '30';
+  if (styleInput) styleInput.value = '';
+  
   document.querySelectorAll('.button-selector').forEach(btn => btn.classList.remove('selected'));
   document.querySelectorAll('.structure-btn').forEach(btn => btn.classList.remove('selected'));
   selectedScriptStructure = null;
@@ -986,11 +1007,13 @@ async function generateScriptStream(platform, topic, positioning, duration, stru
 
 // 生成帳號定位（保留原有函數以支援獨立生成）
 async function generatePositioning() {
+  // 支援新的按鈕選擇器和舊的下拉選單
   const platformEl = document.getElementById('platformSelect');
+  const platformBtn = document.querySelector('.button-selector[data-platform].selected');
   const topicEl = document.getElementById('topicInput');
   const positioningEl = document.getElementById('positioningInput');
   
-  const platform = platformEl ? platformEl.value : '';
+  const platform = platformBtn ? platformBtn.getAttribute('data-platform') : (platformEl ? platformEl.value : '');
   const topic = topicEl ? topicEl.value : '';
   const positioning = positioningEl ? positioningEl.value : '';
   
@@ -1084,11 +1107,13 @@ async function generatePositioning() {
 
 // 生成選題
 async function generateTopics() {
+  // 支援新的按鈕選擇器和舊的下拉選單
   const platformEl = document.getElementById('platformSelect');
+  const platformBtn = document.querySelector('.button-selector[data-platform].selected');
   const topicEl = document.getElementById('topicInput');
   const positioningEl = document.getElementById('positioningInput');
   
-  const platform = platformEl ? platformEl.value : '';
+  const platform = platformBtn ? platformBtn.getAttribute('data-platform') : (platformEl ? platformEl.value : '');
   const topic = topicEl ? topicEl.value : '';
   const positioning = positioningEl ? positioningEl.value : '';
   
@@ -1189,11 +1214,14 @@ async function generateTopics() {
 
 // 生成腳本
 async function generateScript() {
+  // 支援新的按鈕選擇器和舊的下拉選單
   const platformEl = document.getElementById('platformSelect');
+  const platformBtn = document.querySelector('.button-selector[data-platform].selected');
   const topicEl = document.getElementById('topicInput');
   const positioningEl = document.getElementById('positioningInput');
+  const durationInput = document.getElementById('durationInput');
   
-  const platform = platformEl ? platformEl.value : '';
+  const platform = platformBtn ? platformBtn.getAttribute('data-platform') : (platformEl ? platformEl.value : '');
   const topic = topicEl ? topicEl.value : '';
   const positioning = positioningEl ? positioningEl.value : '';
   
@@ -1230,7 +1258,7 @@ async function generateScript() {
   }
   
   try {
-    const durationInput = document.getElementById('durationInput');
+    // durationInput 已在函數開頭定義，無需重複定義
     
     // 根據選擇的結構生成對應的提示詞
     const structureMessages = {
@@ -1563,50 +1591,6 @@ async function regenerateResult(type) {
   }, 500);
 }
 
-// 登入函數
-function goToLogin() {
-  if (window.ReelMindCommon && window.ReelMindCommon.goToLogin) {
-    window.ReelMindCommon.goToLogin();
-  } else {
-    window.location.href = 'index.html';
-  }
-}
-
-// 手機版抽屜切換
-function toggleMobileDrawer() {
-  const drawer = document.getElementById('mobileDrawer');
-  const overlay = document.getElementById('mobileDrawerOverlay');
-  
-  if (drawer && overlay) {
-    const isOpen = drawer.classList.contains('open');
-    
-    if (isOpen) {
-      closeMobileDrawer();
-    } else {
-      openMobileDrawer();
-    }
-  }
-}
-
-function openMobileDrawer() {
-  const drawer = document.getElementById('mobileDrawer');
-  const overlay = document.getElementById('mobileDrawerOverlay');
-  
-  if (drawer && overlay) {
-    drawer.classList.add('open');
-    overlay.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-  }
-}
-
-function closeMobileDrawer() {
-  const drawer = document.getElementById('mobileDrawer');
-  const overlay = document.getElementById('mobileDrawerOverlay');
-  
-  if (drawer && overlay) {
-    drawer.classList.remove('open');
-    overlay.style.display = 'none';
-    document.body.style.overflow = '';
-  }
-}
+// 使用 common.js 中的統一函數（已導出到 window）
+// goToLogin, toggleMobileDrawer, openMobileDrawer, closeMobileDrawer 現在都在 common.js 中統一管理
 

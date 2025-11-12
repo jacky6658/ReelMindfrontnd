@@ -25,6 +25,10 @@
     <meta name="twitter:title" content="IP人設規劃 - ReelMind AI 短影音智能體" />
     <meta name="twitter:description" content="透過深度對話建立個人品牌檔案、14天短影音規劃、今日腳本。" />
     
+    <!-- HTTP 快取標頭 -->
+    <meta http-equiv="Cache-Control" content="public, max-age=3600">
+    <meta http-equiv="Expires" content="3600">
+    
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E" />
     
@@ -399,7 +403,7 @@
           flex-shrink: 0 !important;
           padding: 0 !important;
           margin: 0 !important;
-          gap: 6px !important;
+          gap: 8px !important;
         }
         
         /* 輸入框內部 */
@@ -437,13 +441,13 @@
           justify-content: center !important;
         }
         
-        /* 快速按鈕區域確保可見 */
+        /* 快速按鈕區域確保可見（在輸入欄位上方） */
         .mode3-page .quick-buttons {
           display: flex !important;
           visibility: visible !important;
           opacity: 1 !important;
           width: 100% !important;
-          margin-top: 10px !important;
+          margin-top: 0 !important;
           margin-bottom: 0 !important;
           gap: 8px !important;
           flex-wrap: wrap !important;
@@ -452,6 +456,7 @@
           position: relative !important;
           z-index: 101 !important;
           background: transparent !important;
+          order: -1 !important; /* 確保在輸入欄位上方 */
         }
         
         /* 快速按鈕確保可見 */
@@ -1363,17 +1368,17 @@
       <div class="input-row">
         <div class="input-container">
           <div class="input-wrapper">
+            <!-- 快速按鈕區域（移到輸入欄位上方） -->
+            <div class="quick-buttons" id="mode3-quickButtons">
+              <button class="quick-btn" data-text="重新定位">重新定位</button>
+              <button class="quick-btn" data-text="生成14天規劃">生成14天規劃</button>
+              <button class="quick-btn" data-text="生成3隻腳本">生成3隻腳本</button>
+            </div>
             <div class="input-row-inner">
               <textarea id="mode3-messageInput" class="chat-input" placeholder="向AI顧問提問..." rows="1"></textarea>
               <button id="mode3-sendBtn" class="send-btn" disabled>
                 <i class="fas fa-paper-plane"></i>
               </button>
-            </div>
-            <!-- 快速按鈕區域 -->
-            <div class="quick-buttons" id="mode3-quickButtons">
-              <button class="quick-btn" data-text="重新定位">重新定位</button>
-              <button class="quick-btn" data-text="生成14天規劃">生成14天規劃</button>
-              <button class="quick-btn" data-text="生成3隻腳本">生成3隻腳本</button>
             </div>
           </div>
         </div>

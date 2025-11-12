@@ -145,29 +145,12 @@ async function loadUserMemory() {
 }
 
 // 更新用戶資訊顯示
+// 使用 common.js 中的統一函數
 function updateUserInfo() {
-  if (window.ReelMindCommon && window.ReelMindCommon.isLoggedIn()) {
-    const user = window.ReelMindCommon.getUser();
-    if (user) {
-      const userInfo = document.getElementById('userInfo');
-      const userAvatar = document.getElementById('userAvatar');
-      const userName = document.getElementById('userName');
-      const authButtons = document.getElementById('authButtons');
-      const userDBTab = document.getElementById('userDBTab');
-      
-      if (userInfo && userAvatar && userName) {
-        userAvatar.src = user.picture || user.avatar || 'https://via.placeholder.com/32';
-        userName.textContent = user.name || '用戶';
-        userInfo.style.display = 'flex';
-        if (authButtons) authButtons.style.display = 'none';
-        if (userDBTab) userDBTab.style.display = 'inline-block';
-      }
-    }
-  } else {
-    const userInfo = document.getElementById('userInfo');
-    const authButtons = document.getElementById('authButtons');
-    if (userInfo) userInfo.style.display = 'none';
-    if (authButtons) authButtons.style.display = 'block';
+  if (window.ReelMindCommon && window.ReelMindCommon.updateUserInfo) {
+    window.ReelMindCommon.updateUserInfo();
+  } else if (window.updateUserInfo) {
+    window.updateUserInfo();
   }
 }
 
@@ -358,7 +341,14 @@ async function sendMode3Message(message, conversationType = 'ip_planning') {
   } catch (error) {
     console.error('發送訊息錯誤:', error);
     if (contentDiv) {
-      const safeErrorMsg = window.escapeHtml ? window.escapeHtml(error.message || '未知錯誤') : (error.message || '未知錯誤');
+      // 使用統一的 escapeHtml 函數
+      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
+        if (text == null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+      });
+      const safeErrorMsg = escapeHtml(error.message || '未知錯誤');
       contentDiv.innerHTML = `抱歉，發生了錯誤：${safeErrorMsg}`;
     } else {
       const errorMessage = createMode3Message('assistant', `抱歉，發生了錯誤：${error.message}`);
@@ -421,10 +411,27 @@ function createMode3Message(role, content) {
 
 // Markdown 渲染
 function renderMode3Markdown(text) {
-  if (typeof marked !== 'undefined') {
-    return marked.parse(text);
+  // 優先使用安全的 Markdown 渲染函數
+  if (window.safeRenderMarkdown) {
+    return window.safeRenderMarkdown(text);
   }
-  return text.replace(/\n/g, '<br>');
+  // 其次使用 marked（如果可用）
+  if (typeof marked !== 'undefined') {
+    const html = marked.parse(text);
+    // 使用 DOMPurify 清理（如果可用）
+    if (typeof DOMPurify !== 'undefined') {
+      return DOMPurify.sanitize(html);
+    }
+    return html;
+  }
+  // 最後使用轉義的純文字模式
+  const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
+    if (text == null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+  });
+  return escapeHtml(text).replace(/\n/g, '<br>');
 }
 
 // 記錄 Mode3 長期記憶
@@ -939,49 +946,6 @@ function exportMode3Result() {
 }
 
 // 登入函數
-function goToLogin() {
-  if (window.ReelMindCommon && window.ReelMindCommon.goToLogin) {
-    window.ReelMindCommon.goToLogin();
-  } else {
-    window.location.href = 'index.html';
-  }
-}
-
-// 手機版抽屜切換
-function toggleMobileDrawer() {
-  const drawer = document.getElementById('mobileDrawer');
-  const overlay = document.getElementById('mobileDrawerOverlay');
-  
-  if (drawer && overlay) {
-    const isOpen = drawer.classList.contains('open');
-    
-    if (isOpen) {
-      closeMobileDrawer();
-    } else {
-      openMobileDrawer();
-    }
-  }
-}
-
-function openMobileDrawer() {
-  const drawer = document.getElementById('mobileDrawer');
-  const overlay = document.getElementById('mobileDrawerOverlay');
-  
-  if (drawer && overlay) {
-    drawer.classList.add('open');
-    overlay.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-  }
-}
-
-function closeMobileDrawer() {
-  const drawer = document.getElementById('mobileDrawer');
-  const overlay = document.getElementById('mobileDrawerOverlay');
-  
-  if (drawer && overlay) {
-    drawer.classList.remove('open');
-    overlay.style.display = 'none';
-    document.body.style.overflow = '';
-  }
-}
+// 使用 common.js 中的統一函數（已導出到 window）
+// goToLogin, toggleMobileDrawer, openMobileDrawer, closeMobileDrawer 現在都在 common.js 中統一管理
 

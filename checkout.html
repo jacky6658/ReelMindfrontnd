@@ -6,6 +6,9 @@
 <title>填寫付款資訊｜ReelMind</title>
 <meta name="description" content="填寫付款資訊，完成 ReelMind 訂閱">
 <meta name="theme-color" content="#2563EB" />
+<!-- HTTP 快取標頭 -->
+<meta http-equiv="Cache-Control" content="public, max-age=3600">
+<meta http-equiv="Expires" content="3600">
 <style>
 :root{
   --bg:#F8FAFC; --ink:#0F172A; --sub:#475569; --line:#E2E8F0; --card:#FFFFFF;
@@ -519,13 +522,55 @@ a{text-decoration:none;color:inherit}
     }
   }
 
+  // Toast 通知函數（如果 common.js 未載入，使用降級方案）
+  function showToast(message, duration = 3000) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast(message, duration);
+      return;
+    }
+    // 降級方案：創建簡單的 toast
+    let toastEl = document.getElementById('toast');
+    if (!toastEl) {
+      toastEl = document.createElement('div');
+      toastEl.id = 'toast';
+      toastEl.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #1f2937;
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 10000;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+        max-width: 400px;
+        word-wrap: break-word;
+      `;
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = message;
+    toastEl.style.display = 'block';
+    toastEl.style.opacity = '1';
+    setTimeout(() => {
+      toastEl.style.opacity = '0';
+      setTimeout(() => {
+        toastEl.style.display = 'none';
+      }, 300);
+    }, duration);
+  }
+
   async function checkout(){
     // 登入檢查
     try {
       var token = localStorage.getItem('ipPlanningToken') || '';
       if (!token) {
-        alert('請先登入後再訂閱');
-        try { window.location.href = '/' + '#login'; } catch(_) {}
+        showToast('請先登入後再訂閱', 3000);
+        setTimeout(() => {
+          try { window.location.href = '/' + '#login'; } catch(_) {}
+        }, 1500);
         return;
       }
     } catch(_) {}
@@ -544,18 +589,18 @@ a{text-decoration:none;color:inherit}
     
     // 前端驗證
     if(!payload.name || !payload.email){
-      alert('請填寫姓名與電子信箱');
+      showToast('請填寫姓名與電子信箱', 3000);
       return;
     }
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(payload.email)) {
-      alert('請輸入有效的電子信箱');
+      showToast('請輸入有效的電子信箱', 3000);
       return;
     }
     
     if (payload.invoiceType === 'company' && !payload.vat) {
-      alert('選擇公司發票時，請填寫統一編號');
+      showToast('選擇公司發票時，請填寫統一編號', 3000);
       return;
     }
     
@@ -594,7 +639,7 @@ a{text-decoration:none;color:inherit}
         } else {
           // 如果返回的不是 ECPay 表單，可能是錯誤訊息
           console.error('後端返回的內容不是 ECPay 表單:', html.substring(0, 200));
-          alert('無法載入付款頁面，請稍後再試或聯繫客服');
+          showToast('無法載入付款頁面，請稍後再試或聯繫客服', 4000);
           checkoutBtn.disabled = false;
           checkoutBtn.textContent = originalText;
         }
@@ -603,18 +648,18 @@ a{text-decoration:none;color:inherit}
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
           const errorData = await response.json().catch(() => ({ error: '建立訂單失敗' }));
-          alert(errorData.error || '建立訂單失敗，請稍後再試');
+          showToast(errorData.error || '建立訂單失敗，請稍後再試', 4000);
         } else {
           const errorText = await response.text().catch(() => '建立訂單失敗');
           console.error('後端錯誤回應:', errorText);
-          alert('建立訂單失敗，請稍後再試或聯繫客服：aiagent168168@gmail.com');
+          showToast('建立訂單失敗，請稍後再試或聯繫客服：aiagent168168@gmail.com', 5000);
         }
         checkoutBtn.disabled = false;
         checkoutBtn.textContent = originalText;
       }
     } catch (error) {
       console.error('付款錯誤:', error);
-      alert('付款處理失敗，請檢查網路連線或稍後再試。如有問題請聯繫客服：aiagent168168@gmail.com');
+      showToast('付款處理失敗，請檢查網路連線或稍後再試。如有問題請聯繫客服：aiagent168168@gmail.com', 5000);
       checkoutBtn.disabled = false;
       checkoutBtn.textContent = originalText;
     }

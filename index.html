@@ -48,6 +48,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="ReelMind" />
     
+    <!-- HTTP 快取標頭 -->
+    <meta http-equiv="Cache-Control" content="public, max-age=3600">
+    <meta http-equiv="Expires" content="3600">
+    
     <!-- Favicon: 使用 SVG data URI，避免 404 錯誤 -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E" />
     
@@ -13463,22 +13467,34 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           } else {
             // 嘗試獲取詳細錯誤訊息
             let errorMessage = '啟用失敗，請稍後再試';
+            let errorDetails = '';
             try {
               const errorData = await response.json();
-              errorMessage = errorData.error || errorMessage;
+              errorMessage = errorData.error || errorData.message || errorMessage;
               
-              // 根據錯誤類型顯示不同的提示
-              if (errorMessage.includes('已使用') || errorMessage.includes('已啟用')) {
-                errorMessage = '⚠️ 此授權連結已使用過';
-              } else if (errorMessage.includes('過期')) {
-                errorMessage = '⚠️ 授權連結已過期（7天內有效）';
-              } else if (errorMessage.includes('無效')) {
-                errorMessage = '⚠️ 無效的授權連結';
+              // 如果有詳細資訊，顯示給用戶
+              if (errorData.activated_at) {
+                const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW');
+                errorDetails = `此連結已於 ${activatedDate} 使用`;
+              } else if (errorData.expired_at) {
+                const expiredDate = new Date(errorData.expired_at).toLocaleString('zh-TW');
+                errorDetails = `此連結已於 ${expiredDate} 過期`;
+              }
+              if (errorData.contact) {
+                errorDetails += (errorDetails ? '\n' : '') + errorData.contact;
+              }
+              if (errorData.suggestion) {
+                errorDetails += (errorDetails ? '\n' : '') + errorData.suggestion;
               }
             } catch (e) {
               // 如果無法解析 JSON，使用預設錯誤訊息
             }
-            showToast(errorMessage, 5000);
+            // 顯示詳細錯誤訊息（支援多行）
+            if (errorDetails) {
+              showToast(`${errorMessage}\n${errorDetails}`, 8000);
+            } else {
+              showToast(errorMessage, 5000);
+            }
           }
         } catch (error) {
           console.error('啟用失敗:', error);
@@ -17283,18 +17299,39 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }
           const defaultTitle = currentType === 'profile' ? 'IP Profile' : currentType === 'plan' ? '14天規劃' : '今日腳本';
           const title = savedTitle || result.title || defaultTitle;
+          // 轉義用戶輸入防止 XSS
+          const safeTitle = escapeHtml(title);
+          const safeDate = escapeHtml(date);
+          // result.content 可能包含 HTML（來自 AI 生成），需要安全處理
+          let safeContent = '';
+          if (result.content) {
+            const contentStr = String(result.content);
+            // 如果包含 HTML 標籤，使用 safeRenderMarkdown 或轉義
+            if (/<[^>]+>/.test(contentStr)) {
+              // 包含 HTML，使用安全渲染
+              if (typeof safeRenderMarkdown !== 'undefined') {
+                safeContent = safeRenderMarkdown(contentStr);
+              } else {
+                // 降級：轉義所有 HTML
+                safeContent = escapeHtml(contentStr).replace(/\n/g, '<br>');
+              }
+            } else {
+              // 純文字，轉義並保留換行
+              safeContent = escapeHtml(contentStr).replace(/\n/g, '<br>');
+            }
+          }
           return `
             <div class="ip-planning-item" data-result-id="${result.id}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
               <div class="ip-planning-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                  <h4 class="ip-planning-item-title" data-result-id="${result.id}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; position: relative; padding-right: 24px;" onclick="editIpPlanningItemTitle(${result.id}, event)" title="點擊編輯標題">${title}</h4>
+                  <h4 class="ip-planning-item-title" data-result-id="${result.id}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; position: relative; padding-right: 24px;" onclick="editIpPlanningItemTitle(${result.id}, event)" title="點擊編輯標題">${safeTitle}</h4>
                   <span class="ip-planning-item-edit-icon" data-result-id="${result.id}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none;" onclick="editIpPlanningItemTitle(${result.id}, event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
                   <input type="text" class="ip-planning-item-title-input" data-result-id="${result.id}" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; max-width: 300px;" onblur="saveIpPlanningItemTitle(${result.id})" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle(${result.id})">
                 </div>
-                <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
+                <span style="color: #6B7280; font-size: 0.9rem;">${safeDate}</span>
               </div>
               <div class="ip-planning-content-item" style="color: #374151; line-height: 1.6; max-height: 300px; overflow-y: auto;">
-                ${result.content}
+                ${safeContent}
               </div>
             </div>
           `;
@@ -24073,10 +24110,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               }
             }
             
-            // 使用 Markdown 渲染函數處理內容
-            const renderedContent = typeof renderMode3Markdown !== 'undefined' 
-              ? renderMode3Markdown(content) 
-              : content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            // 使用安全的 Markdown 渲染函數處理內容
+            let renderedContent = '';
+            if (typeof safeRenderMarkdown !== 'undefined') {
+              renderedContent = safeRenderMarkdown(content);
+            } else if (typeof renderMode3Markdown !== 'undefined') {
+              renderedContent = renderMode3Markdown(content);
+            } else {
+              // 降級處理：轉義 HTML 並保留格式
+              renderedContent = escapeHtml(content).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            }
             resultBlock.innerHTML = `<div class="mode3-result-content">${renderedContent}</div>`;
             button.innerHTML = '<span>🚀</span> 重新生成';
             button.disabled = false;
@@ -24145,10 +24188,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               }
             }
             
-            // 使用 Markdown 渲染函數處理內容
-            const renderedContent = typeof renderMode3Markdown !== 'undefined' 
-              ? renderMode3Markdown(content) 
-              : content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            // 使用安全的 Markdown 渲染函數處理內容
+            let renderedContent = '';
+            if (typeof safeRenderMarkdown !== 'undefined') {
+              renderedContent = safeRenderMarkdown(content);
+            } else if (typeof renderMode3Markdown !== 'undefined') {
+              renderedContent = renderMode3Markdown(content);
+            } else {
+              // 降級處理：轉義 HTML 並保留格式
+              renderedContent = escapeHtml(content).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            }
             resultBlock.innerHTML = `<div class="mode3-result-content">${renderedContent}</div>`;
             button.innerHTML = '<span>🚀</span> 重新生成';
             button.disabled = false;
@@ -24216,10 +24265,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               }
             }
             
-            // 使用 Markdown 渲染函數處理內容
-            const renderedContent = typeof renderMode3Markdown !== 'undefined' 
-              ? renderMode3Markdown(content) 
-              : content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            // 使用安全的 Markdown 渲染函數處理內容
+            let renderedContent = '';
+            if (typeof safeRenderMarkdown !== 'undefined') {
+              renderedContent = safeRenderMarkdown(content);
+            } else if (typeof renderMode3Markdown !== 'undefined') {
+              renderedContent = renderMode3Markdown(content);
+            } else {
+              // 降級處理：轉義 HTML 並保留格式
+              renderedContent = escapeHtml(content).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            }
             resultBlock.innerHTML = `<div class="mode3-result-content">${renderedContent}</div>`;
             button.innerHTML = '<span>🚀</span> 重新生成';
             button.disabled = false;
