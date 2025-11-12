@@ -346,7 +346,7 @@
           box-sizing: border-box !important;
           padding: 0 !important;
           padding-top: 40px !important; /* 在頁首下方留出空間 */
-          padding-bottom: 200px !important; /* 減少底部 padding，讓輸入欄位往下移動 */
+          padding-bottom: 0 !important; /* 移除底部 padding，讓輸入欄位固定在底部 */
           background: #ffffff !important;
         }
         
@@ -365,7 +365,7 @@
           margin-bottom: 0 !important;
         }
         
-        /* 輸入區域固定在底部，往下移動 */
+        /* 輸入區域固定在底部 */
         .mode3-page .input-row {
           display: flex !important;
           flex-direction: column !important;
@@ -373,7 +373,7 @@
           flex-grow: 0 !important;
           padding: 12px 32px 16px 32px !important; /* 增加左右 padding，與對話框對齊 */
           margin: 0 !important;
-          margin-top: 0 !important; /* 設為 0，讓輸入欄位在正常位置 */
+          margin-top: auto !important; /* 使用 auto 將輸入欄位推到底部 */
           visibility: visible !important;
           opacity: 1 !important;
           height: auto !important;
