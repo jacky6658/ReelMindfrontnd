@@ -345,11 +345,12 @@
           flex-direction: column !important;
           box-sizing: border-box !important;
           padding: 0 !important;
-          padding-bottom: 300px !important;
+          padding-top: 40px !important; /* 在頁首下方留出空間 */
+          padding-bottom: 200px !important; /* 減少底部 padding，讓輸入欄位往下移動 */
           background: #ffffff !important;
         }
         
-        /* 聊天訊息區域可滾動 */
+        /* 聊天訊息區域可滾動 - 擴大對話框 */
         .mode3-page #mode3-chatMessages {
           flex: 1 1 auto !important;
           overflow-y: auto !important;
@@ -358,21 +359,21 @@
           overscroll-behavior: contain;
           min-height: 0 !important;
           max-height: none !important;
-          padding: 16px 24px !important;
+          padding: 24px 32px !important; /* 增加內邊距，讓對話框更大 */
           margin: 0 !important;
-          padding-bottom: 40px !important;
+          padding-bottom: 60px !important; /* 增加底部 padding */
           margin-bottom: 0 !important;
         }
         
-        /* 輸入區域固定在底部，往上移動更多 */
+        /* 輸入區域固定在底部，往下移動 */
         .mode3-page .input-row {
           display: flex !important;
           flex-direction: column !important;
           flex-shrink: 0 !important;
           flex-grow: 0 !important;
-          padding: 8px 24px 8px 24px !important;
+          padding: 12px 32px 16px 32px !important; /* 增加左右 padding，與對話框對齊 */
           margin: 0 !important;
-          margin-top: -300px !important;
+          margin-top: -200px !important; /* 減少負 margin，讓輸入欄位往下移動 */
           visibility: visible !important;
           opacity: 1 !important;
           height: auto !important;
@@ -519,14 +520,14 @@
       /* IP人設規劃使用說明按鈕和抽屜樣式 */
       .mode3-instructions-btn-container {
         position: fixed;
-        top: 90px;
+        top: 100px; /* 調整位置，配合 padding-top: 40px */
         left: 20px;
         z-index: 1002;
       }
       
       .mode3-results-btn-container {
         position: fixed;
-        top: 90px;
+        top: 100px; /* 調整位置，配合 padding-top: 40px */
         left: 120px;
         z-index: 1002;
       }
