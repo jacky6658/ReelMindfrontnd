@@ -13600,13 +13600,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 啟動 token 監控（每分鐘檢查一次）
         startTokenMonitor();
         
-        // 初始化時更新首頁視圖（確保訂閱狀態正確顯示）
-        console.log('🏠 初始化時更新首頁視圖...');
-        setTimeout(() => {
-          updateHomepageView();
-        }, 500);
-        
         // 處理 hash 導航（例如從其他頁面跳轉過來的 #forum 或 #guide）
+        // 必須在更新首頁視圖之前處理，避免先顯示首頁
         const handleHashNavigation = () => {
           const hash = window.location.hash;
           if (hash) {
@@ -13615,16 +13610,24 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const validPages = ['homepage', 'forum', 'guide', 'userDB', 'guide-article1', 'guide-article2', 'guide-article3'];
             if (validPages.includes(pageId)) {
               console.log('🔗 檢測到 hash 導航:', pageId);
-              // 延遲執行，確保頁面已完全載入
-              setTimeout(() => {
-                switchPage(pageId);
-              }, 300);
+              // 立即執行，避免先顯示首頁
+              switchPage(pageId);
+              return true; // 表示已處理 hash 導航
             }
           }
+          return false; // 表示沒有 hash 導航
         };
         
-        // 頁面載入時處理 hash
-        handleHashNavigation();
+        // 頁面載入時先處理 hash（優先處理）
+        const hasHashNavigation = handleHashNavigation();
+        
+        // 如果沒有 hash 導航，才更新首頁視圖（確保訂閱狀態正確顯示）
+        if (!hasHashNavigation) {
+          console.log('🏠 初始化時更新首頁視圖...');
+          setTimeout(() => {
+            updateHomepageView();
+          }, 500);
+        }
         
         // 監聽 hash 變化（當用戶在同一個頁面內點擊 hash 連結時）
         window.addEventListener('hashchange', handleHashNavigation);

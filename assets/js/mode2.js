@@ -85,7 +85,13 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
   
   // 初始化聊天功能
-  initChatGPTFeatures();
+  console.log('💬 開始初始化聊天功能...');
+  try {
+    initChatGPTFeatures();
+    console.log('✅ 聊天功能初始化完成');
+  } catch (error) {
+    console.error('❌ 初始化聊天功能時出錯:', error);
+  }
   
   console.log('✅ ========== Mode2 頁面初始化完成 ==========');
 });
@@ -179,17 +185,27 @@ function toggleInstructionsDrawer() {
 
 // 初始化 ChatGPT 風格功能
 function initChatGPTFeatures() {
+  console.log('🔧 initChatGPTFeatures() 被調用');
   try {
     // 初始化 Markdown 渲染器
     if (typeof initMarkdownRenderer === 'function') {
+      console.log('📝 初始化 Markdown 渲染器...');
       initMarkdownRenderer();
+      console.log('✅ Markdown 渲染器初始化完成');
+    } else {
+      console.warn('⚠️ initMarkdownRenderer 函數不存在');
     }
   
     // 設置輸入框事件監聽器
+    console.log('🔍 查找輸入框和按鈕元素...');
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
     
+    console.log('📝 messageInput:', messageInput ? '找到' : '未找到');
+    console.log('🔘 sendBtn:', sendBtn ? '找到' : '未找到');
+    
     if (messageInput) {
+      console.log('✅ 設置輸入框事件監聽器...');
       // 自動調整高度
       messageInput.addEventListener('input', () => {
         autoResizeTextarea();
@@ -226,11 +242,16 @@ function initChatGPTFeatures() {
     }
     
     if (sendBtn) {
+      console.log('✅ 設置發送按鈕事件監聽器...');
       sendBtn.addEventListener('click', handleSendMessage);
+    } else {
+      console.warn('⚠️ 找不到發送按鈕元素');
     }
     
     // 快速按鈕事件
+    console.log('🔍 查找快速按鈕元素...');
     const quickButtons = document.getElementById('quickButtons');
+    console.log('⚡ quickButtons:', quickButtons ? '找到' : '未找到');
     if (quickButtons) {
       quickButtons.addEventListener('click', (e) => {
         if (e.target.classList.contains('quick-btn')) {
@@ -242,9 +263,15 @@ function initChatGPTFeatures() {
           }
         }
       });
+      console.log('✅ 快速按鈕事件監聽器設置完成');
+    } else {
+      console.warn('⚠️ 找不到快速按鈕元素');
     }
+    
+    console.log('✅ initChatGPTFeatures() 初始化完成');
   } catch (error) {
-    console.error('初始化 ChatGPT 功能錯誤:', error);
+    console.error('❌ 初始化 ChatGPT 功能錯誤:', error);
+    console.error('錯誤堆疊:', error.stack);
   }
 }
 
