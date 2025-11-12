@@ -380,41 +380,417 @@
         }
       }
       
-      /* ===== 一鍵生成模式樣式 ===== */
+      /* ===== 一鍵生成模式樣式（步驟式流程） ===== */
       .page-content {
         flex: 1;
         padding: 24px;
         overflow-y: auto;
-        display: flex;
-        gap: 24px;
         min-height: calc(100vh - 60px);
+        background: linear-gradient(to bottom, #dbeafe 0%, #ffffff 100%);
       }
       
       @media (max-width: 768px) {
         .page-content {
-          padding: 12px 0;
-          flex-direction: column;
+          padding: 12px;
         }
       }
       
-      /* 左側內容區域 */
-      .left-content {
-        background: var(--bg-secondary);
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 2px 8px var(--shadow);
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        transition: background-color 0.3s ease;
+      /* 步驟式流程容器 */
+      .step-flow-container {
+        max-width: 900px;
+        margin: 0 auto;
       }
       
-      /* 右側面板 */
-      .right-panel {
-        flex: 5;
+      /* 返回按鈕 */
+      .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: transparent;
+        border: none;
+        color: #1e40af;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.2s;
+        margin-bottom: 24px;
+      }
+      
+      .back-button:hover {
+        background: #eff6ff;
+      }
+      
+      /* 進度步驟指示器 */
+      .progress-steps {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+        margin-bottom: 48px;
+        flex-wrap: wrap;
+      }
+      
+      .progress-step {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      
+      .progress-step-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+        transition: all 0.3s;
+        flex-shrink: 0;
+      }
+      
+      .progress-step-circle.active {
+        background: #2563eb;
+        color: white;
+      }
+      
+      .progress-step-circle.completed {
+        background: #10b981;
+        color: white;
+      }
+      
+      .progress-step-circle.inactive {
+        background: #e5e7eb;
+        color: #9ca3af;
+      }
+      
+      .progress-step-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1e40af;
+        white-space: nowrap;
+      }
+      
+      .progress-step-label.inactive {
+        color: #9ca3af;
+      }
+      
+      .progress-step-connector {
+        width: 64px;
+        height: 2px;
+        transition: all 0.3s;
+      }
+      
+      .progress-step-connector.active {
+        background: #2563eb;
+      }
+      
+      .progress-step-connector.inactive {
+        background: #e5e7eb;
+      }
+      
+      @media (max-width: 768px) {
+        .progress-steps {
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+        
+        .progress-step-connector {
+          width: 32px;
+        }
+        
+        .progress-step-label {
+          font-size: 12px;
+        }
+        
+        .progress-step-circle {
+          width: 40px;
+          height: 40px;
+          font-size: 14px;
+        }
+      }
+      
+      /* 步驟內容卡片 */
+      .step-card {
+        background: white;
+        border: 2px solid #bfdbfe;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        padding: 32px;
+        margin-bottom: 24px;
+      }
+      
+      @media (max-width: 768px) {
+        .step-card {
+          padding: 20px;
+        }
+      }
+      
+      .step-card-header {
+        margin-bottom: 24px;
+      }
+      
+      .step-card-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #1e40af;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      
+      .step-card-description {
+        font-size: 14px;
+        color: #2563eb;
+        margin: 0;
+      }
+      
+      .step-card-content {
         display: flex;
         flex-direction: column;
-        gap: 20px;
+        gap: 24px;
+      }
+      
+      /* 表單輸入樣式（藍色主題） */
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .form-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1e40af;
+      }
+      
+      .form-input,
+      .form-select,
+      .form-textarea {
+        padding: 12px;
+        border: 2px solid #bfdbfe;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        color: #1e293b;
+        transition: all 0.2s;
+      }
+      
+      .form-input:focus,
+      .form-select:focus,
+      .form-textarea:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+      
+      .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+      
+      /* 按鈕選擇器（平台、目標） */
+      .button-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      
+      @media (max-width: 768px) {
+        .button-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      
+      .button-selector {
+        padding: 12px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        background: white;
+        color: #4b5563;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+      }
+      
+      .button-selector:hover {
+        border-color: #93c5fd;
+        background: #eff6ff;
+      }
+      
+      .button-selector.selected {
+        border-color: #2563eb;
+        background: #dbeafe;
+        color: #1e40af;
+        font-weight: 600;
+      }
+      
+      .button-selector-desc {
+        font-size: 11px;
+        margin-top: 4px;
+        opacity: 0.75;
+      }
+      
+      /* 主要按鈕 */
+      .btn-primary {
+        width: 100%;
+        padding: 14px 24px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      
+      .btn-primary:hover:not(:disabled) {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      }
+      
+      .btn-primary:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+        transform: none;
+      }
+      
+      .btn-outline {
+        width: 100%;
+        padding: 14px 24px;
+        background: transparent;
+        color: #1e40af;
+        border: 2px solid #bfdbfe;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      
+      .btn-outline:hover {
+        background: #eff6ff;
+        border-color: #2563eb;
+      }
+      
+      /* 載入動畫（參考版本） */
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        padding: 64px 20px;
+        min-height: 300px;
+      }
+      
+      .loading-icon-wrapper {
+        position: relative;
+      }
+      
+      .loading-icon {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        background: #dbeafe;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s ease-in-out infinite;
+      }
+      
+      .loading-icon svg {
+        width: 48px;
+        height: 48px;
+        color: #2563eb;
+        animation: spin 2s linear infinite;
+      }
+      
+      .loading-icon-border {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 4px solid #bfdbfe;
+        border-top-color: #2563eb;
+        animation: spin 1s linear infinite;
+      }
+      
+      .loading-text {
+        text-align: center;
+      }
+      
+      .loading-text h3 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #1e40af;
+        margin-bottom: 8px;
+      }
+      
+      .loading-text p {
+        font-size: 14px;
+        color: #2563eb;
+        animation: pulse 2s ease-in-out infinite;
+      }
+      
+      .loading-dots {
+        display: inline-flex;
+        gap: 4px;
+        margin-top: 16px;
+      }
+      
+      .loading-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #60a5fa;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      
+      .loading-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      
+      .loading-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+      
+      /* 步驟內容顯示/隱藏 */
+      .step-content {
+        display: none;
+      }
+      
+      .step-content.active {
+        display: block;
       }
       
       /* 用戶需求設定區塊 */
@@ -1014,178 +1390,274 @@
       </div>
     </div>
 
-    <!-- Mode3 頁面內容（一鍵生成） -->
+    <!-- Mode3 頁面內容（一鍵生成 - 步驟式流程） -->
     <div class="page-content">
-      <div class="left-content">
-        <!-- 用戶需求設定區塊 -->
-        <div class="settings-block">
-          <h3 id="settingsToggle">📋 用戶需求設定 <span class="settings-toggle">▼</span></h3>
-          <div class="settings-content" id="settingsContent">
-            <div class="settings-grid">
-              <div class="setting-item">
-                <label>平台</label>
-                <select id="platformSelect">
-                  <option value="">選擇平台</option>
-                  <option value="TikTok">TikTok</option>
-                  <option value="Instagram">Instagram Reels</option>
-                  <option value="YouTube">YouTube Shorts</option>
-                  <option value="Facebook">Facebook Reels</option>
-                </select>
-              </div>
-              <div class="setting-item">
-                <label>主題</label>
-                <input type="text" id="topicInput" placeholder="例如:夏季變白挑戰/美白保養">
-              </div>
-              <div class="setting-item">
-                <label>腳本秒數</label>
-                <select id="durationInput">
-                  <option value="15秒">15秒</option>
-                  <option value="30秒" selected>30秒</option>
-                  <option value="45秒">45秒</option>
-                  <option value="60秒">60秒</option>
-                </select>
-              </div>
-              <div class="setting-item">
-                <label>帳號定位</label>
-                <input type="text" id="positioningInput" placeholder="如:健康×加密,輕鬆幽默">
-              </div>
-            </div>
-            
-            <!-- 常用腳本結構選擇 -->
-            <div class="script-structure-section">
-              <label class="structure-label">常用腳本結構</label>
-              <div class="structure-buttons">
-                <button class="structure-btn" data-structure="A" title="標準行銷三段式（Hook → Value → CTA）- 通用/帶貨，適合產品推廣、快速轉換">
-                  <span class="structure-letter">A</span>
-                  <div class="structure-btn-content">
-                    <span class="structure-name">標準行銷三段式</span>
-                    <span class="structure-desc">Hook → Value → CTA，適合產品推廣</span>
-                  </div>
-                </button>
-                <button class="structure-btn" data-structure="B" title="問題 → 解決 → 證明 - 教育/建立信任，適合教學內容、建立專業形象">
-                  <span class="structure-letter">B</span>
-                  <div class="structure-btn-content">
-                    <span class="structure-name">問題→解決→證明</span>
-                    <span class="structure-desc">教育/建立信任，適合教學內容</span>
-                  </div>
-                </button>
-                <button class="structure-btn" data-structure="C" title="Before → After → 秘密揭露 - 視覺反差/爆量，適合效果展示、吸引眼球">
-                  <span class="structure-letter">C</span>
-                  <div class="structure-btn-content">
-                    <span class="structure-name">Before→After</span>
-                    <span class="structure-desc">視覺反差/爆量，適合效果展示</span>
-                  </div>
-                </button>
-                <button class="structure-btn" data-structure="D" title="教學知識型（迷思 → 原理 → 要點 → 行動）- 冷受眾，適合知識科普、教育內容">
-                  <span class="structure-letter">D</span>
-                  <div class="structure-btn-content">
-                    <span class="structure-name">教學知識型</span>
-                    <span class="structure-desc">迷思→原理→要點→行動，適合知識科普</span>
-                  </div>
-                </button>
-                <button class="structure-btn" data-structure="E" title="故事敘事型（起 → 承 → 轉 → 合）- 人設/口碑，適合個人品牌、情感連結">
-                  <span class="structure-letter">E</span>
-                  <div class="structure-btn-content">
-                    <span class="structure-name">故事敘事型</span>
-                    <span class="structure-desc">起→承→轉→合，適合個人品牌</span>
-                  </div>
-                </button>
-              </div>
-            </div>
-            
-            <button id="applyBtn" class="apply-btn">套用設定</button>
+      <div class="step-flow-container">
+        <!-- 返回按鈕 -->
+        <button class="back-button" onclick="window.location.href='index.html'">
+          <span>←</span>
+          <span>返回首頁</span>
+        </button>
+        
+        <!-- 進度步驟指示器 -->
+        <div class="progress-steps">
+          <div class="progress-step">
+            <div class="progress-step-circle active" id="stepCircle1">1</div>
+            <span class="progress-step-label active" id="stepLabel1">填寫需求</span>
           </div>
-        </div>
-
-        <!-- 一鍵生成使用說明 -->
-        <div class="one-click-instructions" id="oneClickInstructions" style="display: none;">
-          <h3>🚀 一鍵生成使用說明</h3>
-          <div class="instruction-steps">
-            <div class="step">
-              <div class="step-number">1</div>
-              <div class="step-content">
-                <strong>設定需求</strong>
-                <p>選擇平台、輸入主題、設定秒數和帳號定位，選擇腳本結構（A/B/C/D/E），然後點擊「套用設定」</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="step-number">2</div>
-              <div class="step-content">
-                <strong>生成功能（可獨立使用）</strong>
-                <p>您可以隨時點擊「一鍵生成帳號定位」、「一鍵生成選題」或「一鍵生成腳本」按鈕，不需要按順序完成。每個功能都可以獨立使用。</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="step-number">3</div>
-              <div class="step-content">
-                <strong>使用建議</strong>
-                <p>建議順序：帳號定位 → 選題推薦 → 腳本生成，但您也可以根據需求直接使用任何功能</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="step-number">4</div>
-              <div class="step-content">
-                <strong>儲存或重新生成</strong>
-                <p>滿意結果可點擊「儲存」，不滿意可點擊「再換一個」重新生成</p>
-              </div>
-            </div>
+          <div class="progress-step-connector inactive" id="connector1"></div>
+          <div class="progress-step">
+            <div class="progress-step-circle inactive" id="stepCircle2">2</div>
+            <span class="progress-step-label inactive" id="stepLabel2">確認資訊</span>
           </div>
-        </div>
-      </div>
-
-      <!-- 右側面板：結果區塊（可切換） -->
-      <div class="right-panel">
-        <!-- 結果標籤切換 -->
-        <div class="result-tabs">
-          <button class="result-tab active" data-tab="positioning">🎯 帳號定位</button>
-          <button class="result-tab" data-tab="topics">💡 腳本選題</button>
-          <button class="result-tab" data-tab="script">📝 短影音腳本</button>
+          <div class="progress-step-connector inactive" id="connector2"></div>
+          <div class="progress-step">
+            <div class="progress-step-circle inactive" id="stepCircle3">3</div>
+            <span class="progress-step-label inactive" id="stepLabel3">生成結果</span>
+          </div>
         </div>
         
-        <!-- 結果區塊容器 -->
-        <div class="results-container">
-          <!-- 帳號定位結果 -->
-          <div id="positioningResult" class="result-content" style="display: block;">
-            <div class="result-header">
-              <h3>帳號定位分析</h3>
-              <button class="generate-btn" onclick="generatePositioning()">一鍵生成帳號定位</button>
+        <!-- Step 1: 填寫需求 -->
+        <div class="step-content active" id="step1">
+          <div class="step-card">
+            <div class="step-card-header">
+              <h2 class="step-card-title">
+                <span>✨</span>
+                <span>告訴AI你的需求</span>
+              </h2>
+              <p class="step-card-description">填寫以下資訊，讓 AI 為你量身打造短影音內容</p>
             </div>
-            <div id="positioningContent" class="result-body">
-              請點選「一鍵生成帳號定位」按鈕開始
-            </div>
-            <div class="result-actions" id="positioningActions" style="display: none;">
-              <button class="save-btn" onclick="saveResult('positioning')">儲存</button>
-              <button class="regenerate-btn" onclick="regenerateResult('positioning')">再換一個</button>
+            <div class="step-card-content">
+              <!-- 主題或產品 -->
+              <div class="form-group">
+                <label class="form-label" for="topicInput">你的主題或產品 *</label>
+                <input type="text" id="topicInput" class="form-input" placeholder="例如:美白咀嚼錠、健身教學、美食分享...">
+              </div>
+              
+              <!-- 帳號定位 -->
+              <div class="form-group">
+                <label class="form-label" for="positioningInput">帳號定位 *</label>
+                <input type="text" id="positioningInput" class="form-input" placeholder="例如:25-35歲女性、健身新手、上班族...">
+              </div>
+              
+              <!-- 影片目標 -->
+              <div class="form-group">
+                <label class="form-label">影片目標 *</label>
+                <div class="button-grid">
+                  <button type="button" class="button-selector" data-goal="流量型">
+                    <div>流量型</div>
+                    <div class="button-selector-desc">吸粉/破圈</div>
+                  </button>
+                  <button type="button" class="button-selector" data-goal="轉換型">
+                    <div>轉換型</div>
+                    <div class="button-selector-desc">帶貨/留資</div>
+                  </button>
+                  <button type="button" class="button-selector" data-goal="教育型">
+                    <div>教育型</div>
+                    <div class="button-selector-desc">建立信任</div>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- 社群平台 -->
+              <div class="form-group">
+                <label class="form-label">社群平台 *</label>
+                <div class="button-grid">
+                  <button type="button" class="button-selector" data-platform="TikTok">TikTok</button>
+                  <button type="button" class="button-selector" data-platform="Instagram Reels">Instagram Reels</button>
+                  <button type="button" class="button-selector" data-platform="小紅書">小紅書</button>
+                  <button type="button" class="button-selector" data-platform="YouTube Shorts">YouTube Shorts</button>
+                  <button type="button" class="button-selector" data-platform="Facebook Reels">Facebook Reels</button>
+                </div>
+              </div>
+              
+              <!-- 腳本秒數 -->
+              <div class="form-group">
+                <label class="form-label" for="durationInput">腳本秒數 *</label>
+                <select id="durationInput" class="form-select">
+                  <option value="15">15秒</option>
+                  <option value="30" selected>30秒</option>
+                  <option value="45">45秒</option>
+                  <option value="60">60秒</option>
+                </select>
+              </div>
+              
+              <!-- 常用腳本結構 -->
+              <div class="form-group">
+                <label class="form-label">常用腳本結構 *</label>
+                <div class="structure-buttons">
+                  <button type="button" class="structure-btn" data-structure="A">
+                    <span class="structure-letter">A</span>
+                    <div class="structure-btn-content">
+                      <span class="structure-name">標準行銷三段式</span>
+                      <span class="structure-desc">Hook → Value → CTA，適合產品推廣</span>
+                    </div>
+                  </button>
+                  <button type="button" class="structure-btn" data-structure="B">
+                    <span class="structure-letter">B</span>
+                    <div class="structure-btn-content">
+                      <span class="structure-name">問題→解決→證明</span>
+                      <span class="structure-desc">教育/建立信任，適合教學內容</span>
+                    </div>
+                  </button>
+                  <button type="button" class="structure-btn" data-structure="C">
+                    <span class="structure-letter">C</span>
+                    <div class="structure-btn-content">
+                      <span class="structure-name">Before→After</span>
+                      <span class="structure-desc">視覺反差/爆量，適合效果展示</span>
+                    </div>
+                  </button>
+                  <button type="button" class="structure-btn" data-structure="D">
+                    <span class="structure-letter">D</span>
+                    <div class="structure-btn-content">
+                      <span class="structure-name">教學知識型</span>
+                      <span class="structure-desc">迷思→原理→要點→行動，適合知識科普</span>
+                    </div>
+                  </button>
+                  <button type="button" class="structure-btn" data-structure="E">
+                    <span class="structure-letter">E</span>
+                    <div class="structure-btn-content">
+                      <span class="structure-name">故事敘事型</span>
+                      <span class="structure-desc">起→承→轉→合，適合個人品牌</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- 補充說明 -->
+              <div class="form-group">
+                <label class="form-label" for="styleInput">補充說明 (選填)</label>
+                <textarea id="styleInput" class="form-textarea" placeholder="例如:想要幽默風格、需要反差感、有 Before/After 素材..."></textarea>
+              </div>
+              
+              <!-- 下一步按鈕 -->
+              <button type="button" class="btn-primary" id="nextToStep2" disabled>
+                <span>下一步</span>
+                <span>→</span>
+              </button>
             </div>
           </div>
-          
-          <!-- 腳本選題結果 -->
-          <div id="topicSelectionResult" class="result-content" style="display: none;">
-            <div class="result-header">
-              <h3>腳本選題推薦</h3>
-              <button class="generate-btn" onclick="generateTopics()">一鍵生成選題</button>
+        </div>
+        
+        <!-- Step 2: 確認資訊 -->
+        <div class="step-content" id="step2">
+          <div class="step-card">
+            <div class="step-card-header">
+              <h2 class="step-card-title">
+                <span>📋</span>
+                <span>確認你的資訊</span>
+              </h2>
+              <p class="step-card-description">確認無誤後，點擊生成按鈕</p>
             </div>
-            <div id="topicContent" class="result-body">
-              請點選「一鍵生成選題」按鈕開始
-            </div>
-            <div class="result-actions" id="topicActions" style="display: none;">
-              <button class="save-btn" onclick="saveResult('topics')">儲存</button>
-              <button class="regenerate-btn" onclick="regenerateResult('topics')">再換一個</button>
+            <div class="step-card-content">
+              <div id="confirmContent" style="display: flex; flex-direction: column; gap: 16px; color: #1e40af;">
+                <!-- 動態填充確認內容 -->
+              </div>
+              
+              <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="button" class="btn-outline" id="backToStep1">
+                  <span>←</span>
+                  <span>返回修改</span>
+                </button>
+                <button type="button" class="btn-primary" id="generateAll">
+                  <span>✨</span>
+                  <span>開始生成</span>
+                </button>
+              </div>
             </div>
           </div>
-          
-          <!-- 短影音腳本結果 -->
-          <div id="scriptResult" class="result-content" style="display: none;">
-            <div class="result-header">
-              <h3>短影音腳本生成</h3>
-              <button class="generate-btn" onclick="generateScript()">一鍵生成腳本</button>
+        </div>
+        
+        <!-- Step 3: 生成結果（載入中） -->
+        <div class="step-content" id="step3Loading">
+          <div class="step-card">
+            <div class="loading-container">
+              <div class="loading-icon-wrapper">
+                <div class="loading-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                </div>
+                <div class="loading-icon-border"></div>
+              </div>
+              <div class="loading-text">
+                <h3>AI 正在為你生成內容...</h3>
+                <p>分析你的需求並打造專屬腳本，請稍候</p>
+                <div class="loading-dots">
+                  <div class="loading-dot"></div>
+                  <div class="loading-dot"></div>
+                  <div class="loading-dot"></div>
+                </div>
+              </div>
             </div>
-            <div id="scriptContent" class="result-body">
-              請點選「一鍵生成腳本」按鈕開始
+          </div>
+        </div>
+        
+        <!-- Step 3: 生成結果（顯示結果） -->
+        <div class="step-content" id="step3Result">
+          <div class="step-card">
+            <div class="step-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h2 class="step-card-title">
+                  <span>🎉</span>
+                  <span>生成完成!</span>
+                </h2>
+              </div>
+              <button type="button" class="btn-outline" id="regenerateAll" style="width: auto; padding: 8px 16px;">
+                <span>重新生成</span>
+              </button>
             </div>
-            <div class="result-actions" id="scriptActions" style="display: none;">
-              <button class="save-btn" onclick="saveScript()">儲存</button>
-              <button class="regenerate-btn" onclick="regenerateResult('script')">再換一個</button>
+            
+            <!-- 結果標籤切換（原版本設計） -->
+            <div class="result-tabs" style="margin-top: 24px;">
+              <button class="result-tab active" data-tab="positioning">🎯 帳號定位</button>
+              <button class="result-tab" data-tab="topics">💡 腳本選題</button>
+              <button class="result-tab" data-tab="script">📝 短影音腳本</button>
+            </div>
+            
+            <!-- 結果區塊容器 -->
+            <div class="results-container">
+              <!-- 帳號定位結果 -->
+              <div id="positioningResult" class="result-content" style="display: block;">
+                <div class="result-header">
+                  <h3>帳號定位分析</h3>
+                </div>
+                <div id="positioningContent" class="result-body">
+                  正在生成...
+                </div>
+                <div class="result-actions" id="positioningActions" style="display: none;">
+                  <button class="save-btn" onclick="saveResult('positioning')">儲存</button>
+                  <button class="regenerate-btn" onclick="regenerateResult('positioning')">再換一個</button>
+                </div>
+              </div>
+              
+              <!-- 腳本選題結果 -->
+              <div id="topicSelectionResult" class="result-content" style="display: none;">
+                <div class="result-header">
+                  <h3>腳本選題推薦</h3>
+                </div>
+                <div id="topicContent" class="result-body">
+                  正在生成...
+                </div>
+                <div class="result-actions" id="topicActions" style="display: none;">
+                  <button class="save-btn" onclick="saveResult('topics')">儲存</button>
+                  <button class="regenerate-btn" onclick="regenerateResult('topics')">再換一個</button>
+                </div>
+              </div>
+              
+              <!-- 短影音腳本結果 -->
+              <div id="scriptResult" class="result-content" style="display: none;">
+                <div class="result-header">
+                  <h3>短影音腳本生成</h3>
+                </div>
+                <div id="scriptContent" class="result-body">
+                  正在生成...
+                </div>
+                <div class="result-actions" id="scriptActions" style="display: none;">
+                  <button class="save-btn" onclick="saveScript()">儲存</button>
+                  <button class="regenerate-btn" onclick="regenerateResult('script')">再換一個</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
