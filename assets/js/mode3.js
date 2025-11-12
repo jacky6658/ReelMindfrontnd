@@ -808,20 +808,42 @@ async function saveResult(type) {
 
 // 儲存腳本
 async function saveScript() {
-  if (!ipPlanningUser || !ipPlanningUser.user_id || !ipPlanningToken) {
+  // 輔助函數：顯示通知（確保一定會顯示）
+  const showNotification = (message, duration = 3000) => {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('請先登入', 3000);
+      window.ReelMindCommon.showToast(message, duration);
+    } else {
+      // 備用方案：使用 alert 或創建簡單的 toast
+      const toastEl = document.getElementById('toast');
+      if (toastEl) {
+        toastEl.textContent = message;
+        toastEl.style.display = 'block';
+        toastEl.style.opacity = '1';
+        setTimeout(() => {
+          toastEl.style.opacity = '0';
+          setTimeout(() => {
+            toastEl.style.display = 'none';
+          }, 300);
+        }, duration);
+      } else {
+        alert(message);
+      }
     }
+  };
+  
+  if (!ipPlanningUser || !ipPlanningUser.user_id || !ipPlanningToken) {
+    showNotification('請先登入', 3000);
     return;
   }
   
   const content = document.getElementById('scriptContent').textContent;
   if (!content || content.includes('請點選「一鍵生成腳本」按鈕開始') || content.includes('請先完成')) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('沒有可儲存的內容', 3000);
-    }
+    showNotification('沒有可儲存的內容', 3000);
     return;
   }
+  
+  // 顯示儲存中提示
+  showNotification('正在儲存...', 2000);
   
   try {
     const response = await fetch(`${API_URL}/api/scripts/save`, {
@@ -840,23 +862,20 @@ async function saveScript() {
     });
     
     if (response.ok) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('腳本儲存成功！', 3000);
-      }
+      const data = await response.json().catch(() => ({}));
+      showNotification('✅ 腳本儲存成功！', 3000);
     } else if (response.status === 404) {
       localStorage.setItem(`saved_script_${Date.now()}`, content);
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('腳本已儲存到本地！', 3000);
-      }
+      showNotification('✅ 腳本已儲存到本地！', 3000);
     } else {
-      throw new Error('儲存失敗');
+      const errorData = await response.json().catch(() => ({ error: '儲存失敗' }));
+      throw new Error(errorData.error || '儲存失敗');
     }
   } catch (error) {
     console.error('Save script error:', error);
+    // 儲存到本地作為備份
     localStorage.setItem(`saved_script_${Date.now()}`, content);
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('腳本已儲存到本地！', 3000);
-    }
+    showNotification('⚠️ 腳本已儲存到本地（伺服器儲存失敗）', 3000);
   }
 }
 
