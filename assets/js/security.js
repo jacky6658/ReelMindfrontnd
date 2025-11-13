@@ -77,7 +77,7 @@
 
   /**
    * 安全地渲染 Markdown（已清理）
-   * 使用 marked 渲染後再清理
+   * 使用 marked 渲染後再清理，支援表格標籤
    * 
    * @param {string} markdown - Markdown 文字
    * @returns {string} 安全的 HTML
@@ -89,18 +89,29 @@
     
     try {
       if (typeof marked !== 'undefined') {
+        // 確保 marked 支援表格和換行
+        if (!marked.getDefaults || !marked.getDefaults().gfm) {
+          marked.setOptions({ 
+            gfm: true,  // GitHub Flavored Markdown（支援表格）
+            breaks: true,  // 支援換行
+            tables: true  // 明確啟用表格支援
+          });
+        }
         const html = marked.parse(markdown);
-        // 使用 DOMPurify 清理（如果可用）
+        // 使用 DOMPurify 清理（如果可用），允許表格標籤
         if (typeof DOMPurify !== 'undefined') {
-          return DOMPurify.sanitize(html);
+          return DOMPurify.sanitize(html, {
+            ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],  // 允許表格標籤
+            ADD_ATTR: ['colspan', 'rowspan']  // 允許表格屬性
+          });
         }
         return html;
       }
       // 如果 marked 不可用，返回轉義的文字
-      return escapeHtml(markdown);
+      return escapeHtml(markdown).replace(/\n/g, '<br>');
     } catch (e) {
       console.error('Markdown 渲染錯誤:', e);
-      return escapeHtml(markdown);
+      return escapeHtml(markdown).replace(/\n/g, '<br>');
     }
   }
 

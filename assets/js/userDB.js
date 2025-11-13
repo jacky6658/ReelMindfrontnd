@@ -2054,7 +2054,15 @@ function displayIpPlanningResultsForUserDB(results) {
   const activeTab = document.querySelector('.ip-planning-tab.active');
   let currentType = 'profile';
   if (activeTab) {
-    if (activeTab.textContent.includes('Profile')) {
+    if (activeTab.textContent.includes('帳號定位')) {
+      currentType = 'profile';
+    } else if (activeTab.textContent.includes('選題方向')) {
+      currentType = 'plan';
+    } else if (activeTab.textContent.includes('一週腳本')) {
+      currentType = 'scripts';
+    }
+    // 保留舊的匹配邏輯作為備用
+    else if (activeTab.textContent.includes('Profile')) {
       currentType = 'profile';
     } else if (activeTab.textContent.includes('規劃')) {
       currentType = 'plan';
@@ -2066,7 +2074,7 @@ function displayIpPlanningResultsForUserDB(results) {
   const currentResults = groupedResults[currentType] || [];
   
   if (currentResults.length === 0) {
-    const typeText = currentType === 'profile' ? 'IP Profile' : currentType === 'plan' ? '14天規劃' : '今日腳本';
+    const typeText = currentType === 'profile' ? '帳號定位' : currentType === 'plan' ? '選題方向（影片類型配比）' : '一週腳本';
     content.innerHTML = `<div class="loading-text">尚無${escapeHtml(typeText)}記錄</div>`;
     return;
   }
@@ -2077,29 +2085,39 @@ function displayIpPlanningResultsForUserDB(results) {
     if (ipPlanningUser && ipPlanningUser.user_id) {
       savedTitle = localStorage.getItem(`ip-planning-item-title-${ipPlanningUser.user_id}-${result.id}`);
     }
-    const defaultTitle = currentType === 'profile' ? 'IP Profile' : currentType === 'plan' ? '14天規劃' : '今日腳本';
-    const title = escapeHtml(savedTitle || result.title || defaultTitle);
+    const defaultTitle = currentType === 'profile' ? '帳號定位' : currentType === 'plan' ? '選題方向（影片類型配比）' : '一週腳本';
+    // 如果沒有儲存的標題且 result.title 為空或預設值，使用預設標題
+    const finalTitle = savedTitle || (result.title && result.title !== '請在此編輯你的標題' ? result.title : defaultTitle);
+    const title = escapeHtml(finalTitle);
     
     // 轉義 result.id 以防止 XSS
     const safeResultId = String(result.id || '').replace(/['"\\]/g, '');
     const escapedResultId = escapeHtml(safeResultId);
     
-    // 處理 result.content：如果包含 HTML 標籤，需要安全地渲染
-    // 使用 DOMParser 來解析和清理 HTML，只允許安全的標籤
+    // 處理 result.content：統一使用與 mode1.js 相同的 Markdown 渲染函數
+    // 由於儲存時已經是 HTML 格式，直接使用 DOMPurify 清理即可
     let safeContent = '';
     if (result.content) {
       const contentStr = String(result.content);
-      // 檢查是否包含 HTML 標籤
+      
+      // 優先使用與 mode1.js 相同的渲染邏輯
+      // 如果內容已經是 HTML（包含標籤），直接使用 DOMPurify 清理
       if (/<[^>]+>/.test(contentStr)) {
-        // 包含 HTML，使用 DOMParser 解析並清理
-        try {
+        // 內容已經是 HTML，使用 DOMPurify 清理（與 mode1.js 的 renderMode3Markdown 保持一致）
+        if (typeof DOMPurify !== 'undefined') {
+          safeContent = DOMPurify.sanitize(contentStr, {
+            ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],  // 允許表格標籤
+            ADD_ATTR: ['colspan', 'rowspan']  // 允許表格屬性
+          });
+        } else {
+          // 如果 DOMPurify 不可用，使用基本清理
           const parser = new DOMParser();
           const doc = parser.parseFromString(contentStr, 'text/html');
           const body = doc.body;
           
-          // 只允許安全的 HTML 標籤
-          const allowedTags = ['p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'strong', 'em', 'b', 'i', 'u', 'span', 'div', 'blockquote'];
-          const allowedAttributes = ['style', 'class'];
+          // 只允許安全的 HTML 標籤（包含表格標籤以支援 Markdown 表格）
+          const allowedTags = ['p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'strong', 'em', 'b', 'i', 'u', 'span', 'div', 'blockquote', 'table', 'thead', 'tbody', 'tr', 'th', 'td'];
+          const allowedAttributes = ['style', 'class', 'colspan', 'rowspan'];
           
           // 清理所有不允許的標籤和屬性
           const cleanNode = (node) => {
@@ -2127,14 +2145,34 @@ function displayIpPlanningResultsForUserDB(results) {
           
           Array.from(body.childNodes).forEach(child => cleanNode(child));
           safeContent = body.innerHTML;
-        } catch (e) {
-          console.warn('HTML 解析失敗，使用轉義文本:', e);
-          // 如果解析失敗，轉義所有 HTML
-          safeContent = escapeHtml(contentStr).replace(/\n/g, '<br>');
         }
       } else {
-        // 純文本，轉義並保留換行
-        safeContent = escapeHtml(contentStr).replace(/\n/g, '<br>');
+        // 純文本，使用統一的 Markdown 渲染函數（與 mode1.js 保持一致）
+        if (window.safeRenderMarkdown) {
+          safeContent = window.safeRenderMarkdown(contentStr);
+        } else if (typeof marked !== 'undefined') {
+          // 確保 marked 支援表格和換行
+          if (!marked.getDefaults || !marked.getDefaults().gfm) {
+            marked.setOptions({ 
+              gfm: true,  // GitHub Flavored Markdown（支援表格）
+              breaks: true,  // 支援換行
+              tables: true  // 明確啟用表格支援
+            });
+          }
+          const html = marked.parse(contentStr);
+          // 使用 DOMPurify 清理（如果可用）
+          if (typeof DOMPurify !== 'undefined') {
+            safeContent = DOMPurify.sanitize(html, {
+              ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],  // 允許表格標籤
+              ADD_ATTR: ['colspan', 'rowspan']  // 允許表格屬性
+            });
+          } else {
+            safeContent = html;
+          }
+        } else {
+          // 最後使用轉義的純文字模式
+          safeContent = escapeHtml(contentStr).replace(/\n/g, '<br>');
+        }
       }
     }
     
@@ -2185,11 +2223,23 @@ function showIpPlanningType(type) {
   const tabs = document.querySelectorAll('.ip-planning-tab');
   let targetTab = null;
   if (type === 'profile') {
-    targetTab = Array.from(tabs).find(tab => tab.textContent.includes('Profile'));
+    targetTab = Array.from(tabs).find(tab => tab.textContent.includes('帳號定位'));
+    // 備用匹配
+    if (!targetTab) {
+      targetTab = Array.from(tabs).find(tab => tab.textContent.includes('Profile'));
+    }
   } else if (type === 'plan') {
-    targetTab = Array.from(tabs).find(tab => tab.textContent.includes('規劃'));
+    targetTab = Array.from(tabs).find(tab => tab.textContent.includes('選題方向'));
+    // 備用匹配
+    if (!targetTab) {
+      targetTab = Array.from(tabs).find(tab => tab.textContent.includes('規劃'));
+    }
   } else if (type === 'scripts') {
-    targetTab = Array.from(tabs).find(tab => tab.textContent.includes('腳本'));
+    targetTab = Array.from(tabs).find(tab => tab.textContent.includes('一週腳本'));
+    // 備用匹配
+    if (!targetTab) {
+      targetTab = Array.from(tabs).find(tab => tab.textContent.includes('腳本'));
+    }
   }
   
   if (targetTab) {
@@ -2241,8 +2291,8 @@ function exportIpPlanningResults() {
     
     let csvContent = '類型,標題,內容,創建時間\n';
     filteredResults.forEach(result => {
-      const typeName = result.result_type === 'profile' ? 'IP Profile' : 
-                     result.result_type === 'plan' ? '14天規劃' : '今日腳本';
+      const typeName = result.result_type === 'profile' ? '帳號定位' : 
+                     result.result_type === 'plan' ? '選題方向（影片類型配比）' : '一週腳本';
       const textContent = (result.content || '').replace(/<[^>]*>/g, '').replace(/"/g, '""').replace(/\n/g, ' ');
       const title = (result.title || typeName).replace(/"/g, '""');
       const date = result.created_at ? formatTaiwanTime(result.created_at) : '';

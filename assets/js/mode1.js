@@ -1092,24 +1092,24 @@ async function saveMode3Result() {
     let title = '';
     const tabText = activeTab.textContent;
     if (tabText.includes('帳號定位')) {
-      resultType = 'positioning';
+      resultType = 'profile'; // 映射到後端接受的 'profile'
       title = '帳號定位';
     } else if (tabText.includes('選題方向')) {
-      resultType = 'topics';
+      resultType = 'plan'; // 映射到後端接受的 'plan'
       title = '選題方向（影片類型配比）';
     } else if (tabText.includes('一週腳本')) {
-      resultType = 'weekly';
+      resultType = 'scripts'; // 映射到後端接受的 'scripts'
       title = '一週腳本';
     }
     // 保留舊的匹配邏輯作為備用
     else if (tabText.includes('Profile')) {
-      resultType = 'positioning';
+      resultType = 'profile'; // 映射到後端接受的 'profile'
       title = 'IP Profile';
     } else if (tabText.includes('規劃')) {
-      resultType = 'topics';
+      resultType = 'plan'; // 映射到後端接受的 'plan'
       title = '14天短影音規劃';
     } else if (tabText.includes('腳本')) {
-      resultType = 'weekly';
+      resultType = 'scripts'; // 映射到後端接受的 'scripts'
       title = '今日腳本';
     }
     
@@ -1121,8 +1121,12 @@ async function saveMode3Result() {
       return;
     }
     
-    const resultBlock = document.getElementById(`mode3-${resultType}-result`) || 
-                       document.getElementById(`mode3-${resultType === 'positioning' ? 'profile' : resultType === 'topics' ? 'plan' : 'scripts'}-result`);
+    // 映射結果類型到 HTML ID（前端使用 positioning/topics/weekly，但後端使用 profile/plan/scripts）
+    const frontendResultType = resultType === 'profile' ? 'positioning' : 
+                               resultType === 'plan' ? 'topics' : 
+                               resultType === 'scripts' ? 'weekly' : resultType;
+    const resultBlock = document.getElementById(`mode3-${frontendResultType}-result`) || 
+                       document.getElementById(`mode3-${resultType === 'profile' ? 'profile' : resultType === 'plan' ? 'plan' : 'scripts'}-result`);
     if (!resultBlock) {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('找不到結果區塊', 3000);
@@ -1138,8 +1142,8 @@ async function saveMode3Result() {
       return;
     }
     
-    const textContent = content.innerText || content.textContent || '';
-    const shortTitle = textContent.substring(0, 50) || title;
+    // 使用預設標題「請在此編輯你的標題」
+    const defaultTitle = '請在此編輯你的標題';
     
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('正在儲存...', 2000);
@@ -1154,7 +1158,7 @@ async function saveMode3Result() {
       body: JSON.stringify({
         user_id: user.user_id,
         result_type: resultType,
-        title: shortTitle,
+        title: defaultTitle,
         content: content.innerHTML,
         metadata: {
           timestamp: new Date().toISOString(),
