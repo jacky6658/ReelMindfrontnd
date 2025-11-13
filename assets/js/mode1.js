@@ -392,8 +392,23 @@ async function handleQuickButton(type) {
     case '14day-plan':
       // 先檢查是否有已保存的結果
       const savedPlan = await checkSavedIpPlanningResult('plan', false);
-      if (savedPlan && savedPlan.content) {
-        // 如果有已保存的結果，直接在對話框中顯示
+      // 同時檢查是否有最新的 IP Profile，用於驗證14天規劃是否匹配
+      const currentProfile = await checkSavedIpPlanningResult('profile', false);
+      
+      // 如果14天規劃存在，但IP Profile已更新，則應該重新生成14天規劃
+      // 簡單判斷：如果14天規劃的創建時間早於IP Profile，則不匹配
+      let shouldRegenerate = false;
+      if (savedPlan && currentProfile) {
+        const planTime = new Date(savedPlan.created_at || 0).getTime();
+        const profileTime = new Date(currentProfile.created_at || 0).getTime();
+        // 如果IP Profile比14天規劃新，則應該重新生成
+        if (profileTime > planTime) {
+          shouldRegenerate = true;
+        }
+      }
+      
+      if (savedPlan && savedPlan.content && !shouldRegenerate) {
+        // 如果有已保存的結果且與當前IP Profile匹配，直接在對話框中顯示
         const userMessage = createMode1Message('user', '請告知我的14天規劃');
         chatMessages.appendChild(userMessage);
         
@@ -411,8 +426,8 @@ async function handleQuickButton(type) {
           console.error('記錄長期記憶錯誤:', error);
         }
       } else {
-        // 如果沒有已保存的結果，發送訊息給 LLM 生成
-        sendMode1Message('請根據我們之前討論的影片類型配比，再次告知我的14天規劃。', 'ip_planning');
+        // 如果沒有已保存的結果，或結果與當前IP Profile不匹配，發送訊息給 LLM 重新生成
+        sendMode1Message('請根據我們目前最新的帳號定位和對話內容，重新生成我的14天規劃。', 'ip_planning');
       }
       break;
     case 'today-script':
@@ -2281,11 +2296,12 @@ function updateMode1OneClickStatus(type, status, message = '') {
         });
       }, 100);
       
-      // 檢查內容高度，決定是否顯示展開按鈕
+      // 檢查內容高度，決定是否顯示展開按鈕（改為彈出模態視窗）
       if (wrapperEl) {
         const contentHeight = elements.contentEl.scrollHeight;
         const maxHeight = window.innerWidth <= 768 ? 200 : 300;
         if (contentHeight > maxHeight) {
+          // 內容超過限制，顯示展開按鈕（彈出模態視窗）
           wrapperEl.classList.add('collapsed');
           wrapperEl.classList.remove('expanded');
           if (expandEl && expandEl.classList.contains('mode1-oneclick-result-expand')) {
@@ -2294,10 +2310,14 @@ function updateMode1OneClickStatus(type, status, message = '') {
             if (btn) btn.innerHTML = '<span>展開</span>';
           }
         } else {
+          // 內容未超過限制，仍然可以展開查看（但按鈕可選顯示）
           wrapperEl.classList.remove('collapsed');
           wrapperEl.classList.add('expanded');
+          // 即使內容不長，也顯示展開按鈕，讓用戶可以在模態視窗中查看
           if (expandEl && expandEl.classList.contains('mode1-oneclick-result-expand')) {
-            expandEl.style.display = 'none';
+            expandEl.style.display = 'block';
+            const btn = expandEl.querySelector('button');
+            if (btn) btn.innerHTML = '<span>展開</span>';
           }
         }
       }
@@ -2733,31 +2753,71 @@ async function regenerateMode1OneClickResult(type, forceRegenerate = true) {
   }
 }
 
-// 展開/收起一鍵生成結果
+// 展開一鍵生成結果（彈出模態視窗）
 window.toggleMode1OneClickExpand = function(type) {
   const typeMap = {
-    'positioning': 'Positioning',
-    'topics': 'Topics',
-    'weekly': 'Weekly'
+    'positioning': { name: 'Positioning', title: '帳號定位' },
+    'topics': { name: 'Topics', title: '選題方向（影片類型配比）' },
+    'weekly': { name: 'Weekly', title: '一週腳本' }
   };
-  const typeName = typeMap[type] || type;
-  const contentEl = document.getElementById(`mode1OneClick${typeName}Content`);
-  const wrapperEl = contentEl?.parentElement;
-  const expandEl = wrapperEl?.nextElementSibling;
-  const btn = expandEl?.querySelector('button');
+  const typeInfo = typeMap[type] || { name: type, title: '內容' };
+  const contentEl = document.getElementById(`mode1OneClick${typeInfo.name}Content`);
   
-  if (!wrapperEl || !expandEl) return;
+  if (!contentEl || !contentEl.innerHTML.trim()) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('沒有可查看的內容', 2000);
+    }
+    return;
+  }
   
-  if (wrapperEl.classList.contains('collapsed')) {
-    // 展開
-    wrapperEl.classList.remove('collapsed');
-    wrapperEl.classList.add('expanded');
-    if (btn) btn.innerHTML = '<span>收起</span>';
-  } else {
-    // 收起
-    wrapperEl.classList.remove('expanded');
-    wrapperEl.classList.add('collapsed');
-    if (btn) btn.innerHTML = '<span>展開</span>';
+  // 打開模態視窗
+  const overlay = document.getElementById('mode1ExpandModalOverlay');
+  const modal = overlay?.querySelector('.mode1-expand-modal');
+  const titleEl = document.getElementById('mode1ExpandModalTitle');
+  const contentElModal = document.getElementById('mode1ExpandModalContent');
+  
+  if (!overlay || !modal || !titleEl || !contentElModal) return;
+  
+  // 設置標題
+  titleEl.textContent = typeInfo.title;
+  
+  // 複製內容到模態視窗
+  contentElModal.innerHTML = contentEl.innerHTML;
+  
+  // 確保表格在模態視窗中正確顯示
+  const tables = contentElModal.querySelectorAll('table');
+  tables.forEach(table => {
+    // 如果表格不在滾動容器中，添加容器
+    if (!table.parentElement.classList.contains('mode1-oneclick-result-content-wrapper')) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'mode1-oneclick-result-content-wrapper';
+      wrapper.style.overflowX = 'auto';
+      wrapper.style.webkitOverflowScrolling = 'touch';
+      wrapper.style.overscrollBehaviorX = 'contain';
+      table.parentElement.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    }
+  });
+  
+  // 顯示模態視窗
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  
+  // iOS Safari 處理
+  if (window.innerWidth <= 768) {
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+  }
+};
+
+// 關閉展開模態視窗
+window.closeMode1ExpandModal = function() {
+  const overlay = document.getElementById('mode1ExpandModalOverlay');
+  if (overlay) {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
   }
 };
 
