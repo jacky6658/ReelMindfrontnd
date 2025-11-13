@@ -2673,57 +2673,111 @@ async function generateMode1WeeklyForOneClick() {
 
 // 儲存一鍵生成結果
 async function saveMode1OneClickResult(type) {
-  const contentEl = document.getElementById(`mode1OneClick${type === 'positioning' ? 'Positioning' : type === 'topics' ? 'Topics' : 'Weekly'}Content`);
-  if (!contentEl || !contentEl.innerHTML.trim()) {
+  // 防止模態窗口縮放動畫
+  const modal = document.querySelector('.mode1-oneclick-modal');
+  if (modal) {
+    modal.classList.add('saving');
+  }
+  
+  try {
+    const contentEl = document.getElementById(`mode1OneClick${type === 'positioning' ? 'Positioning' : type === 'topics' ? 'Topics' : 'Weekly'}Content`);
+    if (!contentEl || !contentEl.innerHTML.trim()) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('沒有可儲存的內容', 3000);
+      }
+      return;
+    }
+    
+    const token = localStorage.getItem('ipPlanningToken');
+    const userStr = localStorage.getItem('ipPlanningUser');
+    
+    if (!token || !userStr) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入', 3000);
+      }
+      return;
+    }
+    
+    const user = JSON.parse(userStr);
+    
+    // 映射類型到後端接受的格式
+    const resultTypeMap = {
+      'positioning': 'profile',
+      'topics': 'plan',
+      'weekly': 'scripts'
+    };
+    
+    const resultType = resultTypeMap[type];
+    if (!resultType) {
+      console.error('無效的結果類型:', type);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('儲存失敗：無效的結果類型', 3000);
+      }
+      return;
+    }
+    
+    // 獲取內容（HTML）
+    let content = contentEl.innerHTML.trim();
+    
+    // 生成標題
+    const titleMap = {
+      'positioning': '帳號定位',
+      'topics': '選題方向（影片類型配比）',
+      'weekly': '一週腳本'
+    };
+    const title = titleMap[type] || 'IP 人設規劃結果';
+    
+    // 顯示儲存中通知
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('沒有可儲存的內容', 3000);
+      window.ReelMindCommon.showToast('正在儲存...', 2000);
     }
-    return;
+    
+    // 直接調用 API 儲存
+    const response = await fetch('https://aivideobackend.zeabur.app/api/ip-planning/save', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        user_id: user.user_id,
+        result_type: resultType,
+        title: title,
+        content: content,
+        metadata: {
+          timestamp: new Date().toISOString(),
+          source: 'mode1_oneclick'
+        }
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    // 顯示成功通知
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('✅ 儲存成功', 3000);
+    }
+    
+    console.log('儲存成功:', result);
+    
+  } catch (error) {
+    console.error('儲存失敗:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast(`❌ 儲存失敗：${error.message}`, 5000);
+    }
+  } finally {
+    // 移除 saving class，恢復動畫
+    if (modal) {
+      setTimeout(() => {
+        modal.classList.remove('saving');
+      }, 100);
+    }
   }
-  
-  // 使用現有的儲存函數，但需要映射類型
-  const resultTypeMap = {
-    'positioning': 'profile',
-    'topics': 'plan',
-    'weekly': 'scripts'
-  };
-  
-  // 臨時設置活動標籤和結果區塊，然後調用儲存函數
-  const originalTab = document.querySelector('.mode1-tab.active');
-  const originalBlock = document.querySelector('.mode1-result-block.active');
-  
-  // 設置對應的標籤和區塊
-  const tabs = document.querySelectorAll('.mode1-tab');
-  tabs.forEach(tab => {
-    tab.classList.remove('active');
-    const tabText = tab.textContent;
-    if ((type === 'positioning' && tabText.includes('帳號定位')) ||
-        (type === 'topics' && tabText.includes('選題方向')) ||
-        (type === 'weekly' && tabText.includes('一週腳本'))) {
-      tab.classList.add('active');
-    }
-  });
-  
-  const blocks = document.querySelectorAll('.mode1-result-block');
-  blocks.forEach(block => {
-    block.classList.remove('active');
-  });
-  
-  const targetBlock = document.getElementById(`mode1-${type}-result`);
-  if (targetBlock) {
-    targetBlock.classList.add('active');
-    const contentDiv = targetBlock.querySelector('.mode1-result-content');
-    if (contentDiv) {
-      contentDiv.innerHTML = contentEl.innerHTML;
-    }
-  }
-  
-  // 調用儲存函數
-  await saveMode1Result();
-  
-  // 恢復原始狀態
-  if (originalTab) originalTab.classList.add('active');
-  if (originalBlock) originalBlock.classList.add('active');
 }
 
 // 重新生成生成結果

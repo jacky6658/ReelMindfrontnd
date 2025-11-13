@@ -684,6 +684,12 @@
         transform: scale(1);
       }
       
+      /* 防止儲存時觸發縮放動畫 */
+      .mode1-oneclick-modal-overlay.open .mode1-oneclick-modal.saving {
+        transform: scale(1) !important;
+        transition: none !important;
+      }
+      
       .mode1-oneclick-modal-header {
         padding: 24px 32px;
         border-bottom: 1px solid #e5e7eb;

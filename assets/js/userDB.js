@@ -2531,6 +2531,7 @@ function displayOrdersForUserDB(orders) {
             <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">付款時間</th>
             <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">到期日期</th>
             <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">發票號碼</th>
+            <th style="padding: 12px; text-align: center; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">操作</th>
           </tr>
         </thead>
         <tbody>
@@ -2549,16 +2550,17 @@ function displayOrdersForUserDB(orders) {
               : '<span style="display: inline-block; padding: 4px 12px; background: #fee2e2; color: #991b1b; border-radius: 12px; font-size: 12px; font-weight: 600;">⏳ 待付款</span>';
             
             const planText = order.plan_type === 'monthly' ? '月費方案' : order.plan_type === 'yearly' ? '年費方案' : order.plan_type || '-';
-            
+            const orderId = order.order_id || order.id;
             return `
-              <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s; cursor: pointer;" onclick="showOrderDetail('${order.order_id || order.id}')" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
-                <td style="padding: 12px; color: #1f2937; font-weight: 500;">${escapeHtml(order.order_id || order.id || '-')}</td>
-                <td style="padding: 12px; color: #4b5563;">${escapeHtml(planText)}</td>
-                <td style="padding: 12px; text-align: right; color: #1f2937; font-weight: 600;">NT$${order.amount?.toLocaleString() || 0}</td>
-                <td style="padding: 12px; text-align: center;">${statusBadge}</td>
-                <td style="padding: 12px; color: #6b7280; font-size: 14px;">${escapeHtml(paidDate)}</td>
-                <td style="padding: 12px; color: #6b7280; font-size: 14px;">${escapeHtml(expiresDate)}</td>
-                <td style="padding: 12px; color: #6b7280; font-size: 14px;">${escapeHtml(order.invoice_number || '-')}</td>
+              <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
+                <td style="padding: 12px; color: #1f2937; font-weight: 500; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(orderId || '-')}</td>
+                <td style="padding: 12px; color: #4b5563; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(planText)}</td>
+                <td style="padding: 12px; text-align: right; color: #1f2937; font-weight: 600; cursor: pointer;" onclick="showOrderDetail('${orderId}')">NT$${order.amount?.toLocaleString() || 0}</td>
+                <td style="padding: 12px; text-align: center; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${statusBadge}</td>
+                <td style="padding: 12px; color: #6b7280; font-size: 14px; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(paidDate)}</td>
+                <td style="padding: 12px; color: #6b7280; font-size: 14px; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(expiresDate)}</td>
+                <td style="padding: 12px; color: #6b7280; font-size: 14px; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(order.invoice_number || '-')}</td>
+                <td style="padding: 12px; text-align: center; color: #9ca3af;">-</td>
               </tr>
             `;
           }).join('')}
@@ -2567,6 +2569,10 @@ function displayOrdersForUserDB(orders) {
     </div>
   `;
 }
+
+// 刪除訂單
+// 刪除訂單功能已停用 - 訂單將由系統自動清理（超過24小時的待付款訂單）
+// window.deleteOrder 函數已移除
 
 // 顯示訂單詳情
 window.showOrderDetail = async function(orderId) {

@@ -15,7 +15,69 @@
         visibility: visible;
         transition: opacity 0.3s ease-in;
       }
+      /* Fallback: 如果 3 秒後 JavaScript 仍未執行，強制顯示頁面 */
+      body:not(.page-loaded)::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        z-index: 999999;
+        animation: showPageFallback 3s forwards;
+      }
+      @keyframes showPageFallback {
+        0%, 99% { opacity: 0; }
+        100% { opacity: 1; display: none; }
+      }
     </style>
+    
+    <!-- 立即處理授權連結（不依賴 DOMContentLoaded） -->
+    <script>
+      (function() {
+        'use strict';
+        try {
+          // 立即檢查 URL 中的 token 參數
+          const urlParams = new URLSearchParams(window.location.search);
+          const token = urlParams.get('token');
+          
+          if (token) {
+            console.log('🔗 檢測到授權連結 token:', token.substring(0, 20) + '...');
+            
+            // 檢查是否已登入
+            const currentToken = localStorage.getItem('ipPlanningToken');
+            
+            if (!currentToken) {
+              // 未登入，立即跳轉到登入頁
+              console.log('🔐 未登入，跳轉到登入頁');
+              window.location.replace('/#login?activation_token=' + encodeURIComponent(token));
+              return;
+            } else {
+              // 已登入，標記需要處理授權（等 DOMContentLoaded 時處理）
+              sessionStorage.setItem('pendingActivationToken', token);
+              console.log('✅ 已登入，標記待處理授權');
+            }
+          }
+          
+          // 確保頁面在 3 秒後顯示（fallback）
+          setTimeout(function() {
+            if (document.body && !document.body.classList.contains('page-loaded')) {
+              console.warn('⚠️ JavaScript 載入超時，強制顯示頁面');
+              document.body.classList.add('page-loaded');
+            }
+          }, 3000);
+        } catch (e) {
+          console.error('❌ 授權連結處理錯誤:', e);
+          // 發生錯誤時，確保頁面能顯示
+          setTimeout(function() {
+            if (document.body) {
+              document.body.classList.add('page-loaded');
+            }
+          }, 1000);
+        }
+      })();
+    </script>
     
     <!-- Primary SEO Meta Tags -->
     <title>ReelMind | AI 短影音智能體 - AI 生成腳本 × AI 帳號定位 × 爆款短影音</title>
@@ -13453,6 +13515,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         // 處理授權連結（/activate?token=xxx 或根路徑 ?token=xxx）
+        // 優先檢查 sessionStorage 中的待處理授權（來自立即執行的腳本）
+        const pendingToken = sessionStorage.getItem('pendingActivationToken');
+        if (pendingToken) {
+          sessionStorage.removeItem('pendingActivationToken');
+          activationToken = pendingToken;
+          console.log('✅ 從 sessionStorage 獲取待處理授權 token');
+        }
+        
         if (activationToken) {
           // 檢查是否為授權連結（路徑是 /activate 或根路徑有 token 參數）
           const isActivatePath = window.location.pathname === '/activate' || 
@@ -13473,7 +13543,23 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             } else {
               // 已登入，處理授權
               console.log('✅ 檢測到授權連結且已登入，開始驗證授權');
-              handleActivationToken(activationToken);
+              if (typeof handleActivationToken === 'function') {
+                handleActivationToken(activationToken);
+              } else {
+                console.error('❌ handleActivationToken 函數未定義，等待 common.js 載入...');
+                // 等待 common.js 載入
+                let retryCount = 0;
+                const checkFunction = setInterval(function() {
+                  if (typeof handleActivationToken === 'function') {
+                    clearInterval(checkFunction);
+                    handleActivationToken(activationToken);
+                  } else if (retryCount++ > 10) {
+                    clearInterval(checkFunction);
+                    console.error('❌ handleActivationToken 函數載入超時');
+                    showToast('⚠️ 授權處理失敗，請重新整理頁面', 5000);
+                  }
+                }, 200);
+              }
             }
           }
         }
