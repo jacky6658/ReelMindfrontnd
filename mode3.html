@@ -327,39 +327,63 @@
         .top-navbar {
           padding: 12px 16px;
           padding-top: calc(12px + var(--safe-area-inset-top, 0px));
-          flex-wrap: wrap;
-          gap: 12px;
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
           z-index: 1000;
+          grid-template-columns: auto 1fr auto;
+          gap: 8px;
         }
         
         .navbar-left {
-          gap: 16px;
-          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: 0;
+          justify-content: flex-start;
           min-width: 0;
+          flex-shrink: 0;
+          width: auto;
+        }
+        
+        .navbar-left .navbar-tabs {
+          display: none !important; /* 手機版完全隱藏標籤 */
         }
         
         .navbar-title {
-          font-size: 25px;
+          font-size: 20px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
           text-align: center;
-        }
-        
-        .top-navbar {
-          grid-template-columns: auto 1fr auto;
-        }
-        
-        .navbar-tabs {
-          display: none; /* 手機版隱藏標籤，改用底部導航 */
+          justify-self: center;
+          grid-column: 2;
+          width: 100%;
+          max-width: 100%;
         }
         
         .navbar-right {
+          display: flex;
+          align-items: center;
           gap: 8px;
+          justify-content: flex-end;
+          flex-shrink: 0;
+          width: auto;
+          min-width: 0;
+        }
+        
+        /* 手機版隱藏創作者資料庫連結（應該在抽屜中） */
+        .navbar-right #userDBLink {
+          display: none !important;
+        }
+        
+        /* 確保三條線按鈕不會被擠壓 */
+        .mobile-drawer-toggle {
+          flex-shrink: 0;
+          width: 44px;
+          height: 44px;
+          min-width: 44px;
+          min-height: 44px;
         }
         
         .user-info {
@@ -1518,7 +1542,6 @@
       </div>
       <div class="navbar-title clickable-title" onclick="window.location.href='index.html'">ReelMind</div>
       <div class="navbar-right">
-        <a href="userDB.html" id="userDBLink" class="navbar-tab" style="display:none; margin-right: 16px;" onclick="window.location.href='userDB.html'; return false;">創作者資料庫</a>
         <div class="user-info" id="userInfo" style="display: none;" onclick="window.location.href='userDB.html'">
           <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
           <span id="userName" class="user-name"></span>
