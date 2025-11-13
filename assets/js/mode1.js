@@ -434,6 +434,10 @@ async function handleQuickButton(type) {
       // 今日腳本需要 LLM 詢問用戶選擇腳本結構，所以直接發送
       sendMode1Message('請根據目前資料庫的5個腳本結構（A/B/C/D/E），詢問我要使用哪一個腳本結構來產出今日的腳本。', 'ip_planning');
       break;
+    case 'change-script-structure':
+      // 換腳本結構：讓 LLM 列出腳本結構讓用戶選擇
+      sendMode1Message('請列出目前資料庫中的所有腳本結構（A/B/C/D/E），並說明每個結構的特點，讓我選擇要使用哪一個腳本結構。', 'ip_planning');
+      break;
     case 'reposition':
       // 重新定位：強制重新生成，所以直接發送給 LLM
       sendMode1Message('請重新為我生成帳號定位，基於我們最新的對話內容。', 'ip_planning');
@@ -1658,9 +1662,9 @@ async function saveMode1Result() {
     
     const data = await response.json();
     if (data.success) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('✅ 結果已儲存到個人資料庫', 3000);
-      }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('✅ 儲存成功', 3000);
+    }
     } else {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('❌ ' + (data.error || '儲存失敗'), 3000);
@@ -1804,7 +1808,7 @@ function exportMode1Result() {
     URL.revokeObjectURL(csvUrl);
     
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('✅ 結果已匯出為 CSV 檔案', 3000);
+      window.ReelMindCommon.showToast('✅ 匯出成功', 3000);
     }
   } catch (error) {
     console.error('匯出失敗:', error);
@@ -2138,7 +2142,7 @@ window.exportHistoryResult = async function(resultId, resultType) {
           URL.revokeObjectURL(csvUrl);
           
           if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast('結果已匯出為 CSV 檔案', 3000);
+            window.ReelMindCommon.showToast('✅ 匯出成功', 3000);
           }
         }
       }
@@ -2912,7 +2916,7 @@ function exportMode1OneClickResult(type) {
     URL.revokeObjectURL(csvUrl);
     
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('結果已匯出為 CSV 檔案', 3000);
+      window.ReelMindCommon.showToast('✅ 匯出成功', 3000);
     }
   } catch (error) {
     console.error('匯出失敗:', error);

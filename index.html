@@ -49,9 +49,12 @@
             const currentToken = localStorage.getItem('ipPlanningToken');
             
             if (!currentToken) {
-              // 未登入，立即跳轉到登入頁
-              console.log('🔐 未登入，跳轉到登入頁');
-              window.location.replace('/#login?activation_token=' + encodeURIComponent(token));
+              // 未登入，先顯示 popup-callback.html 動畫，然後跳轉到 Google 登入
+              console.log('🔐 未登入，顯示動畫後跳轉到登入頁');
+              // 保存 activation_token 到 sessionStorage，供 popup-callback.html 使用
+              sessionStorage.setItem('pendingActivationToken', token);
+              // 跳轉到 popup-callback.html，它會自動處理登入流程
+              window.location.replace('/auth/popup-callback.html?activation_token=' + encodeURIComponent(token));
               return;
             } else {
               // 已登入，標記需要處理授權（等 DOMContentLoaded 時處理）
@@ -11451,7 +11454,7 @@
               <section class="rm-guide-section" style="background: #F8FAFC; padding: 100px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw;">
                 <div style="max-width: 1400px; margin: 0 auto; padding: 0 16px;">
                   <div style="text-align: center; margin-bottom: 60px;">
-                    <h2 style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; color: #1E293B; margin-bottom: 16px;"><i class="fas fa-book-open" style="margin-right: 10px;"></i>AI 短影音實戰指南</h2>
+                    <h2 onclick="switchPage('guide'); return false;" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; color: #1E293B; margin-bottom: 16px; cursor: pointer; transition: color 0.3s;" onmouseover="this.style.color='#2563EB';" onmouseout="this.style.color='#1E293B';"><i class="fas fa-book-open" style="margin-right: 10px;"></i>AI 短影音實戰指南</h2>
                     <p style="font-size: 1.1rem; color: #64748B; max-width: 600px; margin: 0 auto;">學習如何用 AI 打造爆款短影音內容</p>
                 </div>
                   
@@ -11493,6 +11496,21 @@
                           <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">Reels / Shorts / TikTok<br>腳本差異</div>
                           <div style="font-size: 0.95rem; color: #64748B; line-height: 1.6;">
                             每個平台的短影音都有不同特性：IG Reels 偏重品牌敘事，YouTube Shorts 強調快速爆點，TikTok 重視娛樂性。本指南解析 AI 如何自動調整...
+                          </div>
+                        </div>
+                        <div style="padding: 20px 32px; background: #F8FAFC;">
+                          <span style="color: #2563EB; font-weight: 600; font-size: 0.95rem;">閱讀更多 →</span>
+                        </div>
+                      </div>
+                    </a>
+                    
+                    <!-- 文章 4 -->
+                    <a onclick="switchPage('guide-article4'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                      <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
+                        <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
+                          <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">腳本結構選擇指南</div>
+                          <div style="font-size: 0.95rem; color: #64748B; line-height: 1.6;">
+                            了解 ReelMind 提供的 5 種腳本結構（A/B/C/D/E），每種結構適合不同的內容類型和目標。本指南幫助你選擇最適合的腳本結構，提升內容效果...
                           </div>
                         </div>
                         <div style="padding: 20px 32px; background: #F8FAFC;">
@@ -12161,6 +12179,19 @@
                     <span style="color: #2563EB; font-weight: 600; font-size: 0.95rem;">閱讀更多 →</span>
                   </div>
                 </div>
+                
+                <!-- 文章 4 -->
+                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="switchPage('guide-article4')">
+                  <div style="padding: 32px; border-bottom: 1px solid #F1F5F9;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">腳本結構選擇指南</div>
+                    <div style="font-size: 1rem; color: #64748B; line-height: 1.6;">
+                      了解 ReelMind 提供的 5 種腳本結構（A/B/C/D/E），每種結構適合不同的內容類型和目標。本指南幫助你選擇最適合的腳本結構，提升內容效果...
+                    </div>
+                  </div>
+                  <div style="padding: 20px 32px; background: #F8FAFC;">
+                    <span style="color: #2563EB; font-weight: 600; font-size: 0.95rem;">閱讀更多 →</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -12529,6 +12560,129 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                       <p style="color:#475569;">表情多、互動詞強、可用梗音樂或挑戰格式。</p>
                       <div style="font-weight:700;color:#0f172a;">範例 Hook</div>
                       <p style="color:#475569;">「我保證看完你一定會試一次。」</p>
+                    </div>
+                  </section>
+
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0 0;">
+                    <a class="btn sky" onclick="goToLogin();" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;background:#06b6d4;color:#001018;text-decoration:none;cursor:pointer;">登入解鎖 AI 生成</a>
+                    <a class="btn alt" href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;border:1px solid #cbd5e1;color:#334155;background:#fff;text-decoration:none;">到 Discord 看範例</a>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Footer -->
+              <footer style="padding: 26px 0; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; font-size: 14px;">
+                <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">© 2025 ReelMind · AI 短影音 · 台灣</div>
+              </footer>
+            </div>
+          </div>
+
+          <!-- 文章 4：腳本結構選擇指南 -->
+          <div id="guide-article4" class="page">
+            <div>
+              <!-- Header -->
+              <header style="padding: 56px 0 18px; border-bottom: 1px solid #e2e8f0; background: linear-gradient(135deg, rgba(14,165,233,.10), transparent 60%), linear-gradient(135deg, rgba(167,139,250,.10), transparent 60%);">
+                <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+                  <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+                    <a onclick="switchPage('homepage'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
+                    <a onclick="switchPage('guide'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+                  </div>
+                  <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">腳本結構選擇指南</h1>
+                  <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">了解 ReelMind 提供的 5 種腳本結構（A/B/C/D/E），每種結構適合不同的內容類型和目標，幫助你選擇最適合的腳本結構。</p>
+                </div>
+              </header>
+
+              <!-- Article -->
+              <article style="padding: 28px 0;">
+                <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+                  <section style="background:#0f172a;border:1px solid #1f2937;border-radius:16px;padding:16px;color:#e5e7eb;">
+                    <h2 style="font-size: 22px; margin: 0 0 8px; color:#e5e7eb;">一、五種腳本結構總覽</h2>
+                    <div style="overflow:auto;">
+                      <table style="width:100%; border-collapse:separate; border-spacing:0 10px;">
+                        <tr style="background:#111827;">
+                          <td style="padding:10px 12px; font-weight:700; color:#94a3b8;">結構</td>
+                          <td style="padding:10px 12px; font-weight:700; color:#94a3b8;">特點</td>
+                          <td style="padding:10px 12px; font-weight:700; color:#94a3b8;">適用場景</td>
+                        </tr>
+                        <tr style="background:#0f172a;">
+                          <td style="padding:10px 12px; font-weight:700; color:#3b82f6;">結構 A</td>
+                          <td style="padding:10px 12px;">開場吸引 + 問題提出 + 解決方案</td>
+                          <td style="padding:10px 12px;">教學類、知識分享</td>
+                        </tr>
+                        <tr style="background:#111827;">
+                          <td style="padding:10px 12px; font-weight:700; color:#10b981;">結構 B</td>
+                          <td style="padding:10px 12px;">故事敘述 + 轉折點 + 啟發</td>
+                          <td style="padding:10px 12px;">品牌故事、個人經歷</td>
+                        </tr>
+                        <tr style="background:#0f172a;">
+                          <td style="padding:10px 12px; font-weight:700; color:#f59e0b;">結構 C</td>
+                          <td style="padding:10px 12px;">快速列點 + 重點強調 + CTA</td>
+                          <td style="padding:10px 12px;">產品介紹、功能說明</td>
+                        </tr>
+                        <tr style="background:#111827;">
+                          <td style="padding:10px 12px; font-weight:700; color:#ef4444;">結構 D</td>
+                          <td style="padding:10px 12px;">對比呈現 + 優勢分析 + 行動呼籲</td>
+                          <td style="padding:10px 12px;">比較類、說服型內容</td>
+                        </tr>
+                        <tr style="background:#0f172a;">
+                          <td style="padding:10px 12px; font-weight:700; color:#8b5cf6;">結構 E</td>
+                          <td style="padding:10px 12px;">互動開場 + 共鳴點 + 深度內容</td>
+                          <td style="padding:10px 12px;">社群互動、討論型</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </section>
+
+                  <section style="display:grid; gap:14px; grid-template-columns:1fr; margin-top:14px;">
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                      <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#dbeafe;border:1px solid #bfdbfe;color:#2563eb;font-weight:800;font-size:12px;margin-bottom:6px;">結構 A：教學型</span>
+                      <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+                      <div style="font-weight:700;color:#0f172a;">適用內容</div>
+                      <p style="color:#475569;">知識分享、技能教學、步驟說明、工具介紹</p>
+                      <div style="font-weight:700;color:#0f172a;">範例</div>
+                      <p style="color:#475569;">「3 個步驟讓你學會...」、「30 秒教會你...」</p>
+                    </div>
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                      <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#d1fae5;border:1px solid #a7f3d0;color:#059669;font-weight:800;font-size:12px;margin-bottom:6px;">結構 B：故事型</span>
+                      <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+                      <div style="font-weight:700;color:#0f172a;">適用內容</div>
+                      <p style="color:#475569;">個人經歷、品牌故事、成功案例、轉折故事</p>
+                      <div style="font-weight:700;color:#0f172a;">範例</div>
+                      <p style="color:#475569;">「我曾經也遇到這個問題，直到我發現...」</p>
+                    </div>
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                      <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#fef3c7;border:1px solid #fde68a;color:#d97706;font-weight:800;font-size:12px;margin-bottom:6px;">結構 C：列點型</span>
+                      <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+                      <div style="font-weight:700;color:#0f172a;">適用內容</div>
+                      <p style="color:#475569;">產品功能、特色介紹、清單式內容、快速資訊</p>
+                      <div style="font-weight:700;color:#0f172a;">範例</div>
+                      <p style="color:#475569;">「5 個你必須知道的...」、「這 3 個功能改變了我...」</p>
+                    </div>
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                      <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#fee2e2;border:1px solid #fecaca;color:#dc2626;font-weight:800;font-size:12px;margin-bottom:6px;">結構 D：對比型</span>
+                      <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+                      <div style="font-weight:700;color:#0f172a;">適用內容</div>
+                      <p style="color:#475569;">產品比較、方法對比、前後差異、優劣分析</p>
+                      <div style="font-weight:700;color:#0f172a;">範例</div>
+                      <p style="color:#475569;">「這樣做 vs 那樣做，差別在哪裡？」</p>
+                    </div>
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                      <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#ede9fe;border:1px solid #ddd6fe;color:#7c3aed;font-weight:800;font-size:12px;margin-bottom:6px;">結構 E：互動型</span>
+                      <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+                      <div style="font-weight:700;color:#0f172a;">適用內容</div>
+                      <p style="color:#475569;">討論話題、觀點分享、問答互動、共鳴內容</p>
+                      <div style="font-weight:700;color:#0f172a;">範例</div>
+                      <p style="color:#475569;">「你有沒有想過...」、「我發現一個有趣的現象...」</p>
+                    </div>
+                  </section>
+
+                  <section style="margin-top:28px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:20px;">
+                    <h2 style="font-size: 20px; margin: 0 0 12px; color:#0f172a;">二、如何選擇適合的結構？</h2>
+                    <div style="color:#475569; line-height:1.8;">
+                      <p style="margin:0 0 12px;"><strong>1. 根據內容目標：</strong>教學選 A、故事選 B、產品選 C、比較選 D、互動選 E</p>
+                      <p style="margin:0 0 12px;"><strong>2. 根據目標受眾：</strong>專業人士偏好 A/C，一般用戶偏好 B/E，決策者偏好 D</p>
+                      <p style="margin:0 0 12px;"><strong>3. 根據平台特性：</strong>Reels 適合 B/E，Shorts 適合 A/C，TikTok 適合 E/D</p>
+                      <p style="margin:0;"><strong>4. 測試與優化：</strong>可以嘗試不同結構，觀察哪種效果最好</p>
                     </div>
                   </section>
 
@@ -13433,8 +13587,57 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               console.log('無法從 response 獲取方案資訊，使用預設值');
             }
             
-            // 重新檢查訂閱狀態
-            await checkSubscriptionStatus();
+            // 等待一小段時間確保後端完成資料庫更新
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // 重試檢查訂閱狀態（最多重試 3 次）
+            let retryCount = 0;
+            let subscriptionActive = false;
+            
+            while (retryCount < 3 && !subscriptionActive) {
+              await checkSubscriptionStatus();
+              // 檢查訂閱狀態
+              const isSubscribed = document.body.dataset.subscribed === 'true' || 
+                                  localStorage.getItem('subscriptionStatus') === 'active';
+              
+              if (isSubscribed) {
+                subscriptionActive = true;
+                break;
+              }
+              
+              // 如果還沒生效，等待後重試
+              if (retryCount < 2) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+              }
+              retryCount++;
+            }
+            
+            // 強制刷新用戶資訊（確保獲取最新的訂閱狀態）
+            const currentToken = localStorage.getItem('ipPlanningToken');
+            if (currentToken) {
+              try {
+                const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                  headers: {
+                    'Authorization': `Bearer ${currentToken}`
+                  }
+                });
+                if (userResponse.ok) {
+                  const userInfo = await userResponse.json();
+                  // 更新本地用戶資訊
+                  if (userInfo.is_subscribed) {
+                    document.body.dataset.subscribed = 'true';
+                    localStorage.setItem('subscriptionStatus', 'active');
+                    // 更新全局用戶資訊
+                    if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                      ipPlanningUser.is_subscribed = userInfo.is_subscribed;
+                      localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                    }
+                  }
+                }
+              } catch (e) {
+                console.warn('刷新用戶資訊失敗:', e);
+              }
+            }
             
             // 確保顯示主應用程式（而不是訂閱頁面）
             if (window.location.pathname.includes('subscription.html')) {
@@ -13449,7 +13652,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             
             // 顯示成功通知（包含方案資訊）
             const planName = planType === 'yearly' ? '年費' : '月費';
-            showToast(`✅ 訂閱啟用成功！方案：${planName}`, 5000);
+            const planDays = planType === 'yearly' ? '1年' : '1個月';
+            showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
             
             // 清除 URL 參數
             window.history.replaceState({}, document.title, window.location.pathname);
@@ -13506,7 +13710,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 處理授權成功頁面（從後端 redirect 回來）
         if (activationSuccess === 'success') {
           const plan = urlParams.get('plan') || hashParams.get('plan') || 'yearly';
-          showToast(`✅ 訂閱啟用成功！方案：${plan === 'yearly' ? '年費' : '月費'}`, 5000);
+          const planName = plan === 'yearly' ? '年費' : '月費';
+          const planDays = plan === 'yearly' ? '1年' : '1個月';
+          showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
           // 重新檢查訂閱狀態
           checkSubscriptionStatus().then(() => {
             // 清除 URL 參數

@@ -288,8 +288,78 @@
       
       if (response.ok || response.status === 302) {
         // 驗證成功
-        await checkSubscriptionStatus();
-        showToast('✅ 訂閱啟用成功！', 5000);
+        // 等待一小段時間確保後端完成資料庫更新
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // 重試檢查訂閱狀態（最多重試 3 次）
+        let retryCount = 0;
+        let subscriptionActive = false;
+        
+        while (retryCount < 3 && !subscriptionActive) {
+          await checkSubscriptionStatus();
+          // 檢查訂閱狀態
+          const isSubscribed = document.body.dataset.subscribed === 'true' || 
+                              localStorage.getItem('subscriptionStatus') === 'active';
+          
+          if (isSubscribed) {
+            subscriptionActive = true;
+            break;
+          }
+          
+          // 如果還沒生效，等待後重試
+          if (retryCount < 2) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          retryCount++;
+        }
+        
+        // 強制刷新用戶資訊（確保獲取最新的訂閱狀態）
+        if (ipPlanningUser && ipPlanningUser.user_id) {
+          try {
+            const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+              headers: {
+                'Authorization': `Bearer ${currentToken}`
+              }
+            });
+            if (userResponse.ok) {
+              const userInfo = await userResponse.json();
+              // 更新本地用戶資訊
+              if (userInfo.is_subscribed) {
+                document.body.dataset.subscribed = 'true';
+                localStorage.setItem('subscriptionStatus', 'active');
+                // 更新 ipPlanningUser
+                if (ipPlanningUser) {
+                  ipPlanningUser.is_subscribed = userInfo.is_subscribed;
+                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('刷新用戶資訊失敗:', e);
+          }
+        }
+        
+        // 獲取方案類型（從後端響應或預設為 yearly）
+        let planType = 'yearly';
+        try {
+          // 嘗試從後端獲取方案資訊
+          const licenseResponse = await fetch(`${API_BASE_URL}/api/user/license/verify?token=${token}`, {
+            headers: {
+              'Authorization': `Bearer ${currentToken}`
+            },
+            redirect: 'manual'
+          });
+          if (licenseResponse.ok) {
+            const licenseData = await licenseResponse.json();
+            planType = licenseData.plan_type || planType;
+          }
+        } catch (e) {
+          console.warn('無法獲取方案資訊，使用預設值');
+        }
+        
+        const planName = planType === 'yearly' ? '年費' : '月費';
+        const planDays = planType === 'yearly' ? '1年' : '1個月';
+        showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
         // 清除 URL 參數
         window.history.replaceState({}, document.title, window.location.pathname);
       } else {

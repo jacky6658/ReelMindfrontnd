@@ -1616,10 +1616,8 @@ async function saveScript() {
   
   // 輔助函數：顯示通知（確保一定會顯示）
   const showNotification = (message, duration = 3000) => {
-    console.log('顯示通知:', message);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast(message, duration);
-      console.log('使用 ReelMindCommon.showToast');
     } else {
       // 備用方案：使用 alert 或創建簡單的 toast
       const toastEl = document.getElementById('toast');
@@ -1627,7 +1625,6 @@ async function saveScript() {
         toastEl.textContent = message;
         toastEl.style.display = 'block';
         toastEl.style.opacity = '1';
-        console.log('使用 toast 元素');
         setTimeout(() => {
           toastEl.style.opacity = '0';
           setTimeout(() => {
@@ -1635,7 +1632,6 @@ async function saveScript() {
           }, 300);
         }, duration);
       } else {
-        console.log('使用 alert 備用方案');
         alert(message);
       }
     }
