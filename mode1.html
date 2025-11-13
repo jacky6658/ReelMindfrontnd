@@ -924,19 +924,22 @@
       @media (max-width: 768px) {
         .mode1-oneclick-results-grid {
           grid-template-columns: 1fr;
+          gap: 16px;
         }
         
         .mode1-oneclick-modal-overlay {
           padding: 0;
           align-items: flex-end; /* 手機版從底部彈出 */
+          -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
         }
         
         .mode1-oneclick-modal {
           max-width: 100%;
-          width: 100%;
           max-height: 90vh;
-          max-height: 90dvh; /* 使用動態視窗高度 */
-          border-radius: 20px 20px 0 0; /* 手機版頂部圓角 */
+          max-height: 90dvh; /* iOS Safari 動態視窗高度 */
+          border-radius: 20px 20px 0 0;
+          padding-bottom: env(safe-area-inset-bottom, 0px); /* iOS 安全區域 */
+          width: 100%;
           transform: translateY(100%); /* 初始位置在底部 */
           transition: transform 0.3s ease;
         }
@@ -1103,8 +1106,82 @@
         color: #4b5563;
         border-right: 1px solid #e5e7eb; /* 垂直分隔線 */
         vertical-align: top;
-        word-wrap: break-word; /* 長文字自動換行 */
-        overflow-wrap: break-word;
+      }
+      
+      /* 一週腳本表格特殊處理：允許橫向滾動，不換行 */
+      .mode1-oneclick-result-content-wrapper:has(table) {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
+        overscroll-behavior-x: contain; /* 防止滾動穿透 */
+      }
+      
+      .mode1-oneclick-result-content-wrapper table {
+        min-width: 800px; /* 確保表格有足夠寬度，觸發橫向滾動 */
+      }
+      
+      .mode1-oneclick-result-content-wrapper table td {
+        white-space: nowrap; /* 防止文字換行，強制使用橫向滾動 */
+      }
+      
+      /* 內容容器 */
+      .mode1-oneclick-result-content {
+        position: relative;
+      }
+      
+      /* 為表格添加滾動容器 */
+      .mode1-oneclick-result-content-wrapper {
+        margin: 16px 0;
+      }
+      
+      .mode1-oneclick-result-content-wrapper table {
+        margin: 0;
+      }
+      
+      /* 展開按鈕樣式 */
+      .mode1-oneclick-result-expand {
+        text-align: center;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #e5e7eb;
+      }
+      
+      .mode1-oneclick-expand-btn {
+        padding: 8px 16px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        background: white;
+        color: #374151;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .mode1-oneclick-expand-btn:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+      }
+      
+      /* 內容收起狀態 */
+      .mode1-oneclick-result-content-wrapper.collapsed {
+        max-height: 300px;
+        overflow: hidden;
+        position: relative;
+      }
+      
+      .mode1-oneclick-result-content-wrapper.collapsed::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: linear-gradient(to bottom, transparent, white);
+        pointer-events: none;
+      }
+      
+      .mode1-oneclick-result-content-wrapper.expanded {
+        max-height: none;
       }
       
       .mode1-oneclick-result-content table td:last-child {
@@ -2038,15 +2115,20 @@
         }
         
         .mode1-instructions-btn, .mode1-results-btn {
-          padding: 12px 16px; /* 增加 padding 確保觸控目標 */
+          padding: 10px 14px; /* 調整 padding */
           min-height: 44px; /* iOS 最小觸控目標 */
-          font-size: 13px;
+          font-size: 12px; /* 縮小字體 */
           -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊高亮 */
           touch-action: manipulation; /* 優化觸控響應 */
         }
         
-        .mode1-instructions-text, .mode1-results-text {
+        /* 手機版：隱藏 emoji，顯示文字 */
+        .mode1-instructions-icon, .mode1-results-icon {
           display: none;
+        }
+        
+        .mode1-instructions-text, .mode1-results-text {
+          display: inline-block; /* 顯示文字 */
         }
       }
     </style>
@@ -2286,7 +2368,7 @@
     <div class="mode1-results-overlay" id="mode1ResultsOverlay" onclick="closeMode1ResultsDrawer()"></div>
     <div class="mode1-results-drawer" id="mode1ResultsDrawer">
       <div class="mode1-results-drawer-header">
-        <h3>📊 生成結果</h3>
+        <h3>生成結果</h3>
         <button class="mode1-results-drawer-close" onclick="closeMode1ResultsDrawer()">✕</button>
       </div>
       <div class="mode1-results-drawer-content">
@@ -2396,8 +2478,15 @@
                 </div>
                 <span class="mode1-oneclick-result-status pending" id="mode1OneClickPositioningStatus">待生成</span>
               </div>
-              <div class="mode1-oneclick-result-content" id="mode1OneClickPositioningContent">
-                <p style="text-align: center; color: #9ca3af; padding: 40px 0;">點擊上方按鈕開始生成</p>
+              <div class="mode1-oneclick-result-content-wrapper">
+                <div class="mode1-oneclick-result-content" id="mode1OneClickPositioningContent">
+                  <p style="text-align: center; color: #9ca3af; padding: 40px 0;">點擊上方按鈕開始生成</p>
+                </div>
+              </div>
+              <div class="mode1-oneclick-result-expand" id="mode1OneClickPositioningExpand" style="display: none;">
+                <button class="mode1-oneclick-expand-btn" onclick="toggleMode1OneClickExpand('positioning')">
+                  <span>展開</span>
+                </button>
               </div>
               <div class="mode1-oneclick-result-actions" id="mode1OneClickPositioningActions" style="display: none;">
                 <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('positioning')">
@@ -2420,8 +2509,15 @@
                 </div>
                 <span class="mode1-oneclick-result-status pending" id="mode1OneClickTopicsStatus">待生成</span>
               </div>
-              <div class="mode1-oneclick-result-content" id="mode1OneClickTopicsContent">
-                <p style="text-align: center; color: #9ca3af; padding: 40px 0;">點擊上方按鈕開始生成</p>
+              <div class="mode1-oneclick-result-content-wrapper">
+                <div class="mode1-oneclick-result-content" id="mode1OneClickTopicsContent">
+                  <p style="text-align: center; color: #9ca3af; padding: 40px 0;">點擊上方按鈕開始生成</p>
+                </div>
+              </div>
+              <div class="mode1-oneclick-result-expand" id="mode1OneClickTopicsExpand" style="display: none;">
+                <button class="mode1-oneclick-expand-btn" onclick="toggleMode1OneClickExpand('topics')">
+                  <span>展開</span>
+                </button>
               </div>
               <div class="mode1-oneclick-result-actions" id="mode1OneClickTopicsActions" style="display: none;">
                 <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('topics')">
@@ -2444,8 +2540,15 @@
                 </div>
                 <span class="mode1-oneclick-result-status pending" id="mode1OneClickWeeklyStatus">待生成</span>
               </div>
-              <div class="mode1-oneclick-result-content" id="mode1OneClickWeeklyContent">
-                <p style="text-align: center; color: #9ca3af; padding: 40px 0;">點擊上方按鈕開始生成</p>
+              <div class="mode1-oneclick-result-content-wrapper">
+                <div class="mode1-oneclick-result-content" id="mode1OneClickWeeklyContent">
+                  <p style="text-align: center; color: #9ca3af; padding: 40px 0;">點擊上方按鈕開始生成</p>
+                </div>
+              </div>
+              <div class="mode1-oneclick-result-expand" id="mode1OneClickWeeklyExpand" style="display: none;">
+                <button class="mode1-oneclick-expand-btn" onclick="toggleMode1OneClickExpand('weekly')">
+                  <span>展開</span>
+                </button>
               </div>
               <div class="mode1-oneclick-result-actions" id="mode1OneClickWeeklyActions" style="display: none;">
                 <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('weekly')">

@@ -358,56 +358,70 @@ function parseQuotaError(errorMessage) {
 }
 
 // 處理快速按鈕點擊
-function handleQuickButton(type) {
+async function handleQuickButton(type) {
+  const chatMessages = document.getElementById('mode1-chatMessages');
+  if (!chatMessages) return;
+  
   switch(type) {
     case 'ip-profile':
-      // 打開右側抽屜，顯示 帳號定位 標籤
-      toggleMode1ResultsDrawer();
-      switchMode1Tab('positioning', null);
-      // 先嘗試載入已保存的結果，如果沒有則生成
-      const positioningResult = document.getElementById('mode1-positioning-result');
-      if (positioningResult) {
-        const hasContent = positioningResult.querySelector('.mode1-result-content') && 
-                          positioningResult.querySelector('.mode1-result-content').innerHTML.trim();
-        if (!hasContent) {
-          // 沒有內容，嘗試載入或生成
-          generateMode1Positioning(false);
-        } else {
-          // 如果已經有內容，LLM 告知用戶目前的 IP Profile
-          sendMode1Message('請告知我目前的 IP Profile，基於我們之前的對話內容。', 'ip_planning');
+      // 先檢查是否有已保存的結果
+      const savedProfile = await checkSavedIpPlanningResult('profile', false);
+      if (savedProfile && savedProfile.content) {
+        // 如果有已保存的結果，直接在對話框中顯示
+        const userMessage = createMode1Message('user', '請告知我目前的 IP Profile');
+        chatMessages.appendChild(userMessage);
+        
+        const aiMessage = createMode1Message('assistant', '');
+        const contentDiv = aiMessage.querySelector('.message-content');
+        contentDiv.innerHTML = renderMode1Markdown(savedProfile.content);
+        chatMessages.appendChild(aiMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // 記錄到長期記憶
+        try {
+          await recordMode1ConversationMessage('ip_planning', 'user', '請告知我目前的 IP Profile', ipPlanningToken, ipPlanningUser);
+          await recordMode1ConversationMessage('ip_planning', 'assistant', savedProfile.content, ipPlanningToken, ipPlanningUser);
+        } catch (error) {
+          console.error('記錄長期記憶錯誤:', error);
         }
+      } else {
+        // 如果沒有已保存的結果，發送訊息給 LLM 生成
+        sendMode1Message('請告知我目前的 IP Profile，基於我們之前的對話內容。', 'ip_planning');
       }
       break;
     case '14day-plan':
-      // 打開右側抽屜，顯示 選題方向 標籤
-      toggleMode1ResultsDrawer();
-      switchMode1Tab('topics', null);
-      // 先嘗試載入已保存的結果，如果沒有則生成
-      const topicsResult = document.getElementById('mode1-topics-result');
-      if (topicsResult) {
-        const hasContent = topicsResult.querySelector('.mode1-result-content') && 
-                          topicsResult.querySelector('.mode1-result-content').innerHTML.trim();
-        if (!hasContent) {
-          // 沒有內容，嘗試載入或生成
-          generateMode1TopicsWithRatio(false);
-        } else {
-          // 如果已經有內容，LLM 根據之前討論的影片類型配比再次告知規劃
-          sendMode1Message('請根據我們之前討論的影片類型配比，再次告知我的14天規劃。', 'ip_planning');
+      // 先檢查是否有已保存的結果
+      const savedPlan = await checkSavedIpPlanningResult('plan', false);
+      if (savedPlan && savedPlan.content) {
+        // 如果有已保存的結果，直接在對話框中顯示
+        const userMessage = createMode1Message('user', '請告知我的14天規劃');
+        chatMessages.appendChild(userMessage);
+        
+        const aiMessage = createMode1Message('assistant', '');
+        const contentDiv = aiMessage.querySelector('.message-content');
+        contentDiv.innerHTML = renderMode1Markdown(savedPlan.content);
+        chatMessages.appendChild(aiMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // 記錄到長期記憶
+        try {
+          await recordMode1ConversationMessage('ip_planning', 'user', '請告知我的14天規劃', ipPlanningToken, ipPlanningUser);
+          await recordMode1ConversationMessage('ip_planning', 'assistant', savedPlan.content, ipPlanningToken, ipPlanningUser);
+        } catch (error) {
+          console.error('記錄長期記憶錯誤:', error);
         }
+      } else {
+        // 如果沒有已保存的結果，發送訊息給 LLM 生成
+        sendMode1Message('請根據我們之前討論的影片類型配比，再次告知我的14天規劃。', 'ip_planning');
       }
       break;
     case 'today-script':
-      // 打開右側抽屜，顯示 一週腳本 標籤
-      toggleMode1ResultsDrawer();
-      switchMode1Tab('weekly', null);
-      // 詢問用戶要使用哪個腳本結構
+      // 今日腳本需要 LLM 詢問用戶選擇腳本結構，所以直接發送
       sendMode1Message('請根據目前資料庫的5個腳本結構（A/B/C/D/E），詢問我要使用哪一個腳本結構來產出今日的腳本。', 'ip_planning');
       break;
     case 'reposition':
-      // 重新定位：強制重新生成帳號定位
-      toggleMode1ResultsDrawer();
-      switchMode1Tab('positioning', null);
-      generateMode1Positioning(true); // 強制重新生成
+      // 重新定位：強制重新生成，所以直接發送給 LLM
+      sendMode1Message('請重新為我生成帳號定位，基於我們最新的對話內容。', 'ip_planning');
       break;
     default:
       console.warn('未知的快速按鈕類型:', type);
@@ -1962,7 +1976,8 @@ window.expandHistoryContent = function(resultId) {
 async function loadFullHistoryContent(resultId, resultType, contentEl) {
   try {
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}`, {
+    // 使用 /api/ip-planning/my 端點獲取所有結果，然後篩選
+    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
         'Content-Type': 'application/json'
@@ -1971,11 +1986,15 @@ async function loadFullHistoryContent(resultId, resultType, contentEl) {
     
     if (response.ok) {
       const data = await response.json();
-      if (data.success && data.result) {
-        contentEl.innerHTML = renderMode1Markdown(data.result.content);
-        contentEl.classList.add('expanded');
-        const btn = contentEl.nextElementSibling?.querySelector('button');
-        if (btn) btn.innerHTML = '<span>收起</span>';
+      if (data.success && data.results) {
+        // 從結果中找出對應的 resultId
+        const result = data.results.find(r => r.id === resultId);
+        if (result) {
+          contentEl.innerHTML = renderMode1Markdown(result.content);
+          contentEl.classList.add('expanded');
+          const btn = contentEl.nextElementSibling?.querySelector('button');
+          if (btn) btn.innerHTML = '<span>收起</span>';
+        }
       }
     }
   } catch (error) {
@@ -1987,7 +2006,8 @@ async function loadFullHistoryContent(resultId, resultType, contentEl) {
 async function loadHistoryContentPreview(resultId, resultType, contentEl) {
   try {
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}`, {
+    // 使用 /api/ip-planning/my 端點獲取所有結果，然後篩選
+    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
         'Content-Type': 'application/json'
@@ -1996,9 +2016,13 @@ async function loadHistoryContentPreview(resultId, resultType, contentEl) {
     
     if (response.ok) {
       const data = await response.json();
-      if (data.success && data.result) {
-        const preview = data.result.content.replace(/<[^>]*>/g, '').substring(0, 150);
-        contentEl.innerHTML = renderMode1Markdown(preview) + '...';
+      if (data.success && data.results) {
+        // 從結果中找出對應的 resultId
+        const result = data.results.find(r => r.id === resultId);
+        if (result) {
+          const preview = result.content.replace(/<[^>]*>/g, '').substring(0, 150);
+          contentEl.innerHTML = renderMode1Markdown(preview) + '...';
+        }
       }
     }
   } catch (error) {
@@ -2019,7 +2043,8 @@ window.loadHistoryResultToGenerate = function(type, resultId) {
 async function loadHistoryResultToCard(type, resultId) {
   try {
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}`, {
+    // 使用 /api/ip-planning/my 端點獲取所有結果，然後篩選
+    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
         'Content-Type': 'application/json'
@@ -2028,17 +2053,21 @@ async function loadHistoryResultToCard(type, resultId) {
     
     if (response.ok) {
       const data = await response.json();
-      if (data.success && data.result) {
-        const typeMap = {
-          'profile': 'positioning',
-          'plan': 'topics',
-          'scripts': 'weekly'
-        };
-        const cardType = typeMap[type] || type;
-        updateMode1OneClickStatus(cardType, 'completed', data.result.content);
-        
-        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast('已載入歷史結果', 2000);
+      if (data.success && data.results) {
+        // 從結果中找出對應的 resultId
+        const result = data.results.find(r => r.id === resultId);
+        if (result) {
+          const typeMap = {
+            'profile': 'positioning',
+            'plan': 'topics',
+            'scripts': 'weekly'
+          };
+          const cardType = typeMap[type] || type;
+          updateMode1OneClickStatus(cardType, 'completed', result.content);
+          
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('已載入歷史結果', 2000);
+          }
         }
       }
     }
@@ -2054,7 +2083,8 @@ async function loadHistoryResultToCard(type, resultId) {
 window.exportHistoryResult = async function(resultId, resultType) {
   try {
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}`, {
+    // 使用 /api/ip-planning/my 端點獲取所有結果，然後篩選
+    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
         'Content-Type': 'application/json'
@@ -2063,34 +2093,38 @@ window.exportHistoryResult = async function(resultId, resultType) {
     
     if (response.ok) {
       const data = await response.json();
-      if (data.success && data.result) {
-        const typeNames = {
-          'profile': '帳號定位',
-          'plan': '選題方向',
-          'scripts': '一週腳本'
-        };
-        const typeName = typeNames[resultType] || resultType;
-        const textContent = data.result.content.replace(/<[^>]*>/g, '');
-        
-        const csvContent = `類型,標題,內容,匯出時間\n"${resultType}","${data.result.title || typeName}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW', {
-          timeZone: 'Asia/Taipei',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        })}"`;
-        
-        const csvBlob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const csvUrl = URL.createObjectURL(csvBlob);
-        const csvLink = document.createElement('a');
-        csvLink.href = csvUrl;
-        csvLink.download = `ip-${resultType}-${resultId}-${Date.now()}.csv`;
-        csvLink.click();
-        URL.revokeObjectURL(csvUrl);
-        
-        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast('結果已匯出為 CSV 檔案', 3000);
+      if (data.success && data.results) {
+        // 從結果中找出對應的 resultId
+        const result = data.results.find(r => r.id === resultId);
+        if (result) {
+          const typeNames = {
+            'profile': '帳號定位',
+            'plan': '選題方向',
+            'scripts': '一週腳本'
+          };
+          const typeName = typeNames[resultType] || resultType;
+          const textContent = result.content.replace(/<[^>]*>/g, '');
+          
+          const csvContent = `類型,標題,內容,匯出時間\n"${resultType}","${result.title || typeName}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW', {
+            timeZone: 'Asia/Taipei',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}"`;
+          
+          const csvBlob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+          const csvUrl = URL.createObjectURL(csvBlob);
+          const csvLink = document.createElement('a');
+          csvLink.href = csvUrl;
+          csvLink.download = `ip-${resultType}-${resultId}-${Date.now()}.csv`;
+          csvLink.click();
+          URL.revokeObjectURL(csvUrl);
+          
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('結果已匯出為 CSV 檔案', 3000);
+          }
         }
       }
     }
@@ -2206,6 +2240,9 @@ function updateMode1OneClickStatus(type, status, message = '') {
   
   // 更新內容
   if (elements.contentEl) {
+    const wrapperEl = elements.contentEl.parentElement;
+    const expandEl = wrapperEl?.nextElementSibling;
+    
     if (status === 'generating') {
       elements.contentEl.innerHTML = `
         <div class="generating-container">
@@ -2213,14 +2250,69 @@ function updateMode1OneClickStatus(type, status, message = '') {
           <div class="generating-text">${message || '生成中...'}<span class="generating-dots"></span></div>
         </div>
       `;
+      if (expandEl && expandEl.classList.contains('mode1-oneclick-result-expand')) {
+        expandEl.style.display = 'none';
+      }
     } else if (status === 'completed' && message) {
       elements.contentEl.innerHTML = renderMode1Markdown(message);
       elements.contentEl.classList.add('has-content');
+      
+      // 確保表格在滾動容器中（一週腳本表格需要橫向滾動）
+      setTimeout(() => {
+        const tables = elements.contentEl.querySelectorAll('table');
+        tables.forEach(table => {
+          // 檢查表格是否已經在 wrapper 中
+          let currentParent = table.parentElement;
+          let isInWrapper = false;
+          while (currentParent && currentParent !== elements.contentEl) {
+            if (currentParent.classList.contains('mode1-oneclick-result-content-wrapper')) {
+              isInWrapper = true;
+              break;
+            }
+            currentParent = currentParent.parentElement;
+          }
+          
+          if (!isInWrapper) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'mode1-oneclick-result-content-wrapper';
+            table.parentElement.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+          }
+        });
+      }, 100);
+      
+      // 檢查內容高度，決定是否顯示展開按鈕
+      if (wrapperEl) {
+        const contentHeight = elements.contentEl.scrollHeight;
+        const maxHeight = window.innerWidth <= 768 ? 200 : 300;
+        if (contentHeight > maxHeight) {
+          wrapperEl.classList.add('collapsed');
+          wrapperEl.classList.remove('expanded');
+          if (expandEl && expandEl.classList.contains('mode1-oneclick-result-expand')) {
+            expandEl.style.display = 'block';
+            const btn = expandEl.querySelector('button');
+            if (btn) btn.innerHTML = '<span>展開</span>';
+          }
+        } else {
+          wrapperEl.classList.remove('collapsed');
+          wrapperEl.classList.add('expanded');
+          if (expandEl && expandEl.classList.contains('mode1-oneclick-result-expand')) {
+            expandEl.style.display = 'none';
+          }
+        }
+      }
+      
       if (elements.actionsEl) {
         elements.actionsEl.style.display = 'flex';
       }
     } else if (status === 'pending') {
       elements.contentEl.innerHTML = `<p style="text-align: center; color: #9ca3af; padding: 40px 0;">${message || '點擊上方按鈕開始生成'}</p>`;
+      if (wrapperEl) {
+        wrapperEl.classList.remove('collapsed', 'expanded');
+      }
+      if (expandEl && expandEl.classList.contains('mode1-oneclick-result-expand')) {
+        expandEl.style.display = 'none';
+      }
       if (elements.actionsEl) {
         elements.actionsEl.style.display = 'none';
       }
@@ -2232,6 +2324,9 @@ function updateMode1OneClickStatus(type, status, message = '') {
         return div.innerHTML;
       });
       elements.contentEl.innerHTML = `<div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px;">${escapeHtml(message || '生成失敗')}</div>`;
+      if (expandEl && expandEl.classList.contains('mode1-oneclick-result-expand')) {
+        expandEl.style.display = 'none';
+      }
     }
   }
 }
@@ -2637,6 +2732,34 @@ async function regenerateMode1OneClickResult(type, forceRegenerate = true) {
     }
   }
 }
+
+// 展開/收起一鍵生成結果
+window.toggleMode1OneClickExpand = function(type) {
+  const typeMap = {
+    'positioning': 'Positioning',
+    'topics': 'Topics',
+    'weekly': 'Weekly'
+  };
+  const typeName = typeMap[type] || type;
+  const contentEl = document.getElementById(`mode1OneClick${typeName}Content`);
+  const wrapperEl = contentEl?.parentElement;
+  const expandEl = wrapperEl?.nextElementSibling;
+  const btn = expandEl?.querySelector('button');
+  
+  if (!wrapperEl || !expandEl) return;
+  
+  if (wrapperEl.classList.contains('collapsed')) {
+    // 展開
+    wrapperEl.classList.remove('collapsed');
+    wrapperEl.classList.add('expanded');
+    if (btn) btn.innerHTML = '<span>收起</span>';
+  } else {
+    // 收起
+    wrapperEl.classList.remove('expanded');
+    wrapperEl.classList.add('collapsed');
+    if (btn) btn.innerHTML = '<span>展開</span>';
+  }
+};
 
 // 匯出生成結果
 function exportMode1OneClickResult(type) {
