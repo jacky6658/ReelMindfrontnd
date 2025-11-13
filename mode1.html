@@ -333,7 +333,7 @@
         }
         
         /* 主內容區域固定高度，使用 flex 布局 */
-        .mode3-page {
+        .mode1-page {
           position: fixed !important;
           top: 60px !important; /* 導航欄高度 */
           left: 0 !important;
@@ -351,7 +351,7 @@
         }
         
         /* 聊天訊息區域可滾動 - 擴大對話框 */
-        .mode3-page #mode3-chatMessages {
+        .mode1-page #mode1-chatMessages {
           flex: 1 1 auto !important;
           overflow-y: auto !important;
           overflow-x: hidden !important;
@@ -366,7 +366,7 @@
         }
         
         /* 輸入區域固定在底部，稍微向上移動 */
-        .mode3-page .input-row {
+        .mode1-page .input-row {
           display: flex !important;
           flex-direction: column !important;
           flex-shrink: 0 !important;
@@ -389,7 +389,7 @@
         }
         
         /* 確保快速按鈕在輸入欄位內顯示 */
-        .mode3-page .input-wrapper .quick-buttons {
+        .mode1-page .input-wrapper .quick-buttons {
           display: flex !important;
           visibility: visible !important;
           opacity: 1 !important;
@@ -473,7 +473,7 @@
         }
         
         /* 主內容區域為固定頁首留出空間，固定高度 */
-        .mode3-page {
+        .mode1-page {
           padding-top: 80px;
           height: 100vh !important;
           overflow: hidden !important;
@@ -482,7 +482,7 @@
         }
         
         /* 聊天容器固定高度，只讓訊息區域可滾動 */
-        .mode3-chat-container {
+        .mode1-chat-container {
           flex: 1;
           display: flex;
           flex-direction: column;
@@ -491,7 +491,7 @@
         }
         
         /* 聊天訊息區域可滾動 */
-        #mode3-chatMessages {
+        #mode1-chatMessages {
           flex: 1;
           overflow-y: auto !important;
           overflow-x: hidden !important;
@@ -501,7 +501,7 @@
       }
       
       /* ===== 模式3：IP人設規劃模式樣式 ===== */
-      .mode3-page {
+      .mode1-page {
         min-height: 100vh;
         background: transparent;
         padding: 0;
@@ -512,7 +512,7 @@
         flex-direction: column;
       }
       
-      .mode3-fixed {
+      .mode1-fixed {
         position: relative;
         width: 100%;
         min-height: calc(100vh - 60px);
@@ -520,21 +520,21 @@
       }
       
       /* IP人設規劃使用說明按鈕和抽屜樣式 */
-      .mode3-instructions-btn-container {
+      .mode1-instructions-btn-container {
         position: fixed;
         top: 100px; /* 調整位置，配合 padding-top: 40px */
         left: 20px;
         z-index: 1002;
       }
       
-      .mode3-results-btn-container {
+      .mode1-results-btn-container {
         position: fixed;
         top: 100px; /* 調整位置，配合 padding-top: 40px */
         left: 120px;
         z-index: 1002;
       }
       
-      .mode3-instructions-btn, .mode3-results-btn {
+      .mode1-instructions-btn, .mode1-results-btn {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -551,28 +551,28 @@
         overflow: visible; /* 確保文字不被裁切 */
       }
       
-      .mode3-instructions-btn {
+      .mode1-instructions-btn {
         background: #4f46e5;
       }
       
-      .mode3-instructions-btn:hover {
+      .mode1-instructions-btn:hover {
         background: #4338ca;
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(79, 70, 229, 0.4);
       }
       
-      .mode3-results-btn {
+      .mode1-results-btn {
         background: #10b981;
       }
       
-      .mode3-results-btn:hover {
+      .mode1-results-btn:hover {
         background: #059669;
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
       }
       
       /* 抽屜樣式 */
-      .mode3-instructions-overlay, .mode3-results-overlay {
+      .mode1-instructions-overlay, .mode1-results-overlay {
         position: fixed;
         top: 0;
         left: 0;
@@ -585,12 +585,12 @@
         transition: all 0.3s ease;
       }
       
-      .mode3-instructions-overlay.open, .mode3-results-overlay.open {
+      .mode1-instructions-overlay.open, .mode1-results-overlay.open {
         opacity: 1;
         visibility: visible;
       }
       
-      .mode3-instructions-drawer, .mode3-results-drawer {
+      .mode1-instructions-drawer, .mode1-results-drawer {
         position: fixed;
         top: 0;
         right: -400px;
@@ -603,20 +603,20 @@
         overflow-y: auto;
       }
       
-      .mode3-results-drawer {
+      .mode1-results-drawer {
         width: 500px;
         right: -500px;
       }
       
-      .mode3-instructions-drawer.open {
+      .mode1-instructions-drawer.open {
         right: 0;
       }
       
-      .mode3-results-drawer.open {
+      .mode1-results-drawer.open {
         right: 0;
       }
       
-      .mode3-instructions-drawer-header, .mode3-results-drawer-header {
+      .mode1-instructions-drawer-header, .mode1-results-drawer-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -625,14 +625,14 @@
         background: #f8fafc;
       }
       
-      .mode3-instructions-drawer-header h3, .mode3-results-drawer-header h3 {
+      .mode1-instructions-drawer-header h3, .mode1-results-drawer-header h3 {
         margin: 0;
         color: #1f2937;
         font-size: 18px;
         font-weight: 600;
       }
       
-      .mode3-instructions-drawer-close, .mode3-results-drawer-close {
+      .mode1-instructions-drawer-close, .mode1-results-drawer-close {
         background: none;
         border: none;
         font-size: 20px;
@@ -643,23 +643,23 @@
         transition: all 0.2s ease;
       }
       
-      .mode3-instructions-drawer-close:hover, .mode3-results-drawer-close:hover {
+      .mode1-instructions-drawer-close:hover, .mode1-results-drawer-close:hover {
         background: #e5e7eb;
         color: #374151;
       }
       
-      .mode3-instructions-drawer-content, .mode3-results-drawer-content {
+      .mode1-instructions-drawer-content, .mode1-results-drawer-content {
         padding: 20px;
         color: #374151;
         line-height: 1.6;
       }
       
       /* 使用說明步驟指南樣式 */
-      .mode3-step-guide {
+      .mode1-step-guide {
         margin: 16px 0;
       }
       
-      .mode3-step {
+      .mode1-step {
         display: flex;
         align-items: flex-start;
         margin-bottom: 16px;
@@ -669,7 +669,7 @@
         border-left: 4px solid #4f46e5;
       }
       
-      .mode3-step-number {
+      .mode1-step-number {
         width: 32px;
         height: 32px;
         background: #4f46e5;
@@ -684,18 +684,18 @@
         flex-shrink: 0;
       }
       
-      .mode3-step-content {
+      .mode1-step-content {
         flex: 1;
       }
       
-      .mode3-step-content strong {
+      .mode1-step-content strong {
         color: #1f2937;
         font-size: 14px;
         display: block;
         margin-bottom: 4px;
       }
       
-      .mode3-step-content p {
+      .mode1-step-content p {
         color: #6b7280;
         font-size: 13px;
         margin: 0;
@@ -703,11 +703,11 @@
       }
       
       /* 生成內容類型樣式 */
-      .mode3-result-types {
+      .mode1-result-types {
         margin: 12px 0;
       }
       
-      .mode3-result-type {
+      .mode1-result-type {
         background: rgba(255, 255, 255, 0.05);
         border-radius: 6px;
         padding: 10px 12px;
@@ -715,14 +715,14 @@
         border-left: 3px solid #10b981;
       }
       
-      .mode3-result-type strong {
+      .mode1-result-type strong {
         color: #1f2937;
         font-size: 13px;
         display: block;
         margin-bottom: 4px;
       }
       
-      .mode3-result-type p {
+      .mode1-result-type p {
         color: #6b7280;
         font-size: 12px;
         margin: 0;
@@ -730,14 +730,14 @@
       }
       
       /* 生成結果標籤和內容 */
-      .mode3-tabs {
+      .mode1-tabs {
         display: flex;
         gap: 10px;
         margin-bottom: 20px;
         border-bottom: 1px solid #e5e7eb;
       }
       
-      .mode3-tab {
+      .mode1-tab {
         padding: 10px 16px;
         background: none;
         border: none;
@@ -748,25 +748,25 @@
         transition: all 0.2s ease;
       }
       
-      .mode3-tab.active {
+      .mode1-tab.active {
         color: #4f46e5;
         border-bottom-color: #4f46e5;
       }
       
-      .mode3-tab:hover {
+      .mode1-tab:hover {
         color: #4f46e5;
       }
       
-      .mode3-result-block {
+      .mode1-result-block {
         display: none;
       }
       
-      .mode3-result-block.active {
+      .mode1-result-block.active {
         display: block;
       }
       
       /* Markdown 表格樣式 */
-      .mode3-result-content table {
+      .mode1-result-content table {
         width: 100%;
         border-collapse: collapse;
         margin: 16px 0;
@@ -777,12 +777,12 @@
         overflow: hidden;
       }
       
-      .mode3-result-content table thead {
+      .mode1-result-content table thead {
         background: #f8fafc;
         border-bottom: 2px solid #e5e7eb;
       }
       
-      .mode3-result-content table th {
+      .mode1-result-content table th {
         padding: 12px 16px;
         text-align: left;
         font-weight: 600;
@@ -791,11 +791,11 @@
         border-right: 1px solid #e5e7eb;
       }
       
-      .mode3-result-content table th:last-child {
+      .mode1-result-content table th:last-child {
         border-right: none;
       }
       
-      .mode3-result-content table tbody tr {
+      .mode1-result-content table tbody tr {
         border-bottom: 1px solid #e5e7eb;
         transition: background-color 0.2s ease;
       }
@@ -808,7 +808,7 @@
         border-bottom: none;
       }
       
-      .mode3-result-content table td {
+      .mode1-result-content table td {
         padding: 12px 16px;
         color: #4b5563;
         border-right: 1px solid #e5e7eb;
@@ -829,23 +829,23 @@
       
       /* 響應式表格 */
       @media (max-width: 768px) {
-        .mode3-result-content table {
+        .mode1-result-content table {
           font-size: 12px;
         }
         
         .mode3-result-content table th,
-        .mode3-result-content table td {
+        .mode1-result-content table td {
           padding: 8px 12px;
         }
         
-        .mode3-result-content table {
+        .mode1-result-content table {
           display: block;
           overflow-x: auto;
           -webkit-overflow-scrolling: touch;
         }
       }
       
-      .mode3-result-actions {
+      .mode1-result-actions {
         display: flex;
         gap: 10px;
         margin-top: 20px;
@@ -853,7 +853,7 @@
         border-top: 1px solid #e5e7eb;
       }
       
-      .mode3-action-btn {
+      .mode1-action-btn {
         flex: 1;
         padding: 10px 16px;
         background: #f3f4f6;
@@ -874,7 +874,7 @@
         transform: translateY(-1px);
       }
       
-      .mode3-generate-btn {
+      .mode1-generate-btn {
         padding: 12px 24px;
         background: #4f46e5;
         color: white;
@@ -891,18 +891,84 @@
         transform: translateY(-1px);
       }
       
-      .mode3-result-placeholder {
+      .mode1-result-placeholder {
         text-align: center;
         padding: 40px 20px;
       }
       
-      .mode3-placeholder-icon {
+      .mode1-placeholder-icon {
         font-size: 48px;
         margin-bottom: 16px;
       }
       
+      /* 生成中動畫樣式（類似 mode3） */
+      .generating-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        padding: 40px 20px;
+        min-height: 200px;
+      }
+      
+      .generating-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid #e5e7eb;
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      
+      .generating-text {
+        font-size: 16px;
+        font-weight: 500;
+        color: #3b82f6;
+        text-align: center;
+        animation: pulse 2s ease-in-out infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+      
+      .generating-dots {
+        display: inline-block;
+        width: 1em;
+        text-align: left;
+      }
+      
+      .generating-dots::after {
+        content: '...';
+        animation: dots 1.5s steps(4, end) infinite;
+      }
+      
+      @keyframes dots {
+        0%, 20% {
+          content: '.';
+        }
+        40% {
+          content: '..';
+        }
+        60%, 100% {
+          content: '...';
+        }
+      }
+      
       /* 聊天訊息區域 */
-      #mode3-chatMessages {
+      #mode1-chatMessages {
         flex: 1;
         overflow-y: auto;
         padding: 16px 24px;
@@ -917,7 +983,7 @@
       }
       
       /* Mode3 訊息框樣式 */
-      #mode3-chatMessages .message.user {
+      #mode1-chatMessages .message.user {
         display: flex !important;
         flex-direction: row !important;
         align-items: flex-start !important;
@@ -927,7 +993,7 @@
         margin-left: auto !important;
       }
       
-      #mode3-chatMessages .message.user .message-content {
+      #mode1-chatMessages .message.user .message-content {
         flex: 1 !important;
         background: #dbeafe !important;
         padding: 20px 40px !important;
@@ -944,7 +1010,7 @@
         box-sizing: border-box !important;
       }
       
-      #mode3-chatMessages .message.user .message-avatar {
+      #mode1-chatMessages .message.user .message-avatar {
         width: 32px !important;
         height: 32px !important;
         border-radius: 50% !important;
@@ -960,7 +1026,7 @@
         order: 2 !important;
       }
       
-      #mode3-chatMessages .message.user .message-avatar img {
+      #mode1-chatMessages .message.user .message-avatar img {
         width: 100% !important;
         height: 100% !important;
         border-radius: 50% !important;
@@ -968,13 +1034,13 @@
         display: block !important;
       }
       
-      #mode3-chatMessages .message.user .message-avatar:has(img) {
+      #mode1-chatMessages .message.user .message-avatar:has(img) {
         background: transparent !important;
       }
       
       /* Mode3 AI 訊息容器樣式 */
-      #mode3-chatMessages .message.ai,
-      #mode3-chatMessages .message.assistant {
+      #mode1-chatMessages .message.ai,
+      #mode1-chatMessages .message.assistant {
         display: flex !important;
         margin-bottom: 16px !important;
         align-items: flex-start !important;
@@ -982,8 +1048,8 @@
       }
       
       /* Mode3 AI 對話泡泡內容樣式 */
-      #mode3-chatMessages .message.ai .message-content,
-      #mode3-chatMessages .message.assistant .message-content {
+      #mode1-chatMessages .message.ai .message-content,
+      #mode1-chatMessages .message.assistant .message-content {
         flex: 1 !important;
         background: #f8fafc !important;
         padding: 20px 40px !important;
@@ -1001,8 +1067,8 @@
       }
       
       /* Mode3 AI 頭像樣式 */
-      #mode3-chatMessages .message.ai .message-avatar,
-      #mode3-chatMessages .message.assistant .message-avatar {
+      #mode1-chatMessages .message.ai .message-avatar,
+      #mode1-chatMessages .message.assistant .message-avatar {
         width: 32px !important;
         height: 32px !important;
         border-radius: 50% !important;
@@ -1017,36 +1083,36 @@
       }
       
       /* Mode3 AI 對話泡泡段落樣式 */
-      #mode3-chatMessages .message.ai .message-content p,
-      #mode3-chatMessages .message.assistant .message-content p {
+      #mode1-chatMessages .message.ai .message-content p,
+      #mode1-chatMessages .message.assistant .message-content p {
         margin: 0 0 6px 0 !important;
         line-height: 1.4 !important;
       }
       
-      #mode3-chatMessages .message.ai .message-content p:first-child,
-      #mode3-chatMessages .message.assistant .message-content p:first-child {
+      #mode1-chatMessages .message.ai .message-content p:first-child,
+      #mode1-chatMessages .message.assistant .message-content p:first-child {
         margin-top: 0 !important;
       }
       
-      #mode3-chatMessages .message.ai .message-content p:last-child,
-      #mode3-chatMessages .message.assistant .message-content p:last-child {
+      #mode1-chatMessages .message.ai .message-content p:last-child,
+      #mode1-chatMessages .message.assistant .message-content p:last-child {
         margin-bottom: 0 !important;
       }
       
       /* Mode3 AI 對話泡泡列表樣式 */
-      #mode3-chatMessages .message.ai .message-content ul,
-      #mode3-chatMessages .message.assistant .message-content ul {
+      #mode1-chatMessages .message.ai .message-content ul,
+      #mode1-chatMessages .message.assistant .message-content ul {
         margin: 8px 0 !important;
         padding-left: 20px !important;
       }
       
-      #mode3-chatMessages .message.ai .message-content li,
-      #mode3-chatMessages .message.assistant .message-content li {
+      #mode1-chatMessages .message.ai .message-content li,
+      #mode1-chatMessages .message.assistant .message-content li {
         margin: 4px 0 !important;
       }
       
       /* Mode3 typing-indicator 樣式 */
-      #mode3-chatMessages .typing-indicator {
+      #mode1-chatMessages .typing-indicator {
         display: flex !important;
         align-items: center !important;
         font-style: italic !important;
@@ -1055,12 +1121,12 @@
         padding: 0 !important;
       }
       
-      #mode3-chatMessages .typing-dots {
+      #mode1-chatMessages .typing-dots {
         display: flex !important;
         margin-left: 10px !important;
       }
       
-      #mode3-chatMessages .typing-dot {
+      #mode1-chatMessages .typing-dot {
         width: 6px !important;
         height: 6px !important;
         margin: 0 2px !important;
@@ -1069,11 +1135,11 @@
         animation: dot-flashing 1s infinite alternate !important;
       }
       
-      #mode3-chatMessages .typing-dot:nth-child(2) {
+      #mode1-chatMessages .typing-dot:nth-child(2) {
         animation-delay: 0.2s !important;
       }
       
-      #mode3-chatMessages .typing-dot:nth-child(3) {
+      #mode1-chatMessages .typing-dot:nth-child(3) {
         animation-delay: 0.4s !important;
       }
       
@@ -1088,12 +1154,12 @@
       
       /* 手機版聊天訊息樣式 */
       @media (max-width: 768px) {
-        #mode3-chatMessages {
+        #mode1-chatMessages {
           padding: 16px 12px;
           padding-top: 80px;
         }
         
-        #mode3-chatMessages .message.user .message-content {
+        #mode1-chatMessages .message.user .message-content {
           padding: 15px 20px !important;
           padding-left: 30px !important;
           font-size: 14px !important;
@@ -1262,7 +1328,7 @@
           padding: 8px 12px 16px 12px !important;
         }
         
-        .mode3-page .input-row {
+        .mode1-page .input-row {
           padding: 10px 12px 16px 12px !important;
         }
         
@@ -1283,27 +1349,27 @@
           overflow: hidden !important; /* 隱藏溢出文字 */
           text-overflow: ellipsis !important; /* 溢出顯示省略號 */
         }
-        .mode3-instructions-drawer, .mode3-results-drawer {
+        .mode1-instructions-drawer, .mode1-results-drawer {
           width: 100%;
           right: -100%;
         }
         
-        .mode3-instructions-btn-container {
+        .mode1-instructions-btn-container {
           top: 80px;
           left: 15px;
         }
         
-        .mode3-results-btn-container {
+        .mode1-results-btn-container {
           top: 80px;
           left: 80px;
         }
         
-        .mode3-instructions-btn, .mode3-results-btn {
+        .mode1-instructions-btn, .mode1-results-btn {
           padding: 10px 12px;
           font-size: 13px;
         }
         
-        .mode3-instructions-text, .mode3-results-text {
+        .mode1-instructions-text, .mode1-results-text {
           display: none;
         }
       }
@@ -1316,7 +1382,7 @@
     <script src="assets/js/api.js"></script>
     <script src="assets/js/common.js"></script>
   </head>
-  <body class="mode3-fixed mode3 fig1">
+  <body class="mode1-fixed mode1 fig1">
     <!-- 導航欄 -->
     <div class="top-navbar">
       <div class="navbar-left">
@@ -1380,40 +1446,40 @@
     </div>
 
     <!-- Mode1 頁面內容（IP人設規劃） -->
-    <div class="mode3-page">
+    <div class="mode1-page">
       <!-- 使用說明按鈕 -->
-      <div class="mode3-instructions-btn-container">
-        <button class="mode3-instructions-btn" onclick="toggleMode3InstructionsDrawer()">
-          <span class="mode3-instructions-icon">📋</span>
-          <span class="mode3-instructions-text">使用說明</span>
+      <div class="mode1-instructions-btn-container">
+        <button class="mode1-instructions-btn" onclick="toggleMode1InstructionsDrawer()">
+          <span class="mode1-instructions-icon">📋</span>
+          <span class="mode1-instructions-text">使用說明</span>
         </button>
       </div>
       
       <!-- 一鍵生成按鈕 -->
-      <div class="mode3-results-btn-container">
-        <button class="mode3-results-btn" onclick="toggleMode3ResultsDrawer()">
-          <span class="mode3-results-icon">📊</span>
-          <span class="mode3-results-text">一鍵生成</span>
+      <div class="mode1-results-btn-container">
+        <button class="mode1-results-btn" onclick="toggleMode1ResultsDrawer()">
+          <span class="mode1-results-icon">📊</span>
+          <span class="mode1-results-text">一鍵生成</span>
         </button>
       </div>
 
       <!-- 聊天訊息區域 -->
-      <div id="mode3-chatMessages" class="chat-messages"></div>
+      <div id="mode1-chatMessages" class="chat-messages"></div>
 
       <!-- 輸入區域 -->
       <div class="input-row">
         <div class="input-container">
           <div class="input-wrapper">
             <!-- 快速按鈕區域（移到輸入欄位上方） -->
-            <div class="quick-buttons" id="mode3-quickButtons">
+            <div class="quick-buttons" id="mode1-quickButtons">
               <button class="quick-btn" onclick="handleQuickButton('ip-profile')">IP Profile</button>
               <button class="quick-btn" onclick="handleQuickButton('14day-plan')">14天規劃</button>
               <button class="quick-btn" onclick="handleQuickButton('today-script')">今日腳本</button>
               <button class="quick-btn" onclick="handleQuickButton('reposition')">重新定位</button>
             </div>
             <div class="input-row-inner">
-              <textarea id="mode3-messageInput" class="chat-input" placeholder="向AI提問..." rows="1"></textarea>
-              <button id="mode3-sendBtn" class="send-btn" disabled>
+              <textarea id="mode1-messageInput" class="chat-input" placeholder="向AI提問..." rows="1"></textarea>
+              <button id="mode1-sendBtn" class="send-btn" disabled>
                 <i class="fas fa-paper-plane"></i>
               </button>
             </div>
@@ -1423,35 +1489,35 @@
     </div>
 
     <!-- IP人設規劃使用說明抽屜 -->
-    <div class="mode3-instructions-overlay" id="mode3InstructionsOverlay" onclick="closeMode3InstructionsDrawer()"></div>
-    <div class="mode3-instructions-drawer" id="mode3InstructionsDrawer">
-      <div class="mode3-instructions-drawer-header">
+    <div class="mode1-instructions-overlay" id="mode1InstructionsOverlay" onclick="closeMode1InstructionsDrawer()"></div>
+    <div class="mode1-instructions-drawer" id="mode1InstructionsDrawer">
+      <div class="mode1-instructions-drawer-header">
         <h3>📋 IP人設規劃使用說明</h3>
-        <button class="mode3-instructions-drawer-close" onclick="closeMode3InstructionsDrawer()">✕</button>
+        <button class="mode1-instructions-drawer-close" onclick="closeMode1InstructionsDrawer()">✕</button>
       </div>
-      <div class="mode3-instructions-drawer-content">
+      <div class="mode1-instructions-drawer-content">
         <p><strong>🎯 IP人設規劃模式</strong></p>
         <p>透過與AI深度對話，記錄您的人生曲線和個人特色，讓AI協助您建立完整的IP人設。</p>
         
         <p><strong>🚀 操作步驟：</strong></p>
-        <div class="mode3-step-guide">
-          <div class="mode3-step">
-            <div class="mode3-step-number">1</div>
-            <div class="mode3-step-content">
+        <div class="mode1-step-guide">
+          <div class="mode1-step">
+            <div class="mode1-step-number">1</div>
+            <div class="mode1-step-content">
               <strong>開始對話</strong>
               <p>點擊快速按鈕或輸入框，與AI分享您的背景、專長、價值觀</p>
             </div>
           </div>
-          <div class="mode3-step">
-            <div class="mode3-step-number">2</div>
-            <div class="mode3-step-content">
+          <div class="mode1-step">
+            <div class="mode1-step-number">2</div>
+            <div class="mode1-step-content">
               <strong>深度交流</strong>
               <p>建議進行5-10輪對話，讓AI充分了解您的個人特色和目標</p>
             </div>
           </div>
-          <div class="mode3-step">
-            <div class="mode3-step-number">3</div>
-            <div class="mode3-step-content">
+          <div class="mode1-step">
+            <div class="mode1-step-number">3</div>
+            <div class="mode1-step-content">
               <strong>生成結果</strong>
               <p>隨時點擊右側生成按鈕，無需等待AI提醒</p>
             </div>
@@ -1467,8 +1533,8 @@
         </ul>
         
         <p><strong>📊 生成內容：</strong></p>
-        <div class="mode3-result-types">
-          <div class="mode3-result-type">
+        <div class="mode1-result-types">
+          <div class="mode1-result-type">
             <strong>🎭 IP Profile</strong>
             <p>個人品牌檔案：人設標籤、品牌原型、語氣設定</p>
           </div>
@@ -1493,53 +1559,53 @@
     </div>
     
     <!-- IP人設規劃生成結果抽屜 -->
-    <div class="mode3-results-overlay" id="mode3ResultsOverlay" onclick="closeMode3ResultsDrawer()"></div>
-    <div class="mode3-results-drawer" id="mode3ResultsDrawer">
-      <div class="mode3-results-drawer-header">
+    <div class="mode1-results-overlay" id="mode1ResultsOverlay" onclick="closeMode1ResultsDrawer()"></div>
+    <div class="mode1-results-drawer" id="mode1ResultsDrawer">
+      <div class="mode1-results-drawer-header">
         <h3>📊 生成結果</h3>
-        <button class="mode3-results-drawer-close" onclick="closeMode3ResultsDrawer()">✕</button>
+        <button class="mode1-results-drawer-close" onclick="closeMode1ResultsDrawer()">✕</button>
       </div>
-      <div class="mode3-results-drawer-content">
+      <div class="mode1-results-drawer-content">
         <!-- 結果標籤 -->
-        <div class="mode3-tabs">
-          <button class="mode3-tab active" onclick="switchMode3Tab('positioning', event)">《帳號定位》</button>
-          <button class="mode3-tab" onclick="switchMode3Tab('topics', event)">《選題方向（影片類型配比）》</button>
-          <button class="mode3-tab" onclick="switchMode3Tab('weekly', event)">《一週腳本》</button>
+        <div class="mode1-tabs">
+          <button class="mode1-tab active" onclick="switchMode1Tab('positioning', event)">《帳號定位》</button>
+          <button class="mode1-tab" onclick="switchMode1Tab('topics', event)">《選題方向（影片類型配比）》</button>
+          <button class="mode1-tab" onclick="switchMode1Tab('weekly', event)">《一週腳本》</button>
         </div>
 
         <!-- 結果內容 -->
-        <div class="mode3-results-content">
+        <div class="mode1-results-content">
           <!-- 帳號定位結果 -->
-          <div id="mode3-positioning-result" class="mode3-result-block active">
-            <div class="mode3-result-placeholder">
-              <div class="mode3-placeholder-icon">🎯</div>
+          <div id="mode1-positioning-result" class="mode1-result-block active">
+            <div class="mode1-result-placeholder">
+              <div class="mode1-placeholder-icon">🎯</div>
               <h4>帳號定位</h4>
               <p>與AI對話後，將在此顯示您的帳號定位分析</p>
-              <button class="mode3-generate-btn" onclick="generateMode3Positioning()">
+              <button class="mode1-generate-btn" onclick="generateMode1Positioning()">
                 <span>🚀</span> 生成帳號定位
               </button>
             </div>
           </div>
 
           <!-- 選題方向（影片類型配比）結果 -->
-          <div id="mode3-topics-result" class="mode3-result-block">
-            <div class="mode3-result-placeholder">
-              <div class="mode3-placeholder-icon">📊</div>
+          <div id="mode1-topics-result" class="mode1-result-block">
+            <div class="mode1-result-placeholder">
+              <div class="mode1-placeholder-icon">📊</div>
               <h4>選題方向（影片類型配比）</h4>
               <p>根據您的帳號定位，生成選題方向和影片類型配比建議</p>
-              <button class="mode3-generate-btn" onclick="generateMode3TopicsWithRatio()">
+              <button class="mode1-generate-btn" onclick="generateMode1TopicsWithRatio()">
                 <span>🚀</span> 生成選題方向
               </button>
             </div>
           </div>
 
           <!-- 一週腳本結果 -->
-          <div id="mode3-weekly-result" class="mode3-result-block">
-            <div class="mode3-result-placeholder">
-              <div class="mode3-placeholder-icon">📝</div>
+          <div id="mode1-weekly-result" class="mode1-result-block">
+            <div class="mode1-result-placeholder">
+              <div class="mode1-placeholder-icon">📝</div>
               <h4>一週腳本</h4>
               <p>根據您的選題方向，生成一週的短影音腳本</p>
-              <button class="mode3-generate-btn" onclick="generateMode3WeeklyScripts()">
+              <button class="mode1-generate-btn" onclick="generateMode1WeeklyScripts()">
                 <span>🚀</span> 生成一週腳本
               </button>
             </div>
@@ -1547,14 +1613,14 @@
         </div>
         
         <!-- 操作按鈕 -->
-        <div class="mode3-result-actions">
-          <button class="mode3-action-btn" onclick="saveMode3Result()" title="儲存結果">
+        <div class="mode1-result-actions">
+          <button class="mode1-action-btn" onclick="saveMode1Result()" title="儲存結果">
             <span>💾</span> 儲存結果
           </button>
-          <button class="mode3-action-btn" onclick="regenerateMode3Result()" title="重新生成">
+          <button class="mode1-action-btn" onclick="regenerateMode1Result()" title="重新生成">
             <span>🔄</span> 重新生成
           </button>
-          <button class="mode3-action-btn" onclick="exportMode3Result()" title="匯出結果">
+          <button class="mode1-action-btn" onclick="exportMode1Result()" title="匯出結果">
             <span>📤</span> 匯出結果
           </button>
         </div>

@@ -6,9 +6,9 @@
 const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
 let ipPlanningToken = localStorage.getItem('ipPlanningToken') || '';
 let ipPlanningUser = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
-let isMode3Sending = false;
-let mode3ChatInitialized = false;
-let currentMode3ConversationType = 'ip_planning';
+let isMode1Sending = false;
+let mode1ChatInitialized = false;
+let currentMode1ConversationType = 'ip_planning';
 
 // 頁面初始化
 document.addEventListener('DOMContentLoaded', async function() {
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
   
   // 初始化聊天功能
-  initMode3Chat();
+  initMode1Chat();
   
   console.log('✅ ========== Mode1 頁面初始化完成 ==========');
 });
@@ -155,19 +155,19 @@ function updateUserInfo() {
   // 不再調用 window.updateUserInfo()，因為它可能指向自己，導致無限遞迴
 }
 
-// 初始化 Mode3 聊天功能
-function initMode3Chat() {
-  const messageInput = document.getElementById('mode3-messageInput');
-  const sendBtn = document.getElementById('mode3-sendBtn');
-  const quickButtons = document.getElementById('mode3-quickButtons');
+// 初始化 Mode1 聊天功能
+function initMode1Chat() {
+  const messageInput = document.getElementById('mode1-messageInput');
+  const sendBtn = document.getElementById('mode1-sendBtn');
+  const quickButtons = document.getElementById('mode1-quickButtons');
   
   if (!messageInput || !sendBtn || !quickButtons) return;
   
-  if (mode3ChatInitialized) {
+  if (mode1ChatInitialized) {
     sendBtn.disabled = !messageInput.value.trim();
     return;
   }
-  mode3ChatInitialized = true;
+  mode1ChatInitialized = true;
   
   // 輸入框自動調整高度
   messageInput.addEventListener('input', function() {
@@ -180,7 +180,7 @@ function initMode3Chat() {
   sendBtn.addEventListener('click', () => {
     const message = messageInput.value.trim();
     if (message) {
-      sendMode3Message(message);
+      sendMode1Message(message);
     }
   });
   
@@ -190,7 +190,7 @@ function initMode3Chat() {
       e.preventDefault();
       const message = messageInput.value.trim();
       if (message) {
-        sendMode3Message(message);
+        sendMode1Message(message);
       }
     }
   });
@@ -199,7 +199,7 @@ function initMode3Chat() {
   quickButtons.addEventListener('click', (e) => {
     e.stopPropagation();
     const btn = e.target.closest('.quick-btn');
-    if (btn && btn.closest('.mode3-page') && quickButtons.id === 'mode3-quickButtons') {
+    if (btn && btn.closest('.mode1-page') && quickButtons.id === 'mode1-quickButtons') {
       e.preventDefault();
       // 如果按鈕有 onclick，不處理（由 onclick 處理）
       if (btn.onclick) {
@@ -208,10 +208,58 @@ function initMode3Chat() {
       // 降級處理：如果有 data-text，使用舊方式
       const text = btn.getAttribute('data-text');
       if (text) {
-        sendMode3Message(text, 'ip_planning');
+        sendMode1Message(text, 'ip_planning');
       }
     }
   });
+}
+
+// 解析 429 配額錯誤並提取重試時間
+function parseQuotaError(errorMessage) {
+  if (!errorMessage || typeof errorMessage !== 'string') {
+    return null;
+  }
+  
+  // 檢查是否為 429 錯誤
+  if (!errorMessage.includes('429') && !errorMessage.includes('quota') && !errorMessage.includes('exceeded')) {
+    return null;
+  }
+  
+  // 提取 retry_delay 資訊
+  let retrySeconds = null;
+  
+  // 方法1: 從 "Please retry in X.XXs" 提取
+  const retryMatch = errorMessage.match(/Please retry in ([\d.]+)s/i);
+  if (retryMatch) {
+    retrySeconds = Math.ceil(parseFloat(retryMatch[1]));
+  }
+  
+  // 方法2: 從 "retry_delay { seconds: X }" 提取
+  if (!retrySeconds) {
+    const delayMatch = errorMessage.match(/retry_delay\s*\{[^}]*seconds:\s*(\d+)/i);
+    if (delayMatch) {
+      retrySeconds = parseInt(delayMatch[1], 10);
+    }
+  }
+  
+  // 方法3: 從 "seconds: X" 提取（更寬鬆的匹配）
+  if (!retrySeconds) {
+    const secondsMatch = errorMessage.match(/seconds:\s*(\d+)/i);
+    if (secondsMatch) {
+      retrySeconds = parseInt(secondsMatch[1], 10);
+    }
+  }
+  
+  return retrySeconds ? {
+    isQuotaError: true,
+    retrySeconds: retrySeconds,
+    retryMinutes: Math.ceil(retrySeconds / 60),
+    message: `API 配額已用盡，請等待約 ${retrySeconds} 秒（約 ${Math.ceil(retrySeconds / 60)} 分鐘）後再試。`
+  } : {
+    isQuotaError: true,
+    retrySeconds: null,
+    message: 'API 配額已用盡，請稍後再試。'
+  };
 }
 
 // 處理快速按鈕點擊
@@ -219,62 +267,62 @@ function handleQuickButton(type) {
   switch(type) {
     case 'ip-profile':
       // 打開右側抽屜，顯示 帳號定位 標籤
-      toggleMode3ResultsDrawer();
-      switchMode3Tab('positioning', null);
+      toggleMode1ResultsDrawer();
+      switchMode1Tab('positioning', null);
       // 如果還沒有生成，自動生成
-      const positioningResult = document.getElementById('mode3-positioning-result');
-      if (positioningResult && positioningResult.querySelector('.mode3-result-placeholder')) {
-        generateMode3Positioning();
+      const positioningResult = document.getElementById('mode1-positioning-result');
+      if (positioningResult && positioningResult.querySelector('.mode1-result-placeholder')) {
+        generateMode1Positioning();
       } else {
         // 如果已經有內容，LLM 告知用戶目前的 IP Profile
-        sendMode3Message('請告知我目前的 IP Profile，基於我們之前的對話內容。', 'ip_planning');
+        sendMode1Message('請告知我目前的 IP Profile，基於我們之前的對話內容。', 'ip_planning');
       }
       break;
     case '14day-plan':
       // 打開右側抽屜，顯示 選題方向 標籤
-      toggleMode3ResultsDrawer();
-      switchMode3Tab('topics', null);
+      toggleMode1ResultsDrawer();
+      switchMode1Tab('topics', null);
       // 如果還沒有生成，自動生成
-      const topicsResult = document.getElementById('mode3-topics-result');
-      if (topicsResult && topicsResult.querySelector('.mode3-result-placeholder')) {
-        generateMode3TopicsWithRatio();
+      const topicsResult = document.getElementById('mode1-topics-result');
+      if (topicsResult && topicsResult.querySelector('.mode1-result-placeholder')) {
+        generateMode1TopicsWithRatio();
       } else {
         // 如果已經有內容，LLM 根據之前討論的影片類型配比再次告知規劃
-        sendMode3Message('請根據我們之前討論的影片類型配比，再次告知我的14天規劃。', 'ip_planning');
+        sendMode1Message('請根據我們之前討論的影片類型配比，再次告知我的14天規劃。', 'ip_planning');
       }
       break;
     case 'today-script':
       // 打開右側抽屜，顯示 一週腳本 標籤
-      toggleMode3ResultsDrawer();
-      switchMode3Tab('weekly', null);
+      toggleMode1ResultsDrawer();
+      switchMode1Tab('weekly', null);
       // 詢問用戶要使用哪個腳本結構
-      sendMode3Message('請根據目前資料庫的5個腳本結構（A/B/C/D/E），詢問我要使用哪一個腳本結構來產出今日的腳本。', 'ip_planning');
+      sendMode1Message('請根據目前資料庫的5個腳本結構（A/B/C/D/E），詢問我要使用哪一個腳本結構來產出今日的腳本。', 'ip_planning');
       break;
     case 'reposition':
       // 重新定位：LLM 會先詢問
-      sendMode3Message('我想要重新定位，請先詢問我想要重新定位哪個方面？', 'ip_planning');
+      sendMode1Message('我想要重新定位，請先詢問我想要重新定位哪個方面？', 'ip_planning');
       break;
     default:
       console.warn('未知的快速按鈕類型:', type);
   }
 }
 
-// 發送 Mode3 訊息
-async function sendMode3Message(message, conversationType = 'ip_planning') {
-  if (isMode3Sending) {
+// 發送 Mode1 訊息
+async function sendMode1Message(message, conversationType = 'ip_planning') {
+  if (isMode1Sending) {
     console.log('訊息發送中，請稍候...');
     return;
   }
   
-  currentMode3ConversationType = conversationType;
+  currentMode1ConversationType = conversationType;
   if (!message || !message.trim()) return;
   
-  isMode3Sending = true;
+  isMode1Sending = true;
   
-  const chatMessages = document.getElementById('mode3-chatMessages');
-  const messageInput = document.getElementById('mode3-messageInput');
-  const sendBtn = document.getElementById('mode3-sendBtn');
-  const quickButtons = document.getElementById('mode3-quickButtons');
+  const chatMessages = document.getElementById('mode1-chatMessages');
+  const messageInput = document.getElementById('mode1-messageInput');
+  const sendBtn = document.getElementById('mode1-sendBtn');
+  const quickButtons = document.getElementById('mode1-quickButtons');
   
   if (!chatMessages || !messageInput || !sendBtn) return;
   
@@ -284,7 +332,7 @@ async function sendMode3Message(message, conversationType = 'ip_planning') {
   const user = userStr ? JSON.parse(userStr) : null;
   
   // 添加用戶訊息
-  const userMessage = createMode3Message('user', message);
+  const userMessage = createMode1Message('user', message);
   chatMessages.appendChild(userMessage);
   
   // 隱藏快速按鈕
@@ -300,13 +348,13 @@ async function sendMode3Message(message, conversationType = 'ip_planning') {
   
   // 記錄長期記憶
   try {
-    await recordMode3ConversationMessage(conversationType, 'user', message, token, user);
+    await recordMode1ConversationMessage(conversationType, 'user', message, token, user);
   } catch (error) {
     console.error('記錄長期記憶錯誤:', error);
   }
   
   // 添加載入動畫
-  const aiMessage = createMode3Message('assistant', '');
+  const aiMessage = createMode1Message('assistant', '');
   const contentDiv = aiMessage.querySelector('.message-content');
   contentDiv.innerHTML = `
     <div class="typing-indicator">
@@ -359,7 +407,7 @@ async function sendMode3Message(message, conversationType = 'ip_planning') {
           const data = line.slice(6);
           if (data === '[DONE]') {
             try {
-              await recordMode3ConversationMessage(currentMode3ConversationType, 'assistant', fullContent, token, user);
+              await recordMode1ConversationMessage(currentMode1ConversationType, 'assistant', fullContent, token, user);
             } catch (error) {
               console.error('記錄長期記憶錯誤:', error);
             }
@@ -370,7 +418,7 @@ async function sendMode3Message(message, conversationType = 'ip_planning') {
             const parsed = JSON.parse(data);
             if (parsed.content) {
               fullContent += parsed.content;
-              contentDiv.innerHTML = renderMode3Markdown(fullContent);
+              contentDiv.innerHTML = renderMode1Markdown(fullContent);
               
               // 語法高亮
               if (typeof hljs !== 'undefined') {
@@ -391,6 +439,20 @@ async function sendMode3Message(message, conversationType = 'ip_planning') {
     }
   } catch (error) {
     console.error('發送訊息錯誤:', error);
+    
+    // 檢查是否為配額錯誤
+    const quotaInfo = error.quotaInfo || parseQuotaError(error.message);
+    let errorMessage = error.message || '未知錯誤';
+    
+    if (quotaInfo && quotaInfo.isQuotaError) {
+      errorMessage = quotaInfo.message;
+      
+      // 顯示配額錯誤通知
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(`⚠️ ${errorMessage}`, 5000);
+      }
+    }
+    
     if (contentDiv) {
       // 使用統一的 escapeHtml 函數
       const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
@@ -399,10 +461,24 @@ async function sendMode3Message(message, conversationType = 'ip_planning') {
         div.textContent = String(text);
         return div.innerHTML;
       });
-      const safeErrorMsg = escapeHtml(error.message || '未知錯誤');
-      contentDiv.innerHTML = `抱歉，發生了錯誤：${safeErrorMsg}`;
+      const safeErrorMsg = escapeHtml(errorMessage);
+      
+      if (quotaInfo && quotaInfo.isQuotaError) {
+        contentDiv.innerHTML = `
+          <div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
+            <p style="font-weight: 600; margin-bottom: 8px;">⚠️ ${safeErrorMsg}</p>
+            ${quotaInfo.retrySeconds ? `
+              <p style="color: #991b1b; font-size: 14px; margin-top: 8px;">
+                <i class="fas fa-clock"></i> 建議等待時間：約 ${quotaInfo.retrySeconds} 秒（${quotaInfo.retryMinutes} 分鐘）後再試
+              </p>
+            ` : '<p style="color: #991b1b; font-size: 14px; margin-top: 8px;">請稍後再試，或聯繫客服處理。</p>'}
+          </div>
+        `;
+      } else {
+        contentDiv.innerHTML = `抱歉，發生了錯誤：${safeErrorMsg}`;
+      }
     } else {
-      const errorMessage = createMode3Message('assistant', `抱歉，發生了錯誤：${error.message}`);
+      const errorMessage = createMode1Message('assistant', `抱歉，發生了錯誤：${errorMessage}`);
       chatMessages.appendChild(errorMessage);
     }
   } finally {
@@ -412,12 +488,12 @@ async function sendMode3Message(message, conversationType = 'ip_planning') {
       quickButtons.style.display = 'flex';
     }
     chatMessages.scrollTop = chatMessages.scrollHeight;
-    isMode3Sending = false;
+    isMode1Sending = false;
   }
 }
 
-// 創建 Mode3 訊息元素
-function createMode3Message(role, content) {
+// 創建 Mode1 訊息元素
+function createMode1Message(role, content) {
   const messageDiv = document.createElement('div');
   messageDiv.className = `message ${role}`;
   
@@ -446,7 +522,7 @@ function createMode3Message(role, content) {
   const contentDiv = document.createElement('div');
   contentDiv.className = 'message-content';
   if (content) {
-    contentDiv.innerHTML = renderMode3Markdown(content);
+    contentDiv.innerHTML = renderMode1Markdown(content);
   }
   
   if (role === 'user') {
@@ -461,7 +537,7 @@ function createMode3Message(role, content) {
 }
 
 // Markdown 渲染
-function renderMode3Markdown(text) {
+function renderMode1Markdown(text) {
   // 優先使用安全的 Markdown 渲染函數
   if (window.safeRenderMarkdown) {
     return window.safeRenderMarkdown(text);
@@ -497,7 +573,7 @@ function renderMode3Markdown(text) {
 }
 
 // 記錄 Mode3 長期記憶
-async function recordMode3ConversationMessage(conversationType, role, content, token, user) {
+async function recordMode1ConversationMessage(conversationType, role, content, token, user) {
   if (!token || !content) return;
   
   try {
@@ -531,24 +607,24 @@ async function recordMode3ConversationMessage(conversationType, role, content, t
 }
 
 // 切換說明抽屜
-function toggleMode3InstructionsDrawer() {
-  const overlay = document.getElementById('mode3InstructionsOverlay');
-  const drawer = document.getElementById('mode3InstructionsDrawer');
+function toggleMode1InstructionsDrawer() {
+  const overlay = document.getElementById('mode1InstructionsOverlay');
+  const drawer = document.getElementById('mode1InstructionsDrawer');
   
   if (overlay && drawer) {
     const isOpen = overlay.classList.contains('open');
     
     if (isOpen) {
-      closeMode3InstructionsDrawer();
+      closeMode1InstructionsDrawer();
     } else {
-      openMode3InstructionsDrawer();
+      openMode1InstructionsDrawer();
     }
   }
 }
 
-function openMode3InstructionsDrawer() {
-  const overlay = document.getElementById('mode3InstructionsOverlay');
-  const drawer = document.getElementById('mode3InstructionsDrawer');
+function openMode1InstructionsDrawer() {
+  const overlay = document.getElementById('mode1InstructionsOverlay');
+  const drawer = document.getElementById('mode1InstructionsDrawer');
   
   if (overlay && drawer) {
     overlay.classList.add('open');
@@ -557,9 +633,9 @@ function openMode3InstructionsDrawer() {
   }
 }
 
-function closeMode3InstructionsDrawer() {
-  const overlay = document.getElementById('mode3InstructionsOverlay');
-  const drawer = document.getElementById('mode3InstructionsDrawer');
+function closeMode1InstructionsDrawer() {
+  const overlay = document.getElementById('mode1InstructionsOverlay');
+  const drawer = document.getElementById('mode1InstructionsDrawer');
   
   if (overlay && drawer) {
     overlay.classList.remove('open');
@@ -569,24 +645,24 @@ function closeMode3InstructionsDrawer() {
 }
 
 // 切換結果抽屜
-function toggleMode3ResultsDrawer() {
-  const overlay = document.getElementById('mode3ResultsOverlay');
-  const drawer = document.getElementById('mode3ResultsDrawer');
+function toggleMode1ResultsDrawer() {
+  const overlay = document.getElementById('mode1ResultsOverlay');
+  const drawer = document.getElementById('mode1ResultsDrawer');
   
   if (overlay && drawer) {
     const isOpen = overlay.classList.contains('open');
     
     if (isOpen) {
-      closeMode3ResultsDrawer();
+      closeMode1ResultsDrawer();
     } else {
-      openMode3ResultsDrawer();
+      openMode1ResultsDrawer();
     }
   }
 }
 
-function openMode3ResultsDrawer() {
-  const overlay = document.getElementById('mode3ResultsOverlay');
-  const drawer = document.getElementById('mode3ResultsDrawer');
+function openMode1ResultsDrawer() {
+  const overlay = document.getElementById('mode1ResultsOverlay');
+  const drawer = document.getElementById('mode1ResultsDrawer');
   
   if (overlay && drawer) {
     overlay.classList.add('open');
@@ -595,9 +671,9 @@ function openMode3ResultsDrawer() {
   }
 }
 
-function closeMode3ResultsDrawer() {
-  const overlay = document.getElementById('mode3ResultsOverlay');
-  const drawer = document.getElementById('mode3ResultsDrawer');
+function closeMode1ResultsDrawer() {
+  const overlay = document.getElementById('mode1ResultsOverlay');
+  const drawer = document.getElementById('mode1ResultsDrawer');
   
   if (overlay && drawer) {
     overlay.classList.remove('open');
@@ -607,19 +683,19 @@ function closeMode3ResultsDrawer() {
 }
 
 // 切換結果標籤
-function switchMode3Tab(tabName, event) {
-  document.querySelectorAll('.mode3-tab').forEach(tab => {
+function switchMode1Tab(tabName, event) {
+  document.querySelectorAll('.mode1-tab').forEach(tab => {
     tab.classList.remove('active');
   });
   
-  document.querySelectorAll('.mode3-result-block').forEach(block => {
+  document.querySelectorAll('.mode1-result-block').forEach(block => {
     block.classList.remove('active');
   });
   
   if (event && event.target) {
     event.target.classList.add('active');
   } else {
-    const tabs = document.querySelectorAll('.mode3-tab');
+    const tabs = document.querySelectorAll('.mode1-tab');
     tabs.forEach(tab => {
       const tabText = tab.textContent;
       if (tabName === 'positioning' && tabText.includes('帳號定位')) {
@@ -641,15 +717,15 @@ function switchMode3Tab(tabName, event) {
   }
   
   // 優先使用新的 ID，如果不存在則使用舊的 ID
-  let resultBlock = document.getElementById(`mode3-${tabName}-result`);
+  let resultBlock = document.getElementById(`mode1-${tabName}-result`);
   if (!resultBlock) {
     // 映射舊的標籤名稱到新的 ID
     if (tabName === 'profile') {
-      resultBlock = document.getElementById('mode3-positioning-result');
+      resultBlock = document.getElementById('mode1-positioning-result');
     } else if (tabName === 'plan') {
-      resultBlock = document.getElementById('mode3-topics-result');
+      resultBlock = document.getElementById('mode1-topics-result');
     } else if (tabName === 'scripts') {
-      resultBlock = document.getElementById('mode3-weekly-result');
+      resultBlock = document.getElementById('mode1-weekly-result');
     }
   }
   
@@ -659,13 +735,13 @@ function switchMode3Tab(tabName, event) {
 }
 
 // 生成帳號定位
-async function generateMode3Positioning() {
-  const resultBlock = document.getElementById('mode3-positioning-result') || document.getElementById('mode3-profile-result');
+async function generateMode1Positioning() {
+  const resultBlock = document.getElementById('mode1-positioning-result') || document.getElementById('mode1-profile-result');
   if (!resultBlock) {
     console.error('找不到結果區塊');
     return;
   }
-  const button = resultBlock.querySelector('.mode3-generate-btn');
+  const button = resultBlock.querySelector('.mode1-generate-btn');
   if (!button) {
     console.error('找不到生成按鈕');
     return;
@@ -675,19 +751,26 @@ async function generateMode3Positioning() {
   button.innerHTML = '<span>⏳</span> 生成中...';
   
   // 清空之前的內容，但保留按鈕結構
-  const placeholder = resultBlock.querySelector('.mode3-result-placeholder');
+  const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
   if (placeholder) {
     placeholder.style.display = 'none';
   }
   
   // 創建或獲取內容容器
-  let contentDiv = resultBlock.querySelector('.mode3-result-content');
+  let contentDiv = resultBlock.querySelector('.mode1-result-content');
   if (!contentDiv) {
     contentDiv = document.createElement('div');
-    contentDiv.className = 'mode3-result-content';
+    contentDiv.className = 'mode1-result-content';
     resultBlock.appendChild(contentDiv);
   }
-  contentDiv.innerHTML = '<p>正在生成帳號定位...</p>';
+  // 顯示生成中動畫（類似 mode3）
+  const safeMessage = window.escapeHtml ? window.escapeHtml('正在生成帳號定位') : '正在生成帳號定位';
+  contentDiv.innerHTML = `
+    <div class="generating-container">
+      <div class="generating-spinner"></div>
+      <div class="generating-text">${safeMessage}<span class="generating-dots"></span></div>
+    </div>
+  `;
   
   try {
     const response = await fetch(`${API_URL}/api/chat/stream`, {
@@ -736,14 +819,22 @@ async function generateMode3Positioning() {
             if (parsed.type === 'token' && parsed.content) {
               content += parsed.content;
               hasReceivedContent = true;
-              const renderedContent = renderMode3Markdown(content);
+              const renderedContent = renderMode1Markdown(content);
               contentDiv.innerHTML = renderedContent;
             } else if (parsed.type === 'error') {
-              throw new Error(parsed.message || parsed.content || '生成失敗');
+              const errorMsg = parsed.message || parsed.content || '生成失敗';
+              // 檢查是否為 429 配額錯誤
+              const quotaInfo = parseQuotaError(errorMsg);
+              if (quotaInfo) {
+                const quotaError = new Error(quotaInfo.message);
+                quotaError.quotaInfo = quotaInfo;
+                throw quotaError;
+              }
+              throw new Error(errorMsg);
             } else if (parsed.content) {
               content += parsed.content;
               hasReceivedContent = true;
-              const renderedContent = renderMode3Markdown(content);
+              const renderedContent = renderMode1Markdown(content);
               contentDiv.innerHTML = renderedContent;
             }
           } catch (e) {
@@ -761,22 +852,78 @@ async function generateMode3Positioning() {
     }
     
     // 確保按鈕存在才更新
-    const finalButton = resultBlock.querySelector('.mode3-generate-btn');
+    const finalButton = resultBlock.querySelector('.mode1-generate-btn');
     if (finalButton) {
       finalButton.innerHTML = '<span>🚀</span> 重新生成';
       finalButton.disabled = false;
     }
+    
+    // 顯示成功通知
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('✅ 帳號定位生成完成！', 3000);
+    }
   } catch (error) {
     console.error('生成帳號定位失敗:', error);
-    if (contentDiv) {
-      contentDiv.innerHTML = `<p style="color: #dc2626;">生成失敗：${escapeHtml(error.message || '未知錯誤')}</p><p>請檢查網路連線或稍後再試。</p>`;
+    
+    // 檢查是否為配額錯誤
+    const quotaInfo = error.quotaInfo || parseQuotaError(error.message);
+    let errorMessage = error.message || '未知錯誤';
+    let errorDetail = '請檢查網路連線或稍後再試。';
+    
+    if (quotaInfo && quotaInfo.isQuotaError) {
+      errorMessage = quotaInfo.message;
+      errorDetail = quotaInfo.retrySeconds 
+        ? `系統將在約 ${quotaInfo.retrySeconds} 秒後自動恢復。您也可以稍後手動重試。`
+        : '請稍後再試，或聯繫客服處理。';
+      
+      // 顯示配額錯誤通知
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(`⚠️ ${errorMessage}`, 5000);
+      }
     }
-    const errorButton = resultBlock.querySelector('.mode3-generate-btn');
+    
+    if (contentDiv) {
+      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
+        if (text == null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+      });
+      contentDiv.innerHTML = `
+        <div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
+          <p style="font-weight: 600; margin-bottom: 8px;">生成失敗：${escapeHtml(errorMessage)}</p>
+          <p style="color: #991b1b; font-size: 14px;">${escapeHtml(errorDetail)}</p>
+          ${quotaInfo && quotaInfo.retrySeconds ? `
+            <p style="color: #991b1b; font-size: 12px; margin-top: 8px;">
+              <i class="fas fa-clock"></i> 建議等待時間：約 ${quotaInfo.retrySeconds} 秒（${quotaInfo.retryMinutes} 分鐘）
+            </p>
+          ` : ''}
+        </div>
+      `;
+    }
+    const errorButton = resultBlock.querySelector('.mode1-generate-btn');
     if (errorButton) {
-      errorButton.innerHTML = '<span>❌</span> 生成失敗，請重試';
-      errorButton.disabled = false;
+      if (quotaInfo && quotaInfo.retrySeconds) {
+        errorButton.innerHTML = `<span>⏳</span> 等待 ${quotaInfo.retrySeconds} 秒後重試`;
+        errorButton.disabled = true;
+        // 設置倒計時
+        let countdown = quotaInfo.retrySeconds;
+        const countdownInterval = setInterval(() => {
+          countdown--;
+          if (countdown > 0) {
+            errorButton.innerHTML = `<span>⏳</span> 等待 ${countdown} 秒後重試`;
+          } else {
+            errorButton.innerHTML = '<span>🔄</span> 可以重試了';
+            errorButton.disabled = false;
+            clearInterval(countdownInterval);
+          }
+        }, 1000);
+      } else {
+        errorButton.innerHTML = '<span>❌</span> 生成失敗，請重試';
+        errorButton.disabled = false;
+      }
     } else {
-      const placeholder = resultBlock.querySelector('.mode3-result-placeholder');
+      const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
       if (placeholder) {
         placeholder.style.display = 'block';
       }
@@ -785,18 +932,18 @@ async function generateMode3Positioning() {
 }
 
 // 保留舊函數作為備用（向後兼容）
-async function generateMode3IPProfile() {
-  return generateMode3Positioning();
+async function generateMode1IPProfile() {
+  return generateMode1Positioning();
 }
 
 // 生成選題方向（影片類型配比）
-async function generateMode3TopicsWithRatio() {
-  const resultBlock = document.getElementById('mode3-topics-result') || document.getElementById('mode3-plan-result');
+async function generateMode1TopicsWithRatio() {
+  const resultBlock = document.getElementById('mode1-topics-result') || document.getElementById('mode1-plan-result');
   if (!resultBlock) {
     console.error('找不到結果區塊');
     return;
   }
-  const button = resultBlock.querySelector('.mode3-generate-btn');
+  const button = resultBlock.querySelector('.mode1-generate-btn');
   if (!button) {
     console.error('找不到生成按鈕');
     return;
@@ -806,19 +953,26 @@ async function generateMode3TopicsWithRatio() {
   button.innerHTML = '<span>⏳</span> 生成中...';
   
   // 清空之前的內容，但保留按鈕結構
-  const placeholder = resultBlock.querySelector('.mode3-result-placeholder');
+  const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
   if (placeholder) {
     placeholder.style.display = 'none';
   }
   
   // 創建或獲取內容容器
-  let contentDiv = resultBlock.querySelector('.mode3-result-content');
+  let contentDiv = resultBlock.querySelector('.mode1-result-content');
   if (!contentDiv) {
     contentDiv = document.createElement('div');
-    contentDiv.className = 'mode3-result-content';
+    contentDiv.className = 'mode1-result-content';
     resultBlock.appendChild(contentDiv);
   }
-  contentDiv.innerHTML = '<p>正在生成選題方向...</p>';
+  // 顯示生成中動畫（類似 mode3）
+  const safeMessage = window.escapeHtml ? window.escapeHtml('正在生成選題方向') : '正在生成選題方向';
+  contentDiv.innerHTML = `
+    <div class="generating-container">
+      <div class="generating-spinner"></div>
+      <div class="generating-text">${safeMessage}<span class="generating-dots"></span></div>
+    </div>
+  `;
   
   try {
     const response = await fetch(`${API_URL}/api/chat/stream`, {
@@ -867,14 +1021,22 @@ async function generateMode3TopicsWithRatio() {
             if (parsed.type === 'token' && parsed.content) {
               content += parsed.content;
               hasReceivedContent = true;
-              const renderedContent = renderMode3Markdown(content);
+              const renderedContent = renderMode1Markdown(content);
               contentDiv.innerHTML = renderedContent;
             } else if (parsed.type === 'error') {
-              throw new Error(parsed.message || parsed.content || '生成失敗');
+              const errorMsg = parsed.message || parsed.content || '生成失敗';
+              // 檢查是否為 429 配額錯誤
+              const quotaInfo = parseQuotaError(errorMsg);
+              if (quotaInfo) {
+                const quotaError = new Error(quotaInfo.message);
+                quotaError.quotaInfo = quotaInfo;
+                throw quotaError;
+              }
+              throw new Error(errorMsg);
             } else if (parsed.content) {
               content += parsed.content;
               hasReceivedContent = true;
-              const renderedContent = renderMode3Markdown(content);
+              const renderedContent = renderMode1Markdown(content);
               contentDiv.innerHTML = renderedContent;
             }
           } catch (e) {
@@ -892,22 +1054,78 @@ async function generateMode3TopicsWithRatio() {
     }
     
     // 確保按鈕存在才更新
-    const finalButton = resultBlock.querySelector('.mode3-generate-btn');
+    const finalButton = resultBlock.querySelector('.mode1-generate-btn');
     if (finalButton) {
       finalButton.innerHTML = '<span>🚀</span> 重新生成';
       finalButton.disabled = false;
     }
+    
+    // 顯示成功通知
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('✅ 選題方向生成完成！', 3000);
+    }
   } catch (error) {
     console.error('生成選題方向失敗:', error);
-    if (contentDiv) {
-      contentDiv.innerHTML = `<p style="color: #dc2626;">生成失敗：${escapeHtml(error.message || '未知錯誤')}</p><p>請檢查網路連線或稍後再試。</p>`;
+    
+    // 檢查是否為配額錯誤
+    const quotaInfo = error.quotaInfo || parseQuotaError(error.message);
+    let errorMessage = error.message || '未知錯誤';
+    let errorDetail = '請檢查網路連線或稍後再試。';
+    
+    if (quotaInfo && quotaInfo.isQuotaError) {
+      errorMessage = quotaInfo.message;
+      errorDetail = quotaInfo.retrySeconds 
+        ? `系統將在約 ${quotaInfo.retrySeconds} 秒後自動恢復。您也可以稍後手動重試。`
+        : '請稍後再試，或聯繫客服處理。';
+      
+      // 顯示配額錯誤通知
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(`⚠️ ${errorMessage}`, 5000);
+      }
     }
-    const errorButton = resultBlock.querySelector('.mode3-generate-btn');
+    
+    if (contentDiv) {
+      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
+        if (text == null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+      });
+      contentDiv.innerHTML = `
+        <div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
+          <p style="font-weight: 600; margin-bottom: 8px;">生成失敗：${escapeHtml(errorMessage)}</p>
+          <p style="color: #991b1b; font-size: 14px;">${escapeHtml(errorDetail)}</p>
+          ${quotaInfo && quotaInfo.retrySeconds ? `
+            <p style="color: #991b1b; font-size: 12px; margin-top: 8px;">
+              <i class="fas fa-clock"></i> 建議等待時間：約 ${quotaInfo.retrySeconds} 秒（${quotaInfo.retryMinutes} 分鐘）
+            </p>
+          ` : ''}
+        </div>
+      `;
+    }
+    const errorButton = resultBlock.querySelector('.mode1-generate-btn');
     if (errorButton) {
-      errorButton.innerHTML = '<span>❌</span> 生成失敗，請重試';
-      errorButton.disabled = false;
+      if (quotaInfo && quotaInfo.retrySeconds) {
+        errorButton.innerHTML = `<span>⏳</span> 等待 ${quotaInfo.retrySeconds} 秒後重試`;
+        errorButton.disabled = true;
+        // 設置倒計時
+        let countdown = quotaInfo.retrySeconds;
+        const countdownInterval = setInterval(() => {
+          countdown--;
+          if (countdown > 0) {
+            errorButton.innerHTML = `<span>⏳</span> 等待 ${countdown} 秒後重試`;
+          } else {
+            errorButton.innerHTML = '<span>🔄</span> 可以重試了';
+            errorButton.disabled = false;
+            clearInterval(countdownInterval);
+          }
+        }, 1000);
+      } else {
+        errorButton.innerHTML = '<span>❌</span> 生成失敗，請重試';
+        errorButton.disabled = false;
+      }
     } else {
-      const placeholder = resultBlock.querySelector('.mode3-result-placeholder');
+      const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
       if (placeholder) {
         placeholder.style.display = 'block';
       }
@@ -916,18 +1134,18 @@ async function generateMode3TopicsWithRatio() {
 }
 
 // 保留舊函數作為備用（向後兼容）
-async function generateMode314DayPlan() {
-  return generateMode3TopicsWithRatio();
+async function generateMode114DayPlan() {
+  return generateMode1TopicsWithRatio();
 }
 
 // 生成一週腳本
-async function generateMode3WeeklyScripts() {
-  const resultBlock = document.getElementById('mode3-weekly-result') || document.getElementById('mode3-scripts-result');
+async function generateMode1WeeklyScripts() {
+  const resultBlock = document.getElementById('mode1-weekly-result') || document.getElementById('mode1-scripts-result');
   if (!resultBlock) {
     console.error('找不到結果區塊');
     return;
   }
-  const button = resultBlock.querySelector('.mode3-generate-btn');
+  const button = resultBlock.querySelector('.mode1-generate-btn');
   if (!button) {
     console.error('找不到生成按鈕');
     return;
@@ -937,19 +1155,26 @@ async function generateMode3WeeklyScripts() {
   button.innerHTML = '<span>⏳</span> 生成中...';
   
   // 清空之前的內容，但保留按鈕結構
-  const placeholder = resultBlock.querySelector('.mode3-result-placeholder');
+  const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
   if (placeholder) {
     placeholder.style.display = 'none';
   }
   
   // 創建或獲取內容容器
-  let contentDiv = resultBlock.querySelector('.mode3-result-content');
+  let contentDiv = resultBlock.querySelector('.mode1-result-content');
   if (!contentDiv) {
     contentDiv = document.createElement('div');
-    contentDiv.className = 'mode3-result-content';
+    contentDiv.className = 'mode1-result-content';
     resultBlock.appendChild(contentDiv);
   }
-  contentDiv.innerHTML = '<p>正在生成腳本...</p>';
+  // 顯示生成中動畫（類似 mode3）
+  const safeMessage = window.escapeHtml ? window.escapeHtml('正在生成一週腳本') : '正在生成一週腳本';
+  contentDiv.innerHTML = `
+    <div class="generating-container">
+      <div class="generating-spinner"></div>
+      <div class="generating-text">${safeMessage}<span class="generating-dots"></span></div>
+    </div>
+  `;
   
   try {
     const response = await fetch(`${API_URL}/api/chat/stream`, {
@@ -1005,18 +1230,26 @@ async function generateMode3WeeklyScripts() {
               fullContent += parsed.content;
               hasReceivedContent = true;
               // 實時更新顯示
-              const renderedContent = renderMode3Markdown(fullContent);
+              const renderedContent = renderMode1Markdown(fullContent);
               contentDiv.innerHTML = renderedContent;
             } else if (parsed.type === 'end') {
               console.log('✅ 收到 end 標記');
               break;
             } else if (parsed.type === 'error') {
-              throw new Error(parsed.message || parsed.content || '生成失敗');
+              const errorMsg = parsed.message || parsed.content || '生成失敗';
+              // 檢查是否為 429 配額錯誤
+              const quotaInfo = parseQuotaError(errorMsg);
+              if (quotaInfo) {
+                const quotaError = new Error(quotaInfo.message);
+                quotaError.quotaInfo = quotaInfo;
+                throw quotaError;
+              }
+              throw new Error(errorMsg);
             } else if (parsed.content) {
               // 兼容舊格式
               fullContent += parsed.content;
               hasReceivedContent = true;
-              const renderedContent = renderMode3Markdown(fullContent);
+              const renderedContent = renderMode1Markdown(fullContent);
               contentDiv.innerHTML = renderedContent;
             }
           } catch (e) {
@@ -1029,7 +1262,7 @@ async function generateMode3WeeklyScripts() {
     
     // 最終更新顯示
     if (fullContent) {
-      const renderedContent = renderMode3Markdown(fullContent);
+      const renderedContent = renderMode1Markdown(fullContent);
       contentDiv.innerHTML = renderedContent;
       console.log('✅ 腳本生成完成，最終內容長度:', fullContent.length);
     } else if (!hasReceivedContent) {
@@ -1037,24 +1270,80 @@ async function generateMode3WeeklyScripts() {
     }
     
     // 確保按鈕存在才更新
-    const finalButton = resultBlock.querySelector('.mode3-generate-btn');
+    const finalButton = resultBlock.querySelector('.mode1-generate-btn');
     if (finalButton) {
       finalButton.innerHTML = '<span>🚀</span> 重新生成';
       finalButton.disabled = false;
     }
+    
+    // 顯示成功通知
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('✅ 一週腳本生成完成！', 3000);
+    }
   } catch (error) {
     console.error('❌ 生成一週腳本失敗:', error);
+    
+    // 檢查是否為配額錯誤
+    const quotaInfo = error.quotaInfo || parseQuotaError(error.message);
+    let errorMessage = error.message || '未知錯誤';
+    let errorDetail = '請檢查網路連線或稍後再試。';
+    
+    if (quotaInfo && quotaInfo.isQuotaError) {
+      errorMessage = quotaInfo.message;
+      errorDetail = quotaInfo.retrySeconds 
+        ? `系統將在約 ${quotaInfo.retrySeconds} 秒後自動恢復。您也可以稍後手動重試。`
+        : '請稍後再試，或聯繫客服處理。';
+      
+      // 顯示配額錯誤通知
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(`⚠️ ${errorMessage}`, 5000);
+      }
+    }
+    
     if (contentDiv) {
-      contentDiv.innerHTML = `<p style="color: #dc2626;">生成失敗：${escapeHtml(error.message || '未知錯誤')}</p><p>請檢查網路連線或稍後再試。</p>`;
+      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
+        if (text == null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+      });
+      contentDiv.innerHTML = `
+        <div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
+          <p style="font-weight: 600; margin-bottom: 8px;">生成失敗：${escapeHtml(errorMessage)}</p>
+          <p style="color: #991b1b; font-size: 14px;">${escapeHtml(errorDetail)}</p>
+          ${quotaInfo && quotaInfo.retrySeconds ? `
+            <p style="color: #991b1b; font-size: 12px; margin-top: 8px;">
+              <i class="fas fa-clock"></i> 建議等待時間：約 ${quotaInfo.retrySeconds} 秒（${quotaInfo.retryMinutes} 分鐘）
+            </p>
+          ` : ''}
+        </div>
+      `;
     }
     // 確保按鈕存在才更新
-    const errorButton = resultBlock.querySelector('.mode3-generate-btn');
+    const errorButton = resultBlock.querySelector('.mode1-generate-btn');
     if (errorButton) {
-      errorButton.innerHTML = '<span>❌</span> 生成失敗，請重試';
-      errorButton.disabled = false;
+      if (quotaInfo && quotaInfo.retrySeconds) {
+        errorButton.innerHTML = `<span>⏳</span> 等待 ${quotaInfo.retrySeconds} 秒後重試`;
+        errorButton.disabled = true;
+        // 設置倒計時
+        let countdown = quotaInfo.retrySeconds;
+        const countdownInterval = setInterval(() => {
+          countdown--;
+          if (countdown > 0) {
+            errorButton.innerHTML = `<span>⏳</span> 等待 ${countdown} 秒後重試`;
+          } else {
+            errorButton.innerHTML = '<span>🔄</span> 可以重試了';
+            errorButton.disabled = false;
+            clearInterval(countdownInterval);
+          }
+        }, 1000);
+      } else {
+        errorButton.innerHTML = '<span>❌</span> 生成失敗，請重試';
+        errorButton.disabled = false;
+      }
     } else {
       // 如果按鈕不存在，重新顯示 placeholder
-      const placeholder = resultBlock.querySelector('.mode3-result-placeholder');
+      const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
       if (placeholder) {
         placeholder.style.display = 'block';
       }
@@ -1063,12 +1352,12 @@ async function generateMode3WeeklyScripts() {
 }
 
 // 保留舊函數作為備用（向後兼容）
-async function generateMode3TodayScripts() {
-  return generateMode3WeeklyScripts();
+async function generateMode1TodayScripts() {
+  return generateMode1WeeklyScripts();
 }
 
 // 儲存結果
-async function saveMode3Result() {
+async function saveMode1Result() {
   const token = localStorage.getItem('ipPlanningToken');
   const userStr = localStorage.getItem('ipPlanningUser');
   
@@ -1081,7 +1370,7 @@ async function saveMode3Result() {
   
   try {
     const user = JSON.parse(userStr);
-    const activeTab = document.querySelector('.mode3-tab.active');
+    const activeTab = document.querySelector('.mode1-tab.active');
     if (!activeTab) {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('請先選擇要儲存的結果', 3000);
@@ -1126,15 +1415,15 @@ async function saveMode3Result() {
     const frontendResultType = resultType === 'profile' ? 'positioning' : 
                                resultType === 'plan' ? 'topics' : 
                                resultType === 'scripts' ? 'weekly' : resultType;
-    const resultBlock = document.getElementById(`mode3-${frontendResultType}-result`) || 
-                       document.getElementById(`mode3-${resultType === 'profile' ? 'profile' : resultType === 'plan' ? 'plan' : 'scripts'}-result`);
+    const resultBlock = document.getElementById(`mode1-${frontendResultType}-result`) || 
+                       document.getElementById(`mode1-${resultType === 'profile' ? 'profile' : resultType === 'plan' ? 'plan' : 'scripts'}-result`);
     if (!resultBlock) {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('找不到結果區塊', 3000);
       }
       return;
     }
-    const content = resultBlock.querySelector('.mode3-result-content');
+    const content = resultBlock.querySelector('.mode1-result-content');
     
     if (!content || !content.innerHTML.trim()) {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1199,31 +1488,58 @@ async function saveMode3Result() {
 }
 
 // 重新生成結果
-function regenerateMode3Result() {
-  const activeTab = document.querySelector('.mode3-tab.active');
-  if (activeTab) {
-    const tabText = activeTab.textContent;
-    if (tabText.includes('帳號定位')) {
-      generateMode3Positioning();
-    } else if (tabText.includes('選題方向')) {
-      generateMode3TopicsWithRatio();
-    } else if (tabText.includes('一週腳本')) {
-      generateMode3WeeklyScripts();
+function regenerateMode1Result() {
+  const activeTab = document.querySelector('.mode1-tab.active');
+  if (!activeTab) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先選擇要重新生成的結果', 3000);
     }
-    // 保留舊的匹配邏輯作為備用
-    else if (tabText.includes('Profile')) {
-      generateMode3Positioning();
-    } else if (tabText.includes('規劃')) {
-      generateMode3TopicsWithRatio();
-    } else if (tabText.includes('腳本')) {
-      generateMode3WeeklyScripts();
+    return;
+  }
+  
+  const tabText = activeTab.textContent;
+  if (tabText.includes('帳號定位')) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('正在重新生成帳號定位...', 2000);
+    }
+    generateMode1Positioning();
+  } else if (tabText.includes('選題方向')) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('正在重新生成選題方向...', 2000);
+    }
+    generateMode1TopicsWithRatio();
+  } else if (tabText.includes('一週腳本')) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('正在重新生成一週腳本...', 2000);
+    }
+    generateMode1WeeklyScripts();
+  }
+  // 保留舊的匹配邏輯作為備用
+  else if (tabText.includes('Profile')) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('正在重新生成帳號定位...', 2000);
+    }
+    generateMode1Positioning();
+  } else if (tabText.includes('規劃')) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('正在重新生成選題方向...', 2000);
+    }
+    generateMode1TopicsWithRatio();
+  } else if (tabText.includes('腳本')) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('正在重新生成一週腳本...', 2000);
+    }
+    generateMode1WeeklyScripts();
+  } else {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('無法識別結果類型，請重新選擇標籤', 3000);
     }
   }
 }
 
 // 匯出結果
-function exportMode3Result() {
-  const activeTab = document.querySelector('.mode3-tab.active');
+function exportMode1Result() {
+  const activeTab = document.querySelector('.mode1-tab.active');
   if (!activeTab) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('請先選擇要匯出的結果', 3000);
@@ -1263,15 +1579,15 @@ function exportMode3Result() {
     return;
   }
   
-  const resultBlock = document.getElementById(`mode3-${tabName}-result`) || 
-                     document.getElementById(`mode3-${tabName === 'positioning' ? 'profile' : tabName === 'topics' ? 'plan' : 'scripts'}-result`);
+    const resultBlock = document.getElementById(`mode1-${tabName}-result`) ||
+                     document.getElementById(`mode1-${tabName === 'positioning' ? 'profile' : tabName === 'topics' ? 'plan' : 'scripts'}-result`);
   if (!resultBlock) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('找不到結果區塊', 3000);
     }
     return;
   }
-  const content = resultBlock.querySelector('.mode3-result-content');
+  const content = resultBlock.querySelector('.mode1-result-content');
   
   if (!content || !content.innerHTML.trim()) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {

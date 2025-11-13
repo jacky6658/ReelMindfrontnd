@@ -2184,7 +2184,10 @@ function displayIpPlanningResultsForUserDB(results) {
             <span class="ip-planning-item-edit-icon" data-result-id="${escapedResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
             <input type="text" class="ip-planning-item-title-input" data-result-id="${escapedResultId}" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; max-width: 300px;" onblur="saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')">
           </div>
-          <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
+            <button class="action-btn delete-btn" onclick="deleteIpPlanningResultForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'" title="刪除此項目">🗑️ 刪除</button>
+          </div>
         </div>
         <div class="ip-planning-content-item" style="color: #374151; line-height: 1.6; max-height: 300px; overflow-y: auto;">
           ${safeContent}
@@ -2317,6 +2320,68 @@ function exportIpPlanningResults() {
     }
   }
 }
+
+// 刪除 IP 人設規劃結果
+window.deleteIpPlanningResultForUserDB = async function(resultId) {
+  // 驗證和清理 resultId 參數以防止 XSS
+  if (!resultId || (typeof resultId !== 'string' && typeof resultId !== 'number')) {
+    console.error('無效的 resultId:', resultId);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('刪除失敗：無效的記錄ID', 3000);
+    }
+    return;
+  }
+  const safeResultId = String(resultId).replace(/[^a-zA-Z0-9_-]/g, '');
+  if (!safeResultId) {
+    console.error('清理後的 resultId 為空:', resultId);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('刪除失敗：無效的記錄ID', 3000);
+    }
+    return;
+  }
+  
+  const confirmMessage = '確定要刪除此 IP 人設規劃結果嗎？此操作無法復原。';
+  if (!confirm(confirmMessage)) return;
+  
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/ip-planning/results/${safeResultId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      
+      // 從本地結果中移除
+      if (window.currentIpPlanningResults) {
+        window.currentIpPlanningResults = window.currentIpPlanningResults.filter(r => String(r.id) !== String(safeResultId));
+      }
+      
+      // 重新顯示結果
+      if (window.currentIpPlanningResults) {
+        displayIpPlanningResultsForUserDB(window.currentIpPlanningResults);
+      } else {
+        loadIpPlanningResultsForUserDB();
+      }
+      
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(data.message || '✅ 記錄已刪除', 3000);
+      }
+    } else {
+      const errorData = await response.json().catch(() => ({ error: '刪除失敗' }));
+      throw new Error(errorData.error || `刪除失敗 (${response.status})`);
+    }
+  } catch (error) {
+    console.error('Delete IP planning result error:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('❌ 刪除失敗：' + (error.message || '請稍後再試'), 3000);
+    }
+  }
+};
 
 // 編輯 IP 人設規劃項目標題
 window.editIpPlanningItemTitle = function(resultId, event) {
