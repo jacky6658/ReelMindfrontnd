@@ -368,14 +368,65 @@
       } else {
         // 嘗試獲取詳細錯誤訊息
         let errorMessage = '啟用失敗，請稍後再試';
+        let isAlreadyActivated = false;
         try {
           const errorData = await response.json();
+          
+          // 檢查是否為「已經啟用」的成功訊息（同一個帳戶）
+          if (errorData.status === 'already_activated' && errorData.message) {
+            // 更新本地狀態
+            document.body.dataset.subscribed = 'true';
+            localStorage.setItem('subscriptionStatus', 'active');
+            if (ipPlanningUser) {
+              ipPlanningUser.is_subscribed = true;
+              localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+            }
+            // 顯示友好訊息
+            const activatedDate = errorData.activated_at ? 
+              new Date(errorData.activated_at).toLocaleString('zh-TW') : '';
+            const message = activatedDate ? 
+              `✅ ${errorData.message}（啟用時間：${activatedDate}）` : 
+              `✅ ${errorData.message}`;
+            showToast(message, 5000);
+            return; // 提前返回，不顯示錯誤訊息
+          }
+          
           errorMessage = errorData.error || errorData.message || errorMessage;
           
           // 如果有詳細資訊，顯示給用戶
           if (errorData.activated_at) {
+            isAlreadyActivated = true;
             const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW');
             errorMessage = `此授權連結已使用（${activatedDate}）`;
+            
+            // 如果連結已使用，檢查用戶當前的訂閱狀態
+            // 如果用戶已經有訂閱，這可能是成功的（用戶之前已經啟用過）
+            try {
+              const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                headers: {
+                  'Authorization': `Bearer ${currentToken}`
+                }
+              });
+              if (userResponse.ok) {
+                const userInfo = await userResponse.json();
+                if (userInfo.is_subscribed) {
+                  // 用戶已經有訂閱，這表示之前已經成功啟用過
+                  // 更新本地狀態
+                  document.body.dataset.subscribed = 'true';
+                  localStorage.setItem('subscriptionStatus', 'active');
+                  if (ipPlanningUser) {
+                    ipPlanningUser.is_subscribed = userInfo.is_subscribed;
+                    localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  }
+                  // 顯示成功訊息而不是錯誤
+                  showToast(`✅ 您已擁有授權！此連結已於 ${activatedDate} 啟用`, 5000);
+                  return; // 提前返回，不顯示錯誤訊息
+                }
+              }
+            } catch (e) {
+              console.warn('檢查訂閱狀態失敗:', e);
+              // 如果檢查失敗，繼續顯示錯誤訊息
+            }
           } else if (errorData.expired_at) {
             const expiredDate = new Date(errorData.expired_at).toLocaleString('zh-TW');
             errorMessage = `此授權連結已過期（${expiredDate}）`;
@@ -392,7 +443,10 @@
             errorMessage = `啟用失敗（錯誤代碼：${response.status}）`;
           }
         }
-        showToast(`❌ ${errorMessage}`, 5000);
+        // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
+        if (!isAlreadyActivated || !document.body.dataset.subscribed) {
+          showToast(`❌ ${errorMessage}`, 5000);
+        }
       }
     } catch (error) {
       console.error('啟用失敗:', error);

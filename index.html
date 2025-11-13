@@ -13661,14 +13661,68 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             // 嘗試獲取詳細錯誤訊息
             let errorMessage = '啟用失敗，請稍後再試';
             let errorDetails = '';
+            let isAlreadyActivated = false;
             try {
               const errorData = await response.json();
+              
+              // 檢查是否為「已經啟用」的成功訊息（同一個帳戶）
+              if (errorData.status === 'already_activated' && errorData.message) {
+                // 更新本地狀態
+                document.body.dataset.subscribed = 'true';
+                localStorage.setItem('subscriptionStatus', 'active');
+                if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                  ipPlanningUser.is_subscribed = true;
+                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                }
+                // 顯示友好訊息
+                const activatedDate = errorData.activated_at ? 
+                  new Date(errorData.activated_at).toLocaleString('zh-TW') : '';
+                const message = activatedDate ? 
+                  `✅ ${errorData.message}（啟用時間：${activatedDate}）` : 
+                  `✅ ${errorData.message}`;
+                showToast(message, 5000);
+                return; // 提前返回，不顯示錯誤訊息
+              }
+              
               errorMessage = errorData.error || errorData.message || errorMessage;
               
               // 如果有詳細資訊，顯示給用戶
               if (errorData.activated_at) {
+                isAlreadyActivated = true;
                 const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW');
                 errorDetails = `此連結已於 ${activatedDate} 使用`;
+                
+                // 如果連結已使用，檢查用戶當前的訂閱狀態
+                // 如果用戶已經有訂閱，這可能是成功的（用戶之前已經啟用過）
+                const currentToken = localStorage.getItem('ipPlanningToken');
+                if (currentToken) {
+                  try {
+                    const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                      headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                      }
+                    });
+                    if (userResponse.ok) {
+                      const userInfo = await userResponse.json();
+                      if (userInfo.is_subscribed) {
+                        // 用戶已經有訂閱，這表示之前已經成功啟用過
+                        // 更新本地狀態
+                        document.body.dataset.subscribed = 'true';
+                        localStorage.setItem('subscriptionStatus', 'active');
+                        if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                          ipPlanningUser.is_subscribed = userInfo.is_subscribed;
+                          localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                        }
+                        // 顯示成功訊息而不是錯誤
+                        showToast(`✅ 您已擁有授權！此連結已於 ${activatedDate} 啟用`, 5000);
+                        return; // 提前返回，不顯示錯誤訊息
+                      }
+                    }
+                  } catch (e) {
+                    console.warn('檢查訂閱狀態失敗:', e);
+                    // 如果檢查失敗，繼續顯示錯誤訊息
+                  }
+                }
               } else if (errorData.expired_at) {
                 const expiredDate = new Date(errorData.expired_at).toLocaleString('zh-TW');
                 errorDetails = `此連結已於 ${expiredDate} 過期`;
@@ -13682,11 +13736,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             } catch (e) {
               // 如果無法解析 JSON，使用預設錯誤訊息
             }
-            // 顯示詳細錯誤訊息（支援多行）
-            if (errorDetails) {
-              showToast(`${errorMessage}\n${errorDetails}`, 8000);
-            } else {
-              showToast(errorMessage, 5000);
+            // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
+            if (!isAlreadyActivated || document.body.dataset.subscribed !== 'true') {
+              // 顯示詳細錯誤訊息（支援多行）
+              if (errorDetails) {
+                showToast(`${errorMessage}\n${errorDetails}`, 8000);
+              } else {
+                showToast(errorMessage, 5000);
+              }
             }
           }
         } catch (error) {
