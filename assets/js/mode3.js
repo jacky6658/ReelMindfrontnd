@@ -123,8 +123,8 @@ async function loadUserMemory() {
     console.log('🧠 ========== 開始載入用戶記憶 ==========');
     console.log('👤 用戶ID:', ipPlanningUser.user_id);
     
-    // 使用完整記憶端點（包含 STM + LTM）
-    const memoryResponse = await fetch(`${API_URL}/api/user/memory/full/${ipPlanningUser.user_id}`, {
+    // 使用完整記憶端點（包含 STM + LTM），指定 conversation_type 為 one_click
+    const memoryResponse = await fetch(`${API_URL}/api/user/memory/full/${ipPlanningUser.user_id}?conversation_type=one_click`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`
       }
@@ -713,6 +713,11 @@ async function generateAll() {
     return;
   }
   
+  // 顯示開始生成通知
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast('⏳ 正在生成內容，請稍候...', 2000);
+  }
+  
   // 切換到載入頁面
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   const loadingStep = document.getElementById('step3Loading');
@@ -814,7 +819,8 @@ async function generatePositioningStream(platform, topic, positioning, style) {
           style: style,
           profile: positioning,
           history: [],
-          user_id: ipPlanningUser?.user_id || null
+          user_id: ipPlanningUser?.user_id || null,
+          conversation_type: 'one_click'  // 指定對話類型
         })
       });
       
@@ -855,6 +861,15 @@ async function generatePositioningStream(platform, topic, positioning, style) {
         }
       }
       
+      // 記錄長期記憶
+      if (result && ipPlanningUser?.user_id && ipPlanningToken) {
+        try {
+          await recordMode3ConversationMessage('one_click', 'assistant', result, ipPlanningToken, ipPlanningUser);
+        } catch (error) {
+          console.error('記錄長期記憶錯誤:', error);
+        }
+      }
+      
       resolve(result);
     } catch (error) {
       reject(error);
@@ -880,7 +895,8 @@ async function generateTopicsStream(platform, topic, positioning, style) {
           style: style,
           profile: positioning,
           history: [],
-          user_id: ipPlanningUser?.user_id || null
+          user_id: ipPlanningUser?.user_id || null,
+          conversation_type: 'one_click'  // 指定對話類型
         })
       });
       
@@ -921,6 +937,15 @@ async function generateTopicsStream(platform, topic, positioning, style) {
         }
       }
       
+      // 記錄長期記憶
+      if (result && ipPlanningUser?.user_id && ipPlanningToken) {
+        try {
+          await recordMode3ConversationMessage('one_click', 'assistant', result, ipPlanningToken, ipPlanningUser);
+        } catch (error) {
+          console.error('記錄長期記憶錯誤:', error);
+        }
+      }
+      
       resolve(result);
     } catch (error) {
       reject(error);
@@ -957,7 +982,8 @@ async function generateScriptStream(platform, topic, positioning, duration, stru
           profile: positioning,
           script_structure: structure,
           history: [],
-          user_id: ipPlanningUser?.user_id || null
+          user_id: ipPlanningUser?.user_id || null,
+          conversation_type: 'one_click'  // 指定對話類型
         })
       });
       
@@ -998,6 +1024,15 @@ async function generateScriptStream(platform, topic, positioning, duration, stru
         }
       }
       
+      // 記錄長期記憶
+      if (result && ipPlanningUser?.user_id && ipPlanningToken) {
+        try {
+          await recordMode3ConversationMessage('one_click', 'assistant', result, ipPlanningToken, ipPlanningUser);
+        } catch (error) {
+          console.error('記錄長期記憶錯誤:', error);
+        }
+      }
+      
       resolve(result);
     } catch (error) {
       reject(error);
@@ -1022,6 +1057,11 @@ async function generatePositioning() {
       window.ReelMindCommon.showToast('請先選擇平台', 3000);
     }
     return;
+  }
+  
+  // 顯示開始生成通知
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast('⏳ 正在生成帳號定位...', 2000);
   }
   
   // 顯示生成中動畫
@@ -1053,7 +1093,8 @@ async function generatePositioning() {
         style: styleInstruction,
         profile: positioning,
         history: [],
-        user_id: ipPlanningUser?.user_id || null
+        user_id: ipPlanningUser?.user_id || null,
+        conversation_type: 'one_click'  // 指定對話類型
       })
     });
     
@@ -1093,6 +1134,15 @@ async function generatePositioning() {
       }
     }
     
+    // 記錄長期記憶
+    if (result && ipPlanningUser?.user_id && ipPlanningToken) {
+      try {
+        await recordMode3ConversationMessage('one_click', 'assistant', result, ipPlanningToken, ipPlanningUser);
+      } catch (error) {
+        console.error('記錄長期記憶錯誤:', error);
+      }
+    }
+    
     switchTab('positioning');
     
     // 移除自動儲存功能，改由用戶手動決定是否儲存
@@ -1127,6 +1177,11 @@ async function generateTopics() {
     return;
   }
   
+  // 顯示開始生成通知
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast('⏳ 正在生成選題推薦...', 2000);
+  }
+  
   // 顯示生成中動畫
   showGeneratingAnimation('topicContent', '正在推薦選題');
   document.getElementById('topicActions').style.display = 'flex';
@@ -1156,7 +1211,8 @@ async function generateTopics() {
         style: styleInstruction,
         profile: positioning,
         history: [],
-        user_id: ipPlanningUser?.user_id || null
+        user_id: ipPlanningUser?.user_id || null,
+        conversation_type: 'one_click'  // 指定對話類型
       })
     });
     
@@ -1198,6 +1254,15 @@ async function generateTopics() {
       }
         
       if (generationEnded) break;
+    }
+    
+    // 記錄長期記憶
+    if (result && ipPlanningUser?.user_id && ipPlanningToken) {
+      try {
+        await recordMode3ConversationMessage('one_click', 'assistant', result, ipPlanningToken, ipPlanningUser);
+      } catch (error) {
+        console.error('記錄長期記憶錯誤:', error);
+      }
     }
     
     switchTab('topics');
@@ -1243,6 +1308,11 @@ async function generateScript() {
     return;
   }
   
+  // 顯示開始生成通知
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast('⏳ 正在生成短影音腳本...', 2000);
+  }
+  
   // 顯示生成中動畫
   showGeneratingAnimation('scriptContent', '正在生成腳本');
   document.getElementById('scriptActions').style.display = 'flex';
@@ -1282,10 +1352,11 @@ async function generateScript() {
         duration: durationInput ? (durationInput.value || '30').replace('秒', '') : '30',
         style: styleInstruction,
         profile: positioning,
-        script_structure: selectedScriptStructure, // 傳遞選中的結構
-        history: [],
-        user_id: ipPlanningUser?.user_id || null
-      })
+          script_structure: selectedScriptStructure, // 傳遞選中的結構
+          history: [],
+          user_id: ipPlanningUser?.user_id || null,
+          conversation_type: 'one_click'  // 指定對話類型
+        })
     });
     
     if (!response.ok) {
@@ -1321,6 +1392,15 @@ async function generateScript() {
             console.error('解析錯誤:', e);
           }
         }
+      }
+    }
+    
+    // 記錄長期記憶
+    if (result && ipPlanningUser?.user_id && ipPlanningToken) {
+      try {
+        await recordMode3ConversationMessage('one_click', 'assistant', result, ipPlanningToken, ipPlanningUser);
+      } catch (error) {
+        console.error('記錄長期記憶錯誤:', error);
       }
     }
     
@@ -1427,8 +1507,83 @@ async function saveResult(type) {
         };
         showNotification('❌ 儲存失敗，請稍後再試', 3000);
       }
+    } else if (type === 'topics') {
+      // 儲存選題到 userDB
+      try {
+        const response = await fetch(`${API_URL}/api/user/topics/save`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${ipPlanningToken}`
+          },
+          body: JSON.stringify({
+            user_id: ipPlanningUser.user_id,
+            content: content
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          // 顯示通知（確保一定會顯示）
+          const showNotification = (message, duration = 3000) => {
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+              window.ReelMindCommon.showToast(message, duration);
+            } else {
+              const toastEl = document.getElementById('toast');
+              if (toastEl) {
+                toastEl.textContent = message;
+                toastEl.style.display = 'block';
+                toastEl.style.opacity = '1';
+                setTimeout(() => {
+                  toastEl.style.opacity = '0';
+                  setTimeout(() => {
+                    toastEl.style.display = 'none';
+                  }, 300);
+                }, duration);
+              } else {
+                alert(message);
+              }
+            }
+          };
+          showNotification(`✅ 選題已儲存${data.record_number ? `（編號：${data.record_number}）` : ''}`, 3000);
+        } else {
+          throw new Error('儲存失敗');
+        }
+      } catch (error) {
+        console.error('儲存選題錯誤:', error);
+        // 降級處理：儲存到 localStorage
+        localStorage.setItem(`saved_topics_${Date.now()}`, content);
+        // 顯示通知（確保一定會顯示）
+        const showNotification = (message, duration = 3000) => {
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast(message, duration);
+          } else {
+            const toastEl = document.getElementById('toast');
+            if (toastEl) {
+              toastEl.textContent = message;
+              toastEl.style.display = 'block';
+              toastEl.style.opacity = '1';
+              setTimeout(() => {
+                toastEl.style.opacity = '0';
+                setTimeout(() => {
+                  toastEl.style.display = 'none';
+                }, 300);
+              }, duration);
+            } else {
+              alert(message);
+            }
+          }
+        };
+        showNotification('⚠️ 選題已儲存到本地（伺服器儲存失敗）', 3000);
+      }
+    } else if (type === 'script') {
+      // script 類型應該使用 saveScript() 函數，這裡只是備用處理
+      console.warn('saveResult("script") 被調用，建議使用 saveScript() 函數');
+      // 調用 saveScript() 函數
+      await saveScript();
     } else {
-      localStorage.setItem(`saved_${type}`, content);
+      // 其他類型降級處理：儲存到 localStorage
+      localStorage.setItem(`saved_${type}_${Date.now()}`, content);
       // 顯示通知（確保一定會顯示）
       const showNotification = (message, duration = 3000) => {
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1450,7 +1605,7 @@ async function saveResult(type) {
           }
         }
       };
-      showNotification(`✅ ${type === 'topics' ? '選題' : '腳本'}已儲存`, 2000);
+      showNotification(`✅ ${type}已儲存到本地`, 2000);
     }
   }
 }
@@ -1589,6 +1744,42 @@ async function regenerateResult(type) {
   setTimeout(() => {
     showNotification(`✅ ${typeNames[type]}已重新生成`, 2000);
   }, 500);
+}
+
+// 記錄 Mode3 長期記憶
+async function recordMode3ConversationMessage(conversationType, role, content, token, user) {
+  if (!token || !content) return;
+  
+  try {
+    const user_id = user?.user_id || 
+      (token ? JSON.parse(atob(token.split('.')[1])).user_id : null);
+    
+    if (!user_id) {
+      console.warn('無法獲取 user_id，跳過長期記憶記錄');
+      return;
+    }
+    
+    const session_id = `${conversationType}_${user_id}_${Date.now()}`;
+    
+    await fetch(`${API_URL}/api/memory/long-term`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        conversation_type: conversationType,
+        session_id: session_id,
+        message_role: role,
+        message_content: content,
+        metadata: JSON.stringify({ user_id: user_id })
+      })
+    });
+    
+    console.log('✅ Mode3 長期記憶已記錄:', { conversationType, role, contentLength: content.length });
+  } catch (error) {
+    console.error('記錄 Mode3 長期記憶錯誤:', error);
+  }
 }
 
 // 使用 common.js 中的統一函數（已導出到 window）

@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     
     <!-- Primary SEO Meta Tags -->
     <title>IP人設規劃 - ReelMind AI 短影音智能體 | AI 個人品牌定位 × 14天規劃 × 短影音腳本</title>
@@ -404,9 +404,12 @@
         /* 固定頁面背景，不允許滾動 */
         html, body {
           height: 100vh !important;
+          height: 100dvh !important; /* 使用動態視窗高度（支援 iOS Safari） */
           overflow: hidden !important;
           position: fixed !important;
           width: 100% !important;
+          /* iOS Safari 安全區域 */
+          padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
         }
         
         /* 頂部導航欄手機版 */
@@ -475,7 +478,9 @@
         /* 主內容區域為固定頁首留出空間，固定高度 */
         .mode1-page {
           padding-top: 80px;
+          padding-top: calc(80px + env(safe-area-inset-top, 0px)); /* iOS 安全區域 */
           height: 100vh !important;
+          height: 100dvh !important; /* 使用動態視窗高度（支援 iOS Safari） */
           overflow: hidden !important;
           display: flex !important;
           flex-direction: column !important;
@@ -494,9 +499,11 @@
         #mode1-chatMessages {
           flex: 1;
           overflow-y: auto !important;
+          overflow-y: overlay !important; /* iOS Safari 優化 */
           overflow-x: hidden !important;
-          -webkit-overflow-scrolling: touch;
-          overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
+          overscroll-behavior: contain; /* 防止滾動穿透 */
+          padding-bottom: env(safe-area-inset-bottom, 0px); /* iOS 安全區域 */
         }
       }
       
@@ -614,6 +621,316 @@
       
       .mode1-results-drawer.open {
         right: 0;
+      }
+      
+      /* 一鍵生成 Modal 彈出視窗樣式 */
+      .mode1-oneclick-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        height: 100dvh; /* 使用動態視窗高度（支援 iOS Safari） */
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 10000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        padding: env(safe-area-inset-top, 20px) env(safe-area-inset-right, 20px) env(safe-area-inset-bottom, 20px) env(safe-area-inset-left, 20px);
+        /* iOS Safari 安全區域支援 */
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .mode1-oneclick-modal-overlay.open {
+        opacity: 1;
+        visibility: visible;
+      }
+      
+      .mode1-oneclick-modal {
+        background: white;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 1200px;
+        max-height: 90vh;
+        max-height: 90dvh; /* 使用動態視窗高度（支援 iOS Safari） */
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        /* iOS Safari 安全區域支援 */
+        border-radius: 16px 16px 0 0; /* 手機版底部圓角移除 */
+      }
+      
+      .mode1-oneclick-modal-overlay.open .mode1-oneclick-modal {
+        transform: scale(1);
+      }
+      
+      .mode1-oneclick-modal-header {
+        padding: 24px 32px;
+        border-bottom: 1px solid #e5e7eb;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .mode1-oneclick-modal-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      
+      .mode1-oneclick-modal-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        font-size: 24px;
+        width: 44px; /* iOS 最小觸控目標 44x44px */
+        height: 44px;
+        min-width: 44px; /* 確保最小尺寸 */
+        min-height: 44px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊高亮 */
+        touch-action: manipulation; /* 優化觸控響應 */
+      }
+      
+      .mode1-oneclick-modal-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+      }
+      
+      .mode1-oneclick-modal-content {
+        flex: 1;
+        overflow-y: auto;
+        overflow-y: overlay; /* iOS Safari 優化 */
+        -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
+        overscroll-behavior: contain; /* 防止滾動穿透 */
+        padding: 32px;
+        padding: calc(32px + env(safe-area-inset-top, 0px)) calc(32px + env(safe-area-inset-right, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)) calc(32px + env(safe-area-inset-left, 0px));
+        background: #f8fafc;
+      }
+      
+      .mode1-oneclick-generate-all-btn {
+        width: 100%;
+        padding: 16px 24px;
+        min-height: 48px; /* iOS 最小觸控目標 */
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊高亮 */
+        touch-action: manipulation; /* 優化觸控響應 */
+      }
+      
+      .mode1-oneclick-generate-all-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+      }
+      
+      .mode1-oneclick-generate-all-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+      
+      .mode1-oneclick-results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 24px;
+      }
+      
+      @media (max-width: 768px) {
+        .mode1-oneclick-results-grid {
+          grid-template-columns: 1fr;
+        }
+        
+        .mode1-oneclick-modal-overlay {
+          padding: 0;
+          align-items: flex-end; /* 手機版從底部彈出 */
+        }
+        
+        .mode1-oneclick-modal {
+          max-width: 100%;
+          width: 100%;
+          max-height: 90vh;
+          max-height: 90dvh; /* 使用動態視窗高度 */
+          border-radius: 20px 20px 0 0; /* 手機版頂部圓角 */
+          transform: translateY(100%); /* 初始位置在底部 */
+          transition: transform 0.3s ease;
+        }
+        
+        .mode1-oneclick-modal-overlay.open .mode1-oneclick-modal {
+          transform: translateY(0); /* 打開時滑上來 */
+        }
+        
+        .mode1-oneclick-modal-header {
+          padding: 20px;
+          padding-top: calc(20px + env(safe-area-inset-top, 0px)); /* 安全區域 */
+          border-radius: 20px 20px 0 0;
+        }
+        
+        .mode1-oneclick-modal-content {
+          padding: 16px;
+          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); /* 安全區域 */
+          max-height: calc(90vh - 80px);
+          max-height: calc(90dvh - 80px); /* 減去標題高度 */
+        }
+        
+        .mode1-oneclick-generate-all-btn {
+          padding: 14px 20px;
+          font-size: 16px;
+          margin-bottom: 20px;
+        }
+        
+        .mode1-oneclick-result-card {
+          padding: 16px;
+        }
+        
+        .mode1-oneclick-action-btn {
+          min-height: 44px; /* iOS 最小觸控目標 */
+          padding: 12px 16px;
+          font-size: 14px;
+        }
+      }
+      
+      .mode1-oneclick-result-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s ease;
+      }
+      
+      .mode1-oneclick-result-card.generating {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+      }
+      
+      .mode1-oneclick-result-card.completed {
+        border-color: #10b981;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+      }
+      
+      .mode1-oneclick-result-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #f3f4f6;
+      }
+      
+      .mode1-oneclick-result-card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .mode1-oneclick-result-status {
+        font-size: 12px;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-weight: 500;
+      }
+      
+      .mode1-oneclick-result-status.pending {
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+      
+      .mode1-oneclick-result-status.generating {
+        background: #dbeafe;
+        color: #2563eb;
+      }
+      
+      .mode1-oneclick-result-status.completed {
+        background: #d1fae5;
+        color: #059669;
+      }
+      
+      .mode1-oneclick-result-status.error {
+        background: #fee2e2;
+        color: #dc2626;
+      }
+      
+      .mode1-oneclick-result-content {
+        min-height: 200px;
+        color: #6b7280;
+        line-height: 1.6;
+      }
+      
+      .mode1-oneclick-result-content.has-content {
+        color: #1f2937;
+      }
+      
+      .mode1-oneclick-result-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e5e7eb;
+      }
+      
+      .mode1-oneclick-action-btn {
+        flex: 1;
+        padding: 10px 16px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: white;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      
+      .mode1-oneclick-action-btn:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+      }
+      
+      .mode1-oneclick-action-btn.save {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+      }
+      
+      .mode1-oneclick-action-btn.save:hover {
+        background: #059669;
+        border-color: #059669;
       }
       
       .mode1-instructions-drawer-header, .mode1-results-drawer-header {
@@ -1157,26 +1474,52 @@
         #mode1-chatMessages {
           padding: 16px 12px;
           padding-top: 80px;
+          padding-top: calc(80px + env(safe-area-inset-top, 0px)); /* iOS 安全區域 */
+          padding-left: calc(12px + env(safe-area-inset-left, 0px)); /* iOS 安全區域 */
+          padding-right: calc(12px + env(safe-area-inset-right, 0px)); /* iOS 安全區域 */
+          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); /* iOS 安全區域 */
         }
         
         #mode1-chatMessages .message.user .message-content {
           padding: 15px 20px !important;
           padding-left: 30px !important;
           font-size: 14px !important;
+          max-width: 85%; /* 確保在小螢幕上不會太寬 */
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
         }
         
-        #mode3-chatMessages .message.ai .message-content,
-        #mode3-chatMessages .message.assistant .message-content {
+        #mode1-chatMessages .message.ai .message-content,
+        #mode1-chatMessages .message.assistant .message-content {
           padding: 15px 20px !important;
           font-size: 14px !important;
+          max-width: 85%; /* 確保在小螢幕上不會太寬 */
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
         }
         
-        #mode3-chatMessages .message.user .message-avatar,
-        #mode3-chatMessages .message.ai .message-avatar,
-        #mode3-chatMessages .message.assistant .message-avatar {
-          width: 28px !important;
-          height: 28px !important;
+        #mode1-chatMessages .message.user .message-avatar,
+        #mode1-chatMessages .message.ai .message-avatar,
+        #mode1-chatMessages .message.assistant .message-avatar {
+          width: 32px !important; /* 稍微增大以符合觸控目標 */
+          height: 32px !important;
+          min-width: 32px !important;
+          min-height: 32px !important;
           font-size: 14px !important;
+        }
+        
+        /* 優化對話框在 iOS Safari 的顯示 */
+        #mode1-chatMessages .message {
+          margin-bottom: 20px !important; /* 增加間距，提升可讀性 */
+        }
+        
+        /* 優化表格在手機版的顯示 */
+        #mode1-chatMessages table {
+          font-size: 12px !important;
+          display: block !important;
+          overflow-x: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+          width: 100% !important;
         }
       }
       
@@ -1225,6 +1568,9 @@
         padding: 12px;
         gap: 8px;
         transition: background-color 0.3s ease, border-color 0.3s ease;
+        /* iOS Safari 優化 */
+        -webkit-appearance: none;
+        appearance: none;
       }
       
       .input-wrapper:focus-within {
@@ -1246,12 +1592,16 @@
         border: none;
         border-radius: 0;
         padding: 0;
-        font-size: 14px;
+        font-size: 16px; /* iOS Safari 建議至少 16px 避免自動縮放 */
         background: transparent;
         resize: none;
         overflow-y: auto;
         line-height: 1.5;
         outline: none;
+        /* iOS Safari 優化 */
+        -webkit-appearance: none;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
       }
       
       .chat-input:focus {
@@ -1261,6 +1611,7 @@
       .send-btn {
         height: 44px;
         min-width: 44px;
+        min-height: 44px; /* iOS 最小觸控目標 */
         border-radius: 10px;
         background: #3b82f6;
         color: #ffffff;
@@ -1271,6 +1622,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊高亮 */
+        touch-action: manipulation; /* 優化觸控響應 */
       }
       
       .send-btn:hover:not(:disabled) {
@@ -1326,10 +1679,17 @@
         /* 輸入區域手機版 */
         .input-row {
           padding: 8px 12px 16px 12px !important;
+          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important; /* iOS 安全區域 */
         }
         
         .mode1-page .input-row {
           padding: 10px 12px 16px 12px !important;
+          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important; /* iOS 安全區域 */
+        }
+        
+        /* iOS Safari 鍵盤彈出時調整 */
+        .input-row:focus-within {
+          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px) + 20px) !important;
         }
         
         /* 快速按鈕手機版：並排不換行，節省空間 */
@@ -1343,30 +1703,42 @@
         .quick-btn {
           flex: 1 1 auto !important; /* 平均分配空間 */
           min-width: 0 !important; /* 允許縮小 */
-          padding: 6px 8px !important; /* 減少 padding 節省空間 */
-          font-size: 12px !important; /* 稍微減小字體 */
+          min-height: 44px !important; /* iOS 最小觸控目標 */
+          padding: 8px 12px !important; /* 增加 padding 確保觸控目標 */
+          font-size: 13px !important; /* 稍微減小字體 */
           white-space: nowrap !important; /* 文字不換行 */
           overflow: hidden !important; /* 隱藏溢出文字 */
           text-overflow: ellipsis !important; /* 溢出顯示省略號 */
+          -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊高亮 */
+          touch-action: manipulation; /* 優化觸控響應 */
         }
         .mode1-instructions-drawer, .mode1-results-drawer {
           width: 100%;
           right: -100%;
+          padding-top: env(safe-area-inset-top, 0px); /* iOS 安全區域 */
+          padding-bottom: env(safe-area-inset-bottom, 0px); /* iOS 安全區域 */
         }
         
         .mode1-instructions-btn-container {
           top: 80px;
+          top: calc(80px + env(safe-area-inset-top, 0px)); /* iOS 安全區域 */
           left: 15px;
+          left: calc(15px + env(safe-area-inset-left, 0px)); /* iOS 安全區域 */
         }
         
         .mode1-results-btn-container {
           top: 80px;
+          top: calc(80px + env(safe-area-inset-top, 0px)); /* iOS 安全區域 */
           left: 80px;
+          left: calc(80px + env(safe-area-inset-left, 0px)); /* iOS 安全區域 */
         }
         
         .mode1-instructions-btn, .mode1-results-btn {
-          padding: 10px 12px;
+          padding: 12px 16px; /* 增加 padding 確保觸控目標 */
+          min-height: 44px; /* iOS 最小觸控目標 */
           font-size: 13px;
+          -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊高亮 */
+          touch-action: manipulation; /* 優化觸控響應 */
         }
         
         .mode1-instructions-text, .mode1-results-text {
@@ -1457,8 +1829,8 @@
       
       <!-- 一鍵生成按鈕 -->
       <div class="mode1-results-btn-container">
-        <button class="mode1-results-btn" onclick="toggleMode1ResultsDrawer()">
-          <span class="mode1-results-icon">📊</span>
+        <button class="mode1-results-btn" onclick="openMode1OneClickModal()">
+          <span class="mode1-results-icon">⚡</span>
           <span class="mode1-results-text">一鍵生成</span>
         </button>
       </div>
@@ -1623,6 +1995,99 @@
           <button class="mode1-action-btn" onclick="exportMode1Result()" title="匯出結果">
             <span>📤</span> 匯出結果
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 一鍵生成 Modal 彈出視窗 -->
+    <div class="mode1-oneclick-modal-overlay" id="mode1OneClickModalOverlay" onclick="if(event.target === this) closeMode1OneClickModal()">
+      <div class="mode1-oneclick-modal" onclick="event.stopPropagation()">
+        <div class="mode1-oneclick-modal-header">
+          <h2>
+            <span>⚡</span>
+            <span>一鍵生成全部內容</span>
+          </h2>
+          <button class="mode1-oneclick-modal-close" onclick="closeMode1OneClickModal()">✕</button>
+        </div>
+        <div class="mode1-oneclick-modal-content">
+          <button class="mode1-oneclick-generate-all-btn" id="mode1OneClickGenerateAllBtn" onclick="generateMode1All()">
+            <span>🚀</span>
+            <span>一鍵生成全部（帳號定位 + 選題方向 + 一週腳本）</span>
+          </button>
+          
+          <div class="mode1-oneclick-results-grid">
+            <!-- 帳號定位卡片 -->
+            <div class="mode1-oneclick-result-card" id="mode1OneClickPositioningCard">
+              <div class="mode1-oneclick-result-card-header">
+                <div class="mode1-oneclick-result-card-title">
+                  <span>🎯</span>
+                  <span>帳號定位</span>
+                </div>
+                <span class="mode1-oneclick-result-status pending" id="mode1OneClickPositioningStatus">待生成</span>
+              </div>
+              <div class="mode1-oneclick-result-content" id="mode1OneClickPositioningContent">
+                <p style="text-align: center; color: #9ca3af; padding: 40px 0;">點擊上方按鈕開始生成</p>
+              </div>
+              <div class="mode1-oneclick-result-actions" id="mode1OneClickPositioningActions" style="display: none;">
+                <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('positioning')">
+                  <span>💾</span>
+                  <span>儲存</span>
+                </button>
+                <button class="mode1-oneclick-action-btn" onclick="regenerateMode1OneClickResult('positioning')">
+                  <span>🔄</span>
+                  <span>重新生成</span>
+                </button>
+              </div>
+            </div>
+            
+            <!-- 選題方向卡片 -->
+            <div class="mode1-oneclick-result-card" id="mode1OneClickTopicsCard">
+              <div class="mode1-oneclick-result-card-header">
+                <div class="mode1-oneclick-result-card-title">
+                  <span>📊</span>
+                  <span>選題方向（影片類型配比）</span>
+                </div>
+                <span class="mode1-oneclick-result-status pending" id="mode1OneClickTopicsStatus">待生成</span>
+              </div>
+              <div class="mode1-oneclick-result-content" id="mode1OneClickTopicsContent">
+                <p style="text-align: center; color: #9ca3af; padding: 40px 0;">點擊上方按鈕開始生成</p>
+              </div>
+              <div class="mode1-oneclick-result-actions" id="mode1OneClickTopicsActions" style="display: none;">
+                <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('topics')">
+                  <span>💾</span>
+                  <span>儲存</span>
+                </button>
+                <button class="mode1-oneclick-action-btn" onclick="regenerateMode1OneClickResult('topics')">
+                  <span>🔄</span>
+                  <span>重新生成</span>
+                </button>
+              </div>
+            </div>
+            
+            <!-- 一週腳本卡片 -->
+            <div class="mode1-oneclick-result-card" id="mode1OneClickWeeklyCard">
+              <div class="mode1-oneclick-result-card-header">
+                <div class="mode1-oneclick-result-card-title">
+                  <span>📝</span>
+                  <span>一週腳本</span>
+                </div>
+                <span class="mode1-oneclick-result-status pending" id="mode1OneClickWeeklyStatus">待生成</span>
+              </div>
+              <div class="mode1-oneclick-result-content" id="mode1OneClickWeeklyContent">
+                <p style="text-align: center; color: #9ca3af; padding: 40px 0;">點擊上方按鈕開始生成</p>
+              </div>
+              <div class="mode1-oneclick-result-actions" id="mode1OneClickWeeklyActions" style="display: none;">
+                <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('weekly')">
+                  <span>💾</span>
+                  <span>儲存</span>
+                </button>
+                <button class="mode1-oneclick-action-btn" onclick="regenerateMode1OneClickResult('weekly')">
+                  <span>🔄</span>
+                  <span>重新生成</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

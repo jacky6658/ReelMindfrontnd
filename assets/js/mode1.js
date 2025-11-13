@@ -10,9 +10,29 @@ let isMode1Sending = false;
 let mode1ChatInitialized = false;
 let currentMode1ConversationType = 'ip_planning';
 
+// iOS Safari 視窗高度處理（解決 100vh 問題）
+function setIOSViewportHeight() {
+  // 設置 CSS 變數來處理 iOS Safari 的動態視窗高度
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+  
+  // 為 Modal 設置動態高度
+  const modalOverlay = document.getElementById('mode1OneClickModalOverlay');
+  if (modalOverlay) {
+    modalOverlay.style.height = `${window.innerHeight}px`;
+  }
+}
+
 // 頁面初始化
 document.addEventListener('DOMContentLoaded', async function() {
   console.log('🚀 ========== Mode1 (IP人設規劃) 頁面初始化 ==========');
+  
+  // iOS Safari 視窗高度處理
+  setIOSViewportHeight();
+  window.addEventListener('resize', setIOSViewportHeight);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(setIOSViewportHeight, 100); // 延遲執行以確保方向改變完成
+  });
   
   // 載入用戶資訊
   if (window.Auth && window.Auth.getToken()) {
@@ -750,6 +770,11 @@ async function generateMode1Positioning() {
   button.disabled = true;
   button.innerHTML = '<span>⏳</span> 生成中...';
   
+  // 顯示開始生成通知
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast('⏳ 正在生成帳號定位...', 2000);
+  }
+  
   // 清空之前的內容，但保留按鈕結構
   const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
   if (placeholder) {
@@ -952,6 +977,11 @@ async function generateMode1TopicsWithRatio() {
   button.disabled = true;
   button.innerHTML = '<span>⏳</span> 生成中...';
   
+  // 顯示開始生成通知
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast('⏳ 正在生成選題方向...', 2000);
+  }
+  
   // 清空之前的內容，但保留按鈕結構
   const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
   if (placeholder) {
@@ -1153,6 +1183,11 @@ async function generateMode1WeeklyScripts() {
   
   button.disabled = true;
   button.innerHTML = '<span>⏳</span> 生成中...';
+  
+  // 顯示開始生成通知
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast('⏳ 正在生成一週腳本...', 2000);
+  }
   
   // 清空之前的內容，但保留按鈕結構
   const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
@@ -1623,6 +1658,450 @@ function exportMode1Result() {
     console.error('匯出失敗:', error);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('匯出失敗，請稍後再試', 3000);
+    }
+  }
+}
+
+// 一鍵生成 Modal 控制函數
+function openMode1OneClickModal() {
+  const overlay = document.getElementById('mode1OneClickModalOverlay');
+  if (overlay) {
+    // 更新視窗高度（處理 iOS Safari）
+    setIOSViewportHeight();
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    // 防止背景滾動（iOS Safari）
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+  }
+}
+
+function closeMode1OneClickModal() {
+  const overlay = document.getElementById('mode1OneClickModalOverlay');
+  if (overlay) {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    // 恢復背景滾動（iOS Safari）
+    document.body.style.position = '';
+    document.body.style.width = '';
+  }
+}
+
+// 更新一鍵生成結果卡片狀態
+function updateMode1OneClickStatus(type, status, message = '') {
+  const statusMap = {
+    'positioning': {
+      statusEl: document.getElementById('mode1OneClickPositioningStatus'),
+      contentEl: document.getElementById('mode1OneClickPositioningContent'),
+      cardEl: document.getElementById('mode1OneClickPositioningCard'),
+      actionsEl: document.getElementById('mode1OneClickPositioningActions')
+    },
+    'topics': {
+      statusEl: document.getElementById('mode1OneClickTopicsStatus'),
+      contentEl: document.getElementById('mode1OneClickTopicsContent'),
+      cardEl: document.getElementById('mode1OneClickTopicsCard'),
+      actionsEl: document.getElementById('mode1OneClickTopicsActions')
+    },
+    'weekly': {
+      statusEl: document.getElementById('mode1OneClickWeeklyStatus'),
+      contentEl: document.getElementById('mode1OneClickWeeklyContent'),
+      cardEl: document.getElementById('mode1OneClickWeeklyCard'),
+      actionsEl: document.getElementById('mode1OneClickWeeklyActions')
+    }
+  };
+  
+  const elements = statusMap[type];
+  if (!elements) return;
+  
+  // 更新狀態標籤
+  if (elements.statusEl) {
+    elements.statusEl.className = 'mode1-oneclick-result-status ' + status;
+    const statusText = {
+      'pending': '待生成',
+      'generating': '生成中...',
+      'completed': '已完成',
+      'error': '生成失敗'
+    };
+    elements.statusEl.textContent = statusText[status] || status;
+  }
+  
+  // 更新卡片樣式
+  if (elements.cardEl) {
+    elements.cardEl.classList.remove('generating', 'completed');
+    if (status === 'generating') {
+      elements.cardEl.classList.add('generating');
+    } else if (status === 'completed') {
+      elements.cardEl.classList.add('completed');
+    }
+  }
+  
+  // 更新內容
+  if (elements.contentEl && message) {
+    if (status === 'generating') {
+      elements.contentEl.innerHTML = `
+        <div class="generating-container">
+          <div class="generating-spinner"></div>
+          <div class="generating-text">${message}<span class="generating-dots"></span></div>
+        </div>
+      `;
+    } else if (status === 'completed') {
+      elements.contentEl.innerHTML = renderMode1Markdown(message);
+      elements.contentEl.classList.add('has-content');
+      if (elements.actionsEl) {
+        elements.actionsEl.style.display = 'flex';
+      }
+    } else if (status === 'error') {
+      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
+        if (text == null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+      });
+      elements.contentEl.innerHTML = `<div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px;">${escapeHtml(message)}</div>`;
+    }
+  }
+}
+
+// 一鍵生成全部內容
+async function generateMode1All() {
+  const generateBtn = document.getElementById('mode1OneClickGenerateAllBtn');
+  if (!generateBtn) return;
+  
+  generateBtn.disabled = true;
+  generateBtn.innerHTML = '<span>⏳</span> <span>正在生成中，請稍候...</span>';
+  
+  // 顯示開始生成通知
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast('⏳ 正在一鍵生成全部內容...', 2000);
+  }
+  
+  // 重置所有卡片狀態
+  updateMode1OneClickStatus('positioning', 'generating', '正在生成帳號定位');
+  updateMode1OneClickStatus('topics', 'generating', '正在生成選題方向');
+  updateMode1OneClickStatus('weekly', 'generating', '正在生成一週腳本');
+  
+  try {
+    // 同時發起三個生成請求
+    const [positioningResult, topicsResult, weeklyResult] = await Promise.allSettled([
+      generateMode1PositioningForOneClick(),
+      generateMode1TopicsForOneClick(),
+      generateMode1WeeklyForOneClick()
+    ]);
+    
+    // 處理帳號定位結果
+    if (positioningResult.status === 'fulfilled') {
+      updateMode1OneClickStatus('positioning', 'completed', positioningResult.value);
+    } else {
+      updateMode1OneClickStatus('positioning', 'error', positioningResult.reason?.message || '生成失敗');
+    }
+    
+    // 處理選題方向結果
+    if (topicsResult.status === 'fulfilled') {
+      updateMode1OneClickStatus('topics', 'completed', topicsResult.value);
+    } else {
+      updateMode1OneClickStatus('topics', 'error', topicsResult.reason?.message || '生成失敗');
+    }
+    
+    // 處理一週腳本結果
+    if (weeklyResult.status === 'fulfilled') {
+      updateMode1OneClickStatus('weekly', 'completed', weeklyResult.value);
+    } else {
+      updateMode1OneClickStatus('weekly', 'error', weeklyResult.reason?.message || '生成失敗');
+    }
+    
+    // 顯示完成通知
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('✅ 一鍵生成完成！', 3000);
+    }
+    
+  } catch (error) {
+    console.error('一鍵生成失敗:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('❌ 生成過程中發生錯誤', 3000);
+    }
+  } finally {
+    generateBtn.disabled = false;
+    generateBtn.innerHTML = '<span>🚀</span> <span>一鍵生成全部（帳號定位 + 選題方向 + 一週腳本）</span>';
+  }
+}
+
+// 為一鍵生成優化的生成函數（返回 Promise 和內容）
+async function generateMode1PositioningForOneClick() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch(`${API_URL}/api/chat/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ipPlanningToken}`
+        },
+        body: JSON.stringify({
+          message: '請根據我們的對話內容，生成帳號定位分析。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。內容包含：1.**目標受眾**：清楚說明目標受眾是誰 2.**傳達目標**：說明想要達成的目標（例如：進群、portally、建立品牌等） 3.**帳號定位**：用一句話清楚說明帳號定位 4.**內容方向**：描述主要內容方向 5.**風格調性**：說明帳號的風格和調性 6.**差異化優勢**：說明與其他帳號的差異化優勢',
+          user_id: ipPlanningUser?.user_id || 'anonymous',
+          platform: '短影音平台',
+          profile: 'IP人設規劃專家',
+          topic: '帳號定位生成',
+          style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，不要程式碼或技術格式',
+          duration: '30',
+          conversation_type: 'ip_planning'
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let content = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+            
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content) {
+                content += parsed.content;
+              }
+            } catch (e) {
+              // 忽略解析錯誤
+            }
+          }
+        }
+      }
+      
+      if (!content) {
+        throw new Error('未收到任何內容');
+      }
+      
+      resolve(content);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+async function generateMode1TopicsForOneClick() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch(`${API_URL}/api/chat/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ipPlanningToken}`
+        },
+        body: JSON.stringify({
+          message: '請根據我們的對話內容和帳號定位，生成選題方向和影片類型配比建議。請參考知識庫中的「內容策略矩陣」，理解其邏輯而非記憶範例。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現選題方向和配比**，表格欄位包含：影片類型、佔比、目的、內容方向。請根據用戶的帳號定位、目標受眾、傳達目標來判斷適合的內容類型和配比，不要使用固定配比。如果用戶的主題不符合範例類別，請根據邏輯自創新類型並合理配置比例。',
+          user_id: ipPlanningUser?.user_id || 'anonymous',
+          platform: '短影音平台',
+          profile: 'IP人設規劃專家',
+          topic: '選題方向生成',
+          style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現選題方向和配比',
+          duration: '30',
+          conversation_type: 'ip_planning'
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let content = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+            
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content) {
+                content += parsed.content;
+              }
+            } catch (e) {
+              // 忽略解析錯誤
+            }
+          }
+        }
+      }
+      
+      if (!content) {
+        throw new Error('未收到任何內容');
+      }
+      
+      resolve(content);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+async function generateMode1WeeklyForOneClick() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch(`${API_URL}/api/chat/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ipPlanningToken}`
+        },
+        body: JSON.stringify({
+          message: '請根據我們的對話內容、帳號定位和選題方向，生成一週的短影音腳本。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現一週腳本**，表格欄位包含：日期、主題、時間、段落、台詞、畫面描述、字幕文字、音效與轉場。每支腳本請包含：1.**主題標題**：用一句話清楚說明這支影片的主題 2.**開場鉤子**：用自然語言寫出吸引人的開場，讓觀眾想繼續看下去 3.**核心內容**：用2-3句自然語言說明影片要傳達的價值 4.**行動呼籲**：用一句話引導觀眾採取行動 5.**畫面描述**：用簡短易懂的句子描述畫面應該呈現什麼 6.**發佈文案**：寫一段適合社群媒體的文案。請確保表格格式正確，使用 Markdown 表格語法（| 欄位1 | 欄位2 | ... |）。',
+          user_id: ipPlanningUser?.user_id || 'anonymous',
+          platform: '短影音平台',
+          profile: 'IP人設規劃專家',
+          topic: '一週腳本生成',
+          style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現一週腳本',
+          duration: '30',
+          conversation_type: 'ip_planning'
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let content = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+            
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content) {
+                content += parsed.content;
+              }
+            } catch (e) {
+              // 忽略解析錯誤
+            }
+          }
+        }
+      }
+      
+      if (!content) {
+        throw new Error('未收到任何內容');
+      }
+      
+      resolve(content);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// 儲存一鍵生成結果
+async function saveMode1OneClickResult(type) {
+  const contentEl = document.getElementById(`mode1OneClick${type === 'positioning' ? 'Positioning' : type === 'topics' ? 'Topics' : 'Weekly'}Content`);
+  if (!contentEl || !contentEl.innerHTML.trim()) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('沒有可儲存的內容', 3000);
+    }
+    return;
+  }
+  
+  // 使用現有的儲存函數，但需要映射類型
+  const resultTypeMap = {
+    'positioning': 'profile',
+    'topics': 'plan',
+    'weekly': 'scripts'
+  };
+  
+  // 臨時設置活動標籤和結果區塊，然後調用儲存函數
+  const originalTab = document.querySelector('.mode1-tab.active');
+  const originalBlock = document.querySelector('.mode1-result-block.active');
+  
+  // 設置對應的標籤和區塊
+  const tabs = document.querySelectorAll('.mode1-tab');
+  tabs.forEach(tab => {
+    tab.classList.remove('active');
+    const tabText = tab.textContent;
+    if ((type === 'positioning' && tabText.includes('帳號定位')) ||
+        (type === 'topics' && tabText.includes('選題方向')) ||
+        (type === 'weekly' && tabText.includes('一週腳本'))) {
+      tab.classList.add('active');
+    }
+  });
+  
+  const blocks = document.querySelectorAll('.mode1-result-block');
+  blocks.forEach(block => {
+    block.classList.remove('active');
+  });
+  
+  const targetBlock = document.getElementById(`mode1-${type}-result`);
+  if (targetBlock) {
+    targetBlock.classList.add('active');
+    const contentDiv = targetBlock.querySelector('.mode1-result-content');
+    if (contentDiv) {
+      contentDiv.innerHTML = contentEl.innerHTML;
+    }
+  }
+  
+  // 調用儲存函數
+  await saveMode1Result();
+  
+  // 恢復原始狀態
+  if (originalTab) originalTab.classList.add('active');
+  if (originalBlock) originalBlock.classList.add('active');
+}
+
+// 重新生成一鍵生成結果
+async function regenerateMode1OneClickResult(type) {
+  updateMode1OneClickStatus(type, 'generating', `正在重新生成${type === 'positioning' ? '帳號定位' : type === 'topics' ? '選題方向' : '一週腳本'}`);
+  
+  try {
+    let result;
+    if (type === 'positioning') {
+      result = await generateMode1PositioningForOneClick();
+    } else if (type === 'topics') {
+      result = await generateMode1TopicsForOneClick();
+    } else if (type === 'weekly') {
+      result = await generateMode1WeeklyForOneClick();
+    }
+    
+    updateMode1OneClickStatus(type, 'completed', result);
+    
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast(`✅ ${type === 'positioning' ? '帳號定位' : type === 'topics' ? '選題方向' : '一週腳本'}已重新生成`, 3000);
+    }
+  } catch (error) {
+    updateMode1OneClickStatus(type, 'error', error.message || '生成失敗');
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast(`❌ 重新生成失敗`, 3000);
     }
   }
 }
