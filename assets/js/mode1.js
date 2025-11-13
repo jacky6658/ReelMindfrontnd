@@ -673,6 +673,21 @@ async function generateMode3Positioning() {
   button.disabled = true;
   button.innerHTML = '<span>⏳</span> 生成中...';
   
+  // 清空之前的內容，但保留按鈕結構
+  const placeholder = resultBlock.querySelector('.mode3-result-placeholder');
+  if (placeholder) {
+    placeholder.style.display = 'none';
+  }
+  
+  // 創建或獲取內容容器
+  let contentDiv = resultBlock.querySelector('.mode3-result-content');
+  if (!contentDiv) {
+    contentDiv = document.createElement('div');
+    contentDiv.className = 'mode3-result-content';
+    resultBlock.appendChild(contentDiv);
+  }
+  contentDiv.innerHTML = '<p>正在生成帳號定位...</p>';
+  
   try {
     const response = await fetch(`${API_URL}/api/chat/stream`, {
       method: 'POST',
@@ -692,46 +707,79 @@ async function generateMode3Positioning() {
       })
     });
     
-    if (response.ok) {
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let content = '';
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let content = '';
+    let hasReceivedContent = false;
+    
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
       
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') continue;
-            
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content) {
-                content += parsed.content;
-              }
-            } catch (e) {
-              // 忽略解析錯誤
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
+          if (data === '[DONE]') continue;
+          
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.type === 'token' && parsed.content) {
+              content += parsed.content;
+              hasReceivedContent = true;
+              const renderedContent = renderMode3Markdown(content);
+              contentDiv.innerHTML = renderedContent;
+            } else if (parsed.type === 'error') {
+              throw new Error(parsed.message || parsed.content || '生成失敗');
+            } else if (parsed.content) {
+              content += parsed.content;
+              hasReceivedContent = true;
+              const renderedContent = renderMode3Markdown(content);
+              contentDiv.innerHTML = renderedContent;
             }
+          } catch (e) {
+            if (e.message && e.message.includes('生成失敗')) {
+              throw e;
+            }
+            console.warn('解析 JSON 錯誤:', e, '原始數據:', data);
           }
         }
       }
-      
-      const renderedContent = renderMode3Markdown(content);
-      resultBlock.innerHTML = `<div class="mode3-result-content">${renderedContent}</div>`;
-      button.innerHTML = '<span>🚀</span> 重新生成';
-      button.disabled = false;
-    } else {
-      throw new Error('生成失敗');
+    }
+    
+    if (!hasReceivedContent) {
+      throw new Error('未收到任何內容，請重試');
+    }
+    
+    // 確保按鈕存在才更新
+    const finalButton = resultBlock.querySelector('.mode3-generate-btn');
+    if (finalButton) {
+      finalButton.innerHTML = '<span>🚀</span> 重新生成';
+      finalButton.disabled = false;
     }
   } catch (error) {
     console.error('生成帳號定位失敗:', error);
-    button.innerHTML = '<span>❌</span> 生成失敗，請重試';
-    button.disabled = false;
+    if (contentDiv) {
+      contentDiv.innerHTML = `<p style="color: #dc2626;">生成失敗：${escapeHtml(error.message || '未知錯誤')}</p><p>請檢查網路連線或稍後再試。</p>`;
+    }
+    const errorButton = resultBlock.querySelector('.mode3-generate-btn');
+    if (errorButton) {
+      errorButton.innerHTML = '<span>❌</span> 生成失敗，請重試';
+      errorButton.disabled = false;
+    } else {
+      const placeholder = resultBlock.querySelector('.mode3-result-placeholder');
+      if (placeholder) {
+        placeholder.style.display = 'block';
+      }
+    }
   }
 }
 
@@ -756,6 +804,21 @@ async function generateMode3TopicsWithRatio() {
   button.disabled = true;
   button.innerHTML = '<span>⏳</span> 生成中...';
   
+  // 清空之前的內容，但保留按鈕結構
+  const placeholder = resultBlock.querySelector('.mode3-result-placeholder');
+  if (placeholder) {
+    placeholder.style.display = 'none';
+  }
+  
+  // 創建或獲取內容容器
+  let contentDiv = resultBlock.querySelector('.mode3-result-content');
+  if (!contentDiv) {
+    contentDiv = document.createElement('div');
+    contentDiv.className = 'mode3-result-content';
+    resultBlock.appendChild(contentDiv);
+  }
+  contentDiv.innerHTML = '<p>正在生成選題方向...</p>';
+  
   try {
     const response = await fetch(`${API_URL}/api/chat/stream`, {
       method: 'POST',
@@ -775,46 +838,79 @@ async function generateMode3TopicsWithRatio() {
       })
     });
     
-    if (response.ok) {
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let content = '';
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let content = '';
+    let hasReceivedContent = false;
+    
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
       
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') continue;
-            
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content) {
-                content += parsed.content;
-              }
-            } catch (e) {
-              // 忽略解析錯誤
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
+          if (data === '[DONE]') continue;
+          
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.type === 'token' && parsed.content) {
+              content += parsed.content;
+              hasReceivedContent = true;
+              const renderedContent = renderMode3Markdown(content);
+              contentDiv.innerHTML = renderedContent;
+            } else if (parsed.type === 'error') {
+              throw new Error(parsed.message || parsed.content || '生成失敗');
+            } else if (parsed.content) {
+              content += parsed.content;
+              hasReceivedContent = true;
+              const renderedContent = renderMode3Markdown(content);
+              contentDiv.innerHTML = renderedContent;
             }
+          } catch (e) {
+            if (e.message && e.message.includes('生成失敗')) {
+              throw e;
+            }
+            console.warn('解析 JSON 錯誤:', e, '原始數據:', data);
           }
         }
       }
-      
-      const renderedContent = renderMode3Markdown(content);
-      resultBlock.innerHTML = `<div class="mode3-result-content">${renderedContent}</div>`;
-      button.innerHTML = '<span>🚀</span> 重新生成';
-      button.disabled = false;
-    } else {
-      throw new Error('生成失敗');
+    }
+    
+    if (!hasReceivedContent) {
+      throw new Error('未收到任何內容，請重試');
+    }
+    
+    // 確保按鈕存在才更新
+    const finalButton = resultBlock.querySelector('.mode3-generate-btn');
+    if (finalButton) {
+      finalButton.innerHTML = '<span>🚀</span> 重新生成';
+      finalButton.disabled = false;
     }
   } catch (error) {
     console.error('生成選題方向失敗:', error);
-    button.innerHTML = '<span>❌</span> 生成失敗，請重試';
-    button.disabled = false;
+    if (contentDiv) {
+      contentDiv.innerHTML = `<p style="color: #dc2626;">生成失敗：${escapeHtml(error.message || '未知錯誤')}</p><p>請檢查網路連線或稍後再試。</p>`;
+    }
+    const errorButton = resultBlock.querySelector('.mode3-generate-btn');
+    if (errorButton) {
+      errorButton.innerHTML = '<span>❌</span> 生成失敗，請重試';
+      errorButton.disabled = false;
+    } else {
+      const placeholder = resultBlock.querySelector('.mode3-result-placeholder');
+      if (placeholder) {
+        placeholder.style.display = 'block';
+      }
+    }
   }
 }
 
@@ -839,9 +935,20 @@ async function generateMode3WeeklyScripts() {
   button.disabled = true;
   button.innerHTML = '<span>⏳</span> 生成中...';
   
-  // 清空之前的內容
-  resultBlock.innerHTML = '<div class="mode3-result-content"><p>正在生成腳本...</p></div>';
-  const contentDiv = resultBlock.querySelector('.mode3-result-content');
+  // 清空之前的內容，但保留按鈕結構
+  const placeholder = resultBlock.querySelector('.mode3-result-placeholder');
+  if (placeholder) {
+    placeholder.style.display = 'none';
+  }
+  
+  // 創建或獲取內容容器
+  let contentDiv = resultBlock.querySelector('.mode3-result-content');
+  if (!contentDiv) {
+    contentDiv = document.createElement('div');
+    contentDiv.className = 'mode3-result-content';
+    resultBlock.appendChild(contentDiv);
+  }
+  contentDiv.innerHTML = '<p>正在生成腳本...</p>';
   
   try {
     const response = await fetch(`${API_URL}/api/chat/stream`, {
@@ -903,7 +1010,7 @@ async function generateMode3WeeklyScripts() {
               console.log('✅ 收到 end 標記');
               break;
             } else if (parsed.type === 'error') {
-              throw new Error(parsed.content || '生成失敗');
+              throw new Error(parsed.message || parsed.content || '生成失敗');
             } else if (parsed.content) {
               // 兼容舊格式
               fullContent += parsed.content;
@@ -928,13 +1035,29 @@ async function generateMode3WeeklyScripts() {
       throw new Error('未收到任何內容，請重試');
     }
     
-    button.innerHTML = '<span>🚀</span> 重新生成';
-    button.disabled = false;
+    // 確保按鈕存在才更新
+    const finalButton = resultBlock.querySelector('.mode3-generate-btn');
+    if (finalButton) {
+      finalButton.innerHTML = '<span>🚀</span> 重新生成';
+      finalButton.disabled = false;
+    }
   } catch (error) {
     console.error('❌ 生成一週腳本失敗:', error);
-    contentDiv.innerHTML = `<p style="color: #dc2626;">生成失敗：${escapeHtml(error.message || '未知錯誤')}</p><p>請檢查網路連線或稍後再試。</p>`;
-    button.innerHTML = '<span>❌</span> 生成失敗，請重試';
-    button.disabled = false;
+    if (contentDiv) {
+      contentDiv.innerHTML = `<p style="color: #dc2626;">生成失敗：${escapeHtml(error.message || '未知錯誤')}</p><p>請檢查網路連線或稍後再試。</p>`;
+    }
+    // 確保按鈕存在才更新
+    const errorButton = resultBlock.querySelector('.mode3-generate-btn');
+    if (errorButton) {
+      errorButton.innerHTML = '<span>❌</span> 生成失敗，請重試';
+      errorButton.disabled = false;
+    } else {
+      // 如果按鈕不存在，重新顯示 placeholder
+      const placeholder = resultBlock.querySelector('.mode3-result-placeholder');
+      if (placeholder) {
+        placeholder.style.display = 'block';
+      }
+    }
   }
 }
 
@@ -991,8 +1114,9 @@ async function saveMode3Result() {
     }
     
     if (!resultType) {
+      console.error('無法識別結果類型，tabText:', tabText, 'activeTab:', activeTab);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('無法識別結果類型', 3000);
+        window.ReelMindCommon.showToast('無法識別結果類型，請重新選擇標籤', 3000);
       }
       return;
     }
@@ -1040,8 +1164,15 @@ async function saveMode3Result() {
     });
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: '網路錯誤' }));
-      throw new Error(errorData.error || `HTTP ${response.status}`);
+      let errorMessage = `HTTP ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorData.message || errorMessage;
+      } catch (e) {
+        // 如果無法解析 JSON，使用狀態碼
+        errorMessage = `HTTP ${response.status}: ${response.statusText || '請求失敗'}`;
+      }
+      throw new Error(errorMessage);
     }
     
     const data = await response.json();
