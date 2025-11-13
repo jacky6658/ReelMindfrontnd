@@ -361,11 +361,12 @@
           max-height: none !important;
           padding: 16px 24px !important; /* 減少內邊距 */
           margin: 0 !important;
-          padding-bottom: 200px !important; /* 增加底部 padding，為輸入欄位留出空間，並確保可以滾動 */
+          /* 動態計算底部 padding，為輸入欄位留出空間（考慮 safe-area-inset-bottom） */
+          padding-bottom: calc(200px + env(safe-area-inset-bottom, 0px)) !important;
           margin-bottom: 0 !important;
         }
         
-        /* 輸入區域固定在底部，稍微向上移動 */
+        /* 輸入區域固定在底部，使用 safe-area-inset-bottom 避免被 iOS Safari 網址欄擋到 */
         .mode1-page .input-row {
           display: flex !important;
           flex-direction: column !important;
@@ -379,13 +380,16 @@
           min-height: auto !important;
           max-height: none !important;
           z-index: 100 !important;
-          position: absolute !important; /* 使用絕對定位固定在底部 */
-          bottom: 30px !important; /* 稍微向上移動一點點 */
+          position: fixed !important; /* 使用 fixed 定位固定在底部 */
+          bottom: calc(0px + env(safe-area-inset-bottom, 0px)) !important; /* 使用 safe-area-inset-bottom 避免被網址欄擋到 */
           left: 0 !important;
           right: 0 !important;
           background: #ffffff !important; /* 添加背景色，避免被遮擋 */
           width: 100% !important;
           box-sizing: border-box !important;
+          /* iOS Safari 優化 */
+          -webkit-transform: translateZ(0);
+          transform: translateZ(0);
         }
         
         /* 確保快速按鈕在輸入欄位內顯示 */
@@ -2697,11 +2701,16 @@
         .mode1-page .input-row {
           padding: 10px 12px 16px 12px !important;
           padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important; /* iOS 安全區域 */
+          /* 確保輸入欄位在 iOS Safari 網址欄上方 */
+          bottom: calc(0px + env(safe-area-inset-bottom, 0px)) !important;
         }
         
         /* iOS Safari 鍵盤彈出時調整 */
-        .input-row:focus-within {
+        .input-row:focus-within,
+        .mode1-page .input-row:focus-within {
           padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px) + 20px) !important;
+          /* 鍵盤彈出時，輸入欄位向上移動更多，避免被鍵盤遮擋 */
+          bottom: calc(0px + env(safe-area-inset-bottom, 0px) + 20px) !important;
         }
         
         /* 快速按鈕手機版：並排不換行，節省空間 */
