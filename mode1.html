@@ -674,7 +674,7 @@
       .mode1-oneclick-modal-header {
         padding: 24px 32px;
         border-bottom: 1px solid #e5e7eb;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         color: white;
         display: flex;
         justify-content: space-between;
@@ -729,7 +729,7 @@
         width: 100%;
         padding: 16px 24px;
         min-height: 48px; /* iOS 最小觸控目標 */
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         color: white;
         border: none;
         border-radius: 12px;
@@ -742,14 +742,14 @@
         align-items: center;
         justify-content: center;
         gap: 12px;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊高亮 */
         touch-action: manipulation; /* 優化觸控響應 */
       }
       
       .mode1-oneclick-generate-all-btn:hover:not(:disabled) {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
       }
       
       .mode1-oneclick-generate-all-btn:disabled {
@@ -828,8 +828,8 @@
       }
       
       .mode1-oneclick-result-card.generating {
-        border-color: #667eea;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        border-color: #3b82f6;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
       }
       
       .mode1-oneclick-result-card.completed {
@@ -869,7 +869,7 @@
       
       .mode1-oneclick-result-status.generating {
         background: #dbeafe;
-        color: #2563eb;
+        color: #1e40af;
       }
       
       .mode1-oneclick-result-status.completed {
@@ -1830,7 +1830,6 @@
       <!-- 一鍵生成按鈕 -->
       <div class="mode1-results-btn-container">
         <button class="mode1-results-btn" onclick="openMode1OneClickModal()">
-          <span class="mode1-results-icon">⚡</span>
           <span class="mode1-results-text">一鍵生成</span>
         </button>
       </div>
@@ -1864,68 +1863,99 @@
     <div class="mode1-instructions-overlay" id="mode1InstructionsOverlay" onclick="closeMode1InstructionsDrawer()"></div>
     <div class="mode1-instructions-drawer" id="mode1InstructionsDrawer">
       <div class="mode1-instructions-drawer-header">
-        <h3>📋 IP人設規劃使用說明</h3>
+        <h3>IP人設規劃使用說明</h3>
         <button class="mode1-instructions-drawer-close" onclick="closeMode1InstructionsDrawer()">✕</button>
       </div>
       <div class="mode1-instructions-drawer-content">
-        <p><strong>🎯 IP人設規劃模式</strong></p>
-        <p>透過與AI深度對話，記錄您的人生曲線和個人特色，讓AI協助您建立完整的IP人設。</p>
+        <p><strong>IP人設規劃模式</strong></p>
+        <p>透過與AI深度對話，記錄您的人生曲線和個人特色，讓AI協助您建立完整的IP人設，並生成帳號定位、選題方向和一週腳本。</p>
         
-        <p><strong>🚀 操作步驟：</strong></p>
+        <p><strong>兩種生成方式</strong></p>
+        <div class="mode1-step-guide">
+          <div class="mode1-step">
+            <div class="mode1-step-number">方式一</div>
+            <div class="mode1-step-content">
+              <strong>一鍵生成全部</strong>
+              <p>點擊左上角「一鍵生成」按鈕，開啟彈出視窗，可同時生成帳號定位、選題方向、一週腳本三個內容。適合快速取得完整規劃。</p>
+            </div>
+          </div>
+          <div class="mode1-step">
+            <div class="mode1-step-number">方式二</div>
+            <div class="mode1-step-content">
+              <strong>個別生成</strong>
+              <p>先與AI對話建立基礎，再點擊「生成結果」抽屜中的按鈕，依序生成帳號定位、選題方向、一週腳本。適合需要逐步調整的用戶。</p>
+            </div>
+          </div>
+        </div>
+        
+        <p><strong>操作流程</strong></p>
         <div class="mode1-step-guide">
           <div class="mode1-step">
             <div class="mode1-step-number">1</div>
             <div class="mode1-step-content">
               <strong>開始對話</strong>
-              <p>點擊快速按鈕或輸入框，與AI分享您的背景、專長、價值觀</p>
+              <p>使用快速按鈕（IP Profile、14天規劃、今日腳本、重新定位）或直接輸入，與AI分享您的背景、專長、價值觀和目標</p>
             </div>
           </div>
           <div class="mode1-step">
             <div class="mode1-step-number">2</div>
             <div class="mode1-step-content">
               <strong>深度交流</strong>
-              <p>建議進行5-10輪對話，讓AI充分了解您的個人特色和目標</p>
+              <p>建議進行5-10輪對話，讓AI充分了解您的個人特色、專業領域、內容方向和目標受眾</p>
             </div>
           </div>
           <div class="mode1-step">
             <div class="mode1-step-number">3</div>
             <div class="mode1-step-content">
-              <strong>生成結果</strong>
-              <p>隨時點擊右側生成按鈕，無需等待AI提醒</p>
+              <strong>生成內容</strong>
+              <p>點擊「一鍵生成」按鈕，或使用「生成結果」抽屜中的個別生成功能。生成後可儲存、匯出或重新生成</p>
             </div>
           </div>
         </div>
         
-        <p><strong>💬 對話建議：</strong></p>
+        <p><strong>對話建議</strong></p>
         <ul>
-          <li>分享您的專業經驗和成就</li>
-          <li>討論您的價值觀和人生目標</li>
-          <li>描述您的個性和溝通風格</li>
-          <li>探索您想分享的內容方向</li>
+          <li>分享您的專業經驗、成就和獨特見解</li>
+          <li>討論您的價值觀、人生目標和想傳達的訊息</li>
+          <li>描述您的個性、溝通風格和內容調性</li>
+          <li>說明您的目標受眾和想解決的問題</li>
+          <li>探索您想分享的內容方向和主題領域</li>
         </ul>
         
-        <p><strong>📊 生成內容：</strong></p>
+        <p><strong>生成內容說明</strong></p>
         <div class="mode1-result-types">
           <div class="mode1-result-type">
-            <strong>🎭 IP Profile</strong>
-            <p>個人品牌檔案：人設標籤、品牌原型、語氣設定</p>
+            <strong>帳號定位</strong>
+            <p>包含目標受眾、傳達目標、帳號定位、內容方向、風格調性、差異化優勢等完整分析</p>
           </div>
           <div class="mode3-result-type">
-            <strong>📅 14天規劃</strong>
-            <p>詳細的短影音內容規劃表</p>
+            <strong>選題方向（影片類型配比）</strong>
+            <p>根據帳號定位生成適合的影片類型、佔比、目的和內容方向建議，以表格形式呈現</p>
           </div>
           <div class="mode3-result-type">
-            <strong>📝 今日腳本</strong>
-            <p>3支即時可用的短影音腳本</p>
+            <strong>一週腳本</strong>
+            <p>生成一週7天的短影音腳本，包含主題、開場鉤子、核心內容、行動呼籲、畫面描述和發佈文案</p>
           </div>
         </div>
         
-        <p><strong>💡 重要提醒：</strong></p>
+        <p><strong>功能特色</strong></p>
         <ul>
-          <li>✅ <strong>隨時可以生成</strong>：不需要等AI提醒</li>
-          <li>✅ <strong>建議順序</strong>：IP Profile → 14天規劃 → 今日腳本</li>
-          <li>✅ <strong>可以重複生成</strong>：不滿意就點「🔄 重新生成」</li>
-          <li>✅ <strong>AI有記憶</strong>：會記住您之前說過的內容</li>
+          <li><strong>一鍵生成全部</strong>：可同時生成三個內容，節省時間</li>
+          <li><strong>個別生成</strong>：可依序生成，逐步調整和優化</li>
+          <li><strong>隨時生成</strong>：不需要等AI提醒，隨時可以點擊生成</li>
+          <li><strong>重新生成</strong>：不滿意可隨時重新生成，直到滿意為止</li>
+          <li><strong>長期記憶</strong>：AI會記住您之前說過的內容，生成結果會越來越精準</li>
+          <li><strong>儲存與匯出</strong>：生成結果可儲存到個人資料庫，或匯出為CSV檔案</li>
+          <li><strong>快速按鈕</strong>：使用快速按鈕可快速詢問特定主題，加速對話流程</li>
+        </ul>
+        
+        <p><strong>使用技巧</strong></p>
+        <ul>
+          <li>首次使用建議先進行5-10輪對話，讓AI充分了解您的背景</li>
+          <li>生成後可繼續對話調整，AI會根據新對話更新理解</li>
+          <li>一鍵生成適合快速取得完整規劃，個別生成適合需要精細調整的情況</li>
+          <li>所有生成內容都會自動記錄到長期記憶，後續對話會更精準</li>
+          <li>可在「創作者資料庫」中查看所有歷史生成記錄</li>
         </ul>
       </div>
     </div>
@@ -2004,14 +2034,12 @@
       <div class="mode1-oneclick-modal" onclick="event.stopPropagation()">
         <div class="mode1-oneclick-modal-header">
           <h2>
-            <span>⚡</span>
             <span>一鍵生成全部內容</span>
           </h2>
           <button class="mode1-oneclick-modal-close" onclick="closeMode1OneClickModal()">✕</button>
         </div>
         <div class="mode1-oneclick-modal-content">
           <button class="mode1-oneclick-generate-all-btn" id="mode1OneClickGenerateAllBtn" onclick="generateMode1All()">
-            <span>🚀</span>
             <span>一鍵生成全部（帳號定位 + 選題方向 + 一週腳本）</span>
           </button>
           
@@ -2020,7 +2048,6 @@
             <div class="mode1-oneclick-result-card" id="mode1OneClickPositioningCard">
               <div class="mode1-oneclick-result-card-header">
                 <div class="mode1-oneclick-result-card-title">
-                  <span>🎯</span>
                   <span>帳號定位</span>
                 </div>
                 <span class="mode1-oneclick-result-status pending" id="mode1OneClickPositioningStatus">待生成</span>
@@ -2030,11 +2057,9 @@
               </div>
               <div class="mode1-oneclick-result-actions" id="mode1OneClickPositioningActions" style="display: none;">
                 <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('positioning')">
-                  <span>💾</span>
                   <span>儲存</span>
                 </button>
                 <button class="mode1-oneclick-action-btn" onclick="regenerateMode1OneClickResult('positioning')">
-                  <span>🔄</span>
                   <span>重新生成</span>
                 </button>
               </div>
@@ -2044,7 +2069,6 @@
             <div class="mode1-oneclick-result-card" id="mode1OneClickTopicsCard">
               <div class="mode1-oneclick-result-card-header">
                 <div class="mode1-oneclick-result-card-title">
-                  <span>📊</span>
                   <span>選題方向（影片類型配比）</span>
                 </div>
                 <span class="mode1-oneclick-result-status pending" id="mode1OneClickTopicsStatus">待生成</span>
@@ -2054,11 +2078,9 @@
               </div>
               <div class="mode1-oneclick-result-actions" id="mode1OneClickTopicsActions" style="display: none;">
                 <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('topics')">
-                  <span>💾</span>
                   <span>儲存</span>
                 </button>
                 <button class="mode1-oneclick-action-btn" onclick="regenerateMode1OneClickResult('topics')">
-                  <span>🔄</span>
                   <span>重新生成</span>
                 </button>
               </div>
@@ -2068,7 +2090,6 @@
             <div class="mode1-oneclick-result-card" id="mode1OneClickWeeklyCard">
               <div class="mode1-oneclick-result-card-header">
                 <div class="mode1-oneclick-result-card-title">
-                  <span>📝</span>
                   <span>一週腳本</span>
                 </div>
                 <span class="mode1-oneclick-result-status pending" id="mode1OneClickWeeklyStatus">待生成</span>
@@ -2078,11 +2099,9 @@
               </div>
               <div class="mode1-oneclick-result-actions" id="mode1OneClickWeeklyActions" style="display: none;">
                 <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('weekly')">
-                  <span>💾</span>
                   <span>儲存</span>
                 </button>
                 <button class="mode1-oneclick-action-btn" onclick="regenerateMode1OneClickResult('weekly')">
-                  <span>🔄</span>
                   <span>重新生成</span>
                 </button>
               </div>

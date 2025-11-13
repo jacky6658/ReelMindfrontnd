@@ -108,6 +108,81 @@ document.addEventListener('DOMContentLoaded', async function() {
   console.log('✅ ========== Mode1 頁面初始化完成 ==========');
 });
 
+// 檢查是否有已保存的 IP 規劃結果
+async function checkSavedIpPlanningResult(resultType, forceRegenerate = false) {
+  // forceRegenerate: true 表示強制重新生成（用於重新定位或重新生成按鈕）
+  if (forceRegenerate || !ipPlanningUser?.user_id || !ipPlanningToken) {
+    return null;
+  }
+  
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/ip-planning/my?result_type=${resultType}`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.results && data.results.length > 0) {
+        // 返回最新的結果（第一個，因為後端按 created_at DESC 排序）
+        return data.results[0];
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('檢查已保存的 IP 規劃結果失敗:', error);
+    return null;
+  }
+}
+
+// 顯示已保存的 IP 規劃結果
+function displaySavedIpPlanningResult(resultBlock, result, resultType) {
+  if (!resultBlock || !result || !result.content) {
+    return false;
+  }
+  
+  // 隱藏 placeholder
+  const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
+  if (placeholder) {
+    placeholder.style.display = 'none';
+  }
+  
+  // 創建或獲取內容容器
+  let contentDiv = resultBlock.querySelector('.mode1-result-content');
+  if (!contentDiv) {
+    contentDiv = document.createElement('div');
+    contentDiv.className = 'mode1-result-content';
+    resultBlock.appendChild(contentDiv);
+  }
+  
+  // 渲染 Markdown 內容
+  contentDiv.innerHTML = renderMode1Markdown(result.content);
+  
+  // 更新按鈕
+  const button = resultBlock.querySelector('.mode1-generate-btn');
+  if (button) {
+    button.innerHTML = '<span>重新生成</span>';
+    button.disabled = false;
+  }
+  
+  // 顯示通知
+  const typeNames = {
+    'profile': '帳號定位',
+    'plan': '選題方向',
+    'scripts': '一週腳本'
+  };
+  const typeName = typeNames[resultType] || '內容';
+  
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast(`已載入之前的${typeName}記錄`, 2000);
+  }
+  
+  return true;
+}
+
 // 載入用戶記憶（長期記憶和短期記憶）
 async function loadUserMemory() {
   if (!ipPlanningUser?.user_id || !ipPlanningToken) {
@@ -289,26 +364,36 @@ function handleQuickButton(type) {
       // 打開右側抽屜，顯示 帳號定位 標籤
       toggleMode1ResultsDrawer();
       switchMode1Tab('positioning', null);
-      // 如果還沒有生成，自動生成
+      // 先嘗試載入已保存的結果，如果沒有則生成
       const positioningResult = document.getElementById('mode1-positioning-result');
-      if (positioningResult && positioningResult.querySelector('.mode1-result-placeholder')) {
-        generateMode1Positioning();
-      } else {
-        // 如果已經有內容，LLM 告知用戶目前的 IP Profile
-        sendMode1Message('請告知我目前的 IP Profile，基於我們之前的對話內容。', 'ip_planning');
+      if (positioningResult) {
+        const hasContent = positioningResult.querySelector('.mode1-result-content') && 
+                          positioningResult.querySelector('.mode1-result-content').innerHTML.trim();
+        if (!hasContent) {
+          // 沒有內容，嘗試載入或生成
+          generateMode1Positioning(false);
+        } else {
+          // 如果已經有內容，LLM 告知用戶目前的 IP Profile
+          sendMode1Message('請告知我目前的 IP Profile，基於我們之前的對話內容。', 'ip_planning');
+        }
       }
       break;
     case '14day-plan':
       // 打開右側抽屜，顯示 選題方向 標籤
       toggleMode1ResultsDrawer();
       switchMode1Tab('topics', null);
-      // 如果還沒有生成，自動生成
+      // 先嘗試載入已保存的結果，如果沒有則生成
       const topicsResult = document.getElementById('mode1-topics-result');
-      if (topicsResult && topicsResult.querySelector('.mode1-result-placeholder')) {
-        generateMode1TopicsWithRatio();
-      } else {
-        // 如果已經有內容，LLM 根據之前討論的影片類型配比再次告知規劃
-        sendMode1Message('請根據我們之前討論的影片類型配比，再次告知我的14天規劃。', 'ip_planning');
+      if (topicsResult) {
+        const hasContent = topicsResult.querySelector('.mode1-result-content') && 
+                          topicsResult.querySelector('.mode1-result-content').innerHTML.trim();
+        if (!hasContent) {
+          // 沒有內容，嘗試載入或生成
+          generateMode1TopicsWithRatio(false);
+        } else {
+          // 如果已經有內容，LLM 根據之前討論的影片類型配比再次告知規劃
+          sendMode1Message('請根據我們之前討論的影片類型配比，再次告知我的14天規劃。', 'ip_planning');
+        }
       }
       break;
     case 'today-script':
@@ -319,8 +404,10 @@ function handleQuickButton(type) {
       sendMode1Message('請根據目前資料庫的5個腳本結構（A/B/C/D/E），詢問我要使用哪一個腳本結構來產出今日的腳本。', 'ip_planning');
       break;
     case 'reposition':
-      // 重新定位：LLM 會先詢問
-      sendMode1Message('我想要重新定位，請先詢問我想要重新定位哪個方面？', 'ip_planning');
+      // 重新定位：強制重新生成帳號定位
+      toggleMode1ResultsDrawer();
+      switchMode1Tab('positioning', null);
+      generateMode1Positioning(true); // 強制重新生成
       break;
     default:
       console.warn('未知的快速按鈕類型:', type);
@@ -755,7 +842,7 @@ function switchMode1Tab(tabName, event) {
 }
 
 // 生成帳號定位
-async function generateMode1Positioning() {
+async function generateMode1Positioning(forceRegenerate = false) {
   const resultBlock = document.getElementById('mode1-positioning-result') || document.getElementById('mode1-profile-result');
   if (!resultBlock) {
     console.error('找不到結果區塊');
@@ -767,12 +854,22 @@ async function generateMode1Positioning() {
     return;
   }
   
+  // 如果不是強制重新生成，先檢查是否有已保存的結果
+  if (!forceRegenerate) {
+    const savedResult = await checkSavedIpPlanningResult('profile', false);
+    if (savedResult) {
+      // 如果有已保存的結果，直接顯示
+      displaySavedIpPlanningResult(resultBlock, savedResult, 'profile');
+      return;
+    }
+  }
+  
   button.disabled = true;
-  button.innerHTML = '<span>⏳</span> 生成中...';
+  button.innerHTML = '<span>生成中...</span>';
   
   // 顯示開始生成通知
   if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-    window.ReelMindCommon.showToast('⏳ 正在生成帳號定位...', 2000);
+    window.ReelMindCommon.showToast('正在生成帳號定位...', 2000);
   }
   
   // 清空之前的內容，但保留按鈕結構
@@ -879,13 +976,15 @@ async function generateMode1Positioning() {
     // 確保按鈕存在才更新
     const finalButton = resultBlock.querySelector('.mode1-generate-btn');
     if (finalButton) {
-      finalButton.innerHTML = '<span>🚀</span> 重新生成';
+      finalButton.innerHTML = '<span>重新生成</span>';
       finalButton.disabled = false;
+      // 更新按鈕點擊事件，使其強制重新生成
+      finalButton.onclick = () => generateMode1Positioning(true);
     }
     
     // 顯示成功通知
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('✅ 帳號定位生成完成！', 3000);
+      window.ReelMindCommon.showToast('帳號定位生成完成！', 3000);
     }
   } catch (error) {
     console.error('生成帳號定位失敗:', error);
@@ -962,7 +1061,7 @@ async function generateMode1IPProfile() {
 }
 
 // 生成選題方向（影片類型配比）
-async function generateMode1TopicsWithRatio() {
+async function generateMode1TopicsWithRatio(forceRegenerate = false) {
   const resultBlock = document.getElementById('mode1-topics-result') || document.getElementById('mode1-plan-result');
   if (!resultBlock) {
     console.error('找不到結果區塊');
@@ -974,12 +1073,22 @@ async function generateMode1TopicsWithRatio() {
     return;
   }
   
+  // 如果不是強制重新生成，先檢查是否有已保存的結果
+  if (!forceRegenerate) {
+    const savedResult = await checkSavedIpPlanningResult('plan', false);
+    if (savedResult) {
+      // 如果有已保存的結果，直接顯示
+      displaySavedIpPlanningResult(resultBlock, savedResult, 'plan');
+      return;
+    }
+  }
+  
   button.disabled = true;
-  button.innerHTML = '<span>⏳</span> 生成中...';
+  button.innerHTML = '<span>生成中...</span>';
   
   // 顯示開始生成通知
   if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-    window.ReelMindCommon.showToast('⏳ 正在生成選題方向...', 2000);
+    window.ReelMindCommon.showToast('正在生成選題方向...', 2000);
   }
   
   // 清空之前的內容，但保留按鈕結構
@@ -1086,13 +1195,15 @@ async function generateMode1TopicsWithRatio() {
     // 確保按鈕存在才更新
     const finalButton = resultBlock.querySelector('.mode1-generate-btn');
     if (finalButton) {
-      finalButton.innerHTML = '<span>🚀</span> 重新生成';
+      finalButton.innerHTML = '<span>重新生成</span>';
       finalButton.disabled = false;
+      // 更新按鈕點擊事件，使其強制重新生成
+      finalButton.onclick = () => generateMode1TopicsWithRatio(true);
     }
     
     // 顯示成功通知
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('✅ 選題方向生成完成！', 3000);
+      window.ReelMindCommon.showToast('選題方向生成完成！', 3000);
     }
   } catch (error) {
     console.error('生成選題方向失敗:', error);
@@ -1169,7 +1280,7 @@ async function generateMode114DayPlan() {
 }
 
 // 生成一週腳本
-async function generateMode1WeeklyScripts() {
+async function generateMode1WeeklyScripts(forceRegenerate = false) {
   const resultBlock = document.getElementById('mode1-weekly-result') || document.getElementById('mode1-scripts-result');
   if (!resultBlock) {
     console.error('找不到結果區塊');
@@ -1181,12 +1292,22 @@ async function generateMode1WeeklyScripts() {
     return;
   }
   
+  // 如果不是強制重新生成，先檢查是否有已保存的結果
+  if (!forceRegenerate) {
+    const savedResult = await checkSavedIpPlanningResult('scripts', false);
+    if (savedResult) {
+      // 如果有已保存的結果，直接顯示
+      displaySavedIpPlanningResult(resultBlock, savedResult, 'scripts');
+      return;
+    }
+  }
+  
   button.disabled = true;
-  button.innerHTML = '<span>⏳</span> 生成中...';
+  button.innerHTML = '<span>生成中...</span>';
   
   // 顯示開始生成通知
   if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-    window.ReelMindCommon.showToast('⏳ 正在生成一週腳本...', 2000);
+    window.ReelMindCommon.showToast('正在生成一週腳本...', 2000);
   }
   
   // 清空之前的內容，但保留按鈕結構
@@ -1307,13 +1428,15 @@ async function generateMode1WeeklyScripts() {
     // 確保按鈕存在才更新
     const finalButton = resultBlock.querySelector('.mode1-generate-btn');
     if (finalButton) {
-      finalButton.innerHTML = '<span>🚀</span> 重新生成';
+      finalButton.innerHTML = '<span>重新生成</span>';
       finalButton.disabled = false;
+      // 更新按鈕點擊事件，使其強制重新生成
+      finalButton.onclick = () => generateMode1WeeklyScripts(true);
     }
     
     // 顯示成功通知
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('✅ 一週腳本生成完成！', 3000);
+      window.ReelMindCommon.showToast('一週腳本生成完成！', 3000);
     }
   } catch (error) {
     console.error('❌ 生成一週腳本失敗:', error);
@@ -1537,34 +1660,34 @@ function regenerateMode1Result() {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('正在重新生成帳號定位...', 2000);
     }
-    generateMode1Positioning();
+    generateMode1Positioning(true); // 強制重新生成
   } else if (tabText.includes('選題方向')) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('正在重新生成選題方向...', 2000);
     }
-    generateMode1TopicsWithRatio();
+    generateMode1TopicsWithRatio(true); // 強制重新生成
   } else if (tabText.includes('一週腳本')) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('正在重新生成一週腳本...', 2000);
     }
-    generateMode1WeeklyScripts();
+    generateMode1WeeklyScripts(true); // 強制重新生成
   }
   // 保留舊的匹配邏輯作為備用
   else if (tabText.includes('Profile')) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('正在重新生成帳號定位...', 2000);
     }
-    generateMode1Positioning();
+    generateMode1Positioning(true); // 強制重新生成
   } else if (tabText.includes('規劃')) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('正在重新生成選題方向...', 2000);
     }
-    generateMode1TopicsWithRatio();
+    generateMode1TopicsWithRatio(true); // 強制重新生成
   } else if (tabText.includes('腳本')) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('正在重新生成一週腳本...', 2000);
     }
-    generateMode1WeeklyScripts();
+    generateMode1WeeklyScripts(true); // 強制重新生成
   } else {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('無法識別結果類型，請重新選擇標籤', 3000);
@@ -1763,65 +1886,123 @@ function updateMode1OneClickStatus(type, status, message = '') {
 }
 
 // 一鍵生成全部內容
-async function generateMode1All() {
+async function generateMode1All(forceRegenerate = false) {
   const generateBtn = document.getElementById('mode1OneClickGenerateAllBtn');
   if (!generateBtn) return;
   
   generateBtn.disabled = true;
-  generateBtn.innerHTML = '<span>⏳</span> <span>正在生成中，請稍候...</span>';
+  generateBtn.innerHTML = '<span>正在生成中，請稍候...</span>';
   
   // 顯示開始生成通知
   if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-    window.ReelMindCommon.showToast('⏳ 正在一鍵生成全部內容...', 2000);
+    window.ReelMindCommon.showToast('正在一鍵生成全部內容...', 2000);
   }
   
-  // 重置所有卡片狀態
-  updateMode1OneClickStatus('positioning', 'generating', '正在生成帳號定位');
-  updateMode1OneClickStatus('topics', 'generating', '正在生成選題方向');
-  updateMode1OneClickStatus('weekly', 'generating', '正在生成一週腳本');
-  
   try {
-    // 同時發起三個生成請求
-    const [positioningResult, topicsResult, weeklyResult] = await Promise.allSettled([
-      generateMode1PositioningForOneClick(),
-      generateMode1TopicsForOneClick(),
-      generateMode1WeeklyForOneClick()
-    ]);
+    // 如果不是強制重新生成，先檢查是否有已保存的結果
+    let positioningContent = null;
+    let topicsContent = null;
+    let weeklyContent = null;
     
-    // 處理帳號定位結果
-    if (positioningResult.status === 'fulfilled') {
-      updateMode1OneClickStatus('positioning', 'completed', positioningResult.value);
-    } else {
-      updateMode1OneClickStatus('positioning', 'error', positioningResult.reason?.message || '生成失敗');
+    if (!forceRegenerate) {
+      // 檢查已保存的結果
+      const [savedPositioning, savedTopics, savedWeekly] = await Promise.all([
+        checkSavedIpPlanningResult('profile', false),
+        checkSavedIpPlanningResult('plan', false),
+        checkSavedIpPlanningResult('scripts', false)
+      ]);
+      
+      positioningContent = savedPositioning?.content || null;
+      topicsContent = savedTopics?.content || null;
+      weeklyContent = savedWeekly?.content || null;
     }
     
-    // 處理選題方向結果
-    if (topicsResult.status === 'fulfilled') {
-      updateMode1OneClickStatus('topics', 'completed', topicsResult.value);
+    // 更新卡片狀態
+    if (positioningContent && !forceRegenerate) {
+      updateMode1OneClickStatus('positioning', 'completed', positioningContent);
     } else {
-      updateMode1OneClickStatus('topics', 'error', topicsResult.reason?.message || '生成失敗');
+      updateMode1OneClickStatus('positioning', 'generating', '正在生成帳號定位');
     }
     
-    // 處理一週腳本結果
-    if (weeklyResult.status === 'fulfilled') {
-      updateMode1OneClickStatus('weekly', 'completed', weeklyResult.value);
+    if (topicsContent && !forceRegenerate) {
+      updateMode1OneClickStatus('topics', 'completed', topicsContent);
     } else {
-      updateMode1OneClickStatus('weekly', 'error', weeklyResult.reason?.message || '生成失敗');
+      updateMode1OneClickStatus('topics', 'generating', '正在生成選題方向');
     }
+    
+    if (weeklyContent && !forceRegenerate) {
+      updateMode1OneClickStatus('weekly', 'completed', weeklyContent);
+    } else {
+      updateMode1OneClickStatus('weekly', 'generating', '正在生成一週腳本');
+    }
+    
+    // 只生成沒有已保存結果的內容
+    const promises = [];
+    if (!positioningContent || forceRegenerate) {
+      promises.push(generateMode1PositioningForOneClick().then(content => ({ type: 'positioning', content })));
+    } else {
+      promises.push(Promise.resolve({ type: 'positioning', content: positioningContent, fromCache: true }));
+    }
+    
+    if (!topicsContent || forceRegenerate) {
+      promises.push(generateMode1TopicsForOneClick().then(content => ({ type: 'topics', content })));
+    } else {
+      promises.push(Promise.resolve({ type: 'topics', content: topicsContent, fromCache: true }));
+    }
+    
+    if (!weeklyContent || forceRegenerate) {
+      promises.push(generateMode1WeeklyForOneClick().then(content => ({ type: 'weekly', content })));
+    } else {
+      promises.push(Promise.resolve({ type: 'weekly', content: weeklyContent, fromCache: true }));
+    }
+    
+    const results = await Promise.allSettled(promises);
+    
+    // 處理結果
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        const { type, content, fromCache } = result.value;
+        if (type === 'positioning') {
+          updateMode1OneClickStatus('positioning', 'completed', content);
+          if (fromCache && window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('已載入之前的帳號定位記錄', 2000);
+          }
+        } else if (type === 'topics') {
+          updateMode1OneClickStatus('topics', 'completed', content);
+          if (fromCache && window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('已載入之前的選題方向記錄', 2000);
+          }
+        } else if (type === 'weekly') {
+          updateMode1OneClickStatus('weekly', 'completed', content);
+          if (fromCache && window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('已載入之前的一週腳本記錄', 2000);
+          }
+        }
+      } else {
+        // 根據索引判斷是哪個類型失敗
+        if (index === 0) {
+          updateMode1OneClickStatus('positioning', 'error', result.reason?.message || '生成失敗');
+        } else if (index === 1) {
+          updateMode1OneClickStatus('topics', 'error', result.reason?.message || '生成失敗');
+        } else if (index === 2) {
+          updateMode1OneClickStatus('weekly', 'error', result.reason?.message || '生成失敗');
+        }
+      }
+    });
     
     // 顯示完成通知
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('✅ 一鍵生成完成！', 3000);
+      window.ReelMindCommon.showToast('一鍵生成完成！', 3000);
     }
     
   } catch (error) {
     console.error('一鍵生成失敗:', error);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('❌ 生成過程中發生錯誤', 3000);
+      window.ReelMindCommon.showToast('生成過程中發生錯誤', 3000);
     }
   } finally {
     generateBtn.disabled = false;
-    generateBtn.innerHTML = '<span>🚀</span> <span>一鍵生成全部（帳號定位 + 選題方向 + 一週腳本）</span>';
+    generateBtn.innerHTML = '<span>一鍵生成全部（帳號定位 + 選題方向 + 一週腳本）</span>';
   }
 }
 
@@ -2080,7 +2261,7 @@ async function saveMode1OneClickResult(type) {
 }
 
 // 重新生成一鍵生成結果
-async function regenerateMode1OneClickResult(type) {
+async function regenerateMode1OneClickResult(type, forceRegenerate = true) {
   updateMode1OneClickStatus(type, 'generating', `正在重新生成${type === 'positioning' ? '帳號定位' : type === 'topics' ? '選題方向' : '一週腳本'}`);
   
   try {
@@ -2096,12 +2277,12 @@ async function regenerateMode1OneClickResult(type) {
     updateMode1OneClickStatus(type, 'completed', result);
     
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast(`✅ ${type === 'positioning' ? '帳號定位' : type === 'topics' ? '選題方向' : '一週腳本'}已重新生成`, 3000);
+      window.ReelMindCommon.showToast(`${type === 'positioning' ? '帳號定位' : type === 'topics' ? '選題方向' : '一週腳本'}已重新生成`, 3000);
     }
   } catch (error) {
     updateMode1OneClickStatus(type, 'error', error.message || '生成失敗');
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast(`❌ 重新生成失敗`, 3000);
+      window.ReelMindCommon.showToast(`重新生成失敗`, 3000);
     }
   }
 }
