@@ -4,6 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>登入中…</title>
+<!-- Favicon: 使用 SVG data URI，避免 404 錯誤 -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E" />
 <style>
   * {
     margin: 0;
@@ -429,16 +431,42 @@
     setTimeout(function() {
       updateStatus('正在跳轉到 Google 登入...', false);
       
-      // 獲取 Google 登入 URL
+      // 獲取 Google 登入 URL（後端返回 JSON 格式）
       var fbParam = encodeURIComponent(window.location.origin);
-      var authUrl = 'https://aivideobackend.zeabur.app/api/auth/google?fb=' + fbParam;
+      var apiUrl = 'https://aivideobackend.zeabur.app/api/auth/google?fb=' + fbParam;
       
-      console.log('DEBUG: 準備跳轉到 Google 登入:', authUrl);
+      console.log('DEBUG: 準備獲取 Google 登入 URL:', apiUrl);
       
-      // 跳轉到 Google 登入
-      setTimeout(function() {
-        window.location.href = authUrl;
-      }, 1000); // 再等 1 秒讓動畫顯示
+      // 先獲取授權 URL，然後跳轉
+      fetch(apiUrl)
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error('獲取授權 URL 失敗: ' + response.status);
+          }
+          return response.json();
+        })
+        .then(function(data) {
+          var authUrl = data.auth_url;
+          if (!authUrl) {
+            throw new Error('授權 URL 格式錯誤');
+          }
+          console.log('DEBUG: 獲取到授權 URL，準備跳轉:', authUrl);
+          
+          // 跳轉到 Google 登入
+          setTimeout(function() {
+            window.location.href = authUrl;
+          }, 500); // 短暫延遲後跳轉
+        })
+        .catch(function(error) {
+          console.error('DEBUG: 獲取授權 URL 失敗:', error);
+          updateStatus('⚠️ 無法連接到登入服務，請稍後再試', false, true);
+          
+          // 如果 fetch 失敗，嘗試直接使用 API URL（後端可能會重定向）
+          setTimeout(function() {
+            console.log('DEBUG: 嘗試直接跳轉到 API URL');
+            window.location.href = apiUrl;
+          }, 2000);
+        });
     }, 2000); // 顯示動畫 2 秒後跳轉
     return; // 結束處理
   }
