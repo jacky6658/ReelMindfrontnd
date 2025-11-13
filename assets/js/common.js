@@ -288,11 +288,28 @@
       
       // 記錄響應狀態以便調試
       console.log('授權驗證響應狀態:', response.status, response.statusText);
+      console.log('授權驗證響應 headers:', Object.fromEntries(response.headers.entries()));
       
-      if (response.ok || response.status === 302) {
+      // 檢查響應類型
+      const contentType = response.headers.get('content-type') || '';
+      const isJson = contentType.includes('application/json');
+      const isRedirect = response.status === 302 || response.status === 301;
+      
+      if (response.ok || isRedirect) {
         // 驗證成功
+        // 如果是 JSON 響應，嘗試解析
+        let responseData = null;
+        if (isJson && response.ok) {
+          try {
+            responseData = await response.json();
+            console.log('授權驗證成功響應數據:', responseData);
+          } catch (e) {
+            console.warn('無法解析 JSON 響應:', e);
+          }
+        }
+        
         // 等待一小段時間確保後端完成資料庫更新
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 增加到 1 秒
         
         // 重試檢查訂閱狀態（最多重試 3 次）
         let retryCount = 0;
@@ -344,25 +361,52 @@
         
         // 獲取方案類型（從後端響應或預設為 yearly）
         let planType = 'yearly';
-        try {
-          // 嘗試從後端獲取方案資訊
-          const licenseResponse = await fetch(`${API_BASE_URL}/api/user/license/verify?token=${token}`, {
-            headers: {
-              'Authorization': `Bearer ${currentToken}`
-            },
-            redirect: 'manual'
-          });
-          if (licenseResponse.ok) {
-            const licenseData = await licenseResponse.json();
-            planType = licenseData.plan_type || planType;
+        if (responseData && responseData.plan_type) {
+          planType = responseData.plan_type;
+        } else {
+          // 如果響應中沒有方案資訊，嘗試再次獲取（但不要重複驗證）
+          try {
+            // 直接從用戶資訊獲取訂閱狀態，而不是再次調用驗證 API
+            const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+              headers: {
+                'Authorization': `Bearer ${currentToken}`
+              }
+            });
+            if (userResponse.ok) {
+              const userInfo = await userResponse.json();
+              // 可以從用戶資訊中獲取方案類型（如果有）
+              console.log('用戶資訊:', userInfo);
+            }
+          } catch (e) {
+            console.warn('無法獲取用戶資訊，使用預設值');
           }
-        } catch (e) {
-          console.warn('無法獲取方案資訊，使用預設值');
         }
         
-        const planName = planType === 'yearly' ? '年費' : '月費';
-        const planDays = planType === 'yearly' ? '1年' : '1個月';
-        showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+        // 再次確認訂閱狀態（確保顯示正確）
+        const finalCheck = document.body.dataset.subscribed === 'true' || 
+                          localStorage.getItem('subscriptionStatus') === 'active';
+        
+        if (finalCheck) {
+          const planName = planType === 'yearly' ? '年費' : '月費';
+          const planDays = planType === 'yearly' ? '1年' : '1個月';
+          showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+        } else {
+          // 如果最終檢查還是沒有訂閱，可能是後端更新延遲，顯示提示
+          console.warn('授權驗證成功，但訂閱狀態尚未更新，可能需要重新整理頁面');
+          showToast('✅ 授權啟用成功！正在更新訂閱狀態...', 5000);
+          // 再次嘗試刷新訂閱狀態
+          setTimeout(async () => {
+            await checkSubscriptionStatus();
+            const recheck = document.body.dataset.subscribed === 'true' || 
+                           localStorage.getItem('subscriptionStatus') === 'active';
+            if (recheck) {
+              const planName = planType === 'yearly' ? '年費' : '月費';
+              const planDays = planType === 'yearly' ? '1年' : '1個月';
+              showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+            }
+          }, 2000);
+        }
+        
         // 清除 URL 參數
         window.history.replaceState({}, document.title, window.location.pathname);
       } else {
