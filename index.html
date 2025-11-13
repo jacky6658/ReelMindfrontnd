@@ -12965,21 +12965,34 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         });
         
         // 根據頁面ID設置對應標籤為active
+        // 注意：導航欄順序為：首頁(0) | IP人設規劃(外部連結) | 一鍵生成(外部連結) | 論壇介紹(3) | 實戰指南(4) | 創作者資料庫(5, 動態顯示)
         const tabMap = {
           'homepage': 0,
-          'mode1': 1,
-          'mode2': 2,
-          'mode3': 3,
-          'forum': 4,
-          'guide': 5,
-          'userDB': 6,
-          'guide-article1': null, // 文章頁面不需要導航列變亮
-          'guide-article2': null,
-          'guide-article3': null
+          'mode1': null,  // 外部連結，不在導航欄中
+          'mode2': null,  // 已移除
+          'mode3': null,  // 外部連結，不在導航欄中
+          'forum': 3,     // 論壇介紹是第4個標籤（索引3）
+          'guide': 4,     // 實戰指南是第5個標籤（索引4）
+          'userDB': null, // 動態顯示，需要特殊處理
+          'guide-article1': 4,  // 文章頁面顯示實戰指南為 active
+          'guide-article2': 4,
+          'guide-article3': 4
         };
         
+        // 更新導航標籤狀態
         if (tabMap[pageId] !== undefined && tabMap[pageId] !== null) {
-          document.querySelectorAll('.navbar-tab')[tabMap[pageId]].classList.add('active');
+          const tabs = document.querySelectorAll('.navbar-tab');
+          if (tabs[tabMap[pageId]]) {
+            tabs[tabMap[pageId]].classList.add('active');
+          } else {
+            console.warn(`[導航] 找不到索引 ${tabMap[pageId]} 的導航標籤，總共有 ${tabs.length} 個標籤`);
+          }
+        } else if (pageId === 'userDB') {
+          // 創作者資料庫標籤需要特殊處理（動態顯示）
+          const userDBTab = document.getElementById('userDBTab');
+          if (userDBTab) {
+            userDBTab.classList.add('active');
+          }
         }
       }
       

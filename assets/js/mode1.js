@@ -98,9 +98,10 @@ async function loadUserMemory() {
   try {
     console.log('🧠 ========== 開始載入用戶記憶 ==========');
     console.log('👤 用戶ID:', ipPlanningUser.user_id);
+    console.log('💬 對話類型: ip_planning');
     
-    // 使用完整記憶端點（包含 STM + LTM）
-    const memoryResponse = await fetch(`${API_URL}/api/user/memory/full/${ipPlanningUser.user_id}`, {
+    // 使用完整記憶端點（包含 STM + LTM），指定 conversation_type 為 ip_planning
+    const memoryResponse = await fetch(`${API_URL}/api/user/memory/full/${ipPlanningUser.user_id}?conversation_type=ip_planning`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`
       }
