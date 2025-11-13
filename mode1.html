@@ -825,9 +825,12 @@
         margin-top: 12px;
         padding-top: 12px;
         border-top: 1px solid #e5e7eb;
+        justify-content: flex-start; /* 確保按鈕從左對齊，不會因為內容變化而移動 */
       }
       
       .mode1-oneclick-history-item-btn {
+        flex: 1 1 0; /* 平均分配空間，允許縮小和放大 */
+        min-width: 80px; /* 設定最小寬度，確保按鈕不會太小 */
         padding: 8px 16px;
         border: 1px solid #d1d5db;
         border-radius: 6px;
@@ -839,6 +842,12 @@
         min-height: 36px;
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
+        white-space: nowrap; /* 防止文字換行 */
+        overflow: hidden; /* 隱藏溢出文字 */
+        text-overflow: ellipsis; /* 溢出顯示省略號 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       
       .mode1-oneclick-history-item-btn:hover {
@@ -1761,10 +1770,12 @@
         margin-top: 16px;
         padding-top: 16px;
         border-top: 1px solid #e5e7eb;
+        justify-content: flex-start; /* 確保按鈕從左對齊，不會因為內容變化而移動 */
       }
       
       .mode1-oneclick-action-btn {
-        flex: 1;
+        flex: 1 1 0; /* 平均分配空間，允許縮小和放大 */
+        min-width: 80px; /* 設定最小寬度，確保按鈕不會太小 */
         padding: 10px 16px;
         border: 1px solid #d1d5db;
         border-radius: 8px;
@@ -1778,6 +1789,9 @@
         align-items: center;
         justify-content: center;
         gap: 6px;
+        white-space: nowrap; /* 防止文字換行 */
+        overflow: hidden; /* 隱藏溢出文字 */
+        text-overflow: ellipsis; /* 溢出顯示省略號 */
       }
       
       .mode1-oneclick-action-btn:hover {
