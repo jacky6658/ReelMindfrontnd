@@ -11077,7 +11077,7 @@
         <!-- 頁面內容區域 -->
         <div class="page-content">
           <!-- 首頁 -->
-          <div id="homepage" class="page active page-enter">
+          <div id="homepage" class="page page-enter">
             <div class="homepage">
               <!-- 未登入用戶（訪客）視圖 - 顯示 index_unsubscribed.html 的內容 -->
               <div id="homepage-unsubscribed" class="homepage-view">
@@ -13541,6 +13541,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             if (validPages.includes(pageId)) {
               console.log('🔗 檢測到 hash 導航:', pageId);
               // 立即執行，避免先顯示首頁
+              // 先隱藏所有頁面
+              document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+              });
+              // 立即切換到目標頁面
               switchPage(pageId);
               return true; // 表示已處理 hash 導航
             }
@@ -13548,11 +13553,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return false; // 表示沒有 hash 導航
         };
         
-        // 頁面載入時先處理 hash（優先處理）
+        // 頁面載入時先處理 hash（優先處理，在 DOMContentLoaded 之前）
         const hasHashNavigation = handleHashNavigation();
         
-        // 如果沒有 hash 導航，才更新首頁視圖（確保訂閱狀態正確顯示）
+        // 如果沒有 hash 導航，才顯示首頁並更新首頁視圖
         if (!hasHashNavigation) {
+          const homepage = document.getElementById('homepage');
+          if (homepage) {
+            homepage.classList.add('active');
+          }
           console.log('🏠 初始化時更新首頁視圖...');
           setTimeout(() => {
             updateHomepageView();

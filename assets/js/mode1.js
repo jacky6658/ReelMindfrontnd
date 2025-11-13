@@ -1785,8 +1785,8 @@ function exportMode1Result() {
   }
 }
 
-// 一鍵生成 Modal 控制函數
-function openMode1OneClickModal() {
+// 生成結果 Modal 控制函數
+async function openMode1OneClickModal() {
   const overlay = document.getElementById('mode1OneClickModalOverlay');
   if (overlay) {
     // 更新視窗高度（處理 iOS Safari）
@@ -1796,6 +1796,348 @@ function openMode1OneClickModal() {
     // 防止背景滾動（iOS Safari）
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
+    
+    // 預設顯示過往紀錄標籤
+    switchMode1OneClickTab('history');
+  }
+}
+
+// 切換生成結果模態框標籤
+async function switchMode1OneClickTab(tab) {
+  // 更新標籤狀態
+  const historyTab = document.getElementById('mode1OneClickTabHistory');
+  const generateTab = document.getElementById('mode1OneClickTabGenerate');
+  const historyContent = document.getElementById('mode1OneClickHistoryContent');
+  const generateContent = document.getElementById('mode1OneClickGenerateContent');
+  
+  if (tab === 'history') {
+    if (historyTab) historyTab.classList.add('active');
+    if (generateTab) generateTab.classList.remove('active');
+    if (historyContent) historyContent.classList.add('active');
+    if (generateContent) generateContent.classList.remove('active');
+    
+    // 載入過往紀錄
+    await loadMode1OneClickHistory();
+  } else if (tab === 'generate') {
+    if (historyTab) historyTab.classList.remove('active');
+    if (generateTab) generateTab.classList.add('active');
+    if (historyContent) historyContent.classList.remove('active');
+    if (generateContent) generateContent.classList.add('active');
+    
+    // 載入一鍵生成的已保存結果
+    await loadMode1OneClickSavedResults();
+  }
+}
+
+// 載入過往紀錄
+async function loadMode1OneClickHistory() {
+  const container = document.getElementById('mode1OneClickHistoryContainer');
+  if (!container) return;
+  
+  if (!ipPlanningUser?.user_id || !ipPlanningToken) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>請先登入以查看過往紀錄</p></div>';
+    return;
+  }
+  
+  try {
+    container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>載入中...</p></div>';
+    
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('載入失敗');
+    }
+    
+    const data = await response.json();
+    if (!data.success || !data.results || data.results.length === 0) {
+      container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>尚無過往紀錄</p></div>';
+      return;
+    }
+    
+    // 按類型分組
+    const groupedResults = {
+      profile: data.results.filter(r => r.result_type === 'profile').sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+      plan: data.results.filter(r => r.result_type === 'plan').sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+      scripts: data.results.filter(r => r.result_type === 'scripts').sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    };
+    
+    const typeNames = {
+      profile: '帳號定位',
+      plan: '選題方向',
+      scripts: '一週腳本'
+    };
+    
+    let html = '';
+    
+    // 顯示每個類型的結果
+    ['profile', 'plan', 'scripts'].forEach(type => {
+      const results = groupedResults[type];
+      if (results.length === 0) return;
+      
+      html += `<div class="mode1-oneclick-history-section">
+        <div class="mode1-oneclick-history-section-title">${typeNames[type]}</div>`;
+      
+      results.forEach((result, index) => {
+        const date = new Date(result.created_at).toLocaleString('zh-TW', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        const contentPreview = result.content ? result.content.replace(/<[^>]*>/g, '').substring(0, 150) : '';
+        const fullContent = result.content || '';
+        
+        html += `
+          <div class="mode1-oneclick-history-item" data-result-id="${result.id}" data-result-type="${type}">
+            <div class="mode1-oneclick-history-item-header">
+              <div class="mode1-oneclick-history-item-title">${result.title || typeNames[type]}</div>
+              <div class="mode1-oneclick-history-item-date">${date}</div>
+            </div>
+            <div class="mode1-oneclick-history-item-content" id="historyContent${result.id}">
+              ${renderMode1Markdown(contentPreview)}${fullContent.length > 150 ? '...' : ''}
+            </div>
+            <div class="mode1-oneclick-history-item-actions">
+              <button class="mode1-oneclick-history-item-btn" onclick="expandHistoryContent(${result.id})">
+                <span>展開</span>
+              </button>
+              <button class="mode1-oneclick-history-item-btn primary" onclick="loadHistoryResultToGenerate('${type}', ${result.id})">
+                <span>使用此結果</span>
+              </button>
+              <button class="mode1-oneclick-history-item-btn" onclick="exportHistoryResult(${result.id}, '${type}')">
+                <span>匯出</span>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+    });
+    
+    if (html === '') {
+      container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>尚無過往紀錄</p></div>';
+    } else {
+      container.innerHTML = html;
+    }
+  } catch (error) {
+    console.error('載入過往紀錄失敗:', error);
+    container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #dc2626;"><p>載入失敗，請稍後再試</p></div>';
+  }
+}
+
+// 展開/收起歷史內容
+window.expandHistoryContent = function(resultId) {
+  const contentEl = document.getElementById(`historyContent${resultId}`);
+  if (!contentEl) return;
+  
+  const item = contentEl.closest('.mode1-oneclick-history-item');
+  if (!item) return;
+  
+  const resultType = item.dataset.resultType;
+  const resultIdNum = parseInt(resultId);
+  
+  if (contentEl.classList.contains('expanded')) {
+    // 收起
+    contentEl.classList.remove('expanded');
+    const btn = contentEl.nextElementSibling?.querySelector('button');
+    if (btn) btn.innerHTML = '<span>展開</span>';
+    
+    // 重新載入簡短預覽
+    loadHistoryContentPreview(resultIdNum, resultType, contentEl);
+  } else {
+    // 展開
+    loadFullHistoryContent(resultIdNum, resultType, contentEl);
+  }
+};
+
+// 載入完整歷史內容
+async function loadFullHistoryContent(resultId, resultType, contentEl) {
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.result) {
+        contentEl.innerHTML = renderMode1Markdown(data.result.content);
+        contentEl.classList.add('expanded');
+        const btn = contentEl.nextElementSibling?.querySelector('button');
+        if (btn) btn.innerHTML = '<span>收起</span>';
+      }
+    }
+  } catch (error) {
+    console.error('載入完整內容失敗:', error);
+  }
+}
+
+// 載入歷史內容預覽
+async function loadHistoryContentPreview(resultId, resultType, contentEl) {
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.result) {
+        const preview = data.result.content.replace(/<[^>]*>/g, '').substring(0, 150);
+        contentEl.innerHTML = renderMode1Markdown(preview) + '...';
+      }
+    }
+  } catch (error) {
+    console.error('載入預覽失敗:', error);
+  }
+}
+
+// 使用歷史結果到生成區域
+window.loadHistoryResultToGenerate = function(type, resultId) {
+  // 切換到生成標籤
+  switchMode1OneClickTab('generate').then(() => {
+    // 載入結果到對應的卡片
+    loadHistoryResultToCard(type, resultId);
+  });
+};
+
+// 載入歷史結果到卡片
+async function loadHistoryResultToCard(type, resultId) {
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.result) {
+        const typeMap = {
+          'profile': 'positioning',
+          'plan': 'topics',
+          'scripts': 'weekly'
+        };
+        const cardType = typeMap[type] || type;
+        updateMode1OneClickStatus(cardType, 'completed', data.result.content);
+        
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('已載入歷史結果', 2000);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('載入歷史結果失敗:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('載入失敗', 2000);
+    }
+  }
+}
+
+// 匯出歷史結果
+window.exportHistoryResult = async function(resultId, resultType) {
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.result) {
+        const typeNames = {
+          'profile': '帳號定位',
+          'plan': '選題方向',
+          'scripts': '一週腳本'
+        };
+        const typeName = typeNames[resultType] || resultType;
+        const textContent = data.result.content.replace(/<[^>]*>/g, '');
+        
+        const csvContent = `類型,標題,內容,匯出時間\n"${resultType}","${data.result.title || typeName}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW', {
+          timeZone: 'Asia/Taipei',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        })}"`;
+        
+        const csvBlob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const csvUrl = URL.createObjectURL(csvBlob);
+        const csvLink = document.createElement('a');
+        csvLink.href = csvUrl;
+        csvLink.download = `ip-${resultType}-${resultId}-${Date.now()}.csv`;
+        csvLink.click();
+        URL.revokeObjectURL(csvUrl);
+        
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('結果已匯出為 CSV 檔案', 3000);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('匯出失敗:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('匯出失敗，請稍後再試', 3000);
+    }
+  }
+};
+
+// 載入生成結果模態框的已保存結果
+async function loadMode1OneClickSavedResults() {
+  if (!ipPlanningUser?.user_id || !ipPlanningToken) {
+    return;
+  }
+  
+  try {
+    // 檢查已保存的結果
+    const [savedPositioning, savedTopics, savedWeekly] = await Promise.all([
+      checkSavedIpPlanningResult('profile', false),
+      checkSavedIpPlanningResult('plan', false),
+      checkSavedIpPlanningResult('scripts', false)
+    ]);
+    
+    // 更新帳號定位
+    if (savedPositioning) {
+      updateMode1OneClickStatus('positioning', 'completed', savedPositioning.content);
+    } else {
+      updateMode1OneClickStatus('positioning', 'pending', '');
+    }
+    
+    // 更新選題方向
+    if (savedTopics) {
+      updateMode1OneClickStatus('topics', 'completed', savedTopics.content);
+    } else {
+      updateMode1OneClickStatus('topics', 'pending', '');
+    }
+    
+    // 更新一週腳本
+    if (savedWeekly) {
+      updateMode1OneClickStatus('weekly', 'completed', savedWeekly.content);
+    } else {
+      updateMode1OneClickStatus('weekly', 'pending', '');
+    }
+  } catch (error) {
+    console.error('載入已保存結果失敗:', error);
   }
 }
 
@@ -1812,6 +2154,10 @@ function closeMode1OneClickModal() {
 
 // 更新一鍵生成結果卡片狀態
 function updateMode1OneClickStatus(type, status, message = '') {
+  // 如果狀態為 pending 且沒有內容，顯示預設提示
+  if (status === 'pending' && !message) {
+    message = '點擊上方按鈕開始生成';
+  }
   const statusMap = {
     'positioning': {
       statusEl: document.getElementById('mode1OneClickPositioningStatus'),
@@ -1859,19 +2205,24 @@ function updateMode1OneClickStatus(type, status, message = '') {
   }
   
   // 更新內容
-  if (elements.contentEl && message) {
+  if (elements.contentEl) {
     if (status === 'generating') {
       elements.contentEl.innerHTML = `
         <div class="generating-container">
           <div class="generating-spinner"></div>
-          <div class="generating-text">${message}<span class="generating-dots"></span></div>
+          <div class="generating-text">${message || '生成中...'}<span class="generating-dots"></span></div>
         </div>
       `;
-    } else if (status === 'completed') {
+    } else if (status === 'completed' && message) {
       elements.contentEl.innerHTML = renderMode1Markdown(message);
       elements.contentEl.classList.add('has-content');
       if (elements.actionsEl) {
         elements.actionsEl.style.display = 'flex';
+      }
+    } else if (status === 'pending') {
+      elements.contentEl.innerHTML = `<p style="text-align: center; color: #9ca3af; padding: 40px 0;">${message || '點擊上方按鈕開始生成'}</p>`;
+      if (elements.actionsEl) {
+        elements.actionsEl.style.display = 'none';
       }
     } else if (status === 'error') {
       const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
@@ -1880,7 +2231,7 @@ function updateMode1OneClickStatus(type, status, message = '') {
         div.textContent = String(text);
         return div.innerHTML;
       });
-      elements.contentEl.innerHTML = `<div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px;">${escapeHtml(message)}</div>`;
+      elements.contentEl.innerHTML = `<div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px;">${escapeHtml(message || '生成失敗')}</div>`;
     }
   }
 }
@@ -2260,7 +2611,7 @@ async function saveMode1OneClickResult(type) {
   if (originalBlock) originalBlock.classList.add('active');
 }
 
-// 重新生成一鍵生成結果
+// 重新生成生成結果
 async function regenerateMode1OneClickResult(type, forceRegenerate = true) {
   updateMode1OneClickStatus(type, 'generating', `正在重新生成${type === 'positioning' ? '帳號定位' : type === 'topics' ? '選題方向' : '一週腳本'}`);
   
@@ -2283,6 +2634,53 @@ async function regenerateMode1OneClickResult(type, forceRegenerate = true) {
     updateMode1OneClickStatus(type, 'error', error.message || '生成失敗');
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast(`重新生成失敗`, 3000);
+    }
+  }
+}
+
+// 匯出生成結果
+function exportMode1OneClickResult(type) {
+  const contentEl = document.getElementById(`mode1OneClick${type === 'positioning' ? 'Positioning' : type === 'topics' ? 'Topics' : 'Weekly'}Content`);
+  if (!contentEl || !contentEl.innerHTML.trim()) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('沒有可匯出的內容', 3000);
+    }
+    return;
+  }
+  
+  try {
+    const textContent = contentEl.innerText || contentEl.textContent || '';
+    const typeNames = {
+      'positioning': '帳號定位',
+      'topics': '選題方向',
+      'weekly': '一週腳本'
+    };
+    const typeName = typeNames[type] || type;
+    
+    const csvContent = `類型,標題,內容,匯出時間\n"${type}","${typeName}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW', {
+      timeZone: 'Asia/Taipei',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    })}"`;
+    
+    const csvBlob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvUrl = URL.createObjectURL(csvBlob);
+    const csvLink = document.createElement('a');
+    csvLink.href = csvUrl;
+    csvLink.download = `ip-${type}-${Date.now()}.csv`;
+    csvLink.click();
+    URL.revokeObjectURL(csvUrl);
+    
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('結果已匯出為 CSV 檔案', 3000);
+    }
+  } catch (error) {
+    console.error('匯出失敗:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('匯出失敗，請稍後再試', 3000);
     }
   }
 }
