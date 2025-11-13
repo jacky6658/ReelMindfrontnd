@@ -13704,7 +13704,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 檢查 URL 參數中是否有 activation_token（授權連結）
         const urlParams = new URLSearchParams(window.location.search);
         const hashParams = new URLSearchParams(window.location.hash.slice(1));
-        const activationToken = urlParams.get('token') || hashParams.get('token');
+        let activationToken = urlParams.get('token') || hashParams.get('token');
         const activationSuccess = urlParams.get('activation') || hashParams.get('activation');
         
         // 處理授權成功頁面（從後端 redirect 回來）

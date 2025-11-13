@@ -286,6 +286,9 @@
         redirect: 'manual'
       });
       
+      // 記錄響應狀態以便調試
+      console.log('授權驗證響應狀態:', response.status, response.statusText);
+      
       if (response.ok || response.status === 302) {
         // 驗證成功
         // 等待一小段時間確保後端完成資料庫更新
@@ -367,11 +370,29 @@
         let errorMessage = '啟用失敗，請稍後再試';
         try {
           const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
+          errorMessage = errorData.error || errorData.message || errorMessage;
+          
+          // 如果有詳細資訊，顯示給用戶
+          if (errorData.activated_at) {
+            const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW');
+            errorMessage = `此授權連結已使用（${activatedDate}）`;
+          } else if (errorData.expired_at) {
+            const expiredDate = new Date(errorData.expired_at).toLocaleString('zh-TW');
+            errorMessage = `此授權連結已過期（${expiredDate}）`;
+          }
         } catch (e) {
-          // 如果無法解析 JSON，使用預設錯誤訊息
+          // 如果無法解析 JSON，根據狀態碼顯示不同訊息
+          if (response.status === 500) {
+            errorMessage = '伺服器錯誤，請稍後再試或聯繫客服';
+          } else if (response.status === 404) {
+            errorMessage = '授權連結無效或不存在';
+          } else if (response.status === 400) {
+            errorMessage = '授權連結格式錯誤';
+          } else {
+            errorMessage = `啟用失敗（錯誤代碼：${response.status}）`;
+          }
         }
-        showToast(errorMessage, 5000);
+        showToast(`❌ ${errorMessage}`, 5000);
       }
     } catch (error) {
       console.error('啟用失敗:', error);
