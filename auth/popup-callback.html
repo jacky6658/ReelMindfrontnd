@@ -383,6 +383,12 @@
     new URLSearchParams(location.search).get('refresh_token') ||
     new URLSearchParams(location.hash.slice(1)).get('refresh_token');
   
+  // 獲取授權連結的 activation_token
+  var activationToken = 
+    new URLSearchParams(location.search).get('activation_token') ||
+    new URLSearchParams(location.hash.slice(1)).get('activation_token') ||
+    sessionStorage.getItem('pendingActivationToken');
+  
   // 獲取用戶資訊
   var user_id = new URLSearchParams(location.search).get('user_id') || 
                 new URLSearchParams(location.hash.slice(1)).get('user_id');
@@ -400,12 +406,50 @@
 
   console.log('DEBUG: Extracted data:', { 
     token: token ? 'present (' + token.substring(0, 20) + '...)' : 'missing', 
+    activationToken: activationToken ? 'present (' + activationToken.substring(0, 20) + '...)' : 'missing',
     user_id, 
     email, 
     name, 
     picture,
-    origin: originParam
+    origin: originParam,
+    search: location.search,
+    hash: location.hash
   });
+
+  // 如果沒有 token 但有 activation_token，表示是授權連結流程，需要先登入
+  if (!token && activationToken) {
+    console.log('DEBUG: 檢測到授權連結，需要先登入');
+    updateStatus('準備登入以啟用授權...', false);
+    
+    // 保存 activation_token 到 sessionStorage
+    sessionStorage.setItem('pendingActivationToken', activationToken);
+    console.log('DEBUG: 已保存 activation_token 到 sessionStorage:', activationToken.substring(0, 20) + '...');
+    
+    // 顯示動畫後自動跳轉到 Google 登入
+    setTimeout(function() {
+      updateStatus('正在跳轉到 Google 登入...', false);
+      
+      // 獲取 Google 登入 URL
+      var fbParam = encodeURIComponent(window.location.origin);
+      var authUrl = 'https://aivideobackend.zeabur.app/api/auth/google?fb=' + fbParam;
+      
+      console.log('DEBUG: 準備跳轉到 Google 登入:', authUrl);
+      
+      // 跳轉到 Google 登入
+      setTimeout(function() {
+        window.location.href = authUrl;
+      }, 1000); // 再等 1 秒讓動畫顯示
+    }, 2000); // 顯示動畫 2 秒後跳轉
+    return; // 結束處理
+  }
+  
+  // 如果登入完成後有 token，檢查是否有待處理的 activation_token
+  if (token) {
+    var pendingActivationToken = sessionStorage.getItem('pendingActivationToken');
+    if (pendingActivationToken) {
+      console.log('DEBUG: 登入成功，檢測到待處理的授權 token');
+    }
+  }
 
   if (token) {
     // 無論如何，先保存到 localStorage
@@ -426,19 +470,36 @@
       updateStatus('⚠️ 保存失敗，請重試', false, true);
     }
     
+    // 檢查是否有待處理的授權 token
+    var pendingActivationToken = sessionStorage.getItem('pendingActivationToken');
+    if (pendingActivationToken) {
+      console.log('DEBUG: 檢測到待處理的授權 token，登入成功後將處理授權');
+      // 授權 token 會在跳轉到首頁後由首頁處理
+    }
+    
     // 手機版處理：直接跳轉回首頁（因為是整頁跳轉，不是彈窗）
     if (isMobile || !window.opener) {
       console.log('DEBUG: Mobile or no opener detected, redirecting to homepage');
       showSuccess();
-      updateStatus('正在跳轉...', true);
+      
+      // 如果有待處理的授權 token，顯示不同的訊息
+      if (pendingActivationToken) {
+        updateStatus('✅ 登入成功！正在啟用授權...', true);
+      } else {
+        updateStatus('✅ 登入成功！正在跳轉...', true);
+      }
       
       // 延遲一小段時間確保 localStorage 已保存，然後跳轉回首頁
       setTimeout(function() {
-        // 直接跳轉到首頁根目錄
+        // 如果有待處理的授權 token，帶上它跳轉到首頁
         var homepageUrl = window.location.origin + '/';
+        if (pendingActivationToken) {
+          // 授權 token 已經在 sessionStorage 中，首頁會自動處理
+          console.log('DEBUG: Redirecting to homepage with pending activation token');
+        }
         console.log('DEBUG: Redirecting to homepage:', homepageUrl);
         window.location.href = homepageUrl;
-      }, 1500); // 延長一點時間讓動畫完成
+      }, 2000); // 延長一點時間讓動畫完成
       return; // 手機版直接結束，不處理 postMessage
     }
     
@@ -583,8 +644,16 @@
       updateStatus('✅ 登入成功！視窗即將自動關閉...', true);
     }, 1500);
   } else {
-    console.warn('DEBUG: ⚠️ No token found in URL');
-    updateStatus('⚠️ 登入完成，但未找到認證資訊', false, true);
+    // 檢查是否有待處理的 activation_token（可能是從授權連結來的，但登入流程還沒完成）
+    var pendingActivationToken = sessionStorage.getItem('pendingActivationToken');
+    if (pendingActivationToken) {
+      console.log('DEBUG: 沒有 token，但有待處理的 activation_token，可能是登入流程中斷');
+      console.log('DEBUG: 待處理的 activation_token:', pendingActivationToken.substring(0, 20) + '...');
+      updateStatus('⚠️ 登入完成，但未找到認證資訊。請重新點擊授權連結。', false, true);
+    } else {
+      console.warn('DEBUG: ⚠️ No token found in URL and no pending activation token');
+      updateStatus('⚠️ 登入完成，但未找到認證資訊', false, true);
+    }
     if (progressBar) {
       progressBar.style.width = '100%';
       progressBar.style.background = '#DC2626';

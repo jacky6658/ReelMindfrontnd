@@ -359,7 +359,7 @@
           overscroll-behavior: contain;
           min-height: 0 !important;
           max-height: none !important;
-          padding: 16px 24px !important; /* 減少內邊距 */
+          padding: 16px 12px !important; /* 手機版減少左右內邊距，讓對話框更居中 */
           margin: 0 !important;
           /* 動態計算底部 padding，為輸入欄位留出空間（考慮 safe-area-inset-bottom） */
           padding-bottom: calc(200px + env(safe-area-inset-bottom, 0px)) !important;
@@ -372,7 +372,8 @@
           flex-direction: column !important;
           flex-shrink: 0 !important;
           flex-grow: 0 !important;
-          padding: 12px 32px 16px 32px !important; /* 增加左右 padding，與對話框對齊 */
+          padding: 12px 16px 16px 16px !important; /* 手機版減少左右 padding */
+          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px) + 60px) !important; /* 增加底部 padding，為 iOS Safari 網址欄留出空間 */
           margin: 0 !important;
           visibility: visible !important;
           opacity: 1 !important;
@@ -381,7 +382,7 @@
           max-height: none !important;
           z-index: 100 !important;
           position: fixed !important; /* 使用 fixed 定位固定在底部 */
-          bottom: calc(0px + env(safe-area-inset-bottom, 0px)) !important; /* 使用 safe-area-inset-bottom 避免被網址欄擋到 */
+          bottom: 0 !important; /* 改為 0，使用 padding-bottom 來處理安全區域 */
           left: 0 !important;
           right: 0 !important;
           background: #ffffff !important; /* 添加背景色，避免被遮擋 */
@@ -390,6 +391,11 @@
           /* iOS Safari 優化 */
           -webkit-transform: translateZ(0);
           transform: translateZ(0);
+        }
+        
+        /* 當輸入框獲得焦點時，進一步提高位置，避免被鍵盤遮擋 */
+        .mode1-page .input-row:focus-within {
+          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px) + 80px) !important; /* 鍵盤彈出時增加更多空間 */
         }
         
         /* 確保快速按鈕在輸入欄位內顯示 */
@@ -637,13 +643,12 @@
         height: 100dvh; /* 使用動態視窗高度（支援 iOS Safari） */
         background: rgba(0, 0, 0, 0.6);
         z-index: 10000;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
         padding: env(safe-area-inset-top, 20px) env(safe-area-inset-right, 20px) env(safe-area-inset-bottom, 20px) env(safe-area-inset-left, 20px);
         /* iOS Safari 安全區域支援 */
         -webkit-overflow-scrolling: touch;
@@ -669,6 +674,8 @@
         transition: transform 0.3s ease;
         /* iOS Safari 安全區域支援 */
         border-radius: 16px 16px 0 0; /* 手機版底部圓角移除 */
+        position: relative; /* 確保定位正確 */
+        margin: auto; /* 確保居中 */
       }
       
       /* 電腦版（大螢幕）優化 */
@@ -1213,8 +1220,16 @@
         min-height: 200px;
         color: #6b7280;
         line-height: 1.6;
-        overflow-x: auto; /* 允許橫向滾動 */
+        overflow-x: visible; /* 手機版改為可見，避免橫向滾動 */
+        overflow-y: auto; /* 允許縱向滾動 */
         -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
+      }
+      
+      /* 電腦版保持橫向滾動（如果需要） */
+      @media (min-width: 769px) {
+        .mode1-oneclick-result-content {
+          overflow-x: auto;
+        }
       }
       
       .mode1-oneclick-result-content.has-content {
@@ -1275,19 +1290,46 @@
         vertical-align: top;
       }
       
-      /* 一週腳本表格特殊處理：允許橫向滾動，不換行 */
+      /* 一週腳本表格特殊處理：手機版改為自動換行，避免橫向滾動 */
       .mode1-oneclick-result-content-wrapper:has(table) {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
-        overscroll-behavior-x: contain; /* 防止滾動穿透 */
+        overflow-x: visible; /* 手機版改為可見，允許內容自動換行 */
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
       }
       
-      .mode1-oneclick-result-content-wrapper table {
-        min-width: 800px; /* 確保表格有足夠寬度，觸發橫向滾動 */
+      /* 電腦版保持橫向滾動 */
+      @media (min-width: 769px) {
+        .mode1-oneclick-result-content-wrapper:has(table) {
+          overflow-x: auto;
+        }
+        
+        .mode1-oneclick-result-content-wrapper table {
+          min-width: 800px; /* 確保表格有足夠寬度，觸發橫向滾動 */
+        }
+        
+        .mode1-oneclick-result-content-wrapper table td {
+          white-space: nowrap; /* 防止文字換行，強制使用橫向滾動 */
+        }
       }
       
-      .mode1-oneclick-result-content-wrapper table td {
-        white-space: nowrap; /* 防止文字換行，強制使用橫向滾動 */
+      /* 手機版表格自動換行 */
+      @media (max-width: 768px) {
+        .mode1-oneclick-result-content-wrapper table {
+          min-width: 100%; /* 手機版表格寬度為 100% */
+          width: 100%;
+          table-layout: auto; /* 自動調整列寬 */
+        }
+        
+        .mode1-oneclick-result-content-wrapper table td {
+          white-space: normal; /* 允許文字換行 */
+          word-wrap: break-word; /* 長文字自動換行 */
+          word-break: break-word; /* 強制換行 */
+        }
+        
+        .mode1-oneclick-result-content-wrapper table th {
+          white-space: normal; /* 允許標題換行 */
+          word-wrap: break-word;
+        }
       }
       
       /* 內容容器 */
@@ -1437,10 +1479,20 @@
       .mode1-expand-modal-content {
         padding: 24px;
         overflow-y: auto;
+        overflow-x: hidden; /* 防止橫向滾動 */
         flex: 1;
         color: #374151;
         line-height: 1.6;
         font-size: 16px; /* 電腦版預設字體大小 */
+        -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
+      }
+      
+      /* 手機版展開模態視窗內容區域 */
+      @media (max-width: 768px) {
+        .mode1-expand-modal-content {
+          padding: 16px;
+          overflow-x: hidden !important; /* 手機版強制隱藏橫向滾動 */
+        }
       }
       
       .mode1-expand-modal-content p {
@@ -1668,12 +1720,15 @@
         
         .mode1-expand-modal-content table {
           font-size: 12px; /* 手機版表格字體 */
-          min-width: 600px;
-          display: block;
-          overflow-x: auto;
+          width: 100% !important; /* 強制表格寬度為 100% */
+          min-width: 100% !important; /* 移除最小寬度限制 */
+          max-width: 100% !important; /* 確保不超出容器 */
+          display: table !important; /* 保持表格顯示 */
+          overflow-x: visible !important; /* 手機版改為可見，允許內容自動換行 */
           -webkit-overflow-scrolling: touch;
           overscroll-behavior-x: contain;
           margin: 16px 0;
+          table-layout: auto !important; /* 自動調整列寬 */
         }
         
         .mode1-expand-modal-content table thead,
@@ -1681,22 +1736,24 @@
         .mode1-expand-modal-content table tr {
           display: table;
           width: 100%;
-          table-layout: fixed;
-        }
-        
-        .mode1-expand-modal-content table th,
-        .mode1-expand-modal-content table td {
-          padding: 10px 12px; /* 手機版較小內距 */
-          font-size: 12px;
+          table-layout: auto; /* 自動調整列寬 */
         }
         
         .mode1-expand-modal-content table th {
-          white-space: nowrap;
+          padding: 12px 10px; /* 手機版減少內距 */
+          font-size: 13px;
+          white-space: normal !important; /* 允許標題換行 */
+          word-wrap: break-word !important;
+          word-break: break-word !important;
         }
         
         .mode1-expand-modal-content table td {
-          word-wrap: break-word;
-          overflow-wrap: break-word;
+          padding: 12px 10px; /* 手機版減少內距 */
+          font-size: 12px;
+          white-space: normal !important; /* 允許文字換行 */
+          word-wrap: break-word !important;
+          word-break: break-word !important;
+          overflow-wrap: break-word !important;
         }
       }
       
@@ -2266,6 +2323,21 @@
         order: 1 !important;
         font-size: 16px !important;
         box-sizing: border-box !important;
+        max-width: 100% !important; /* 確保不會超出容器 */
+      }
+      
+      /* 手機版對話框調整 - 減少右邊距 */
+      @media (max-width: 768px) {
+        #mode1-chatMessages .message.user .message-content {
+          margin-right: 8px !important; /* 減少右邊距 */
+          padding: 16px 20px !important; /* 減少內邊距 */
+          padding-left: 24px !important;
+        }
+        
+        #mode1-chatMessages {
+          padding-left: 12px !important; /* 減少左邊距，讓對話框更居中 */
+          padding-right: 12px !important; /* 減少右邊距 */
+        }
       }
       
       #mode1-chatMessages .message.user .message-avatar {

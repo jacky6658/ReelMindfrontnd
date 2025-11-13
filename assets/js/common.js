@@ -662,10 +662,11 @@
         padding: 16px 24px;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 10000;
+        z-index: 99999;
         display: none;
         opacity: 0;
         transition: opacity 0.3s;
+        pointer-events: auto;
       `;
       document.body.appendChild(toastEl);
     }
