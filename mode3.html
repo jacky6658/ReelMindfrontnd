@@ -404,6 +404,57 @@
       @media (max-width: 768px) {
         .page-content {
           padding: 12px;
+          padding-top: calc(12px + env(safe-area-inset-top, 0px));
+          padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        }
+        
+        .step-flow-container {
+          max-width: 100%;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .page-content {
+          padding: 10px;
+          padding-top: calc(10px + env(safe-area-inset-top, 0px));
+          padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+        }
+        
+        .step-card {
+          padding: 12px;
+        }
+        
+        .step-card-title {
+          font-size: 16px;
+        }
+        
+        .step-card-description {
+          font-size: 11px;
+        }
+        
+        .form-group {
+          gap: 6px;
+        }
+        
+        .form-label {
+          font-size: 12px;
+        }
+        
+        .form-input,
+        .form-select,
+        .form-textarea {
+          padding: 8px 10px;
+          font-size: 16px;
+        }
+        
+        .button-selector {
+          padding: 8px 10px;
+          font-size: 12px;
+          min-height: 56px;
+        }
+        
+        .button-selector-desc {
+          font-size: 9px;
         }
       }
       
@@ -559,7 +610,40 @@
       
       @media (max-width: 768px) {
         .step-card {
-          padding: 20px;
+          padding: 16px;
+        }
+        
+        .step-card-header {
+          margin-bottom: 16px;
+        }
+        
+        .step-card-title {
+          font-size: 18px;
+          gap: 8px;
+          margin-bottom: 6px;
+        }
+        
+        .step-card-description {
+          font-size: 12px;
+        }
+        
+        .step-card-content {
+          gap: 16px;
+        }
+        
+        .progress-steps {
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+        
+        .progress-step {
+          gap: 8px;
+        }
+        
+        .progress-step-circle {
+          width: 36px;
+          height: 36px;
+          font-size: 14px;
         }
       }
       
@@ -612,6 +696,28 @@
         background: white;
         color: #1e293b;
         transition: all 0.2s;
+        /* iOS Safari 優化 */
+        -webkit-appearance: none;
+        appearance: none;
+        font-size: 16px; /* 防止 iOS 自動縮放 */
+      }
+      
+      @media (max-width: 768px) {
+        .form-label {
+          font-size: 13px;
+        }
+        
+        .form-input,
+        .form-select,
+        .form-textarea {
+          padding: 10px 12px;
+          font-size: 16px; /* 防止 iOS 自動縮放 */
+          min-height: 44px; /* iOS 最小觸控目標 */
+        }
+        
+        .form-textarea {
+          min-height: 120px;
+        }
       }
       
       .form-input:focus,
@@ -637,6 +743,7 @@
       @media (max-width: 768px) {
         .button-grid {
           grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
         }
       }
       
@@ -651,6 +758,26 @@
         cursor: pointer;
         transition: all 0.2s;
         text-align: center;
+        min-height: 44px; /* iOS 最小觸控目標 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+      
+      @media (max-width: 768px) {
+        .button-selector {
+          padding: 10px 12px;
+          font-size: 13px;
+          min-height: 60px; /* 手機版增加高度以容納兩行文字 */
+        }
+        
+        .button-selector-desc {
+          font-size: 10px;
+          margin-top: 4px;
+        }
       }
       
       .button-selector:hover {
@@ -687,6 +814,22 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
+        min-height: 44px; /* iOS 最小觸控目標 */
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+      
+      @media (max-width: 768px) {
+        .btn-primary {
+          padding: 12px 20px;
+          font-size: 15px;
+        }
+        
+        .btn-outline {
+          padding: 12px 20px;
+          font-size: 15px;
+          min-height: 44px;
+        }
       }
       
       .btn-primary:hover:not(:disabled) {

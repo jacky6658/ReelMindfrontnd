@@ -924,7 +924,7 @@
       @media (max-width: 768px) {
         .mode1-oneclick-results-grid {
           grid-template-columns: 1fr;
-          gap: 16px;
+          gap: 12px;
         }
         
         .mode1-oneclick-modal-overlay {
@@ -935,8 +935,8 @@
         
         .mode1-oneclick-modal {
           max-width: 100%;
-          max-height: 90vh;
-          max-height: 90dvh; /* iOS Safari 動態視窗高度 */
+          max-height: 85vh;
+          max-height: 85dvh; /* iOS Safari 動態視窗高度，降低高度以適配手機 */
           border-radius: 20px 20px 0 0;
           padding-bottom: env(safe-area-inset-bottom, 0px); /* iOS 安全區域 */
           width: 100%;
@@ -949,32 +949,180 @@
         }
         
         .mode1-oneclick-modal-header {
-          padding: 20px;
-          padding-top: calc(20px + env(safe-area-inset-top, 0px)); /* 安全區域 */
+          padding: 16px;
+          padding-top: calc(16px + env(safe-area-inset-top, 0px)); /* 安全區域 */
           border-radius: 20px 20px 0 0;
         }
         
+        .mode1-oneclick-modal-header h2 {
+          font-size: 18px; /* 手機版標題字體縮小 */
+        }
+        
+        .mode1-oneclick-tabs {
+          padding: 0 16px;
+        }
+        
+        .mode1-oneclick-tab {
+          padding: 12px 16px;
+          font-size: 14px; /* 手機版標籤字體縮小 */
+        }
+        
         .mode1-oneclick-modal-content {
-          padding: 16px;
-          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); /* 安全區域 */
-          max-height: calc(90vh - 80px);
-          max-height: calc(90dvh - 80px); /* 減去標題高度 */
+          padding: 12px;
+          padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); /* 安全區域 */
+          max-height: calc(85vh - 120px); /* 減去標題和標籤高度 */
+          max-height: calc(85dvh - 120px);
         }
         
         .mode1-oneclick-generate-all-btn {
-          padding: 14px 20px;
-          font-size: 16px;
-          margin-bottom: 20px;
+          padding: 12px 16px;
+          font-size: 14px; /* 手機版按鈕字體縮小 */
+          margin-bottom: 16px;
+          min-height: 44px;
         }
         
         .mode1-oneclick-result-card {
-          padding: 16px;
+          padding: 12px;
+          border-radius: 8px;
+        }
+        
+        .mode1-oneclick-result-card-header {
+          margin-bottom: 12px;
+          padding-bottom: 8px;
+        }
+        
+        .mode1-oneclick-result-card-title {
+          font-size: 16px; /* 手機版卡片標題縮小 */
+        }
+        
+        .mode1-oneclick-result-content {
+          font-size: 13px; /* 手機版內容字體縮小 */
+          line-height: 1.5;
+          min-height: 150px;
+        }
+        
+        .mode1-oneclick-result-content p {
+          font-size: 13px;
+          margin-bottom: 8px;
+        }
+        
+        .mode1-oneclick-result-content ul,
+        .mode1-oneclick-result-content ol {
+          font-size: 13px;
+          padding-left: 20px;
+          margin-bottom: 8px;
+        }
+        
+        .mode1-oneclick-result-content li {
+          font-size: 13px;
+          margin-bottom: 6px;
+        }
+        
+        .mode1-oneclick-result-content h1,
+        .mode1-oneclick-result-content h2,
+        .mode1-oneclick-result-content h3,
+        .mode1-oneclick-result-content h4 {
+          font-size: 15px; /* 手機版標題字體縮小 */
+          margin-top: 12px;
+          margin-bottom: 8px;
         }
         
         .mode1-oneclick-action-btn {
           min-height: 44px; /* iOS 最小觸控目標 */
-          padding: 12px 16px;
+          padding: 10px 14px;
+          font-size: 13px; /* 手機版按鈕字體縮小 */
+        }
+        
+        /* 手機版表格優化 */
+        .mode1-oneclick-result-content table {
+          font-size: 12px;
+        }
+        
+        .mode1-oneclick-result-content table th,
+        .mode1-oneclick-result-content table td {
+          padding: 6px 8px;
+          font-size: 12px;
+        }
+      }
+      
+      /* 小手機進一步優化（小於 480px） */
+      @media (max-width: 480px) {
+        .mode1-oneclick-modal {
+          max-height: 80vh;
+          max-height: 80dvh;
+        }
+        
+        .mode1-oneclick-modal-header {
+          padding: 12px;
+          padding-top: calc(12px + env(safe-area-inset-top, 0px));
+        }
+        
+        .mode1-oneclick-modal-header h2 {
+          font-size: 16px;
+        }
+        
+        .mode1-oneclick-tabs {
+          padding: 0 12px;
+        }
+        
+        .mode1-oneclick-tab {
+          padding: 10px 12px;
+          font-size: 13px;
+        }
+        
+        .mode1-oneclick-modal-content {
+          padding: 10px;
+          padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+          max-height: calc(80vh - 100px);
+          max-height: calc(80dvh - 100px);
+        }
+        
+        .mode1-oneclick-generate-all-btn {
+          padding: 10px 14px;
+          font-size: 13px;
+          margin-bottom: 12px;
+        }
+        
+        .mode1-oneclick-result-card {
+          padding: 10px;
+        }
+        
+        .mode1-oneclick-result-card-title {
           font-size: 14px;
+        }
+        
+        .mode1-oneclick-result-content {
+          font-size: 12px;
+          min-height: 120px;
+        }
+        
+        .mode1-oneclick-result-content p,
+        .mode1-oneclick-result-content ul,
+        .mode1-oneclick-result-content ol,
+        .mode1-oneclick-result-content li {
+          font-size: 12px;
+        }
+        
+        .mode1-oneclick-result-content h1,
+        .mode1-oneclick-result-content h2,
+        .mode1-oneclick-result-content h3,
+        .mode1-oneclick-result-content h4 {
+          font-size: 14px;
+        }
+        
+        .mode1-oneclick-action-btn {
+          padding: 8px 12px;
+          font-size: 12px;
+        }
+        
+        .mode1-oneclick-result-content table {
+          font-size: 11px;
+        }
+        
+        .mode1-oneclick-result-content table th,
+        .mode1-oneclick-result-content table td {
+          padding: 4px 6px;
+          font-size: 11px;
         }
       }
       
