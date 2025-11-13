@@ -661,6 +661,7 @@
     const userAvatar = document.getElementById('userAvatar');
     const userName = document.getElementById('userName');
     const userDBTab = document.getElementById('userDBTab');
+    const userDBLink = document.getElementById('userDBLink');  // mode3 右側的創作者資料庫連結
     const userDBMobileTab = document.getElementById('userDBMobileTab');
     
     if (ipPlanningUser && ipPlanningToken) {
@@ -679,6 +680,9 @@
       if (userDBTab) {
         userDBTab.style.display = 'block';
       }
+      if (userDBLink) {
+        userDBLink.style.display = 'block';
+      }
       if (userDBMobileTab) {
         userDBMobileTab.style.display = 'block';
       }
@@ -691,6 +695,9 @@
       }
       if (userDBTab) {
         userDBTab.style.display = 'none';
+      }
+      if (userDBLink) {
+        userDBLink.style.display = 'none';
       }
       if (userDBMobileTab) {
         userDBMobileTab.style.display = 'none';
