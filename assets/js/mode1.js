@@ -2433,26 +2433,19 @@ function updateMode1OneClickStatus(type, status, message = '') {
           table.style.maxWidth = '100%';
           table.style.boxSizing = 'border-box';
           
-          // 確保所有單元格正確換行（電腦版和手機版都適用）
-          const cells = table.querySelectorAll('th, td');
-          cells.forEach(cell => {
-            cell.style.whiteSpace = 'normal';
-            cell.style.wordWrap = 'break-word';
-            cell.style.wordBreak = 'break-word';
-            cell.style.overflowWrap = 'break-word';
-            cell.style.overflow = 'visible';
-            cell.style.textOverflow = 'clip';
-            cell.style.verticalAlign = 'top';
-          });
-          
           // 手機版：確保表格列寬對齊
           if (window.innerWidth <= 768) {
             table.style.tableLayout = 'fixed';
             table.style.width = '100%';
-          } else {
-            // 電腦版：使用固定表格佈局確保對齊
-            table.style.tableLayout = 'fixed';
-            table.style.width = '100%';
+            
+            // 確保所有單元格正確換行
+            const cells = table.querySelectorAll('th, td');
+            cells.forEach(cell => {
+              cell.style.whiteSpace = 'normal';
+              cell.style.wordWrap = 'break-word';
+              cell.style.wordBreak = 'break-word';
+              cell.style.overflowWrap = 'break-word';
+            });
           }
         });
       }, 100);
