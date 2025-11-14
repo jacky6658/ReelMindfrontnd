@@ -381,7 +381,7 @@
           max-height: none !important;
           z-index: 100 !important;
           position: fixed !important; /* 使用 fixed 定位固定在底部 */
-          bottom: 0px !important; /* 完全貼底，使用 padding-bottom 處理安全區域 */
+          bottom: env(safe-area-inset-bottom, 0px) !important; /* 使用 safe-area-inset-bottom 避免被網址欄擋到 */
           left: 0 !important;
           right: 0 !important;
           background: #ffffff !important; /* 添加背景色，避免被遮擋 */
@@ -397,8 +397,9 @@
           padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px) + 34px) !important;
         }
         
-        /* 當輸入框獲得焦點時（鍵盤彈出），網址欄會隱藏，減少 padding */
+        /* 當輸入框獲得焦點時（鍵盤彈出），網址欄會隱藏，減少 padding 並調整位置 */
         .mode1-page .input-row:focus-within {
+          bottom: 0px !important; /* 鍵盤彈出時網址欄隱藏，可以貼底 */
           padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; /* 鍵盤彈出時網址欄隱藏，減少 padding */
         }
         
@@ -423,7 +424,15 @@
           position: fixed !important;
           width: 100% !important;
           /* iOS Safari 安全區域 */
-          padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+          padding: 0 !important; /* 移除 padding，避免下方空白 */
+          margin: 0 !important;
+        }
+        
+        /* 當輸入框獲得焦點時，移除 body 的固定定位，避免下方空白 */
+        body:has(.mode1-page .input-row:focus-within) {
+          position: relative !important;
+          height: auto !important;
+          overflow: visible !important;
         }
         
         /* 頂部導航欄手機版 */
@@ -517,7 +526,21 @@
           overflow-x: hidden !important;
           -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
           overscroll-behavior: contain; /* 防止滾動穿透 */
-          padding-bottom: env(safe-area-inset-bottom, 0px); /* iOS 安全區域 */
+          padding-top: 16px !important; /* 為頁首留出空間，避免對話泡泡被擋到 */
+          padding-bottom: calc(200px + env(safe-area-inset-bottom, 0px)) !important; /* 為輸入欄位留出空間 */
+        }
+        
+        /* 用戶對話泡泡樣式，確保不被頁首擋到 */
+        #mode1-chatMessages .message.user {
+          margin-top: 8px !important;
+          margin-bottom: 8px !important;
+        }
+        
+        #mode1-chatMessages .message.user .message-content {
+          margin-right: 8px !important;
+          padding: 16px 20px !important;
+          padding-left: 24px !important;
+          max-width: 100% !important;
         }
       }
       
@@ -553,6 +576,15 @@
         top: 100px; /* 調整位置，配合 padding-top: 40px */
         left: 120px;
         z-index: 1002;
+      }
+      
+      /* 手機版：按鈕應該在導航列之下 */
+      @media (max-width: 768px) {
+        .mode1-instructions-btn-container,
+        .mode1-results-btn-container {
+          top: calc(80px + env(safe-area-inset-top, 0px)) !important; /* 在導航列下方 */
+          z-index: 999 !important; /* 低於導航列的 z-index: 1000 */
+        }
       }
       
       .mode1-instructions-btn, .mode1-results-btn {
@@ -707,6 +739,20 @@
           transform: translateY(0) !important; /* 手機版保持位置不變 */
           transition: none !important;
         }
+        
+        /* 防止所有按鈕點擊時觸發視窗動態調整 */
+        .mode1-oneclick-modal-overlay.open .mode1-oneclick-modal {
+          transform: translateY(0) !important; /* 固定位置，不允許動態調整 */
+          transition: transform 0.3s ease !important; /* 保持平滑過渡 */
+        }
+      }
+      
+      /* 電腦版：防止按鈕點擊時視窗移動 */
+      @media (min-width: 769px) {
+        .mode1-oneclick-modal-overlay.open .mode1-oneclick-modal {
+          transform: scale(1) !important; /* 固定縮放，不允許動態調整 */
+          transition: transform 0.3s ease !important; /* 保持平滑過渡 */
+        }
       }
       
       .mode1-oneclick-modal-header {
@@ -845,11 +891,14 @@
         padding-top: 12px;
         border-top: 1px solid #e5e7eb;
         justify-content: flex-start; /* 確保按鈕從左對齊，不會因為內容變化而移動 */
+        width: 100%; /* 固定寬度，防止觸發視窗調整 */
+        box-sizing: border-box; /* 包含 padding 和 border */
       }
       
       .mode1-oneclick-history-item-btn {
         flex: 1 1 0; /* 平均分配空間，允許縮小和放大 */
         min-width: 80px; /* 設定最小寬度，確保按鈕不會太小 */
+        max-width: 150px; /* 設定最大寬度，防止按鈕過大 */
         padding: 8px 16px;
         border: 1px solid #d1d5db;
         border-radius: 6px;
@@ -857,13 +906,14 @@
         color: #374151;
         font-size: 14px;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; /* 只過渡顏色，不包含 transform */
         min-height: 36px;
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
         white-space: nowrap; /* 防止文字換行 */
         overflow: hidden; /* 隱藏溢出文字 */
         text-overflow: ellipsis; /* 溢出顯示省略號 */
+        box-sizing: border-box; /* 包含 padding 和 border */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1632,6 +1682,34 @@
         border-radius: 8px;
         overflow: hidden;
         border: 1px solid #e5e7eb;
+        table-layout: fixed; /* 固定表格布局，確保列對齊 */
+      }
+      
+      /* 手機版展開模態框表格對齊修復 */
+      @media (max-width: 768px) {
+        .mode1-expand-modal-content table {
+          min-width: 100% !important;
+          width: 100% !important;
+          table-layout: fixed !important; /* 固定表格布局 */
+          display: table !important; /* 確保表格顯示 */
+        }
+        
+        .mode1-expand-modal-content table th,
+        .mode1-expand-modal-content table td {
+          width: auto !important;
+          min-width: 0 !important;
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
+          white-space: normal !important; /* 允許換行 */
+          padding: 8px 12px !important;
+          vertical-align: top !important; /* 頂部對齊 */
+        }
+        
+        /* 確保表格列寬度一致 */
+        .mode1-expand-modal-content table colgroup,
+        .mode1-expand-modal-content table col {
+          display: table-column !important;
+        }
       }
       
       .mode1-expand-modal-content table thead {
@@ -1911,11 +1989,14 @@
         padding-top: 16px;
         border-top: 1px solid #e5e7eb;
         justify-content: flex-start; /* 確保按鈕從左對齊，不會因為內容變化而移動 */
+        width: 100%; /* 固定寬度，防止觸發視窗調整 */
+        box-sizing: border-box; /* 包含 padding 和 border */
       }
       
       .mode1-oneclick-action-btn {
         flex: 1 1 0; /* 平均分配空間，允許縮小和放大 */
         min-width: 80px; /* 設定最小寬度，確保按鈕不會太小 */
+        max-width: 150px; /* 設定最大寬度，防止按鈕過大 */
         padding: 10px 16px;
         border: 1px solid #d1d5db;
         border-radius: 8px;
@@ -1924,7 +2005,8 @@
         font-size: 14px;
         font-weight: 500;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; /* 只過渡顏色，不包含 transform */
+        box-sizing: border-box; /* 包含 padding 和 border */
         display: flex;
         align-items: center;
         justify-content: center;

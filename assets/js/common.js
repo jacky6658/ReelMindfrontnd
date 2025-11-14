@@ -768,14 +768,15 @@
       toastEl.className = 'toast';
       toastEl.style.cssText = `
         position: fixed;
-        top: 20px;
-        right: 20px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         background: #1f2937;
         color: white;
         padding: 16px 24px;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 99999;
+        z-index: 100001;
         display: none;
         opacity: 0;
         transition: opacity 0.3s;

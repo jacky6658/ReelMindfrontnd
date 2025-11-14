@@ -435,6 +435,8 @@
         
         .step-flow-container {
           max-width: 100%;
+          padding: 0 20px; /* 手機版左右留出空間 */
+          padding-top: 20px; /* 手機版上方留出空間，避免被切到 */
         }
       }
       
@@ -443,6 +445,11 @@
           padding: 10px;
           padding-top: calc(80px + env(safe-area-inset-top, 0px)); /* 手機版導航列高度約 60-70px，加上安全區域 */
           padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+        }
+        
+        .step-flow-container {
+          padding: 0 16px; /* 小手機版左右留出空間 */
+          padding-top: 16px; /* 小手機版上方留出空間，避免被切到 */
         }
         
         .step-card {
@@ -485,8 +492,19 @@
       
       /* 步驟式流程容器 */
       .step-flow-container {
-        max-width: 900px;
+        max-width: 1200px; /* 增加最大寬度，讓左右延伸 */
         margin: 0 auto;
+        padding: 0 40px; /* 左右留出空間，不要感覺滿版 */
+        padding-top: 24px; /* 上方留出空間，避免被切到 */
+      }
+      
+      /* 電腦版（大螢幕）進一步延伸 */
+      @media (min-width: 1400px) {
+        .step-flow-container {
+          max-width: 1400px;
+          padding: 0 60px;
+          padding-top: 32px;
+        }
       }
       
       /* 返回按鈕 */
@@ -517,7 +535,9 @@
         justify-content: center;
         gap: 32px;
         margin-bottom: 48px;
+        margin-top: 0; /* 確保上方沒有 margin，避免被切到 */
         flex-wrap: nowrap; /* 強制並排，不換行 */
+        padding-top: 0; /* 確保上方沒有 padding */
       }
       
       .progress-step {

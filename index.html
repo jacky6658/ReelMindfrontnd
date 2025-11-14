@@ -11721,43 +11721,60 @@
                     </div>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; margin-top: 40px;">
-                      <!-- 步驟 1：建立IP人設 -->
+                      <!-- 步驟 1：儲存自己的AI金鑰 -->
+                      <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 8px 30px rgba(17,24,39,0.06); border: 1px solid #E2E8F0; text-align: center; position: relative;">
+                        <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 700; box-shadow: 0 4px 12px rgba(245,158,11,0.3);">
+                          1
+                        </div>
+                        <div style="margin-top: 30px; margin-bottom: 24px;">
+                          <i class="fas fa-key" style="font-size: 3rem; color: #F59E0B; margin-bottom: 16px;"></i>
+                        </div>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">儲存自己的AI金鑰</h3>
+                        <p style="font-size: 1rem; color: #64748B; line-height: 1.7; margin-bottom: 20px;">
+                          在「創作者資料庫」中儲存你的 LLM API 金鑰（支援 Gemini、GPT 等），讓 AI 使用你的金鑰進行生成，節省成本並提升使用體驗。
+                        </p>
+                        <a href="#" onclick="switchPage('guide-article5'); return false;" style="display: inline-block; padding: 10px 20px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.3s; box-shadow: 0 2px 8px rgba(245,158,11,0.3);">
+                          如何拿到自己的LLM金鑰？
+                        </a>
+                      </div>
+                      
+                      <!-- 步驟 2：建立IP人設規劃 -->
                       <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 8px 30px rgba(17,24,39,0.06); border: 1px solid #E2E8F0; text-align: center; position: relative;">
                         <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 700; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
-                          1
+                          2
                         </div>
                         <div style="margin-top: 30px; margin-bottom: 24px;">
                           <i class="fas fa-user-tie" style="font-size: 3rem; color: #10B981; margin-bottom: 16px;"></i>
                         </div>
-                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">建立IP人設</h3>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">建立IP人設規劃</h3>
                         <p style="font-size: 1rem; color: #64748B; line-height: 1.7;">
-                          使用「IP人設規劃模式」，透過聊天記錄你的人生曲線與品牌故事，AI 會協助建立專屬的 IP Profile 和 14 天內容規劃。
+                          使用「IP人設規劃模式」，透過聊天記錄你的人生曲線與品牌故事，AI 會協助建立專屬的 IP Profile 和 14 天內容規劃。你也可以深度與 AI 討論短影音矩陣策略，打造完整的內容架構。
                         </p>
                       </div>
                       
-                      <!-- 步驟 2：一鍵生成 -->
+                      <!-- 步驟 3：一鍵生成模式 -->
                       <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 8px 30px rgba(17,24,39,0.06); border: 1px solid #E2E8F0; text-align: center; position: relative;">
                         <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 700; box-shadow: 0 4px 12px rgba(59,130,246,0.3);">
-                          2
+                          3
                         </div>
                         <div style="margin-top: 30px; margin-bottom: 24px;">
                           <i class="fas fa-magic" style="font-size: 3rem; color: #3B82F6; margin-bottom: 16px;"></i>
                         </div>
-                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">一鍵生成腳本</h3>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">一鍵生成模式</h3>
                         <p style="font-size: 1rem; color: #64748B; line-height: 1.7;">
-                          使用「一鍵生成模式」，輸入平台與主題，AI 會根據你的 IP 人設自動生成符合風格的腳本、選題與帳號定位建議。
+                          針對你的需求「快速」產生帳號定位、選題和腳本。AI 會根據你過往的 IP 人設規劃和生成記錄，自動調整內容風格，讓每次生成都更符合你的品牌調性。
                         </p>
                       </div>
                       
-                      <!-- 步驟 3：開始創作 -->
+                      <!-- 步驟 4：創作者資料庫 -->
                       <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 8px 30px rgba(17,24,39,0.06); border: 1px solid #E2E8F0; text-align: center; position: relative;">
                         <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 700; box-shadow: 0 4px 12px rgba(139,92,246,0.3);">
-                          3
+                          4
                         </div>
                         <div style="margin-top: 30px; margin-bottom: 24px;">
-                          <i class="fas fa-video" style="font-size: 3rem; color: #8B5CF6; margin-bottom: 16px;"></i>
+                          <i class="fas fa-database" style="font-size: 3rem; color: #8B5CF6; margin-bottom: 16px;"></i>
                         </div>
-                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">開始創作</h3>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">創作者資料庫</h3>
                         <p style="font-size: 1rem; color: #64748B; line-height: 1.7;">
                           完成腳本後，可以儲存到「創作者資料庫」，隨時查看、下載或重新生成。AI 會記住你的內容風格，持續優化每次生成的品質。
                         </p>
@@ -11768,7 +11785,7 @@
                     <div style="margin-top: 60px; padding: 32px; background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-radius: 20px; border: 2px solid #FCD34D; text-align: center;">
                       <p style="font-size: 1.1rem; color: #92400E; line-height: 1.7;">
                         <i class="fas fa-lightbulb" style="margin-right: 8px; color: #F59E0B;"></i>
-                        <strong style="font-weight: 700;">建議使用順序：</strong>先建立 IP 人設 → 一鍵生成腳本 → 開始創作。AI 會記住你之前的內容並持續優化。
+                        <strong style="font-weight: 700;">建議使用順序：</strong>先儲存 AI 金鑰 → 建立 IP 人設規劃 → 一鍵生成腳本 → 創作者資料庫管理。AI 會記住你之前的內容並持續優化。
                       </p>
                     </div>
                   </div>
@@ -11847,6 +11864,36 @@
                             <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">Reels / Shorts / TikTok<br>腳本差異</div>
                             <div style="font-size: 0.95rem; color: #64748B; line-height: 1.6;">
                               每個平台的短影音都有不同特性：IG Reels 偏重品牌敘事，YouTube Shorts 強調快速爆點，TikTok 重視娛樂性。本指南解析 AI 如何自動調整...
+                            </div>
+                          </div>
+                          <div style="padding: 20px 32px; background: #F8FAFC;">
+                            <span style="color: #2563EB; font-weight: 600; font-size: 0.95rem;">閱讀更多 →</span>
+                          </div>
+                        </div>
+                      </a>
+                      
+                      <!-- 文章 4 -->
+                      <a href="#" onclick="switchPage('guide-article4'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                        <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
+                          <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
+                            <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">腳本結構選擇指南</div>
+                            <div style="font-size: 0.95rem; color: #64748B; line-height: 1.6;">
+                              了解 ReelMind 提供的 5 種腳本結構（A/B/C/D/E），每種結構適合不同的內容類型和目標。本指南幫助你選擇最適合的腳本結構，提升內容效果...
+                            </div>
+                          </div>
+                          <div style="padding: 20px 32px; background: #F8FAFC;">
+                            <span style="color: #2563EB; font-weight: 600; font-size: 0.95rem;">閱讀更多 →</span>
+                          </div>
+                        </div>
+                      </a>
+                      
+                      <!-- 文章 5：如何拿到自己的LLM金鑰 -->
+                      <a href="#" onclick="switchPage('guide-article5'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                        <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
+                          <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
+                            <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">如何拿到自己的LLM金鑰</div>
+                            <div style="font-size: 0.95rem; color: #64748B; line-height: 1.6;">
+                              詳細教學如何取得 Gemini、GPT 等 LLM API 金鑰，並在 ReelMind 中設定使用。使用自己的金鑰可以節省成本，並獲得更好的使用體驗...
                             </div>
                           </div>
                           <div style="padding: 20px 32px; background: #F8FAFC;">
@@ -12186,6 +12233,19 @@
                     <div style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">腳本結構選擇指南</div>
                     <div style="font-size: 1rem; color: #64748B; line-height: 1.6;">
                       了解 ReelMind 提供的 5 種腳本結構（A/B/C/D/E），每種結構適合不同的內容類型和目標。本指南幫助你選擇最適合的腳本結構，提升內容效果...
+                    </div>
+                  </div>
+                  <div style="padding: 20px 32px; background: #F8FAFC;">
+                    <span style="color: #2563EB; font-weight: 600; font-size: 0.95rem;">閱讀更多 →</span>
+                  </div>
+                </div>
+                
+                <!-- 文章 5：如何拿到自己的LLM金鑰 -->
+                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="switchPage('guide-article5')">
+                  <div style="padding: 32px; border-bottom: 1px solid #F1F5F9;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">如何拿到自己的LLM金鑰</div>
+                    <div style="font-size: 1rem; color: #64748B; line-height: 1.6;">
+                      詳細教學如何取得 Gemini、GPT 等 LLM API 金鑰，並在 ReelMind 中設定使用。使用自己的金鑰可以節省成本，並獲得更好的使用體驗...
                     </div>
                   </div>
                   <div style="padding: 20px 32px; background: #F8FAFC;">
@@ -12689,6 +12749,152 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0 0;">
                     <a class="btn sky" onclick="goToLogin();" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;background:#06b6d4;color:#001018;text-decoration:none;cursor:pointer;">登入解鎖 AI 生成</a>
                     <a class="btn alt" href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;border:1px solid #cbd5e1;color:#334155;background:#fff;text-decoration:none;">到 Discord 看範例</a>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Footer -->
+              <footer style="padding: 26px 0; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; font-size: 14px;">
+                <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">© 2025 ReelMind · AI 短影音 · 台灣</div>
+              </footer>
+            </div>
+          </div>
+
+          <!-- 文章 5：如何拿到自己的LLM金鑰 -->
+          <div id="guide-article5" class="page">
+            <div>
+              <!-- Header -->
+              <header style="padding: 56px 0 18px; border-bottom: 1px solid #e2e8f0; background: linear-gradient(135deg, rgba(245,158,11,.10), transparent 60%), linear-gradient(135deg, rgba(217,119,6,.10), transparent 60%);">
+                <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+                  <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+                    <a onclick="switchPage('homepage'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
+                    <a onclick="switchPage('guide'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+                  </div>
+                  <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">如何拿到自己的LLM金鑰</h1>
+                  <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">詳細教學如何取得 Gemini、GPT 等 LLM API 金鑰，並在 ReelMind 中設定使用。使用自己的金鑰可以節省成本，並獲得更好的使用體驗。</p>
+                  <div style="display: flex; gap: 12px; flex-wrap: wrap; color: #64748b; font-size: 12px; margin-top: 8px;">
+                    <span>閱讀約 8 分鐘</span>
+                    <span>適用角色：所有用戶</span>
+                  </div>
+                </div>
+              </header>
+
+              <!-- Article -->
+              <article style="padding: 28px 0;">
+                <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+                  <!-- 快速導覽 -->
+                  <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 28px;">
+                    <strong style="display: block; margin-bottom: 8px; color: #0f172a;">快速導覽</strong>
+                    <ol style="margin: 0; padding-left: 20px; color: #334155;">
+                      <li><a href="#why" style="color: #334155; text-decoration: none;">為什麼要使用自己的LLM金鑰？</a></li>
+                      <li><a href="#gemini" style="color: #334155; text-decoration: none;">如何取得 Gemini API 金鑰</a></li>
+                      <li><a href="#gpt" style="color: #334155; text-decoration: none;">如何取得 GPT API 金鑰</a></li>
+                      <li><a href="#setup" style="color: #334155; text-decoration: none;">在 ReelMind 中設定金鑰</a></li>
+                    </ol>
+                  </div>
+
+                  <h2 id="why" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">為什麼要使用自己的LLM金鑰？</h2>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    使用自己的 LLM API 金鑰有幾個重要優勢：
+                  </p>
+                  <ul style="color: #475569; line-height: 1.8;">
+                    <li><strong>節省成本</strong>：使用自己的金鑰，可以更精確控制 API 使用量，避免超出預算</li>
+                    <li><strong>更好的使用體驗</strong>：不受系統配額限制，可以更自由地使用 AI 功能</li>
+                    <li><strong>數據隱私</strong>：你的 API 金鑰由你管理，數據更安全</li>
+                    <li><strong>靈活性</strong>：可以選擇不同的 LLM 模型（Gemini、GPT 等）</li>
+                  </ul>
+
+                  <h2 id="gemini" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">如何取得 Gemini API 金鑰</h2>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    <strong>步驟 1：前往 Google AI Studio</strong>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    1. 打開瀏覽器，前往 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #2563eb; text-decoration: underline;">Google AI Studio</a>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    2. 使用你的 Google 帳號登入
+                  </p>
+                  
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    <strong>步驟 2：建立 API 金鑰</strong>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    1. 點擊「Create API Key」按鈕
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    2. 選擇要使用的 Google Cloud 專案（或建立新專案）
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    3. 系統會自動生成 API 金鑰，複製並妥善保存
+                  </p>
+                  
+                  <div style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; padding: 12px 14px; color: #1e3a8a; margin: 14px 0;">
+                    <strong>注意事項：</strong>API 金鑰只會顯示一次，請務必複製並保存在安全的地方。不要將金鑰分享給他人。
+                  </div>
+
+                  <h2 id="gpt" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">如何取得 GPT API 金鑰</h2>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    <strong>步驟 1：前往 OpenAI 官網</strong>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    1. 打開瀏覽器，前往 <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #2563eb; text-decoration: underline;">OpenAI Platform</a>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    2. 使用你的 OpenAI 帳號登入（如果沒有帳號，需要先註冊）
+                  </p>
+                  
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    <strong>步驟 2：建立 API 金鑰</strong>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    1. 點擊「Create new secret key」按鈕
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    2. 為金鑰命名（可選）
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    3. 點擊「Create secret key」，複製並妥善保存
+                  </p>
+                  
+                  <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 12px; padding: 12px 14px; color: #92400e; margin: 14px 0;">
+                    <strong>重要提醒：</strong>OpenAI API 是付費服務，使用前請確認你的帳號有足夠的餘額。建議設定使用上限以避免超支。
+                  </div>
+
+                  <h2 id="setup" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">在 ReelMind 中設定金鑰</h2>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    <strong>步驟 1：進入創作者資料庫</strong>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    1. 登入 ReelMind 後，點擊右上角的「創作者資料庫」
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    2. 在左側選單中找到「設定」或「API 金鑰管理」
+                  </p>
+                  
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    <strong>步驟 2：輸入 API 金鑰</strong>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    1. 選擇 LLM 類型（Gemini 或 GPT）
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    2. 貼上你剛才複製的 API 金鑰
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    3. 點擊「儲存」按鈕
+                  </p>
+                  
+                  <div style="background: #d1fae5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 12px 14px; color: #065f46; margin: 14px 0;">
+                    <strong>完成！</strong>設定完成後，ReelMind 會優先使用你的 API 金鑰進行 AI 生成。如果金鑰無效或額度用完，系統會自動切換回系統預設金鑰。
+                  </div>
+
+                  <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin: 18px 0;">
+                    <button onclick="switchPage('homepage');" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">
+                      前往創作者資料庫設定
+                    </button>
+                    <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid #cbd5e1; color: #334155; background: white; text-decoration: none; cursor: pointer; flex: 1;">
+                      到 Discord 詢問問題
+                    </a>
                   </div>
                 </div>
               </article>

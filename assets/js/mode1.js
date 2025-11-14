@@ -271,45 +271,50 @@ function initMode1Chat() {
     sendBtn.disabled = !this.value.trim();
   });
   
-  // iOS Safari 鍵盤處理：當輸入框獲得焦點時，確保輸入框可見
+  // iOS Safari 鍵盤處理：當輸入框獲得焦點時，確保輸入框可見並避免下方空白
   if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
     const inputRow = messageInput.closest('.input-row');
     const chatMessages = document.getElementById('mode1-chatMessages');
+    const body = document.body;
+    const html = document.documentElement;
     
     messageInput.addEventListener('focus', function() {
       // 延遲執行，等待鍵盤彈出
       setTimeout(() => {
         if (inputRow) {
+          // 移除 body 的固定定位，避免下方空白
+          if (body.style.position === 'fixed') {
+            body.style.position = 'relative';
+            body.style.height = 'auto';
+            body.style.overflow = 'visible';
+          }
+          
           // 計算輸入框的位置
           const inputRect = inputRow.getBoundingClientRect();
           const viewportHeight = window.innerHeight;
           const keyboardHeight = viewportHeight - inputRect.bottom;
           
-          // 如果輸入框被鍵盤遮擋，滾動頁面
+          // 如果輸入框被鍵盤遮擋，滾動聊天訊息區域
           if (keyboardHeight < 0 || inputRect.bottom > viewportHeight - 100) {
             // 滾動聊天訊息區域，確保輸入框可見
             if (chatMessages) {
               chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-            
-            // 使用 scrollIntoView 確保輸入框可見
-            messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            
-            // 額外滾動一點，確保輸入框完全可見
-            setTimeout(() => {
-              window.scrollTo({
-                top: document.body.scrollHeight,
-                behavior: 'smooth'
-              });
-            }, 100);
           }
         }
       }, 300); // 等待鍵盤動畫完成
     });
     
     messageInput.addEventListener('blur', function() {
-      // 鍵盤收起時，恢復正常滾動
+      // 鍵盤收起時，恢復 body 的固定定位
       setTimeout(() => {
+        if (body) {
+          body.style.position = 'fixed';
+          body.style.height = '100dvh';
+          body.style.overflow = 'hidden';
+        }
+        
+        // 恢復正常滾動
         if (chatMessages) {
           chatMessages.scrollTop = chatMessages.scrollHeight;
         }
@@ -320,14 +325,25 @@ function initMode1Chat() {
     let lastViewportHeight = window.innerHeight;
     window.addEventListener('resize', function() {
       const currentHeight = window.innerHeight;
-      // 如果視窗高度減少（鍵盤彈出），滾動到底部
+      // 如果視窗高度減少（鍵盤彈出），移除 body 固定定位
       if (currentHeight < lastViewportHeight - 150) {
+        if (body && body.style.position === 'fixed') {
+          body.style.position = 'relative';
+          body.style.height = 'auto';
+          body.style.overflow = 'visible';
+        }
         setTimeout(() => {
           if (chatMessages) {
             chatMessages.scrollTop = chatMessages.scrollHeight;
           }
-          messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }, 100);
+      } else if (currentHeight > lastViewportHeight + 50) {
+        // 鍵盤收起，恢復 body 固定定位
+        if (body) {
+          body.style.position = 'fixed';
+          body.style.height = '100dvh';
+          body.style.overflow = 'hidden';
+        }
       }
       lastViewportHeight = currentHeight;
     });
