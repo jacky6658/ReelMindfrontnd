@@ -420,6 +420,7 @@
       .page-content {
         flex: 1;
         padding: 24px;
+        padding-top: calc(24px + 60px); /* 為固定導航列留出空間 */
         overflow-y: auto;
         min-height: calc(100vh - 60px);
         background: linear-gradient(to bottom, #dbeafe 0%, #ffffff 100%);
@@ -428,7 +429,7 @@
       @media (max-width: 768px) {
         .page-content {
           padding: 12px;
-          padding-top: calc(12px + env(safe-area-inset-top, 0px));
+          padding-top: calc(80px + env(safe-area-inset-top, 0px)); /* 手機版導航列高度約 60-70px，加上安全區域 */
           padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
         }
         
@@ -440,7 +441,7 @@
       @media (max-width: 480px) {
         .page-content {
           padding: 10px;
-          padding-top: calc(10px + env(safe-area-inset-top, 0px));
+          padding-top: calc(80px + env(safe-area-inset-top, 0px)); /* 手機版導航列高度約 60-70px，加上安全區域 */
           padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
         }
         
@@ -1561,15 +1562,15 @@
       </div>
       <div class="mobile-drawer-content">
         <a href="index.html" class="mobile-drawer-item">
-          <span class="mobile-drawer-icon">🏠</span>
+          <span class="mobile-drawer-icon"><i class="fas fa-home"></i></span>
           <span class="mobile-drawer-text">首頁</span>
         </a>
         <a href="mode1.html" class="mobile-drawer-item">
-          <span class="mobile-drawer-icon">🎭</span>
+          <span class="mobile-drawer-icon"><i class="fas fa-user-tie"></i></span>
           <span class="mobile-drawer-text">IP人設規劃</span>
         </a>
         <a href="mode3.html" class="mobile-drawer-item active">
-          <span class="mobile-drawer-icon">⚡</span>
+          <span class="mobile-drawer-icon"><i class="fas fa-magic"></i></span>
           <span class="mobile-drawer-text">一鍵生成</span>
         </a>
         <a href="index.html#forum" class="mobile-drawer-item" onclick="window.location.href='index.html#forum'; closeMobileDrawer(); return false;">
@@ -1581,7 +1582,7 @@
           <span class="mobile-drawer-text">實戰指南</span>
         </a>
         <a href="userDB.html" id="userDBMobileTab" class="mobile-drawer-item" style="display:none;">
-          <span class="mobile-drawer-icon">📊</span>
+          <span class="mobile-drawer-icon"><i class="fas fa-database"></i></span>
           <span class="mobile-drawer-text">創作者資料庫</span>
         </a>
       </div>
