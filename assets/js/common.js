@@ -855,13 +855,15 @@
       }
     }
     
-    // 檢查頁面權限（首頁 index.html 不需要檢查，允許未登入用戶訪問）
+    // 檢查頁面權限（首頁 index.html 和體驗頁面 experience.html 不需要檢查，允許未登入用戶訪問）
     const isHomePage = window.location.pathname === '/' || 
                        window.location.pathname.endsWith('/index.html') ||
                        window.location.pathname.endsWith('/');
+    const isExperiencePage = window.location.pathname.endsWith('/experience.html') ||
+                             window.location.pathname.includes('experience.html');
     
-    if (!isHomePage) {
-      // 非首頁才需要檢查權限
+    if (!isHomePage && !isExperiencePage) {
+      // 非首頁且非體驗頁面才需要檢查權限
       const hasPermission = await checkPagePermission();
       
       if (!hasPermission) {
@@ -869,7 +871,7 @@
         return;
       }
     } else {
-      // 首頁：只檢查登入和訂閱狀態（不強制要求），用於更新 UI
+      // 首頁或體驗頁面：只檢查登入和訂閱狀態（不強制要求），用於更新 UI
       await checkLoginStatus();
       await checkSubscriptionStatus();
     }
