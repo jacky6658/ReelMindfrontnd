@@ -12999,7 +12999,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                       <iframe 
                         width="100%" 
                         height="100%" 
-                        src="https://www.youtube.com/embed/@AgentAi" 
+                        src="https://www.youtube.com/embed/MlxRy6qmFBo" 
                         title="如何取得 Gemini API 金鑰教學" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
@@ -13048,7 +13048,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                       <iframe 
                         width="100%" 
                         height="100%" 
-                        src="https://www.youtube.com/embed/@AgentAi" 
+                        src="https://www.youtube.com/embed/lIh8wCSn_PM" 
                         title="如何取得 GPT API 金鑰教學" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
@@ -14429,40 +14429,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
               });
-              // 立即切換到目標頁面（確保 switchPage 函數已定義）
-              if (typeof switchPage === 'function') {
-                switchPage(pageId);
-              } else {
-                // 如果 switchPage 還未定義，延遲執行
-                setTimeout(() => {
-                  if (typeof switchPage === 'function') {
-                    switchPage(pageId);
-                  } else {
-                    console.warn('⚠️ switchPage 函數未定義，無法處理 hash 導航');
-                  }
-                }, 100);
-              }
+              // 立即切換到目標頁面
+              switchPage(pageId);
               return true; // 表示已處理 hash 導航
             }
           }
           return false; // 表示沒有 hash 導航
         };
         
-        // 頁面載入時先處理 hash（優先處理）
-        // 如果 DOM 已準備好，立即處理；否則等待 DOMContentLoaded
-        let hasHashNavigation = false;
-        if (document.readyState === 'loading') {
-          // DOM 還在載入中，等待 DOMContentLoaded 時處理
-          // 在 DOMContentLoaded 時會再次調用 handleHashNavigation
-        } else {
-          // DOM 已準備好，立即處理
-          hasHashNavigation = handleHashNavigation();
-        }
-        
-        // 在 DOMContentLoaded 時再次處理 hash（確保處理從其他頁面跳轉過來的情況）
-        if (!hasHashNavigation) {
-          hasHashNavigation = handleHashNavigation();
-        }
+        // 頁面載入時先處理 hash（優先處理，在 DOMContentLoaded 之前）
+        const hasHashNavigation = handleHashNavigation();
         
         // 如果沒有 hash 導航，才顯示首頁並更新首頁視圖
         if (!hasHashNavigation) {
