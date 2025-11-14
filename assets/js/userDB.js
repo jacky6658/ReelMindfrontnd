@@ -1004,6 +1004,7 @@ async function renderPersonalInfoContent() {
   let expiresAtText = '未知';
   let daysLeftText = '';
   let expirationWarning = '';
+  let autoRenew = true; // 預設為 true
   
   if (ipPlanningToken && ipPlanningUser?.user_id) {
     try {
@@ -1016,6 +1017,9 @@ async function renderPersonalInfoContent() {
       
       if (subResponse.ok) {
         const subData = await subResponse.json();
+        // 獲取自動續費狀態
+        autoRenew = subData.auto_renew !== false; // 預設為 true
+        
         if (subData.expires_at) {
           expiresAt = new Date(subData.expires_at);
           const now = new Date();
@@ -1046,7 +1050,12 @@ async function renderPersonalInfoContent() {
       }
     } catch (e) {
       console.warn('載入訂閱詳情失敗:', e);
+      // 如果 API 失敗，嘗試從 ipPlanningUser 獲取 auto_renew
+      autoRenew = ipPlanningUser.auto_renew !== false;
     }
+  } else {
+    // 如果沒有 token，嘗試從 ipPlanningUser 獲取 auto_renew
+    autoRenew = ipPlanningUser?.auto_renew !== false;
   }
   
   content.innerHTML = `
@@ -1077,17 +1086,23 @@ async function renderPersonalInfoContent() {
         <span>${escapeHtml(expiresAtText)} ${daysLeftText}</span>
       </div>
       ${expirationWarning}
+      ${autoRenew === false ? `
+      <div style="margin-top: 12px; padding: 12px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; color: #92400e;">
+        <strong>ℹ️ 自動續費已取消</strong><br>
+        <span style="font-size: 14px;">您的訂閱到期後將不會自動續費，請記得手動續費以繼續使用服務。</span>
+      </div>
+      ` : ''}
       <div class="detail-actions" style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-        <a href="/subscription.html" style="display: inline-block; padding: 8px 16px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500;">
-          💳 續費訂閱
+        <a href="/subscription.html" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; min-height: 44px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 14px;">
+          <i class="fas fa-credit-card" style="margin-right: 4px;"></i>續費訂閱
         </a>
-        ${userInfo.auto_renew !== false ? `
-        <button onclick="cancelAutoRenewForUserDB()" style="display: inline-block; padding: 8px 16px; background: #EF4444; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px;">
-          🚫 取消自動續費
+        ${autoRenew !== false ? `
+        <button onclick="cancelAutoRenewForUserDB()" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; min-height: 44px; background: #EF4444; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px;">
+          <i class="fas fa-ban" style="margin-right: 4px;"></i>取消自動續費
         </button>
         ` : `
-        <div style="display: inline-block; padding: 8px 16px; background: #F3F4F6; color: #6B7280; border-radius: 6px; font-weight: 500; font-size: 14px;">
-          ✅ 已取消自動續費
+        <div style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; min-height: 44px; background: #F3F4F6; color: #6B7280; border-radius: 6px; font-weight: 500; font-size: 14px;">
+          <i class="fas fa-check-circle" style="margin-right: 4px;"></i>已取消自動續費
         </div>
         `}
       </div>
