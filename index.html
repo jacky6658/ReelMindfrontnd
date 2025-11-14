@@ -13673,19 +13673,69 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             }
             
             // 再次確認訂閱狀態（確保顯示正確）
+            // 先強制刷新一次用戶資訊
+            let finalUserInfo = null;
+            try {
+              const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                headers: {
+                  'Authorization': `Bearer ${currentToken}`
+                }
+              });
+              if (userResponse.ok) {
+                finalUserInfo = await userResponse.json();
+                if (finalUserInfo.is_subscribed) {
+                  document.body.dataset.subscribed = 'true';
+                  localStorage.setItem('subscriptionStatus', 'active');
+                  if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                    ipPlanningUser.is_subscribed = finalUserInfo.is_subscribed;
+                    localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  }
+                }
+              }
+            } catch (e) {
+              console.warn('最終檢查用戶資訊失敗:', e);
+            }
+            
             const finalCheck = document.body.dataset.subscribed === 'true' || 
-                              localStorage.getItem('subscriptionStatus') === 'active';
+                              localStorage.getItem('subscriptionStatus') === 'active' ||
+                              (finalUserInfo && finalUserInfo.is_subscribed);
             
             if (finalCheck) {
               const planName = planType === 'yearly' ? '年費' : '月費';
               const planDays = planType === 'yearly' ? '1年' : '1個月';
               showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
             } else {
-              // 如果最終檢查還是沒有訂閱，可能是後端更新延遲，顯示提示
-              console.warn('授權驗證成功，但訂閱狀態尚未更新，可能需要重新整理頁面');
+              // 如果最終檢查還是沒有訂閱，可能是後端更新延遲，顯示提示而不是錯誤
+              console.warn('授權驗證成功，但訂閱狀態尚未更新，繼續等待...');
               showToast('✅ 授權啟用成功！正在更新訂閱狀態...', 5000);
-              // 再次嘗試刷新訂閱狀態
+              // 再次嘗試刷新訂閱狀態（增加重試次數和延遲）
               setTimeout(async () => {
+                // 再次強制刷新用戶資訊
+                try {
+                  const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                    headers: {
+                      'Authorization': `Bearer ${currentToken}`
+                    }
+                  });
+                  if (userResponse.ok) {
+                    const latestUserInfo = await userResponse.json();
+                    if (latestUserInfo.is_subscribed) {
+                      document.body.dataset.subscribed = 'true';
+                      localStorage.setItem('subscriptionStatus', 'active');
+                      if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                        ipPlanningUser.is_subscribed = latestUserInfo.is_subscribed;
+                        localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                      }
+                      const planName = planType === 'yearly' ? '年費' : '月費';
+                      const planDays = planType === 'yearly' ? '1年' : '1個月';
+                      showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+                      return;
+                    }
+                  }
+                } catch (e) {
+                  console.warn('再次刷新用戶資訊失敗:', e);
+                }
+                
                 await checkSubscriptionStatus();
                 const recheck = document.body.dataset.subscribed === 'true' || 
                                localStorage.getItem('subscriptionStatus') === 'active';
@@ -13694,10 +13744,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   const planDays = planType === 'yearly' ? '1年' : '1個月';
                   showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
                 } else {
-                  // 如果還是沒有，可能是真的失敗了，但先不顯示錯誤，讓用戶知道正在處理
-                  console.error('授權驗證成功，但訂閱狀態更新失敗');
+                  // 如果還是沒有，但後端已經授權成功（response.ok），顯示成功訊息而不是錯誤
+                  console.warn('授權驗證成功，但訂閱狀態更新較慢，請稍後重新整理頁面');
+                  showToast('✅ 授權啟用成功！如果未看到訂閱狀態，請重新整理頁面', 8000);
                 }
-              }, 2000);
+              }, 3000); // 增加到 3 秒
             }
             
             // 清除 URL 參數
@@ -13793,6 +13844,36 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }
         } catch (error) {
           console.error('啟用失敗:', error);
+          
+          // 即使發生錯誤，也檢查一下用戶的訂閱狀態（可能後端已經授權成功）
+          const currentToken = localStorage.getItem('ipPlanningToken');
+          if (currentToken) {
+            try {
+              const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                headers: {
+                  'Authorization': `Bearer ${currentToken}`
+                }
+              });
+              if (userResponse.ok) {
+                const userInfo = await userResponse.json();
+                if (userInfo.is_subscribed) {
+                  // 用戶已經有訂閱，表示授權成功
+                  document.body.dataset.subscribed = 'true';
+                  localStorage.setItem('subscriptionStatus', 'active');
+                  if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                    ipPlanningUser.is_subscribed = userInfo.is_subscribed;
+                    localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  }
+                  showToast('✅ 授權啟用成功！', 5000);
+                  return; // 提前返回，不顯示錯誤
+                }
+              }
+            } catch (e) {
+              console.warn('檢查訂閱狀態失敗:', e);
+            }
+          }
+          
+          // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
           showToast('⚠️ 啟用失敗，請稍後再試', 5000);
         }
       }

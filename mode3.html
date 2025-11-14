@@ -517,7 +517,7 @@
         justify-content: center;
         gap: 32px;
         margin-bottom: 48px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap; /* 強制並排，不換行 */
       }
       
       .progress-step {
@@ -604,20 +604,29 @@
       
       @media (max-width: 768px) {
         .progress-steps {
-          gap: 16px;
+          gap: 8px; /* 手機版減少間距 */
           margin-bottom: 32px;
+          flex-wrap: nowrap; /* 強制並排，不換行 */
+          overflow-x: auto; /* 如果內容太寬，允許橫向滾動 */
+          -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
+          padding-bottom: 8px; /* 為滾動條留出空間 */
+        }
+        
+        .progress-step {
+          flex-shrink: 0; /* 防止步驟被壓縮 */
         }
         
         .progress-step-connector {
-          width: 32px;
+          width: 20px; /* 手機版減少連接線寬度 */
+          flex-shrink: 0; /* 防止連接線被壓縮 */
         }
         
         .progress-step-label {
-          font-size: 12px;
+          font-size: 12px; /* 手機版縮小字體 */
         }
         
         .progress-step-circle {
-          width: 40px;
+          width: 40px; /* 手機版稍微縮小圓圈 */
           height: 40px;
           font-size: 14px;
         }
