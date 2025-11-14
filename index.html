@@ -13382,6 +13382,73 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       // 確保函數在全局作用域中可用
       window.handleGuideUnlockButton = handleGuideUnlockButton;
       
+      // 更新實戰指南按鈕文字（僅針對已訂閱且已登入的用戶）
+      async function updateGuideButtonTexts() {
+        try {
+          // 檢查登入狀態
+          let isLoggedIn = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+            isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
+          } else {
+            const token = localStorage.getItem('ipPlanningToken');
+            isLoggedIn = !!token;
+          }
+          
+          if (!isLoggedIn) {
+            return; // 未登入，不更新按鈕文字
+          }
+          
+          // 檢查訂閱狀態
+          let isSubscribed = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkSubscriptionStatus === 'function') {
+            await window.ReelMindCommon.checkSubscriptionStatus();
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+              isSubscribed = window.ReelMindCommon.isSubscribed();
+            }
+          } else {
+            const subscriptionStatus = localStorage.getItem('subscriptionStatus');
+            isSubscribed = subscriptionStatus === 'active';
+          }
+          
+          if (!isSubscribed) {
+            return; // 未訂閱，不更新按鈕文字
+          }
+          
+          // 已登入且已訂閱，更新按鈕文字
+          // article1: 三步生成 30 秒短影音腳本 -> "使用一鍵生成功能"
+          const article1Buttons = document.querySelectorAll('button[onclick*="handleGuideUnlockButton(\'article1\')"], a[onclick*="handleGuideUnlockButton(\'article1\')"]');
+          article1Buttons.forEach(btn => {
+            if (btn.textContent.includes('登入解鎖 AI 生成')) {
+              btn.textContent = btn.textContent.replace('登入解鎖 AI 生成', '使用一鍵生成功能');
+            }
+          });
+          
+          // article2: AI 帳號定位：內容支柱與 14 天計畫 -> "使用IP人設規劃功能"
+          const article2Buttons = document.querySelectorAll('button[onclick*="handleGuideUnlockButton(\'article2\')"], a[onclick*="handleGuideUnlockButton(\'article2\')"]');
+          article2Buttons.forEach(btn => {
+            if (btn.textContent.includes('登入解鎖 AI 生成')) {
+              btn.textContent = btn.textContent.replace('登入解鎖 AI 生成', '使用IP人設規劃功能');
+            }
+          });
+          
+          // article3: Reels / Shorts / TikTok 腳本差異 -> "使用一鍵生成功能"
+          const article3Buttons = document.querySelectorAll('button[onclick*="handleGuideUnlockButton(\'article3\')"], a[onclick*="handleGuideUnlockButton(\'article3\')"]');
+          article3Buttons.forEach(btn => {
+            if (btn.textContent.includes('登入解鎖 AI 生成')) {
+              btn.textContent = btn.textContent.replace('登入解鎖 AI 生成', '使用一鍵生成功能');
+            }
+          });
+          
+          // article4: 腳本結構選擇指南 -> "使用一鍵生成功能"
+          // 注意：article4 可能使用 article1 的按鈕，所以已經在上面處理了
+          
+        } catch (error) {
+          console.error('更新按鈕文字失敗:', error);
+        }
+      }
+      // 確保函數在全局作用域中可用
+      window.updateGuideButtonTexts = updateGuideButtonTexts;
+      
       // ===== 提前定義手機版抽屜函數，確保按鈕可以使用 =====
       function toggleMobileDrawer() {
         const drawer = document.getElementById('mobileDrawer');
@@ -13618,6 +13685,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             console.log('✅', pageId === 'forum' ? '論壇介紹' : '實戰指南', '頁面已激活');
             // 滾動到頂部
             window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+          
+          // 如果是實戰指南文章頁面，更新按鈕文字
+          if (pageId && pageId.startsWith('guide-article')) {
+            setTimeout(() => {
+              updateGuideButtonTexts();
+            }, 100);
           }
         } else {
           console.error('❌ Page not found:', pageId);
@@ -14571,6 +14645,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             updateHomepageView();
             // 檢查 LLM Key 綁定狀態並顯示通知
             checkAndShowLlmKeyNotification();
+            // 更新實戰指南按鈕文字（僅針對已訂閱且已登入的用戶）
+            updateGuideButtonTexts();
+          }, 500);
+        } else {
+          // 即使有 hash 導航，也要更新按鈕文字
+          setTimeout(() => {
+            updateGuideButtonTexts();
           }, 500);
         }
         
