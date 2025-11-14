@@ -372,8 +372,7 @@
           flex-direction: column !important;
           flex-shrink: 0 !important;
           flex-grow: 0 !important;
-          padding: 12px 16px 16px 16px !important; /* 手機版減少左右 padding */
-          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px) + 60px) !important; /* 增加底部 padding，為 iOS Safari 網址欄留出空間 */
+          padding: 12px 16px !important; /* 手機版減少左右 padding */
           margin: 0 !important;
           visibility: visible !important;
           opacity: 1 !important;
@@ -382,7 +381,7 @@
           max-height: none !important;
           z-index: 100 !important;
           position: fixed !important; /* 使用 fixed 定位固定在底部 */
-          bottom: 0 !important; /* 改為 0，使用 padding-bottom 來處理安全區域 */
+          bottom: 0px !important; /* 完全貼底，使用 padding-bottom 處理安全區域 */
           left: 0 !important;
           right: 0 !important;
           background: #ffffff !important; /* 添加背景色，避免被遮擋 */
@@ -391,11 +390,16 @@
           /* iOS Safari 優化 */
           -webkit-transform: translateZ(0);
           transform: translateZ(0);
+          /* 添加底部邊框，視覺上更清晰 */
+          border-top: 1px solid #e5e7eb;
+          box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+          /* 添加額外的底部 padding，為 iOS Safari 網址欄留出空間（約 34px） */
+          padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px) + 34px) !important;
         }
         
-        /* 當輸入框獲得焦點時，進一步提高位置，避免被鍵盤遮擋 */
+        /* 當輸入框獲得焦點時（鍵盤彈出），網址欄會隱藏，減少 padding */
         .mode1-page .input-row:focus-within {
-          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px) + 80px) !important; /* 鍵盤彈出時增加更多空間 */
+          padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; /* 鍵盤彈出時網址欄隱藏，減少 padding */
         }
         
         /* 確保快速按鈕在輸入欄位內顯示 */
@@ -2791,18 +2795,19 @@
         }
         
         .mode1-page .input-row {
-          padding: 10px 12px 16px 12px !important;
-          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important; /* iOS 安全區域 */
+          padding: 12px 16px !important;
           /* 確保輸入欄位在 iOS Safari 網址欄上方 */
-          bottom: calc(0px + env(safe-area-inset-bottom, 0px)) !important;
+          bottom: 0px !important; /* 改為 0，完全貼底 */
+          /* 添加額外的安全邊距，確保不被網址欄遮擋 */
+          padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px) + 34px) !important; /* 34px 為 iOS Safari 網址欄高度 */
         }
         
-        /* iOS Safari 鍵盤彈出時調整 */
+        /* iOS Safari 鍵盤彈出時調整 - 使用 JavaScript 動態處理 */
         .input-row:focus-within,
         .mode1-page .input-row:focus-within {
-          padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px) + 20px) !important;
-          /* 鍵盤彈出時，輸入欄位向上移動更多，避免被鍵盤遮擋 */
-          bottom: calc(0px + env(safe-area-inset-bottom, 0px) + 20px) !important;
+          /* 鍵盤彈出時，輸入欄位保持位置，由 JavaScript 處理滾動 */
+          bottom: 0px !important;
+          padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; /* 鍵盤彈出時網址欄會隱藏 */
         }
         
         /* 快速按鈕手機版：並排不換行，節省空間 */

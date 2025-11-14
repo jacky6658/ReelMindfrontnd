@@ -271,6 +271,68 @@ function initMode1Chat() {
     sendBtn.disabled = !this.value.trim();
   });
   
+  // iOS Safari 鍵盤處理：當輸入框獲得焦點時，確保輸入框可見
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+    const inputRow = messageInput.closest('.input-row');
+    const chatMessages = document.getElementById('mode1-chatMessages');
+    
+    messageInput.addEventListener('focus', function() {
+      // 延遲執行，等待鍵盤彈出
+      setTimeout(() => {
+        if (inputRow) {
+          // 計算輸入框的位置
+          const inputRect = inputRow.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+          const keyboardHeight = viewportHeight - inputRect.bottom;
+          
+          // 如果輸入框被鍵盤遮擋，滾動頁面
+          if (keyboardHeight < 0 || inputRect.bottom > viewportHeight - 100) {
+            // 滾動聊天訊息區域，確保輸入框可見
+            if (chatMessages) {
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // 使用 scrollIntoView 確保輸入框可見
+            messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            
+            // 額外滾動一點，確保輸入框完全可見
+            setTimeout(() => {
+              window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: 'smooth'
+              });
+            }, 100);
+          }
+        }
+      }, 300); // 等待鍵盤動畫完成
+    });
+    
+    messageInput.addEventListener('blur', function() {
+      // 鍵盤收起時，恢復正常滾動
+      setTimeout(() => {
+        if (chatMessages) {
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      }, 300);
+    });
+    
+    // 監聽視窗大小變化（鍵盤彈出/收起會觸發）
+    let lastViewportHeight = window.innerHeight;
+    window.addEventListener('resize', function() {
+      const currentHeight = window.innerHeight;
+      // 如果視窗高度減少（鍵盤彈出），滾動到底部
+      if (currentHeight < lastViewportHeight - 150) {
+        setTimeout(() => {
+          if (chatMessages) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }
+          messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }, 100);
+      }
+      lastViewportHeight = currentHeight;
+    });
+  }
+  
   // 發送按鈕
   sendBtn.addEventListener('click', () => {
     const message = messageInput.value.trim();
@@ -1662,9 +1724,9 @@ async function saveMode1Result() {
     
     const data = await response.json();
     if (data.success) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('✅ 儲存成功', 3000);
-    }
+      }
     } else {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('❌ ' + (data.error || '儲存失敗'), 3000);
