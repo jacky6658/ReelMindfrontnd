@@ -512,12 +512,14 @@
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            message: '請幫我進行帳號定位分析',
             topic,
             target_audience: targetAudience,
             goal,
             platform,
             style: style || '',
-            history: []
+            history: [],
+            duration: '30'
           })
         });
         
@@ -561,12 +563,14 @@
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            message: '請幫我生成選題建議',
             topic,
             target_audience: targetAudience,
             goal,
             platform,
             style: style || '',
-            history: []
+            history: [],
+            duration: '30'
           })
         });
         
@@ -610,6 +614,7 @@
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            message: '請幫我生成完整腳本',
             topic,
             target_audience: targetAudience,
             goal,

@@ -32,6 +32,9 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E" />
     
+    <!-- Font Awesome 圖標庫 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
     <!-- CSS 文件 -->
     <link rel="stylesheet" href="assets/css/variables.css" />
     <link rel="stylesheet" href="assets/css/animations.css" />
@@ -1392,7 +1395,27 @@
                 </div>
                 
                 <div class="setting-group">
-                  <h4><i class="fas fa-key" style="margin-right: 8px;"></i>AI API Key金鑰管理</h4>
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <h4 style="margin: 0;"><i class="fas fa-key" style="margin-right: 8px;"></i>AI API Key金鑰管理</h4>
+                    <button onclick="window.location.href='index.html'; setTimeout(() => { if (typeof switchPage === 'function') switchPage('guide-article2'); }, 100);" style="
+                      padding: 8px 16px;
+                      background: #3b82f6;
+                      color: white;
+                      border: none;
+                      border-radius: 6px;
+                      font-weight: 600;
+                      cursor: pointer;
+                      font-size: 14px;
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 6px;
+                      -webkit-tap-highlight-color: transparent;
+                      touch-action: manipulation;
+                    ">
+                      <i class="fas fa-question-circle"></i>
+                      如何取得
+                    </button>
+                  </div>
                   <div class="setting-item">
                     <label for="llmProvider">選擇大型語言模型(LLM) 提供商</label>
                     <select id="llmProvider" onchange="updateModelOptions()" style="margin-bottom: 12px; padding: 12px 16px; min-height: 44px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 16px; width: 100%; -webkit-appearance: none; appearance: none;">
@@ -1423,7 +1446,7 @@
                         onclick="toggleApiKeyVisibility()"
                         style="padding: 10px 12px; min-height: 44px; min-width: 44px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;"
                       >
-                        <span id="toggleKeyIcon">👁️</span>
+                        <i class="fas fa-eye" id="toggleKeyIcon"></i>
                       </button>
                     </div>
                     <div id="savedKeyDisplay" style="display: none; margin-top: 8px;">

@@ -1563,7 +1563,7 @@
         </button>
         <div class="navbar-tabs">
           <a href="index.html" class="navbar-tab">首頁</a>
-          <a href="mode1.html" class="navbar-tab">IP人設規劃</a>
+          <a href="mode1.html" class="navbar-tab" onclick="handleModeNavigation(event, 'mode1')">IP人設規劃</a>
           <a href="mode3.html" class="navbar-tab active">一鍵生成</a>
           <a href="index.html#forum" class="navbar-tab">論壇介紹</a>
           <a href="index.html#guide" class="navbar-tab">實戰指南</a>
@@ -1594,7 +1594,7 @@
           <span class="mobile-drawer-icon"><i class="fas fa-home"></i></span>
           <span class="mobile-drawer-text">首頁</span>
         </a>
-        <a href="mode1.html" class="mobile-drawer-item">
+        <a href="mode1.html" class="mobile-drawer-item" onclick="handleModeNavigation(event, 'mode1'); closeMobileDrawer(); return false;">
           <span class="mobile-drawer-icon"><i class="fas fa-user-tie"></i></span>
           <span class="mobile-drawer-text">IP人設規劃</span>
         </a>
