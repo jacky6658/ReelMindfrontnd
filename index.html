@@ -14246,7 +14246,131 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           console.log('🏠 初始化時更新首頁視圖...');
           setTimeout(() => {
             updateHomepageView();
+            // 檢查 LLM Key 綁定狀態並顯示通知
+            checkAndShowLlmKeyNotification();
           }, 500);
+        }
+        
+        // 檢查並顯示 LLM Key 綁定通知
+        async function checkAndShowLlmKeyNotification() {
+          try {
+            const token = localStorage.getItem('ipPlanningToken');
+            if (!token) {
+              return; // 未登入，不顯示通知
+            }
+            
+            const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+            const response = await fetch(`${API_URL}/api/user/llm-keys/check`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              if (!data.has_key) {
+                // 用戶未綁定 LLM Key，顯示通知
+                showLlmKeyNotification();
+              }
+            }
+          } catch (error) {
+            console.error('檢查 LLM Key 狀態失敗:', error);
+          }
+        }
+        
+        // 顯示 LLM Key 綁定通知
+        function showLlmKeyNotification() {
+          // 檢查是否已經顯示過通知（避免重複顯示）
+          if (document.getElementById('llm-key-notification')) {
+            return;
+          }
+          
+          const notification = document.createElement('div');
+          notification.id = 'llm-key-notification';
+          notification.style.cssText = `
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            max-width: 90%;
+            width: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            animation: slideDown 0.3s ease-out;
+          `;
+          
+          notification.innerHTML = `
+            <div style="flex: 1;">
+              <div style="font-weight: 600; margin-bottom: 4px; font-size: 16px;">🔑 建議綁定您的 LLM API 金鑰</div>
+              <div style="font-size: 14px; opacity: 0.9;">綁定後可獲得更高的使用額度和更穩定的服務</div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button onclick="window.location.href='#userDB?tab=settings'" style="
+                padding: 8px 16px;
+                background: white;
+                color: #667eea;
+                border: none;
+                border-radius: 6px;
+                font-weight: 600;
+                cursor: pointer;
+                font-size: 14px;
+                white-space: nowrap;
+              ">立即綁定</button>
+              <button onclick="this.closest('#llm-key-notification').remove()" style="
+                padding: 8px;
+                background: transparent;
+                color: white;
+                border: none;
+                cursor: pointer;
+                font-size: 20px;
+                line-height: 1;
+                opacity: 0.8;
+              ">×</button>
+            </div>
+          `;
+          
+          // 添加動畫樣式
+          if (!document.getElementById('llm-key-notification-style')) {
+            const style = document.createElement('style');
+            style.id = 'llm-key-notification-style';
+            style.textContent = `
+              @keyframes slideDown {
+                from {
+                  opacity: 0;
+                  transform: translateX(-50%) translateY(-20px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateX(-50%) translateY(0);
+                }
+              }
+            `;
+            document.head.appendChild(style);
+          }
+          
+          document.body.appendChild(notification);
+          
+          // 5 秒後自動隱藏（可選）
+          setTimeout(() => {
+            if (notification && notification.parentNode) {
+              notification.style.opacity = '0';
+              notification.style.transition = 'opacity 0.3s ease-out';
+              setTimeout(() => {
+                if (notification && notification.parentNode) {
+                  notification.remove();
+                }
+              }, 300);
+            }
+          }, 10000); // 10 秒後自動隱藏
         }
         
         // 監聽 hash 變化（當用戶在同一個頁面內點擊 hash 連結時）

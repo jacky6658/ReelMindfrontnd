@@ -1395,10 +1395,30 @@
                   <h4>🔑 大型語言模型(LLM) API 金鑰管理</h4>
                   <div class="setting-item">
                     <label for="llmProvider">選擇大型語言模型(LLM) 提供商</label>
-                    <select id="llmProvider" style="margin-bottom: 12px; padding: 12px 16px; min-height: 44px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 16px; width: 100%; -webkit-appearance: none; appearance: none;">
+                    <select id="llmProvider" onchange="updateModelOptions()" style="margin-bottom: 12px; padding: 12px 16px; min-height: 44px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 16px; width: 100%; -webkit-appearance: none; appearance: none;">
                       <option value="gemini">Google Gemini</option>
                       <option value="openai">OpenAI (GPT)</option>
                     </select>
+                  </div>
+                  <div class="setting-item" id="llmModelContainer">
+                    <label for="llmModel">選擇模型（可選，留空則使用系統預設）</label>
+                    <select id="llmModel" style="margin-bottom: 12px; padding: 12px 16px; min-height: 44px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 16px; width: 100%; -webkit-appearance: none; appearance: none;">
+                      <!-- Gemini 模型選項 -->
+                      <option value="" data-provider="gemini">使用系統預設 (gemini-2.5-flash)</option>
+                      <option value="gemini-2.0-flash-exp" data-provider="gemini">Gemini 2.0 Flash (實驗版)</option>
+                      <option value="gemini-2.5-flash" data-provider="gemini">Gemini 2.5 Flash</option>
+                      <option value="gemini-1.5-pro" data-provider="gemini">Gemini 1.5 Pro</option>
+                      <option value="gemini-1.5-flash" data-provider="gemini">Gemini 1.5 Flash</option>
+                      <!-- GPT 模型選項（目前後端不支援，但預留） -->
+                      <option value="" data-provider="openai">使用系統預設</option>
+                      <option value="gpt-4o" data-provider="openai">GPT-4o</option>
+                      <option value="gpt-4-turbo" data-provider="openai">GPT-4 Turbo</option>
+                      <option value="gpt-4" data-provider="openai">GPT-4</option>
+                      <option value="gpt-3.5-turbo" data-provider="openai">GPT-3.5 Turbo</option>
+                    </select>
+                    <span class="setting-desc" style="margin-top: 8px; display: block; color: #6b7280; font-size: 12px;">
+                      選擇您想要使用的模型。如果留空，系統將使用預設模型。
+                    </span>
                   </div>
                   <div class="setting-item" id="llmKeyContainer">
                     <label for="llmApiKey">API 金鑰</label>
