@@ -3098,10 +3098,10 @@ function toggleApiKeyVisibility() {
   if (apiKeyInput && toggleIcon) {
     if (apiKeyInput.type === 'password') {
       apiKeyInput.type = 'text';
-      toggleIcon.textContent = '🙈';
+      toggleIcon.className = 'fas fa-eye-slash';
     } else {
       apiKeyInput.type = 'password';
-      toggleIcon.textContent = '👁️';
+      toggleIcon.className = 'fas fa-eye';
     }
   }
 }

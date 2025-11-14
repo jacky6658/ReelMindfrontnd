@@ -1807,5 +1807,78 @@ async function recordMode3ConversationMessage(conversationType, role, content, t
 }
 
 // 使用 common.js 中的統一函數（已導出到 window）
+// 處理模式導航（檢查權限）
+async function handleModeNavigation(event, targetMode) {
+  event.preventDefault();
+  event.stopPropagation();
+  
+  // 檢查登入狀態
+  if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+    const loggedIn = await window.ReelMindCommon.checkLoginStatus();
+    
+    if (!loggedIn) {
+      // 未登入，顯示通知並跳轉到登入頁面
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入以使用此功能', 3000);
+      }
+      // 使用 common.js 的登入函數
+      if (typeof goToLogin === 'function') {
+        goToLogin();
+      } else if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+        window.ReelMindCommon.goToLogin();
+      } else {
+        // 降級處理：直接跳轉到 Google 登入
+        const backendUrl = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+        const redirectUri = encodeURIComponent(window.location.origin + '/' + (targetMode === 'mode1' ? 'mode1.html' : 'mode3.html'));
+        window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
+      }
+      return false;
+    }
+    
+    // 已登入，檢查訂閱狀態
+    if (window.ReelMindCommon && typeof window.ReelMindCommon.checkSubscriptionStatus === 'function') {
+      await window.ReelMindCommon.checkSubscriptionStatus();
+    }
+    
+    const subscribed = window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function' 
+      ? window.ReelMindCommon.isSubscribed() 
+      : false;
+    
+    if (!subscribed) {
+      // 已登入但未訂閱，跳轉到訂閱頁面
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先訂閱以使用此功能', 3000);
+      }
+      window.location.href = '/subscription.html';
+      return false;
+    }
+  } else {
+    // 如果 common.js 未載入，降級處理：直接檢查 localStorage
+    const token = localStorage.getItem('ipPlanningToken') || localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('ipPlanningUser') || localStorage.getItem('user') || 'null');
+    
+    if (!token || !user) {
+      // 未登入
+      alert('請先登入以使用此功能！');
+      const backendUrl = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+      const redirectUri = encodeURIComponent(window.location.origin + '/' + (targetMode === 'mode1' ? 'mode1.html' : 'mode3.html'));
+      window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
+      return false;
+    }
+    
+    // 檢查訂閱狀態
+    const isSubscribed = user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1' || user.is_subscribed === 'true';
+    if (!isSubscribed) {
+      alert('請先訂閱以使用此功能！');
+      window.location.href = '/subscription.html';
+      return false;
+    }
+  }
+  
+  // 已登入且已訂閱，允許跳轉
+  window.location.href = targetMode === 'mode1' ? 'mode1.html' : 'mode3.html';
+  return false;
+}
+
 // goToLogin, toggleMobileDrawer, openMobileDrawer, closeMobileDrawer 現在都在 common.js 中統一管理
 
