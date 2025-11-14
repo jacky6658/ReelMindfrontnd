@@ -495,17 +495,22 @@ a{text-decoration:none;color:inherit}
     const plan = getUrlParam('plan');
     const amount = getUrlParam('amount');  // 支援自訂金額（用於測試）
     
+    console.log('🔍 initPlan - plan:', plan, 'amount:', amount);
+    
     // 檢查是否為測試模式（通過 amount 參數）
     if (amount) {
       const amountNum = parseInt(amount);
+      console.log('🔍 解析金額:', amountNum);
       if (amountNum > 0) {
         testMode = true;
         testAmount = amountNum;
+        console.log('✅ 測試模式已啟用，金額:', testAmount);
       }
     }
     
     if (plan === 'yearly' || plan === 'monthly') {
       currentPlan = plan;
+      console.log('✅ 方案設定為:', currentPlan, '測試模式:', testMode, '測試金額:', testAmount);
       updatePlanDisplay();
     } else {
       // 如果沒有方案參數，跳轉回選擇頁面
@@ -711,9 +716,15 @@ a{text-decoration:none;color:inherit}
 
   // 處理付款結果頁面
   window.addEventListener('DOMContentLoaded', async function() {
+    // 調試：檢查 URL 參數
+    const urlParams = new URLSearchParams(window.location.search);
+    const amount = urlParams.get('amount');
+    if (amount) {
+      console.log('🔍 檢測到測試模式，金額參數:', amount);
+    }
+    
     initPlan();
     
-    const urlParams = new URLSearchParams(window.location.search);
     const status = urlParams.get('status');
     const orderId = urlParams.get('order_id');
     const message = urlParams.get('message');
