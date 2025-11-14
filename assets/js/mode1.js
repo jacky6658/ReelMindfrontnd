@@ -545,8 +545,9 @@ async function handleQuickButton(type) {
       sendMode1Message('請列出目前資料庫中的所有腳本結構（A/B/C/D/E），並說明每個結構的特點，讓我選擇要使用哪一個腳本結構。', 'ip_planning');
       break;
     case 'reposition':
-      // 重新定位：強制重新生成，所以直接發送給 LLM
-      sendMode1Message('請重新為我生成帳號定位，基於我們最新的對話內容。', 'ip_planning');
+      // 重新定位：完全重新開始，不要參考之前的對話內容
+      // 使用明確的指示，告訴 LLM 要忽略所有之前的對話和記憶
+      sendMode1Message('【重要：完全重新開始】請完全忽略之前所有的對話內容、帳號定位結果和長期記憶。這是一個全新的帳號定位需求，請從頭開始。請先詢問我以下問題：1. 我的目標受眾是誰？2. 我想要達成的目標是什麼？3. 我主要使用的平台是什麼？4. 我偏好的內容風格是什麼？請根據我的新回答，生成一個全新的、獨立的帳號定位，不要參考任何之前的內容。', 'ip_planning');
       break;
     default:
       console.warn('未知的快速按鈕類型:', type);
