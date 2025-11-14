@@ -853,7 +853,7 @@ async function recordMode1ConversationMessage(conversationType, role, content, t
   }
 }
 
-// 切換說明抽屜
+// 切換說明抽屜/彈跳視窗（根據螢幕寬度決定）
 function toggleMode1InstructionsDrawer() {
   const overlay = document.getElementById('mode1InstructionsOverlay');
   const drawer = document.getElementById('mode1InstructionsDrawer');
@@ -877,6 +877,12 @@ function openMode1InstructionsDrawer() {
     overlay.classList.add('open');
     drawer.classList.add('open');
     document.body.style.overflow = 'hidden';
+    
+    // 手機版：防止背景滾動（iOS Safari）
+    if (window.innerWidth <= 768) {
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    }
   }
 }
 
@@ -888,6 +894,12 @@ function closeMode1InstructionsDrawer() {
     overlay.classList.remove('open');
     drawer.classList.remove('open');
     document.body.style.overflow = '';
+    
+    // 手機版：恢復背景滾動
+    if (window.innerWidth <= 768) {
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
   }
 }
 
@@ -1964,8 +1976,20 @@ async function switchMode1OneClickTab(tab) {
     if (historyContent) historyContent.classList.remove('active');
     if (generateContent) generateContent.classList.add('active');
     
-    // 載入一鍵生成的已保存結果
-    await loadMode1OneClickSavedResults();
+    // 載入一鍵生成的已保存結果（只在內容為空時才重新載入，避免覆蓋現有內容）
+    const positioningContent = document.getElementById('mode1OneClickPositioningContent');
+    const topicsContent = document.getElementById('mode1OneClickTopicsContent');
+    const weeklyContent = document.getElementById('mode1OneClickWeeklyContent');
+    
+    // 檢查是否有現有內容，如果沒有才重新載入
+    const hasContent = (positioningContent && positioningContent.innerHTML.trim() && !positioningContent.innerHTML.includes('點擊上方按鈕開始生成')) ||
+                       (topicsContent && topicsContent.innerHTML.trim() && !topicsContent.innerHTML.includes('點擊上方按鈕開始生成')) ||
+                       (weeklyContent && weeklyContent.innerHTML.trim() && !weeklyContent.innerHTML.includes('點擊上方按鈕開始生成'));
+    
+    if (!hasContent) {
+      // 載入一鍵生成的已保存結果
+      await loadMode1OneClickSavedResults();
+    }
   }
 }
 
@@ -2403,6 +2427,25 @@ function updateMode1OneClickStatus(type, status, message = '') {
             wrapper.className = 'mode1-oneclick-result-content-wrapper';
             table.parentElement.insertBefore(wrapper, table);
             wrapper.appendChild(table);
+          }
+          
+          // 確保表格樣式正確（防止超出容器）
+          table.style.maxWidth = '100%';
+          table.style.boxSizing = 'border-box';
+          
+          // 手機版：確保表格列寬對齊
+          if (window.innerWidth <= 768) {
+            table.style.tableLayout = 'fixed';
+            table.style.width = '100%';
+            
+            // 確保所有單元格正確換行
+            const cells = table.querySelectorAll('th, td');
+            cells.forEach(cell => {
+              cell.style.whiteSpace = 'normal';
+              cell.style.wordWrap = 'break-word';
+              cell.style.wordBreak = 'break-word';
+              cell.style.overflowWrap = 'break-word';
+            });
           }
         });
       }, 100);

@@ -624,7 +624,7 @@
         box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
       }
       
-      /* 抽屜樣式 */
+      /* 抽屜樣式（手機版） */
       .mode1-instructions-overlay, .mode1-results-overlay {
         position: fixed;
         top: 0;
@@ -643,6 +643,7 @@
         visibility: visible;
       }
       
+      /* 手機版：側邊抽屜樣式 */
       .mode1-instructions-drawer, .mode1-results-drawer {
         position: fixed;
         top: 0;
@@ -667,6 +668,46 @@
       
       .mode1-results-drawer.open {
         right: 0;
+      }
+      
+      /* 電腦版：居中彈跳視窗樣式 */
+      @media (min-width: 769px) {
+        .mode1-instructions-drawer {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          right: auto;
+          transform: translate(-50%, -50%) scale(0.9);
+          width: 600px;
+          max-width: 90vw;
+          height: auto;
+          max-height: 85vh;
+          border-radius: 16px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          transition: transform 0.3s ease, opacity 0.3s ease;
+          opacity: 0;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .mode1-instructions-drawer.open {
+          right: auto;
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+        }
+        
+        .mode1-instructions-overlay {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        /* 電腦版：確保內容區域可以滾動 */
+        .mode1-instructions-drawer-content {
+          flex: 1;
+          overflow-y: auto;
+          overflow-x: hidden;
+        }
       }
       
       /* 一鍵生成 Modal 彈出視窗樣式 */
@@ -1326,7 +1367,7 @@
       /* 生成結果模態框內的表格樣式 */
       .mode1-oneclick-result-content table {
         width: 100%;
-        min-width: 600px; /* 防止表格被壓縮 */
+        max-width: 100%; /* 限制最大寬度，防止超出容器 */
         border-collapse: collapse;
         margin: 16px 0;
         font-size: 14px;
@@ -1336,6 +1377,7 @@
         overflow: hidden;
         border: 1px solid #e5e7eb; /* 外框 */
         table-layout: auto; /* 自動調整列寬 */
+        box-sizing: border-box; /* 包含邊框和內距 */
       }
       
       .mode1-oneclick-result-content table thead {
@@ -1388,14 +1430,19 @@
       @media (min-width: 769px) {
         .mode1-oneclick-result-content-wrapper:has(table) {
           overflow-x: auto;
+          max-width: 100%; /* 限制最大寬度 */
         }
         
         .mode1-oneclick-result-content-wrapper table {
           min-width: 800px; /* 確保表格有足夠寬度，觸發橫向滾動 */
+          max-width: none; /* 允許表格超出容器，觸發橫向滾動 */
         }
         
         .mode1-oneclick-result-content-wrapper table td {
           white-space: nowrap; /* 防止文字換行，強制使用橫向滾動 */
+          max-width: 200px; /* 限制單個單元格最大寬度 */
+          overflow: hidden;
+          text-overflow: ellipsis; /* 超出部分顯示省略號 */
         }
       }
       
@@ -1433,20 +1480,55 @@
           min-width: 100% !important; /* 手機版表格寬度為 100% */
           width: 100% !important;
           max-width: 100% !important;
-          table-layout: auto !important; /* 自動調整列寬 */
+          table-layout: fixed !important; /* 固定表格佈局，確保列寬對齊 */
+          box-sizing: border-box !important;
         }
         
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table th,
         .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table td {
           white-space: normal !important; /* 允許文字換行 */
           word-wrap: break-word !important; /* 長文字自動換行 */
           word-break: break-word !important; /* 強制換行 */
           overflow-wrap: break-word !important;
+          padding: 8px 6px !important; /* 手機版減少內距 */
+          font-size: 12px !important; /* 手機版字體縮小 */
+          vertical-align: top !important; /* 頂部對齊 */
         }
         
-        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table th {
-          white-space: normal !important; /* 允許標題換行 */
-          word-wrap: break-word !important;
-          overflow-wrap: break-word !important;
+        /* 確保表格列寬均勻分配 */
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table colgroup,
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table col {
+          width: auto !important;
+        }
+        
+        /* 為表格添加列寬分配（如果表格有8列，每列約12.5%） */
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table thead th:nth-child(1),
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table tbody td:nth-child(1) {
+          width: 10% !important;
+        }
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table thead th:nth-child(2),
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table tbody td:nth-child(2) {
+          width: 15% !important;
+        }
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table thead th:nth-child(3),
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table tbody td:nth-child(3) {
+          width: 10% !important;
+        }
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table thead th:nth-child(4),
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table tbody td:nth-child(4) {
+          width: 20% !important;
+        }
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table thead th:nth-child(5),
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table tbody td:nth-child(5) {
+          width: 20% !important;
+        }
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table thead th:nth-child(6),
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table tbody td:nth-child(6) {
+          width: 15% !important;
+        }
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table thead th:nth-child(7),
+        .mode1-oneclick-result-content-wrapper:not(.in-expand-modal) table tbody td:nth-child(7) {
+          width: 10% !important;
         }
         
         /* 展開模態框中的表格允許橫向滾動 */
