@@ -74,9 +74,11 @@ a{text-decoration:none;color:inherit}
   
   // 判斷付款狀態
   // ECPay 的 RtnCode: 1=成功, 其他=失敗
+  // 如果沒有 status 參數但有 orderId，嘗試查詢訂單狀態
   const isSuccess = status === 'success' || status === '1';
   const isPending = status === 'pending' || paymentType === 'ATM' || paymentType === 'CVS';
-  const isError = !isSuccess && !isPending;
+  const hasNoStatus = !status && !paymentType; // 沒有狀態參數
+  const isError = !isSuccess && !isPending && !hasNoStatus;
   
   if (isSuccess) {
     // 付款成功
@@ -110,16 +112,36 @@ a{text-decoration:none;color:inherit}
       </div>
     `;
     
+  } else if (hasNoStatus && safeOrderId) {
+    // 沒有狀態參數但有訂單編號，嘗試查詢訂單狀態
+    body.className = 'body pending';
+    body.innerHTML = `
+      <div class="icon">⏳</div>
+      <h2 class="h2" style="color: var(--warn);">查詢訂單狀態</h2>
+      <p class="sub">正在查詢您的訂單狀態...</p>
+      ${safeOrderId ? `<p style="color: var(--sub); font-size: 14px; margin-bottom: 24px;">訂單編號：${safeOrderId}</p>` : ''}
+      <div class="row">
+        <button class="btn blue" onclick="checkOrderStatus('${safeOrderId.replace(/'/g, "\\'")}')">檢查付款狀態</button>
+        <button class="btn ghost" onclick="window.location.href='subscription.html'">返回訂閱頁</button>
+      </div>
+    `;
+    // 自動嘗試查詢訂單狀態
+    if (safeOrderId) {
+      setTimeout(() => {
+        checkOrderStatus(safeOrderId);
+      }, 500);
+    }
   } else {
-    // 付款失敗
+    // 付款失敗或未知狀態
     body.className = 'body error';
     body.innerHTML = `
       <div class="icon">❌</div>
-      <h2 class="h2" style="color: var(--red);">付款失敗</h2>
-      <p class="sub">${safeMessage || '付款過程中發生錯誤，請稍後再試或聯繫客服'}</p>
+      <h2 class="h2" style="color: var(--red);">${hasNoStatus ? '無法確認付款狀態' : '付款失敗'}</h2>
+      <p class="sub">${safeMessage || (hasNoStatus ? '請稍後再試或聯繫客服確認訂單狀態' : '付款過程中發生錯誤，請稍後再試或聯繫客服')}</p>
       ${safeOrderId ? `<p style="color: var(--sub); font-size: 14px; margin-bottom: 24px;">訂單編號：${safeOrderId}</p>` : ''}
       <div class="row">
-        <button class="btn blue" onclick="window.location.href='subscription.html'">重新訂閱</button>
+        ${safeOrderId ? `<button class="btn blue" onclick="checkOrderStatus('${safeOrderId.replace(/'/g, "\\'")}')">檢查付款狀態</button>` : ''}
+        <button class="btn blue" onclick="window.location.href='subscription.html'">${hasNoStatus ? '返回訂閱頁' : '重新訂閱'}</button>
         <button class="btn ghost" onclick="window.location.href='/'">返回首頁</button>
       </div>
     `;
