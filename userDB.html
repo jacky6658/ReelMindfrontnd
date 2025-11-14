@@ -1222,7 +1222,7 @@
           <span id="userName" class="user-name"></span>
         </div>
         <div class="auth-buttons" id="authButtons" style="display: none;">
-          <button id="loginBtn" class="login-btn" onclick="goToLogin()" style="padding: 10px 16px; min-height: 44px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">🔐 登入</button>
+          <button id="loginBtn" class="login-btn" onclick="goToLogin()" style="padding: 10px 16px; min-height: 44px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;"><i class="fas fa-lock" style="margin-right: 4px;"></i>登入</button>
         </div>
       </div>
     </div>
@@ -1264,7 +1264,7 @@
 
     <!-- 創作者資料庫頁面 -->
     <div class="user-db-page">
-      <h2 class="page-title">👤 創作者資料庫</h2>
+      <h2 class="page-title"><i class="fas fa-database" style="margin-right: 8px;"></i>創作者資料庫</h2>
       <div class="user-db-container">
         <!-- 左側功能選單 -->
         <div class="user-db-sidebar">
@@ -1279,44 +1279,44 @@
           </div>
           <nav class="sidebar-menu">
             <div class="menu-item active" onclick="showDbSection('personalInfo')">
-              <span class="menu-icon">👤</span>
+              <span class="menu-icon"><i class="fas fa-user"></i></span>
               <span class="menu-text">個人資料</span>
             </div>
             <div class="menu-item" onclick="showDbSection('myScripts')">
-              <span class="menu-icon">💾</span>
+              <span class="menu-icon"><i class="fas fa-file-alt"></i></span>
               <span class="menu-text">我的腳本</span>
             </div>
             <div class="menu-item" onclick="showDbSection('accountPositioning')">
-              <span class="menu-icon">🎯</span>
+              <span class="menu-icon"><i class="fas fa-bullseye"></i></span>
               <span class="menu-text">帳號定位</span>
             </div>
             <div class="menu-item" onclick="showDbSection('topicRecords')">
-              <span class="menu-icon">💡</span>
+              <span class="menu-icon"><i class="fas fa-lightbulb"></i></span>
               <span class="menu-text">選題內容</span>
             </div>
             <div class="menu-item" onclick="showDbSection('ipPlanning')">
-              <span class="menu-icon">🎭</span>
+              <span class="menu-icon"><i class="fas fa-user-tie"></i></span>
               <span class="menu-text">IP人設規劃</span>
             </div>
             <div class="menu-item" onclick="showDbSection('myOrders')">
-              <span class="menu-icon">💳</span>
+              <span class="menu-icon"><i class="fas fa-credit-card"></i></span>
               <span class="menu-text">我的訂單</span>
             </div>
             <div class="menu-item" onclick="showDbSection('settings')">
-              <span class="menu-icon">⚙️</span>
+              <span class="menu-icon"><i class="fas fa-cog"></i></span>
               <span class="menu-text">設定</span>
             </div>
             <div class="menu-item" onclick="showDbSection('usageStats')">
-              <span class="menu-icon">📊</span>
+              <span class="menu-icon"><i class="fas fa-chart-bar"></i></span>
               <span class="menu-text">使用統計</span>
             </div>
             <div class="menu-item" onclick="showDbSection('helpCenter')">
-              <span class="menu-icon">❓</span>
+              <span class="menu-icon"><i class="fas fa-question-circle"></i></span>
               <span class="menu-text">幫助中心</span>
             </div>
             <div class="menu-divider"></div>
             <div class="menu-item logout-item" onclick="logout()">
-              <span class="menu-icon">🚪</span>
+              <span class="menu-icon"><i class="fas fa-sign-out-alt"></i></span>
               <span class="menu-text">登出</span>
             </div>
           </nav>
@@ -1325,28 +1325,28 @@
         <div class="user-db-content">
           <!-- 個人資料 -->
           <div id="db-personalInfo" class="db-section active">
-            <h3 class="section-title">👤 個人資料</h3>
+            <h3 class="section-title"><i class="fas fa-user" style="margin-right: 8px;"></i>個人資料</h3>
             <div class="section-content">
               <p>載入中...</p>
             </div>
           </div>
           <!-- 我的腳本 -->
           <div id="db-myScripts" class="db-section">
-            <h3 class="section-title">💾 我的腳本</h3>
+            <h3 class="section-title"><i class="fas fa-file-alt" style="margin-right: 8px;"></i>我的腳本</h3>
             <div class="section-content">
               <p>載入中...</p>
             </div>
           </div>
           <!-- 帳號定位 -->
           <div id="db-accountPositioning" class="db-section">
-            <h3 class="section-title">🎯 帳號定位</h3>
+            <h3 class="section-title"><i class="fas fa-bullseye" style="margin-right: 8px;"></i>帳號定位</h3>
             <div class="section-content">
               <p>載入中...</p>
             </div>
           </div>
           <!-- 選題內容 -->
           <div id="db-topicRecords" class="db-section">
-            <h3 class="section-title">💡 選題內容</h3>
+            <h3 class="section-title"><i class="fas fa-lightbulb" style="margin-right: 8px;"></i>選題內容</h3>
             <div class="section-content">
               <p>載入中...</p>
             </div>
@@ -1354,8 +1354,8 @@
           <!-- IP人設規劃 -->
           <div id="db-ipPlanning" class="db-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px;">
-              <h3 class="section-title">🎭 IP人設規劃</h3>
-              <button onclick="exportIpPlanningResults()" style="padding: 10px 16px; min-height: 44px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">📥 匯出</button>
+              <h3 class="section-title"><i class="fas fa-user-tie" style="margin-right: 8px;"></i>IP人設規劃</h3>
+              <button onclick="exportIpPlanningResults()" style="padding: 10px 16px; min-height: 44px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; -webkit-tap-highlight-color: transparent; touch-action: manipulation;"><i class="fas fa-download" style="margin-right: 4px;"></i>匯出</button>
             </div>
             <div class="section-content">
               <div class="ip-planning-tabs" style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #E5E7EB;">
@@ -1370,21 +1370,21 @@
           </div>
           <!-- 我的訂單 -->
           <div id="db-myOrders" class="db-section">
-            <h3 class="section-title">💳 我的訂單</h3>
+            <h3 class="section-title"><i class="fas fa-credit-card" style="margin-right: 8px;"></i>我的訂單</h3>
             <div class="section-content" id="myOrdersContent">
               <div class="loading-text">載入中...</div>
             </div>
           </div>
           <!-- 設定 -->
           <div id="db-settings" class="db-section">
-            <h3 class="section-title">⚙️ 設定</h3>
+            <h3 class="section-title"><i class="fas fa-cog" style="margin-right: 8px;"></i>設定</h3>
             <div class="section-content" id="settingsContent">
               <div class="settings-container">
                 <!-- BYOK 說明 -->
                 <div class="byok-notice" style="margin-bottom: 24px; padding: 16px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
                   <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                    <span style="font-size: 24px;">🔑</span>
-                    <h4 style="margin: 0; color: #0369a1; font-size: 16px; font-weight: 600;">大型語言模型(LLM) API 金鑰管理</h4>
+                    <i class="fas fa-key" style="font-size: 24px; color: #0369a1;"></i>
+                    <h4 style="margin: 0; color: #0369a1; font-size: 16px; font-weight: 600;">AI API Key金鑰管理</h4>
                   </div>
                   <p style="margin: 0; color: #0c4a6e; font-size: 14px; line-height: 1.6;">
                     使用您自己的 API 金鑰可以獲得更高的使用額度和更穩定的服務
@@ -1392,7 +1392,7 @@
                 </div>
                 
                 <div class="setting-group">
-                  <h4>🔑 大型語言模型(LLM) API 金鑰管理</h4>
+                  <h4><i class="fas fa-key" style="margin-right: 8px;"></i>AI API Key金鑰管理</h4>
                   <div class="setting-item">
                     <label for="llmProvider">選擇大型語言模型(LLM) 提供商</label>
                     <select id="llmProvider" onchange="updateModelOptions()" style="margin-bottom: 12px; padding: 12px 16px; min-height: 44px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 16px; width: 100%; -webkit-appearance: none; appearance: none;">
@@ -1403,18 +1403,7 @@
                   <div class="setting-item" id="llmModelContainer">
                     <label for="llmModel">選擇模型（可選，留空則使用系統預設）</label>
                     <select id="llmModel" style="margin-bottom: 12px; padding: 12px 16px; min-height: 44px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 16px; width: 100%; -webkit-appearance: none; appearance: none;">
-                      <!-- Gemini 模型選項 -->
-                      <option value="" data-provider="gemini">使用系統預設 (gemini-2.5-flash)</option>
-                      <option value="gemini-2.0-flash-exp" data-provider="gemini">Gemini 2.0 Flash (實驗版)</option>
-                      <option value="gemini-2.5-flash" data-provider="gemini">Gemini 2.5 Flash</option>
-                      <option value="gemini-1.5-pro" data-provider="gemini">Gemini 1.5 Pro</option>
-                      <option value="gemini-1.5-flash" data-provider="gemini">Gemini 1.5 Flash</option>
-                      <!-- GPT 模型選項（目前後端不支援，但預留） -->
-                      <option value="" data-provider="openai">使用系統預設</option>
-                      <option value="gpt-4o" data-provider="openai">GPT-4o</option>
-                      <option value="gpt-4-turbo" data-provider="openai">GPT-4 Turbo</option>
-                      <option value="gpt-4" data-provider="openai">GPT-4</option>
-                      <option value="gpt-3.5-turbo" data-provider="openai">GPT-3.5 Turbo</option>
+                      <option value="">請先選擇提供商...</option>
                     </select>
                     <span class="setting-desc" style="margin-top: 8px; display: block; color: #6b7280; font-size: 12px;">
                       選擇您想要使用的模型。如果留空，系統將使用預設模型。
@@ -1452,8 +1441,8 @@
                     </span>
                   </div>
                   <div class="setting-item">
-                    <button onclick="saveApiKey()" style="margin-right: 8px; padding: 10px 16px; min-height: 44px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">💾 保存金鑰</button>
-                    <button onclick="testApiKey()" style="padding: 10px 16px; min-height: 44px; background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; font-weight: 500; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">🧪 測試金鑰</button>
+                    <button onclick="saveApiKey()" style="margin-right: 8px; padding: 10px 16px; min-height: 44px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; -webkit-tap-highlight-color: transparent; touch-action: manipulation;"><i class="fas fa-save" style="margin-right: 4px;"></i>保存金鑰</button>
+                    <button onclick="testApiKey()" style="padding: 10px 16px; min-height: 44px; background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; font-weight: 500; -webkit-tap-highlight-color: transparent; touch-action: manipulation;"><i class="fas fa-vial" style="margin-right: 4px;"></i>測試金鑰</button>
                     <span class="setting-desc" style="display: block; margin-top: 8px; color: #6b7280; font-size: 12px;">
                       保存前建議先測試金鑰是否有效
                     </span>
@@ -1462,13 +1451,13 @@
                 </div>
                 
                 <div class="setting-group" style="margin-top: 32px;">
-                  <h4>📊 數據管理</h4>
+                  <h4><i class="fas fa-chart-bar" style="margin-right: 8px;"></i>數據管理</h4>
                   <div class="setting-item">
-                    <button onclick="exportUserData()" style="padding: 10px 16px; min-height: 44px; background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; font-weight: 500; margin-bottom: 8px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">📥 匯出我的資料</button>
-                    <span class="setting-desc" style="display: block; color: #6b7280; font-size: 12px;">匯出所有腳本、對話、定位記錄為 CSV 檔案</span>
+                    <button onclick="exportUserData()" style="padding: 10px 16px; min-height: 44px; background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; font-weight: 500; margin-bottom: 8px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;"><i class="fas fa-download" style="margin-right: 4px;"></i>匯出我的資料</button>
+                    <span class="setting-desc" style="display: block; color: #6b7280; font-size: 12px;">匯出所有腳本、對話、定位記錄為 Excel 檔案（不同功能分不同分頁）</span>
                   </div>
                   <div class="setting-item">
-                    <button onclick="clearUserData()" style="padding: 10px 16px; min-height: 44px; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; border-radius: 6px; cursor: pointer; font-weight: 500; margin-bottom: 8px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">🗑️ 清除本地快取</button>
+                    <button onclick="clearUserData()" style="padding: 10px 16px; min-height: 44px; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; border-radius: 6px; cursor: pointer; font-weight: 500; margin-bottom: 8px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;"><i class="fas fa-trash-alt" style="margin-right: 4px;"></i>清除本地快取</button>
                     <span class="setting-desc" style="display: block; color: #6b7280; font-size: 12px;">清除本地暫存數據</span>
                   </div>
                 </div>
@@ -1477,7 +1466,7 @@
           </div>
           <!-- 使用統計 -->
           <div id="db-usageStats" class="db-section">
-            <h3 class="section-title">📊 使用統計</h3>
+            <h3 class="section-title"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i>使用統計</h3>
             <div class="section-content" id="usageStatsContent">
               <div class="stats-overview" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px;">
                 <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
@@ -1504,11 +1493,11 @@
           </div>
           <!-- 幫助中心 -->
           <div id="db-helpCenter" class="db-section">
-            <h3 class="section-title">❓ 幫助中心</h3>
+            <h3 class="section-title"><i class="fas fa-question-circle" style="margin-right: 8px;"></i>幫助中心</h3>
             <div class="section-content" id="helpContent">
               <div class="help-container">
                 <div class="help-section" style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;">🚀 快速開始</h4>
+                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;"><i class="fas fa-rocket" style="margin-right: 8px;"></i>快速開始</h4>
                   <ul style="margin: 0; padding-left: 20px; color: #374151; line-height: 1.8;">
                     <li>首次使用建議先嘗試「一鍵生成」功能</li>
                     <li>點擊「開始」按鈕即可生成帳號定位、選題、腳本</li>
@@ -1516,14 +1505,14 @@
                   </ul>
                 </div>
                 <div class="help-section" style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;">📝 三大使用模式</h4>
+                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;"><i class="fas fa-list" style="margin-right: 8px;"></i>三大使用模式</h4>
                   <ul style="margin: 0; padding-left: 20px; color: #374151; line-height: 1.8;">
                     <li><strong>一鍵生成：</strong>快速生成定位、選題、腳本</li>
                     <li><strong>IP人設規劃：</strong>14天規劃與個人化資料庫</li>
                   </ul>
                 </div>
                 <div class="help-section" style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;">💾 資料庫功能</h4>
+                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;"><i class="fas fa-database" style="margin-right: 8px;"></i>資料庫功能</h4>
                   <ul style="margin: 0; padding-left: 20px; color: #374151; line-height: 1.8;">
                     <li>所有生成內容自動保存</li>
                     <li>可在「創作者資料庫」查看歷史記錄</li>
@@ -1531,7 +1520,7 @@
                   </ul>
                 </div>
                 <div class="help-section" style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;">❓ 常見問題</h4>
+                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;"><i class="fas fa-question-circle" style="margin-right: 8px;"></i>常見問題</h4>
                   <div class="faq-item" style="margin-bottom: 16px;">
                     <strong style="display: block; margin-bottom: 4px; color: #1f2937;">Q: 如何保存腳本？</strong>
                     <p style="margin: 0; color: #6b7280;">A: 點擊生成結果右上角的「保存」按鈕即可。</p>
@@ -1546,7 +1535,7 @@
                   </div>
                 </div>
                 <div class="help-section" style="padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;">📞 聯絡我們</h4>
+                  <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; font-weight: 600;"><i class="fas fa-phone" style="margin-right: 8px;"></i>聯絡我們</h4>
                   <p style="margin: 0 0 8px 0; color: #374151;">如有問題，請聯繫客服：</p>
                   <ul style="margin: 0; padding-left: 20px; color: #374151; line-height: 1.8;">
                     <li>Email: aiagent168168@gmail.com</li>
@@ -1833,8 +1822,8 @@
         
         const isSubscribed = ipPlanningUser.is_subscribed !== false;
         const subscriptionStatus = isSubscribed ? 
-          '<span style="color: #10b981; font-weight: bold;">✅ 已訂閱</span>' : 
-          '<span style="color: #ef4444; font-weight: bold;">❌ 未訂閱</span>';
+          '<span style="color: #10b981; font-weight: bold;"><i class="fas fa-check-circle" style="margin-right: 4px;"></i>已訂閱</span>' : 
+          '<span style="color: #ef4444; font-weight: bold;"><i class="fas fa-times-circle" style="margin-right: 4px;"></i>未訂閱</span>';
         
         let expiresAt = null;
         let daysLeft = null;
@@ -1868,10 +1857,10 @@
                 
                 if (daysLeft < 0) {
                   daysLeftText = `<span style="color: #ef4444; font-weight: bold;">（已過期 ${Math.abs(daysLeft)} 天）</span>`;
-                  expirationWarning = '<div style="margin-top: 12px; padding: 12px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b;"><strong>⚠️ 訂閱已過期</strong><br>請前往訂閱頁面續費以繼續使用服務。</div>';
+                  expirationWarning = '<div style="margin-top: 12px; padding: 12px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b;"><strong><i class="fas fa-exclamation-triangle" style="margin-right: 4px;"></i>訂閱已過期</strong><br>請前往訂閱頁面續費以繼續使用服務。</div>';
                 } else if (daysLeft <= 3) {
                   daysLeftText = `<span style="color: #ef4444; font-weight: bold;">（剩餘 ${daysLeft} 天）</span>`;
-                  expirationWarning = '<div style="margin-top: 12px; padding: 12px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; color: #92400e;"><strong>⚠️ 訂閱即將到期</strong><br>請盡快前往訂閱頁面續費。</div>';
+                  expirationWarning = '<div style="margin-top: 12px; padding: 12px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; color: #92400e;"><strong><i class="fas fa-exclamation-triangle" style="margin-right: 4px;"></i>訂閱即將到期</strong><br>請盡快前往訂閱頁面續費。</div>';
                 } else if (daysLeft <= 7) {
                   daysLeftText = `<span style="color: #f59e0b; font-weight: bold;">（剩餘 ${daysLeft} 天）</span>`;
                   expirationWarning = '<div style="margin-top: 12px; padding: 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; color: #92400e;"><strong>提醒</strong><br>您的訂閱將在 7 天內到期，請記得續費。</div>';
@@ -1915,15 +1904,15 @@
             ${expirationWarning}
             <div class="detail-actions" style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
               <a href="subscription.html" style="display: inline-block; padding: 10px 16px; min-height: 44px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">
-                💳 續費訂閱
+                <i class="fas fa-credit-card" style="margin-right: 4px;"></i>續費訂閱
               </a>
               ${userInfo.auto_renew !== false ? `
               <button onclick="cancelAutoRenewForUserDB()" style="display: inline-block; padding: 10px 16px; min-height: 44px; background: #EF4444; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">
-                🚫 取消自動續費
+                <i class="fas fa-ban" style="margin-right: 4px;"></i>取消自動續費
               </button>
               ` : `
               <div style="display: inline-block; padding: 8px 16px; background: #F3F4F6; color: #6B7280; border-radius: 6px; font-weight: 500; font-size: 14px;">
-                ✅ 已取消自動續費
+                <i class="fas fa-check-circle" style="margin-right: 4px;"></i>已取消自動續費
               </div>
               `}
             </div>

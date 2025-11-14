@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>免費體驗 - ReelMind AI 短影音智能體 | 立即體驗 AI 生成腳本</title>
+    <meta name="title" content="免費體驗 - ReelMind AI 短影音智能體 | 立即體驗 AI 生成腳本" />
+    <meta name="description" content="ReelMind AI 免費體驗：無需登入，立即體驗 AI 生成短影音腳本、帳號定位分析、選題靈感。支援 IG、TikTok、YouTube Shorts。" />
+    <meta name="keywords" content="AI短影音,AI生成腳本,AI帳號定位,短影音腳本生成,免費體驗,短影音工具" />
+    <meta name="author" content="ReelMind AI" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="zh-Hant" />
+    <link rel="canonical" href="https://aivideonew.zeabur.app/experience.html" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E" />
+    
+    <!-- Font Awesome 圖標庫 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- CSS 文件 -->
+    <link rel="stylesheet" href="assets/css/variables.css" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    
+    <style>
+      /* 導航欄樣式 */
+      .top-navbar {
+        background: var(--navbar-bg, #ffffff);
+        border-bottom: 1px solid var(--border-color, #e5e7eb);
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        padding-top: calc(16px + env(safe-area-inset-top, 0px));
+        min-height: 60px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      
+      .navbar-left {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+      
+      .navbar-title {
+        font-size: 30px;
+        font-weight: 600;
+        color: var(--text-primary, #1f2937);
+        cursor: pointer;
+        transition: color 0.2s ease;
+      }
+      
+      .navbar-title:hover {
+        color: #3b82f6;
+      }
+      
+      .navbar-tabs {
+        display: flex;
+        gap: 8px;
+      }
+      
+      .navbar-tab {
+        padding: 8px 16px;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary, #6b7280);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+      }
+      
+      .navbar-tab:hover {
+        background: var(--bg-tertiary, #f3f4f6);
+      }
+      
+      .navbar-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      
+      .login-btn {
+        padding: 8px 16px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .login-btn:hover {
+        background: #2563eb;
+      }
+      
+      /* 體驗頁面內容 */
+      .experience-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+      
+      .experience-header {
+        text-align: center;
+        margin-bottom: 60px;
+      }
+      
+      .experience-header h1 {
+        font-size: clamp(2rem, 4vw, 2.8rem);
+        font-weight: 800;
+        color: #1E293B;
+        margin-bottom: 16px;
+      }
+      
+      .experience-header p {
+        font-size: 1.1rem;
+        color: #64748B;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+      
+      /* 步驟流程 */
+      .step-flow {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+      }
+      
+      .step-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      
+      .step-number {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+      
+      .step-item.active .step-number {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      }
+      
+      .step-connector {
+        width: 60px;
+        height: 2px;
+        background: #e5e7eb;
+      }
+      
+      .step-item.active ~ .step-item .step-connector {
+        background: #e5e7eb;
+      }
+      
+      .step-item.completed .step-connector {
+        background: #10B981;
+      }
+      
+      /* 表單樣式 */
+      .form-container {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        border: 1px solid #E2E8F0;
+        margin-bottom: 40px;
+      }
+      
+      .form-group {
+        margin-bottom: 24px;
+      }
+      
+      .form-label {
+        display: block;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1E293B;
+        margin-bottom: 8px;
+      }
+      
+      .form-input,
+      .form-select,
+      .form-textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #D1D5DB;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        box-sizing: border-box;
+      }
+      
+      .form-input:focus,
+      .form-select:focus,
+      .form-textarea:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+      }
+      
+      .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+      
+      .btn-primary {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+      }
+      
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59,130,246,0.4);
+      }
+      
+      .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+      
+      /* 結果顯示 */
+      .results-container {
+        display: none;
+      }
+      
+      .results-container.show {
+        display: block;
+      }
+      
+      .result-card {
+        background: white;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        border: 1px solid #E2E8F0;
+        margin-bottom: 24px;
+      }
+      
+      .result-card h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      
+      .result-content {
+        font-size: 1rem;
+        color: #475569;
+        line-height: 1.8;
+        white-space: pre-wrap;
+      }
+      
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: #64748B;
+      }
+      
+      .loading-spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 4px solid #E5E7EB;
+        border-top-color: #3B82F6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 16px;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      /* 手機版樣式 */
+      @media (max-width: 768px) {
+        .experience-container {
+          padding: 20px 16px;
+        }
+        
+        .form-container {
+          padding: 24px;
+        }
+        
+        .step-flow {
+          flex-direction: column;
+          gap: 8px;
+        }
+        
+        .step-connector {
+          width: 2px;
+          height: 30px;
+        }
+        
+        .navbar-tabs {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 頂部導航欄 -->
+    <div class="top-navbar">
+      <div class="navbar-left">
+        <div class="navbar-title" onclick="window.location.href='index.html'">ReelMind</div>
+        <div class="navbar-tabs">
+          <a href="index.html" class="navbar-tab">首頁</a>
+          <a href="index.html#guide" class="navbar-tab">實戰指南</a>
+          <a href="index.html#forum" class="navbar-tab">論壇介紹</a>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <button class="login-btn" onclick="window.location.href='index.html'">返回首頁</button>
+      </div>
+    </div>
+
+    <!-- 體驗頁面內容 -->
+    <div class="experience-container">
+      <div class="experience-header">
+        <h1><i class="fas fa-sparkles" style="color: #3B82F6;"></i> 免費體驗 AI 短影音生成</h1>
+        <p>無需登入，立即體驗 ReelMind 的一鍵生成功能。填寫你的需求，AI 將為你生成帳號定位、選題建議和完整腳本。</p>
+      </div>
+
+      <!-- 步驟流程 -->
+      <div class="step-flow">
+        <div class="step-item active" id="step1">
+          <div class="step-number">1</div>
+          <span>填寫需求</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item" id="step2">
+          <div class="step-number">2</div>
+          <span>生成中</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item" id="step3">
+          <div class="step-number">3</div>
+          <span>查看結果</span>
+        </div>
+      </div>
+
+      <!-- 表單容器 -->
+      <div class="form-container" id="formContainer">
+        <form id="experienceForm">
+          <div class="form-group">
+            <label class="form-label" for="topic">主題/產品 *</label>
+            <input type="text" id="topic" class="form-input" placeholder="例如：理財投資、健身減肥、美食分享..." required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="targetAudience">目標受眾 *</label>
+            <input type="text" id="targetAudience" class="form-input" placeholder="例如：25-35歲上班族、想減肥的女性..." required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="goal">影片目標 *</label>
+            <select id="goal" class="form-select" required>
+              <option value="">請選擇</option>
+              <option value="流量">流量</option>
+              <option value="轉換">轉換</option>
+              <option value="品牌">品牌</option>
+              <option value="教育">教育</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="platform">社群平台 *</label>
+            <select id="platform" class="form-select" required>
+              <option value="">請選擇</option>
+              <option value="Instagram Reels">Instagram Reels</option>
+              <option value="TikTok">TikTok</option>
+              <option value="YouTube Shorts">YouTube Shorts</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="style">補充說明（選填）</label>
+            <textarea id="style" class="form-textarea" placeholder="例如：希望語氣輕鬆、加入數據支撐..."></textarea>
+          </div>
+          
+          <button type="submit" class="btn-primary" id="generateBtn">
+            <i class="fas fa-magic"></i> 立即生成
+          </button>
+        </form>
+      </div>
+
+      <!-- 載入中 -->
+      <div class="loading" id="loadingContainer" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>AI 正在為你生成內容，請稍候...</p>
+      </div>
+
+      <!-- 結果容器 -->
+      <div class="results-container" id="resultsContainer">
+        <div class="result-card" id="positioningResult">
+          <h3><i class="fas fa-bullseye" style="color: #3B82F6;"></i> 帳號定位</h3>
+          <div class="result-content" id="positioningContent"></div>
+        </div>
+        
+        <div class="result-card" id="topicsResult">
+          <h3><i class="fas fa-lightbulb" style="color: #10B981;"></i> 選題建議</h3>
+          <div class="result-content" id="topicsContent"></div>
+        </div>
+        
+        <div class="result-card" id="scriptResult">
+          <h3><i class="fas fa-file-alt" style="color: #8B5CF6;"></i> 完整腳本</h3>
+          <div class="result-content" id="scriptContent"></div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 32px;">
+          <button class="btn-primary" onclick="resetExperience()" style="max-width: 300px;">
+            <i class="fas fa-redo"></i> 重新體驗
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = 'https://aivideobackend.zeabur.app';
+      
+      // 表單提交處理
+      document.getElementById('experienceForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const topic = document.getElementById('topic').value;
+        const targetAudience = document.getElementById('targetAudience').value;
+        const goal = document.getElementById('goal').value;
+        const platform = document.getElementById('platform').value;
+        const style = document.getElementById('style').value;
+        
+        // 隱藏表單，顯示載入中
+        document.getElementById('formContainer').style.display = 'none';
+        document.getElementById('loadingContainer').style.display = 'block';
+        document.getElementById('resultsContainer').classList.remove('show');
+        
+        // 更新步驟
+        document.getElementById('step1').classList.remove('active');
+        document.getElementById('step1').classList.add('completed');
+        document.getElementById('step2').classList.add('active');
+        
+        try {
+          // 並行生成三個內容
+          const [positioning, topics, script] = await Promise.allSettled([
+            generatePositioning(topic, targetAudience, goal, platform, style),
+            generateTopics(topic, targetAudience, goal, platform, style),
+            generateScript(topic, targetAudience, goal, platform, style)
+          ]);
+          
+          // 顯示結果
+          document.getElementById('positioningContent').textContent = 
+            positioning.status === 'fulfilled' ? positioning.value : '生成失敗，請稍後再試。';
+          document.getElementById('topicsContent').textContent = 
+            topics.status === 'fulfilled' ? topics.value : '生成失敗，請稍後再試。';
+          document.getElementById('scriptContent').textContent = 
+            script.status === 'fulfilled' ? script.value : '生成失敗，請稍後再試。';
+          
+          // 隱藏載入中，顯示結果
+          document.getElementById('loadingContainer').style.display = 'none';
+          document.getElementById('resultsContainer').classList.add('show');
+          
+          // 更新步驟
+          document.getElementById('step2').classList.remove('active');
+          document.getElementById('step2').classList.add('completed');
+          document.getElementById('step3').classList.add('active');
+          
+          // 滾動到結果
+          document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (error) {
+          console.error('生成失敗:', error);
+          document.getElementById('loadingContainer').innerHTML = 
+            '<p style="color: #ef4444;">生成過程中發生錯誤，請稍後再試。</p>';
+        }
+      });
+      
+      // 生成帳號定位
+      async function generatePositioning(topic, targetAudience, goal, platform, style) {
+        const response = await fetch(`${API_BASE}/api/generate/positioning`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            topic,
+            target_audience: targetAudience,
+            goal,
+            platform,
+            style: style || '',
+            history: []
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('生成失敗');
+        }
+        
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let result = '';
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                if (data.type === 'token' && data.content) {
+                  result += data.content;
+                }
+              } catch (e) {
+                // 忽略解析錯誤
+              }
+            }
+          }
+        }
+        
+        return result || '生成失敗，請稍後再試。';
+      }
+      
+      // 生成選題建議
+      async function generateTopics(topic, targetAudience, goal, platform, style) {
+        const response = await fetch(`${API_BASE}/api/generate/topics`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            topic,
+            target_audience: targetAudience,
+            goal,
+            platform,
+            style: style || '',
+            history: []
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('生成失敗');
+        }
+        
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let result = '';
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                if (data.type === 'token' && data.content) {
+                  result += data.content;
+                }
+              } catch (e) {
+                // 忽略解析錯誤
+              }
+            }
+          }
+        }
+        
+        return result || '生成失敗，請稍後再試。';
+      }
+      
+      // 生成腳本
+      async function generateScript(topic, targetAudience, goal, platform, style) {
+        const response = await fetch(`${API_BASE}/api/generate/script`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            topic,
+            target_audience: targetAudience,
+            goal,
+            platform,
+            style: style || '',
+            duration: '30',
+            history: []
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('生成失敗');
+        }
+        
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let result = '';
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                if (data.type === 'token' && data.content) {
+                  result += data.content;
+                }
+              } catch (e) {
+                // 忽略解析錯誤
+              }
+            }
+          }
+        }
+        
+        return result || '生成失敗，請稍後再試。';
+      }
+      
+      // 重置體驗
+      function resetExperience() {
+        document.getElementById('experienceForm').reset();
+        document.getElementById('formContainer').style.display = 'block';
+        document.getElementById('loadingContainer').style.display = 'none';
+        document.getElementById('resultsContainer').classList.remove('show');
+        
+        // 重置步驟
+        document.querySelectorAll('.step-item').forEach((item, index) => {
+          item.classList.remove('active', 'completed');
+          if (index === 0) item.classList.add('active');
+        });
+        
+        // 滾動到頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    </script>
+  </body>
+</html>
+

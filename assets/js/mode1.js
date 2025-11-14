@@ -84,14 +84,42 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
   
-  // 檢查權限（需要登入和訂閱）
-  if (window.ReelMindCommon) {
-    const hasAccess = await window.ReelMindCommon.checkFeatureAccess();
-    if (!hasAccess) {
-      console.warn('⚠️ 權限檢查失敗，無法訪問此功能');
+  // 檢查權限（需要登入和訂閱）- 使用 checkPagePermission 會直接重定向
+  if (window.ReelMindCommon && typeof window.ReelMindCommon.checkPagePermission === 'function') {
+    const hasPermission = await window.ReelMindCommon.checkPagePermission();
+    if (!hasPermission) {
+      // checkPagePermission 會自動重定向，這裡不需要額外處理
       return;
     }
     console.log('✅ 權限檢查通過，可以訪問此功能');
+  } else {
+    // 降級處理：如果 common.js 未載入，手動檢查
+    if (!isLoggedIn) {
+      console.warn('⚠️ 未登入，導向首頁');
+      window.location.href = '/';
+      return;
+    }
+    // 檢查訂閱狀態
+    let isSubscribed = false;
+    if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+      isSubscribed = window.ReelMindCommon.isSubscribed();
+    } else {
+      const backendSubscribed = document.body.dataset.subscribed === 'true';
+      const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
+      const localSubscribed = localSubscriptionStatus === 'active';
+      const userSubscribed = !!(ipPlanningUser && (
+        ipPlanningUser.is_subscribed === true || 
+        ipPlanningUser.is_subscribed === 1 || 
+        ipPlanningUser.is_subscribed === '1' ||
+        ipPlanningUser.is_subscribed === 'true'
+      ));
+      isSubscribed = backendSubscribed || localSubscribed || userSubscribed;
+    }
+    if (!isSubscribed) {
+      console.warn('⚠️ 未訂閱，導向訂閱頁');
+      window.location.href = '/subscription.html';
+      return;
+    }
   }
 
   // 更新用戶資訊顯示
