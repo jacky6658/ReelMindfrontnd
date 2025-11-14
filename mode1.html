@@ -1390,9 +1390,13 @@
         text-align: left;
         font-weight: 600;
         color: #374151;
-        white-space: nowrap;
+        white-space: normal; /* 允許標題換行 */
+        word-wrap: break-word; /* 長文字自動換行 */
+        word-break: break-word; /* 強制換行 */
+        overflow-wrap: break-word;
         border-right: 1px solid #e5e7eb; /* 垂直分隔線 */
         border-bottom: 1px solid #e5e7eb; /* 水平分隔線 */
+        vertical-align: top; /* 頂部對齊 */
       }
       
       .mode1-oneclick-result-content table th:last-child {
@@ -1417,6 +1421,12 @@
         color: #4b5563;
         border-right: 1px solid #e5e7eb; /* 垂直分隔線 */
         vertical-align: top;
+        white-space: normal; /* 允許文字換行 */
+        word-wrap: break-word; /* 長文字自動換行 */
+        word-break: break-word; /* 強制換行 */
+        overflow-wrap: break-word;
+        overflow: visible; /* 顯示所有內容 */
+        text-overflow: clip; /* 不使用省略號 */
       }
       
       /* 一週腳本表格特殊處理：手機版改為自動換行，避免橫向滾動 */
@@ -1426,7 +1436,7 @@
         overscroll-behavior-x: contain;
       }
       
-      /* 電腦版保持橫向滾動 */
+      /* 電腦版：允許換行，保持欄位對齊 */
       @media (min-width: 769px) {
         .mode1-oneclick-result-content-wrapper:has(table) {
           overflow-x: auto;
@@ -1434,15 +1444,42 @@
         }
         
         .mode1-oneclick-result-content-wrapper table {
-          min-width: 800px; /* 確保表格有足夠寬度，觸發橫向滾動 */
-          max-width: none; /* 允許表格超出容器，觸發橫向滾動 */
+          width: 100%;
+          max-width: 100%;
+          table-layout: fixed; /* 固定表格佈局，確保列寬對齊 */
         }
         
+        .mode1-oneclick-result-content-wrapper table th,
         .mode1-oneclick-result-content-wrapper table td {
-          white-space: nowrap; /* 防止文字換行，強制使用橫向滾動 */
-          max-width: 200px; /* 限制單個單元格最大寬度 */
-          overflow: hidden;
-          text-overflow: ellipsis; /* 超出部分顯示省略號 */
+          white-space: normal !important; /* 允許文字換行 */
+          word-wrap: break-word !important; /* 長文字自動換行 */
+          word-break: break-word !important; /* 強制換行 */
+          overflow-wrap: break-word !important;
+          overflow: visible !important; /* 顯示所有內容 */
+          text-overflow: clip !important; /* 不使用省略號 */
+          vertical-align: top; /* 頂部對齊 */
+        }
+        
+        /* 為表格列設置合理的寬度分配（根據常見的腳本表格結構） */
+        .mode1-oneclick-result-content-wrapper table th:nth-child(1),
+        .mode1-oneclick-result-content-wrapper table td:nth-child(1) {
+          width: 12%; /* 段落 */
+        }
+        .mode1-oneclick-result-content-wrapper table th:nth-child(2),
+        .mode1-oneclick-result-content-wrapper table td:nth-child(2) {
+          width: 25%; /* 台詞內容 */
+        }
+        .mode1-oneclick-result-content-wrapper table th:nth-child(3),
+        .mode1-oneclick-result-content-wrapper table td:nth-child(3) {
+          width: 25%; /* 畫面描述 */
+        }
+        .mode1-oneclick-result-content-wrapper table th:nth-child(4),
+        .mode1-oneclick-result-content-wrapper table td:nth-child(4) {
+          width: 20%; /* 字幕文字 */
+        }
+        .mode1-oneclick-result-content-wrapper table th:nth-child(5),
+        .mode1-oneclick-result-content-wrapper table td:nth-child(5) {
+          width: 18%; /* 音效與轉場 */
         }
       }
       
