@@ -14530,14 +14530,29 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         };
         
         // 頁面載入時先處理 hash（優先處理）
-        // 如果 DOM 已準備好，立即處理；否則等待 DOMContentLoaded
+        // 立即檢查 hash，避免先顯示首頁
         let hasHashNavigation = false;
-        if (document.readyState === 'loading') {
-          // DOM 還在載入中，等待 DOMContentLoaded 時處理
-          // 在 DOMContentLoaded 時會再次調用 handleHashNavigation
-        } else {
-          // DOM 已準備好，立即處理
-          hasHashNavigation = handleHashNavigation();
+        
+        // 立即檢查 hash（不等待 DOM 載入）
+        const currentHash = window.location.hash;
+        if (currentHash) {
+          const pageId = currentHash.replace('#', '');
+          const validPages = ['homepage', 'forum', 'guide', 'userDB', 'guide-article1', 'guide-article2', 'guide-article3'];
+          if (validPages.includes(pageId)) {
+            console.log('🔗 頁面載入時檢測到 hash 導航:', pageId);
+            // 立即隱藏所有頁面（如果 DOM 已準備好）
+            if (document.readyState !== 'loading') {
+              document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+              });
+            }
+            hasHashNavigation = true; // 標記有 hash 導航，稍後處理
+          }
+        }
+        
+        // 如果 DOM 已準備好，立即處理 hash
+        if (document.readyState !== 'loading') {
+          hasHashNavigation = handleHashNavigation() || hasHashNavigation;
         }
         
         // 在 DOMContentLoaded 時再次處理 hash（確保處理從其他頁面跳轉過來的情況）
