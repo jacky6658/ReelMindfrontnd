@@ -479,6 +479,8 @@ a{text-decoration:none;color:inherit}
   // 價格設定
   const price = { monthly: 2480, yearly: 23760 };
   let currentPlan = 'monthly';
+  let testMode = false;  // 測試模式標記
+  let testAmount = null;  // 測試金額
 
   function format(n){ return 'NT$' + n.toLocaleString('zh-Hant-TW'); }
 
@@ -491,6 +493,17 @@ a{text-decoration:none;color:inherit}
   // 初始化：根據 URL 參數設定方案
   function initPlan() {
     const plan = getUrlParam('plan');
+    const amount = getUrlParam('amount');  // 支援自訂金額（用於測試）
+    
+    // 檢查是否為測試模式（通過 amount 參數）
+    if (amount) {
+      const amountNum = parseInt(amount);
+      if (amountNum > 0) {
+        testMode = true;
+        testAmount = amountNum;
+      }
+    }
+    
     if (plan === 'yearly' || plan === 'monthly') {
       currentPlan = plan;
       updatePlanDisplay();
@@ -504,18 +517,40 @@ a{text-decoration:none;color:inherit}
   function updatePlanDisplay() {
     const isYearly = currentPlan === 'yearly';
     
+    // 計算實際金額（測試模式使用測試金額）
+    const actualAmount = testMode && testAmount ? testAmount : price[currentPlan];
+    
     // 更新方案摘要
-    document.getElementById('summaryPlanName').textContent = isYearly ? '年費方案 🔥' : '月費方案';
-    document.getElementById('summaryPlanPrice').textContent = format(price[currentPlan]);
-    document.getElementById('summaryPlanDesc').textContent = isYearly 
-      ? '最划算，節省 NT$5,000（20% OFF）' 
-      : '彈性方案，適合短期使用者';
+    const planName = isYearly ? '年費方案 🔥' : '月費方案';
+    document.getElementById('summaryPlanName').textContent = testMode 
+      ? `${planName} (測試模式)` 
+      : planName;
+    document.getElementById('summaryPlanPrice').textContent = format(actualAmount);
+    document.getElementById('summaryPlanDesc').textContent = testMode
+      ? `⚠️ 測試模式：金額為 NT$${testAmount.toLocaleString('zh-Hant-TW')}`
+      : (isYearly 
+        ? '最划算，節省 NT$5,000（20% OFF）' 
+        : '彈性方案，適合短期使用者');
 
     // 更新訂單摘要
-    const planName = isYearly ? '年費方案（省 NT$5,000）' : '月費方案';
-    document.getElementById('sumPlan').textContent = planName;
-    document.getElementById('sumPrice').textContent = format(price[currentPlan]);
-    document.getElementById('total').textContent = format(price[currentPlan]);
+    const displayPlanName = isYearly ? '年費方案（省 NT$5,000）' : '月費方案';
+    document.getElementById('sumPlan').textContent = testMode 
+      ? `${displayPlanName} (測試)` 
+      : displayPlanName;
+    document.getElementById('sumPrice').textContent = format(actualAmount);
+    document.getElementById('total').textContent = format(actualAmount);
+    
+    // 如果是測試模式，顯示測試提示
+    if (testMode) {
+      const planSummary = document.getElementById('planSummary');
+      if (planSummary && !planSummary.querySelector('.test-badge')) {
+        const testBadge = document.createElement('div');
+        testBadge.className = 'test-badge';
+        testBadge.style.cssText = 'background: #FEF3C7; color: #92400E; padding: 8px 12px; border-radius: 8px; margin-top: 12px; font-size: 12px; font-weight: 600;';
+        testBadge.textContent = `⚠️ 測試模式：此為 ${testAmount} 元測試付款，將產生真實訂單和授權`;
+        planSummary.appendChild(testBadge);
+      }
+    }
 
     // 年費方案顯示額外功能
     const extraFeature = document.getElementById('extraFeature');
@@ -578,9 +613,12 @@ a{text-decoration:none;color:inherit}
     } catch(_) {}
 
     // 收集訂單資料
+    // 計算實際金額（測試模式使用測試金額）
+    const actualAmount = testMode && testAmount ? testAmount : price[currentPlan];
+    
     const payload = {
       plan: currentPlan,
-      amount: price[currentPlan],
+      amount: actualAmount,  // 使用實際金額（測試模式時為自訂金額）
       name: document.getElementById('name').value.trim(),
       email: document.getElementById('email').value.trim(),
       phone: document.getElementById('phone').value.trim(),
