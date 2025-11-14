@@ -2551,6 +2551,17 @@ function displayOrdersForUserDB(orders) {
             
             const planText = order.plan_type === 'monthly' ? '月費方案' : order.plan_type === 'yearly' ? '年費方案' : order.plan_type || '-';
             const orderId = order.order_id || order.id;
+            
+            // 操作按鈕：待付款訂單顯示「繼續付款」按鈕
+            let actionButton = '';
+            if (order.payment_status === 'pending') {
+              const planParam = order.plan_type === 'monthly' ? 'monthly' : 'yearly';
+              const amountParam = order.amount || '';
+              actionButton = `<a href="/checkout.html?plan=${planParam}&amount=${amountParam}" style="display: inline-block; padding: 6px 12px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#2563EB'" onmouseout="this.style.background='#3B82F6'" onclick="event.stopPropagation()">繼續付款</a>`;
+            } else {
+              actionButton = '<span style="color: #9ca3af;">-</span>';
+            }
+            
             return `
               <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
                 <td style="padding: 12px; color: #1f2937; font-weight: 500; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(orderId || '-')}</td>
@@ -2560,7 +2571,7 @@ function displayOrdersForUserDB(orders) {
                 <td style="padding: 12px; color: #6b7280; font-size: 14px; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(paidDate)}</td>
                 <td style="padding: 12px; color: #6b7280; font-size: 14px; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(expiresDate)}</td>
                 <td style="padding: 12px; color: #6b7280; font-size: 14px; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(order.invoice_number || '-')}</td>
-                <td style="padding: 12px; text-align: center; color: #9ca3af;">-</td>
+                <td style="padding: 12px; text-align: center;" onclick="event.stopPropagation()">${actionButton}</td>
               </tr>
             `;
           }).join('')}
