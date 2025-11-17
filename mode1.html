@@ -53,8 +53,8 @@
         background: var(--navbar-bg);
         border-bottom: 1px solid var(--border-color);
         padding: 16px 24px;
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
+        display: flex;
+        justify-content: space-between;
         align-items: center;
         box-shadow: 0 1px 3px var(--shadow);
         padding-top: calc(16px + var(--safe-area-inset-top, 0px));
@@ -460,10 +460,6 @@
           overflow: hidden;
           text-overflow: ellipsis;
           text-align: center;
-        }
-        
-        .top-navbar {
-          grid-template-columns: auto 1fr auto;
         }
         
         .navbar-tabs {

@@ -11226,7 +11226,7 @@
               <a href="mode1.html" class="navbar-tab" onclick="event.preventDefault(); (async function() { if(window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode1.html'; } } else { window.location.href = 'mode1.html'; } })(); return false;">IP人設規劃</a>
               <a href="mode3.html" class="navbar-tab" onclick="event.preventDefault(); (async function() { if(window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode3.html'; } } else { window.location.href = 'mode3.html'; } })(); return false;">一鍵生成</a>
               <a href="#forum" class="navbar-tab" onclick="switchPage('forum'); return false;">論壇介紹</a>
-              <a href="#guide" class="navbar-tab" onclick="switchPage('guide'); return false;">實戰指南</a>
+              <a href="guide.html" class="navbar-tab">實戰指南</a>
               <a href="#" id="userDBTab" class="navbar-tab" style="display:none;" onclick="handleUserDBClick(); return false;">創作者資料庫</a>
             </div>
           </div>
@@ -11556,13 +11556,13 @@
               <section class="rm-guide-section" style="background: #F8FAFC; padding: 100px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw;">
                 <div style="max-width: 1400px; margin: 0 auto; padding: 0 16px;">
                   <div style="text-align: center; margin-bottom: 60px;">
-                    <h2 onclick="switchPage('guide'); return false;" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; color: #1E293B; margin-bottom: 16px; cursor: pointer; transition: color 0.3s;" onmouseover="this.style.color='#2563EB';" onmouseout="this.style.color='#1E293B';"><i class="fas fa-book-open" style="margin-right: 10px;"></i>AI 短影音實戰指南</h2>
+                    <h2 onclick="window.location.href='guide.html'; return false;" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; color: #1E293B; margin-bottom: 16px; cursor: pointer; transition: color 0.3s;" onmouseover="this.style.color='#2563EB';" onmouseout="this.style.color='#1E293B';"><i class="fas fa-book-open" style="margin-right: 10px;"></i>AI 短影音實戰指南</h2>
                     <p style="font-size: 1.1rem; color: #64748B; max-width: 600px; margin: 0 auto;">學習如何用 AI 打造爆款短影音內容</p>
                 </div>
                   
                   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; margin-top: 40px;">
                     <!-- 文章 1 -->
-                    <a onclick="switchPage('guide-article1'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                    <a onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article1'); }, 100); return false;" style="text-decoration: none; display: block; cursor: pointer;">
                       <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
                         <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
                           <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">三步生成 30 秒短影音腳本</div>
@@ -11577,7 +11577,7 @@
                     </a>
                     
                     <!-- 文章 2 -->
-                    <a onclick="switchPage('guide-article2'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                    <a onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article2'); }, 100); return false;" style="text-decoration: none; display: block; cursor: pointer;">
                       <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
                         <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
                           <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">AI 帳號定位：內容支柱與 14 天計畫</div>
@@ -11592,7 +11592,7 @@
                     </a>
                     
                     <!-- 文章 3 -->
-                    <a onclick="switchPage('guide-article3'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                    <a onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article3'); }, 100); return false;" style="text-decoration: none; display: block; cursor: pointer;">
                       <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
                         <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
                           <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">Reels / Shorts / TikTok<br>腳本差異</div>
@@ -11607,7 +11607,7 @@
                     </a>
                     
                     <!-- 文章 4 -->
-                    <a onclick="switchPage('guide-article4'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                    <a onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article4'); }, 100); return false;" style="text-decoration: none; display: block; cursor: pointer;">
                       <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
                         <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
                           <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">腳本結構選擇指南</div>
@@ -11893,7 +11893,7 @@
                         <p style="font-size: 1rem; color: #64748B; line-height: 1.7; margin-bottom: 20px;">
                           在「創作者資料庫」中儲存你的 LLM API 金鑰（支援 Gemini、GPT 等），讓 AI 使用你的金鑰進行生成，節省成本並提升使用體驗。
                         </p>
-                        <a href="#" onclick="switchPage('guide-article5'); return false;" style="display: inline-block; padding: 10px 20px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.3s; box-shadow: 0 2px 8px rgba(245,158,11,0.3);">
+                        <a href="#" onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article5'); }, 100); return false;" style="display: inline-block; padding: 10px 20px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.3s; box-shadow: 0 2px 8px rgba(245,158,11,0.3);">
                           如何拿到自己的LLM金鑰？
                         </a>
                       </div>
@@ -11988,7 +11988,7 @@
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; margin-top: 40px;">
                       <!-- 文章 1 -->
-                      <a href="#" onclick="switchPage('guide-article1'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                      <a href="#" onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article1'); }, 100); return false;" style="text-decoration: none; display: block; cursor: pointer;">
                         <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
                           <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
                             <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">三步生成 30 秒短影音腳本</div>
@@ -12003,7 +12003,7 @@
                       </a>
                       
                       <!-- 文章 2 -->
-                      <a href="#" onclick="switchPage('guide-article2'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                      <a href="#" onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article2'); }, 100); return false;" style="text-decoration: none; display: block; cursor: pointer;">
                         <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
                           <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
                             <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">AI 帳號定位：內容支柱與 14 天計畫</div>
@@ -12018,7 +12018,7 @@
                       </a>
                       
                       <!-- 文章 3 -->
-                      <a href="#" onclick="switchPage('guide-article3'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                      <a href="#" onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article3'); }, 100); return false;" style="text-decoration: none; display: block; cursor: pointer;">
                         <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
                           <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
                             <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">Reels / Shorts / TikTok<br>腳本差異</div>
@@ -12033,7 +12033,7 @@
                       </a>
                       
                       <!-- 文章 4 -->
-                      <a href="#" onclick="switchPage('guide-article4'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                      <a href="#" onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article4'); }, 100); return false;" style="text-decoration: none; display: block; cursor: pointer;">
                         <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
                           <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
                             <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">腳本結構選擇指南</div>
@@ -12048,7 +12048,7 @@
                       </a>
                       
                       <!-- 文章 5：如何拿到自己的LLM金鑰 -->
-                      <a href="#" onclick="switchPage('guide-article5'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                      <a href="#" onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article5'); }, 100); return false;" style="text-decoration: none; display: block; cursor: pointer;">
                         <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
                           <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
                             <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">如何拿到自己的LLM金鑰</div>
@@ -12349,7 +12349,7 @@
               <!-- 指南文章列表 -->
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
                 <!-- 文章 1 -->
-                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="switchPage('guide-article1')">
+                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article1'); }, 100);">
                   <div style="padding: 32px; border-bottom: 1px solid #F1F5F9;">
                     <div style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">三步生成 30 秒短影音腳本</div>
                     <div style="font-size: 1rem; color: #64748B; line-height: 1.6;">
@@ -12362,7 +12362,7 @@
                 </div>
                 
                 <!-- 文章 2 -->
-                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="switchPage('guide-article2')">
+                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article2'); }, 100);">
                   <div style="padding: 32px; border-bottom: 1px solid #F1F5F9;">
                     <div style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">AI 帳號定位：內容支柱與 14 天計畫</div>
                     <div style="font-size: 1rem; color: #64748B; line-height: 1.6;">
@@ -12375,7 +12375,7 @@
                 </div>
                 
                 <!-- 文章 3 -->
-                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="switchPage('guide-article3')">
+                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article3'); }, 100);">
                   <div style="padding: 32px; border-bottom: 1px solid #F1F5F9;">
                     <div style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">Reels / Shorts / TikTok<br>腳本差異</div>
                     <div style="font-size: 1rem; color: #64748B; line-height: 1.6;">
@@ -12388,7 +12388,7 @@
                 </div>
                 
                 <!-- 文章 4 -->
-                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="switchPage('guide-article4')">
+                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article4'); }, 100);">
                   <div style="padding: 32px; border-bottom: 1px solid #F1F5F9;">
                     <div style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">腳本結構選擇指南</div>
                     <div style="font-size: 1rem; color: #64748B; line-height: 1.6;">
@@ -12401,7 +12401,7 @@
                 </div>
                 
                 <!-- 文章 5：如何拿到自己的LLM金鑰 -->
-                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="switchPage('guide-article5')">
+                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article5'); }, 100);">
                   <div style="padding: 32px; border-bottom: 1px solid #F1F5F9;">
                     <div style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">如何拿到自己的LLM金鑰</div>
                     <div style="font-size: 1rem; color: #64748B; line-height: 1.6;">
@@ -12424,7 +12424,7 @@
                 <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
                 <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
                   <a onclick="switchPage('homepage'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
-                  <a onclick="switchPage('guide'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+                  <a onclick="window.location.href='guide.html'; return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
                 </div>
                 <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">三步生成 30 秒短影音腳本</h1>
                 <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">
@@ -12525,7 +12525,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
                   <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
                     <a onclick="switchPage('homepage'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
-                    <a onclick="switchPage('guide'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+                    <a onclick="window.location.href='guide.html'; return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
                   </div>
                   <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">AI 帳號定位：內容支柱與 14 天計畫</h1>
                   <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">建立 ICP 與訊息金字塔 → 內容支柱與矩陣 → Hook/CTA 庫 → 拍攝模板 → 14 天上片日曆 → KPI 與 A/B 實驗 → SEO/GEO 在地化。</p>
@@ -12720,7 +12720,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
                   <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
                     <a onclick="switchPage('homepage'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
-                    <a onclick="switchPage('guide'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+                    <a onclick="window.location.href='guide.html'; return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
                   </div>
                   <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">Reels / Shorts / TikTok 腳本差異</h1>
                   <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">三平台同題目「不同寫法」：Reels 重品牌敘事、Shorts 強快資訊、TikTok 重娛樂互動。把同一支素材改寫出三種打法。</p>
@@ -12805,7 +12805,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
                   <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
                     <a onclick="switchPage('homepage'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
-                    <a onclick="switchPage('guide'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+                    <a onclick="window.location.href='guide.html'; return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
                   </div>
                   <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">腳本結構選擇指南</h1>
                   <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">了解 ReelMind 提供的 5 種腳本結構（A/B/C/D/E），每種結構適合不同的內容類型和目標，幫助你選擇最適合的腳本結構。</p>
@@ -12928,7 +12928,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
                   <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
                     <a onclick="switchPage('homepage'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
-                    <a onclick="switchPage('guide'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+                    <a onclick="window.location.href='guide.html'; return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
                   </div>
                   <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">如何拿到自己的LLM金鑰</h1>
                   <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">詳細教學如何取得 Gemini、GPT 等 LLM API 金鑰，並在 ReelMind 中設定使用。使用自己的金鑰可以節省成本，並獲得更好的使用體驗。</p>
@@ -26011,7 +26011,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           <span class="mobile-drawer-icon"><i class="fas fa-comments"></i></span>
           <span class="mobile-drawer-text">論壇介紹</span>
         </a>
-        <a href="#guide" class="mobile-drawer-item" onclick="switchPage('guide'); closeMobileDrawer(); return false;">
+        <a href="guide.html" class="mobile-drawer-item" onclick="closeMobileDrawer(); return false;">
           <span class="mobile-drawer-icon"><i class="fas fa-book-open"></i></span>
           <span class="mobile-drawer-text">實戰指南</span>
         </a>

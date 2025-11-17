@@ -1,0 +1,1897 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>實戰指南 - ReelMind AI 短影音智能體 | AI 短影音教學指南</title>
+    <meta name="title" content="實戰指南 - ReelMind AI 短影音智能體 | AI 短影音教學指南" />
+    <meta name="description" content="學習如何用 AI 打造爆款短影音內容，從基礎到進階技巧。包含腳本生成、帳號定位、平台差異、腳本結構選擇等完整教學。" />
+    <meta name="keywords" content="AI短影音,短影音教學,AI腳本生成,IP人設規劃,短影音指南" />
+    <meta name="author" content="ReelMind AI" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="zh-Hant" />
+    <link rel="canonical" href="https://aivideonew.zeabur.app/guide.html" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://aivideonew.zeabur.app/guide.html" />
+    <meta property="og:title" content="實戰指南 - ReelMind AI 短影音智能體" />
+    <meta property="og:description" content="學習如何用 AI 打造爆款短影音內容，從基礎到進階技巧。" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="實戰指南 - ReelMind AI 短影音智能體" />
+    <meta name="twitter:description" content="學習如何用 AI 打造爆款短影音內容，從基礎到進階技巧。" />
+    
+    <!-- HTTP 快取標頭 -->
+    <meta http-equiv="Cache-Control" content="public, max-age=3600">
+    <meta http-equiv="Expires" content="3600">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E" />
+    
+    <!-- Markdown 和語法高亮函式庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+    <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    
+    <!-- Font Awesome 圖標庫 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- CSS 文件 -->
+    <link rel="stylesheet" href="assets/css/variables.css" />
+    <link rel="stylesheet" href="assets/css/animations.css" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    
+    <!-- Guide 專用樣式 -->
+    <style>
+      /* ===== 導航欄樣式（電腦版和手機版） ===== */
+      .top-navbar {
+        background: var(--navbar-bg);
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 1px 3px var(--shadow);
+        padding-top: calc(16px + var(--safe-area-inset-top, 0px));
+        min-height: 60px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      .navbar-left {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        justify-content: flex-start;
+      }
+      
+      .navbar-title {
+        font-size: 30px;
+        font-weight: 600;
+        color: var(--text-primary);
+        text-align: center;
+        transition: color 0.3s ease;
+        justify-self: center;
+      }
+      
+      .clickable-title {
+        cursor: pointer;
+        transition: color 0.2s ease;
+      }
+      
+      .clickable-title:hover {
+        color: #3b82f6;
+      }
+      
+      .navbar-tabs {
+        display: flex;
+        gap: 8px;
+      }
+      
+      .navbar-tab {
+        padding: 8px 16px;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+      }
+      
+      .navbar-tab.active {
+        background: var(--button-bg);
+        color: var(--button-text);
+      }
+      
+      .navbar-tab:hover:not(.active) {
+        background: var(--bg-tertiary);
+      }
+      
+      .navbar-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        justify-content: flex-end;
+      }
+      
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+        font-size: 14px;
+        transition: color 0.3s ease;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 8px;
+        transition: background 0.2s;
+      }
+      
+      .user-info:hover {
+        background: #f3f4f6;
+      }
+      
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #e5ecef;
+        object-fit: cover;
+        object-position: center;
+      }
+      
+      .user-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+      }
+      
+      .auth-buttons {
+        display: flex;
+        gap: 8px;
+      }
+      
+      .login-btn, .logout-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .login-btn {
+        background: #3b82f6;
+        color: white;
+      }
+      
+      .login-btn:hover {
+        background: #2563eb;
+      }
+      
+      .logout-btn {
+        background: #ef4444;
+        color: white;
+      }
+      
+      .logout-btn:hover {
+        background: #dc2626;
+      }
+      
+      /* 手機版抽屜按鈕 */
+      .mobile-drawer-toggle {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: var(--text-primary);
+        cursor: pointer;
+        padding: 8px;
+        margin-right: 12px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+      
+      .mobile-drawer-toggle:hover {
+        background-color: #f3f4f6;
+      }
+      
+      .hamburger-icon {
+        display: block;
+      }
+      
+      .mobile-drawer-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none;
+      }
+      
+      .mobile-drawer {
+        position: fixed;
+        top: 0;
+        left: -300px;
+        width: 280px;
+        height: 100%;
+        background: white;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      .mobile-drawer.open {
+        left: 0;
+      }
+      
+      .mobile-drawer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f8fafc;
+      }
+      
+      .mobile-drawer-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+      
+      .mobile-drawer-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+      
+      .mobile-drawer-close:hover {
+        background-color: #e5e7eb;
+      }
+      
+      .mobile-drawer-content {
+        padding: 20px 0;
+      }
+      
+      .mobile-drawer-item {
+        display: flex;
+        align-items: center;
+        padding: 16px 20px;
+        color: #374151;
+        text-decoration: none;
+        transition: background-color 0.2s;
+        border-left: 3px solid transparent;
+      }
+      
+      .mobile-drawer-item:hover {
+        background-color: #f8fafc;
+        color: #1f2937;
+      }
+      
+      .mobile-drawer-item.active {
+        background-color: #eff6ff;
+        color: #3b82f6;
+        border-left-color: #3b82f6;
+      }
+      
+      .mobile-drawer-icon {
+        font-size: 20px;
+        margin-right: 12px;
+        width: 24px;
+        text-align: center;
+      }
+      
+      .mobile-drawer-text {
+        font-size: 16px;
+        font-weight: 500;
+      }
+      
+      /* 桌面版樣式 - 隱藏手機版抽屜 */
+      @media (min-width: 769px) {
+        .mobile-drawer-toggle {
+          display: none !important;
+        }
+        
+        .mobile-drawer {
+          display: none !important;
+        }
+        
+        .mobile-drawer-overlay {
+          display: none !important;
+        }
+      }
+      
+      /* 響應式設計 - 手機版 */
+      @media (max-width: 768px) {
+        .top-navbar {
+          padding: 12px 16px;
+          padding-top: calc(12px + var(--safe-area-inset-top, 0px));
+          flex-wrap: wrap;
+          gap: 12px;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+        }
+        
+        .navbar-left {
+          gap: 16px;
+          flex: 1;
+          min-width: 0;
+        }
+        
+        .navbar-title {
+          font-size: 25px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-align: center;
+        }
+        
+        .navbar-tabs {
+          display: none;
+        }
+        
+        .navbar-right {
+          gap: 8px;
+        }
+        
+        .user-info {
+          padding: 6px 12px;
+          font-size: 14px;
+        }
+        
+        .user-avatar {
+          width: 28px !important;
+          height: 28px !important;
+        }
+        
+        .user-name {
+          font-size: 14px;
+        }
+        
+        .login-btn, .logout-btn {
+          padding: 8px 16px;
+          font-size: 14px;
+        }
+        
+        .mobile-drawer-toggle {
+          display: block !important;
+        }
+      }
+      
+      /* Guide 頁面主內容樣式 */
+      .guide-page {
+        min-height: 100vh;
+        background: #ffffff;
+        padding: 0;
+        padding-top: 60px;
+      }
+      
+      .guide-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+      
+      .guide-header {
+        text-align: center;
+        margin-bottom: 50px;
+      }
+      
+      .guide-header h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1E293B;
+        margin-bottom: 20px;
+      }
+      
+      .guide-header p {
+        font-size: 1.2rem;
+        color: #64748B;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+      
+      /* 分類標籤 */
+      .guide-category-tabs {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 40px;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 12px;
+      }
+      
+      .guide-category-tab {
+        padding: 12px 24px;
+        background: none;
+        border: none;
+        color: #64748b;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+        margin-bottom: -14px;
+      }
+      
+      .guide-category-tab:hover {
+        color: #3b82f6;
+      }
+      
+      .guide-category-tab.active {
+        color: #3b82f6;
+        border-bottom-color: #3b82f6;
+      }
+      
+      /* 文章列表 */
+      .guide-articles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+      }
+      
+      .guide-article-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(17,24,39,0.06);
+        transition: all 0.3s;
+        border: 1px solid #E2E8F0;
+        cursor: pointer;
+      }
+      
+      .guide-article-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(17,24,39,0.1);
+      }
+      
+      .guide-article-card-content {
+        padding: 32px;
+        border-bottom: 1px solid #F1F5F9;
+      }
+      
+      .guide-article-card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 12px;
+      }
+      
+      .guide-article-card-description {
+        font-size: 1rem;
+        color: #64748B;
+        line-height: 1.6;
+      }
+      
+      .guide-article-card-footer {
+        padding: 20px 32px;
+        background: #F8FAFC;
+      }
+      
+      .guide-article-card-footer span {
+        color: #2563EB;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      
+      /* 文章詳細頁面 */
+      .guide-article-page {
+        display: none;
+        min-height: 100vh;
+        background: #ffffff;
+        padding-top: 60px;
+      }
+      
+      .guide-article-page.active {
+        display: block;
+      }
+      
+      .guide-article-content {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 0 40px;
+      }
+      
+      /* 手機版適配 */
+      @media (max-width: 768px) {
+        .guide-container {
+          padding: 20px 16px;
+        }
+        
+        .guide-header h1 {
+          font-size: 2rem;
+        }
+        
+        .guide-header p {
+          font-size: 1rem;
+        }
+        
+        .guide-category-tabs {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+        
+        .guide-category-tab {
+          padding: 10px 18px;
+          font-size: 14px;
+          white-space: nowrap;
+        }
+        
+        .guide-articles-grid {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+        
+        .guide-article-card-content {
+          padding: 24px;
+        }
+        
+        .guide-article-card-title {
+          font-size: 1.25rem;
+        }
+        
+        .guide-article-content {
+          padding: 0 20px;
+        }
+      }
+    </style>
+    
+    <!-- 共享 JavaScript（必須按順序載入） -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/security.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/common.js"></script>
+  </head>
+  <body>
+    <!-- 導航欄 -->
+    <div class="top-navbar">
+      <div class="navbar-left">
+        <!-- 手機版抽屜按鈕 -->
+        <button class="mobile-drawer-toggle" onclick="toggleMobileDrawer()">
+          <span class="hamburger-icon">☰</span>
+        </button>
+        <div class="navbar-title clickable-title" onclick="window.location.href='index.html'">ReelMind</div>
+        <div class="navbar-tabs">
+          <a href="index.html" class="navbar-tab">首頁</a>
+          <a href="mode1.html" class="navbar-tab" onclick="handleModeNavigation(event, 'mode1'); return false;">IP人設規劃</a>
+          <a href="mode3.html" class="navbar-tab" onclick="handleModeNavigation(event, 'mode3'); return false;">一鍵生成</a>
+          <a href="index.html#forum" class="navbar-tab" onclick="event.preventDefault(); window.location.href='index.html#forum'; return false;">論壇介紹</a>
+          <a href="guide.html" class="navbar-tab active">實戰指南</a>
+          <a href="userDB.html" id="userDBTab" class="navbar-tab" style="display:none;">創作者資料庫</a>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <div class="user-info" id="userInfo" style="display: none;" onclick="window.location.href='userDB.html'">
+          <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: center;">
+          <span id="userName" class="user-name"></span>
+        </div>
+        <div class="auth-buttons" id="authButtons" style="display: none;">
+          <button id="loginBtn" class="login-btn" onclick="goToLogin()" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">🔐 登入</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 手機版抽屜 -->
+    <div class="mobile-drawer-overlay" id="mobileDrawerOverlay" onclick="closeMobileDrawer()"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+      <div class="mobile-drawer-header">
+        <h3>選單</h3>
+        <button class="mobile-drawer-close" onclick="closeMobileDrawer()">✕</button>
+      </div>
+      <div class="mobile-drawer-content">
+        <a href="index.html" class="mobile-drawer-item">
+          <span class="mobile-drawer-icon"><i class="fas fa-home"></i></span>
+          <span class="mobile-drawer-text">首頁</span>
+        </a>
+        <a href="mode1.html" class="mobile-drawer-item" onclick="handleModeNavigation(event, 'mode1'); closeMobileDrawer(); return false;">
+          <span class="mobile-drawer-icon"><i class="fas fa-user-tie"></i></span>
+          <span class="mobile-drawer-text">IP人設規劃</span>
+        </a>
+        <a href="mode3.html" class="mobile-drawer-item" onclick="handleModeNavigation(event, 'mode3'); closeMobileDrawer(); return false;">
+          <span class="mobile-drawer-icon"><i class="fas fa-magic"></i></span>
+          <span class="mobile-drawer-text">一鍵生成</span>
+        </a>
+        <a href="index.html#forum" class="mobile-drawer-item" onclick="window.location.href='index.html#forum'; closeMobileDrawer(); return false;">
+          <span class="mobile-drawer-icon"><i class="fas fa-comments"></i></span>
+          <span class="mobile-drawer-text">論壇介紹</span>
+        </a>
+        <a href="guide.html" class="mobile-drawer-item active">
+          <span class="mobile-drawer-icon"><i class="fas fa-book-open"></i></span>
+          <span class="mobile-drawer-text">實戰指南</span>
+        </a>
+        <a href="userDB.html" id="userDBMobileTab" class="mobile-drawer-item" style="display:none;">
+          <span class="mobile-drawer-icon"><i class="fas fa-database"></i></span>
+          <span class="mobile-drawer-text">創作者資料庫</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Guide 頁面主內容 -->
+    <div class="guide-page" id="guideMainPage">
+      <div class="guide-container">
+        <!-- 標題區 -->
+        <div class="guide-header">
+          <h1>
+            <i class="fas fa-book-open" style="margin-right: 15px; color: #3B82F6;"></i>AI 短影音實戰指南
+          </h1>
+          <p>
+            學習如何用 AI 打造爆款短影音內容，從基礎到進階技巧
+          </p>
+        </div>
+
+        <!-- 分類標籤 -->
+        <div class="guide-category-tabs">
+          <button class="guide-category-tab active" onclick="switchGuideCategory('basic')">基礎教學</button>
+          <button class="guide-category-tab" onclick="switchGuideCategory('advanced')">進階教學</button>
+        </div>
+
+        <!-- 基礎教學文章列表 -->
+        <div id="basicArticles" class="guide-articles-grid">
+          <!-- 文章 1 -->
+          <div class="guide-article-card" onclick="showGuideArticle('article1')">
+            <div class="guide-article-card-content">
+              <div class="guide-article-card-title">三步生成 30 秒短影音腳本</div>
+              <div class="guide-article-card-description">
+                只需三步：設定平台與主題、AI 生成劇本大綱、確認並儲存。本教學將示範完整流程，幫你在 5 分鐘內產出 Instagram Reels 腳本...
+              </div>
+            </div>
+            <div class="guide-article-card-footer">
+              <span>閱讀更多 →</span>
+            </div>
+          </div>
+          
+          <!-- 文章 2 -->
+          <div class="guide-article-card" onclick="showGuideArticle('article2')">
+            <div class="guide-article-card-content">
+              <div class="guide-article-card-title">AI 帳號定位：內容支柱與 14 天計畫</div>
+              <div class="guide-article-card-description">
+                了解如何用 AI 分析你的內容定位，並自動生成 14 天發布計畫。包含內容支柱（教育、娛樂、啟發、成交）與排程建議...
+              </div>
+            </div>
+            <div class="guide-article-card-footer">
+              <span>閱讀更多 →</span>
+            </div>
+          </div>
+          
+          <!-- 文章 3 -->
+          <div class="guide-article-card" onclick="showGuideArticle('article3')">
+            <div class="guide-article-card-content">
+              <div class="guide-article-card-title">Reels / Shorts / TikTok<br>腳本差異</div>
+              <div class="guide-article-card-description">
+                每個平台的短影音都有不同特性：IG Reels 偏重品牌敘事，YouTube Shorts 強調快速爆點，TikTok 重視娛樂性。本指南解析 AI 如何自動調整...
+              </div>
+            </div>
+            <div class="guide-article-card-footer">
+              <span>閱讀更多 →</span>
+            </div>
+          </div>
+          
+          <!-- 文章 4 -->
+          <div class="guide-article-card" onclick="showGuideArticle('article4')">
+            <div class="guide-article-card-content">
+              <div class="guide-article-card-title">腳本結構選擇指南</div>
+              <div class="guide-article-card-description">
+                了解 ReelMind 提供的 5 種腳本結構（A/B/C/D/E），每種結構適合不同的內容類型和目標。本指南幫助你選擇最適合的腳本結構，提升內容效果...
+              </div>
+            </div>
+            <div class="guide-article-card-footer">
+              <span>閱讀更多 →</span>
+            </div>
+          </div>
+          
+          <!-- 文章 5：如何拿到自己的LLM金鑰 -->
+          <div class="guide-article-card" onclick="showGuideArticle('article5')">
+            <div class="guide-article-card-content">
+              <div class="guide-article-card-title">如何拿到自己的LLM金鑰</div>
+              <div class="guide-article-card-description">
+                詳細教學如何取得 Gemini、GPT 等 LLM API 金鑰，並在 ReelMind 中設定使用。使用自己的金鑰可以節省成本，並獲得更好的使用體驗...
+              </div>
+            </div>
+            <div class="guide-article-card-footer">
+              <span>閱讀更多 →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 進階教學文章列表（暫時為空） -->
+        <div id="advancedArticles" class="guide-articles-grid" style="display: none;">
+          <div style="text-align: center; padding: 60px 20px; color: #64748b;">
+            <i class="fas fa-rocket" style="font-size: 48px; margin-bottom: 20px; color: #3b82f6;"></i>
+            <p style="font-size: 18px; font-weight: 500;">進階教學內容即將推出</p>
+            <p style="font-size: 14px; margin-top: 8px;">敬請期待！</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 文章詳細頁面容器 -->
+    <div id="articlePages"></div>
+
+    <!-- 彈出提示框 -->
+    <div id="toast" class="toast" style="display: none;"></div>
+
+    <!-- Guide 專用 JavaScript -->
+    <script>
+      // 導航相關函數
+      function toggleMobileDrawer() {
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileDrawerOverlay');
+        
+        if (drawer && overlay) {
+          const isOpen = drawer.classList.contains('open');
+          
+          if (isOpen) {
+            closeMobileDrawer();
+          } else {
+            openMobileDrawer();
+          }
+        }
+      }
+      
+      function openMobileDrawer() {
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileDrawerOverlay');
+        
+        if (drawer && overlay) {
+          drawer.classList.add('open');
+          overlay.style.display = 'block';
+          document.body.style.overflow = 'hidden';
+        }
+      }
+      
+      function closeMobileDrawer() {
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileDrawerOverlay');
+        
+        if (drawer && overlay) {
+          drawer.classList.remove('open');
+          overlay.style.display = 'none';
+          document.body.style.overflow = '';
+        }
+      }
+      
+      window.toggleMobileDrawer = toggleMobileDrawer;
+      window.openMobileDrawer = openMobileDrawer;
+      window.closeMobileDrawer = closeMobileDrawer;
+      
+      // 處理模式導航（與 mode1.js 中的 handleModeNavigation 相同）
+      async function handleModeNavigation(event, targetMode) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+          const loggedIn = await window.ReelMindCommon.checkLoginStatus();
+          
+          if (!loggedIn) {
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+              window.ReelMindCommon.showToast('請先登入以使用此功能', 3000);
+            }
+            if (typeof goToLogin === 'function') {
+              goToLogin();
+            } else if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+              window.ReelMindCommon.goToLogin();
+            } else {
+              const backendUrl = 'https://aivideobackend.zeabur.app';
+              const redirectUri = encodeURIComponent(window.location.origin + '/');
+              window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
+            }
+            return;
+          }
+          
+          let isSubscribed = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkSubscriptionStatus === 'function') {
+            await window.ReelMindCommon.checkSubscriptionStatus();
+            isSubscribed = window.ReelMindCommon.isSubscribed();
+          }
+          
+          if (!isSubscribed) {
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+              window.ReelMindCommon.showToast('您尚未訂閱，請先訂閱以使用此功能', 3000);
+            }
+            window.location.href = '/subscription.html';
+            return;
+          }
+        }
+        
+        window.location.href = `/${targetMode}.html`;
+      }
+      window.handleModeNavigation = handleModeNavigation;
+      
+      // goToLogin 函數
+      function goToLogin(showMessage = false) {
+        if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+          window.ReelMindCommon.goToLogin();
+          return;
+        }
+        const backendUrl = 'https://aivideobackend.zeabur.app';
+        const redirectUri = encodeURIComponent(window.location.origin + '/');
+        window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
+      }
+      window.goToLogin = goToLogin;
+      
+      // 切換分類
+      function switchGuideCategory(category) {
+        const basicTab = document.querySelector('.guide-category-tab[onclick*="basic"]');
+        const advancedTab = document.querySelector('.guide-category-tab[onclick*="advanced"]');
+        const basicArticles = document.getElementById('basicArticles');
+        const advancedArticles = document.getElementById('advancedArticles');
+        
+        if (category === 'basic') {
+          basicTab.classList.add('active');
+          advancedTab.classList.remove('active');
+          basicArticles.style.display = 'grid';
+          advancedArticles.style.display = 'none';
+        } else {
+          advancedTab.classList.add('active');
+          basicTab.classList.remove('active');
+          advancedArticles.style.display = 'grid';
+          basicArticles.style.display = 'none';
+        }
+      }
+      window.switchGuideCategory = switchGuideCategory;
+      
+      // 顯示文章
+      function showGuideArticle(articleId) {
+        console.log('顯示文章:', articleId);
+        // 隱藏主頁面
+        const mainPage = document.getElementById('guideMainPage');
+        if (mainPage) {
+          mainPage.style.display = 'none';
+        }
+        
+        // 獲取或創建文章容器
+        let articlePages = document.getElementById('articlePages');
+        if (!articlePages) {
+          articlePages = document.createElement('div');
+          articlePages.id = 'articlePages';
+          articlePages.style.cssText = 'position: relative; width: 100%;';
+          // 將文章容器添加到 body 中，與 guideMainPage 同級
+          const guideMainPage = document.getElementById('guideMainPage');
+          if (guideMainPage && guideMainPage.parentNode) {
+            guideMainPage.parentNode.appendChild(articlePages);
+          } else {
+            document.body.appendChild(articlePages);
+          }
+        }
+        
+        // 隱藏所有現有文章
+        const allArticles = articlePages.querySelectorAll('.guide-article-page');
+        allArticles.forEach(article => {
+          article.classList.remove('active');
+          article.style.display = 'none';
+        });
+        
+        // 檢查是否已經載入文章
+        let articlePage = document.getElementById(`guide-article-${articleId}`);
+        if (!articlePage) {
+          // 動態載入文章內容
+          loadArticleContent(articleId);
+          articlePage = document.getElementById(`guide-article-${articleId}`);
+        }
+        
+        if (articlePage) {
+          articlePage.classList.add('active');
+          articlePage.style.display = 'block';
+        }
+        
+        // 滾動到頂部
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        
+        // 更新按鈕文字
+        if (typeof updateGuideButtonTexts === 'function') {
+          updateGuideButtonTexts();
+        }
+      }
+      window.showGuideArticle = showGuideArticle;
+      
+      // 返回文章列表
+      function backToArticleList() {
+        const mainPage = document.getElementById('guideMainPage');
+        if (mainPage) {
+          mainPage.style.display = 'block';
+        }
+        
+        const articlePages = document.getElementById('articlePages');
+        if (articlePages) {
+          const allArticles = articlePages.querySelectorAll('.guide-article-page');
+          allArticles.forEach(article => {
+            article.classList.remove('active');
+            article.style.display = 'none';
+          });
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+      window.backToArticleList = backToArticleList;
+      
+      // 複製代碼函數
+      function copyCode(codeBlockId) {
+        const codeBlock = document.getElementById(codeBlockId || 'codeBlock');
+        if (!codeBlock) {
+          console.warn('找不到代碼塊:', codeBlockId);
+          return;
+        }
+        
+        const text = codeBlock.textContent || codeBlock.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('代碼已複製到剪貼板', 2000);
+          } else {
+            alert('代碼已複製到剪貼板');
+          }
+        }).catch(err => {
+          console.error('複製失敗:', err);
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('複製失敗，請手動複製', 2000);
+          }
+        });
+      }
+      window.copyCode = copyCode;
+      
+      // 文章內容數據（從 index.html 提取）
+      const articleContents = {
+        article1: `<!-- Header -->
+<header style="padding: 56px 0 18px; border-bottom: 1px solid #e2e8f0; background: linear-gradient(135deg, rgba(37,99,235,.10), transparent 60%), linear-gradient(135deg, rgba(59,130,246,.10), transparent 60%);">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+    <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+      <a onclick="backToArticleList(); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
+      <a onclick="backToArticleList(); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+    </div>
+    <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">三步生成 30 秒短影音腳本</h1>
+    <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">
+      用 ReelMind 一鍵生成，三步完成 Hook、口播與分鏡。適用 IG Reels / TikTok / YouTube Shorts，含台灣市場在地化語氣建議。
+    </p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; color: #64748b; font-size: 12px; margin-top: 8px;">
+      <span>閱讀約 6 分鐘</span>
+      <span>適用角色：創作者 / 行銷人 / 老闆</span>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin-top: 18px; margin-bottom: 32px;">
+      <button onclick="handleGuideUnlockButton('article1');" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">
+        登入解鎖 AI 生成
+      </button>
+      <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid #cbd5e1; color: #334155; background: white; text-decoration: none; cursor: pointer; flex: 1;">
+        加入 Discord 討論
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- Article -->
+<article style="padding: 28px 0;">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+    <!-- 快速導覽 -->
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 28px;">
+      <strong style="display: block; margin-bottom: 8px; color: #0f172a;">快速導覽</strong>
+      <ol style="margin: 0; padding-left: 20px; color: #334155;">
+        <li><a href="#step1" style="color: #334155; text-decoration: none;">Step 1：設定平台與主題</a></li>
+        <li><a href="#step2" style="color: #334155; text-decoration: none;">Step 2：一鍵生成（Hook／口播／分鏡）</a></li>
+        <li><a href="#step3" style="color: #334155; text-decoration: none;">Step 3：優化與上片（CTA／標題／Hashtag）</a></li>
+      </ol>
+    </div>
+
+    <h2 id="step1" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">Step 1：設定平台與主題</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      在 ReelMind 的「一鍵生成」中，選擇 <strong>IG Reels / TikTok / Shorts</strong>，填入你的主題（產品／服務／風格），以及影片長度（建議 20–45 秒）。
+    </p>
+    <div style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; padding: 12px 14px; color: #1e3a8a; margin: 14px 0;">
+      小技巧：主題請具體到「族群＋場景＋痛點」（例：上班族／午休／快速備餐）。
+    </div>
+
+    <h2 id="step2" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">Step 2：一鍵生成（Hook／口播／分鏡）</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">按下「生成」，系統會輸出：</p>
+    <ul style="color: #475569; line-height: 1.8;">
+      <li><strong>Hook 開場</strong>：前 3–5 秒抓住注意力（數據／疑問／反差）。</li>
+      <li><strong>口播文字</strong>：一句話一重點，避免冗長。</li>
+      <li><strong>鏡頭指示</strong>：特寫／中景／轉場，搭配動作與表情。</li>
+    </ul>
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin: 14px 0; position: relative;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 14px; font-weight: 600; color: #64748b;">代碼示例</span>
+        <button onclick="copyCode()" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s;">
+          <i class="fas fa-copy"></i> 複製
+        </button>
+      </div>
+      <pre id="codeBlock" style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #0f172a; color: white; border-radius: 8px; padding: 10px 12px; display: block; overflow: auto; margin: 0;"># 生成示例（摘要）
+Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
+口播：步驟一… 步驟二… 步驟三…
+分鏡：0-5s 開場特寫；5-20s 步驟畫面；20-30s 成品＋CTA</pre>
+    </div>
+
+    <h2 id="step3" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">Step 3：優化與上片（CTA／標題／Hashtag）</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">確認節奏後，加入 <strong>CTA</strong>（留言關鍵字、下載清單、私訊連結），並依平台最佳做法調整：</p>
+    <ul style="color: #475569; line-height: 1.8;">
+      <li>IG Reels：品牌感與一致視覺。</li>
+      <li>Shorts：強節奏與關鍵字標題。</li>
+      <li>TikTok：娛樂性與互動誘發。</li>
+    </ul>
+    <div style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; padding: 12px 14px; color: #1e3a8a; margin: 14px 0;">
+      若你已訂閱，用「創作者資料庫」下載 PDF/CSV、重生不同版本，持續做 A/B 測試。
+    </div>
+
+    <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin: 18px 0;">
+      <button onclick="handleGuideUnlockButton('article1');" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">
+        立即登入，生成我的第一支腳本
+      </button>
+      <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid #cbd5e1; color: #334155; background: white; text-decoration: none; cursor: pointer; flex: 1;">
+        到 Discord 看大家怎麼改腳本
+      </a>
+    </div>
+  </div>
+</article>
+
+<!-- Footer -->
+<footer style="padding: 26px 0; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; font-size: 14px;">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+    © 2025 ReelMind · AI 短影音｜AI 腳本生成｜AI 顧問｜IP 人設規劃 · 台灣 / 香港 / 新加坡
+  </div>
+</footer>`,
+        
+        article2: `<!-- Header -->
+<header style="padding: 56px 0 18px; border-bottom: 1px solid #e2e8f0; background: linear-gradient(135deg, rgba(234,179,8,.12), transparent 60%), linear-gradient(135deg, rgba(245,158,11,.10), transparent 60%);">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+    <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+      <a onclick="backToArticleList(); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
+      <a onclick="backToArticleList(); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+    </div>
+    <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">AI 帳號定位：內容支柱與 14 天計畫</h1>
+    <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">建立 ICP 與訊息金字塔 → 內容支柱與矩陣 → Hook/CTA 庫 → 拍攝模板 → 14 天上片日曆 → KPI 與 A/B 實驗 → SEO/GEO 在地化。</p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; color: #64748b; font-size: 12px; margin-top: 8px;">
+      <span>閱讀約 8 分鐘</span>
+      <span>適用角色：創作者 / 行銷人 / 老闆</span>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin-top: 18px; margin-bottom: 32px;">
+      <button onclick="handleGuideUnlockButton('article2');" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">登入解鎖 AI 生成</button>
+      <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid #cbd5e1; color: #334155; background: white; text-decoration: none; cursor: pointer; flex: 1;">加入 Discord 討論</a>
+    </div>
+  </div>
+</header>
+
+<!-- Article -->
+<article style="padding: 28px 0;">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+    <!-- 快速導覽 -->
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 28px;">
+      <strong style="display: block; margin-bottom: 8px; color: #0f172a;">快速導覽</strong>
+      <ol style="margin: 0; padding-left: 20px; color: #334155;">
+        <li><a href="#icp" style="color: #334155; text-decoration: none;">ICP 與訊息金字塔</a></li>
+        <li><a href="#pillars" style="color: #334155; text-decoration: none;">內容支柱與矩陣</a></li>
+        <li><a href="#hooks" style="color: #334155; text-decoration: none;">Hook / CTA 庫</a></li>
+        <li><a href="#script" style="color: #334155; text-decoration: none;">拍攝腳本模板</a></li>
+        <li><a href="#calendar" style="color: #334155; text-decoration: none;">14 天日曆與每日任務</a></li>
+        <li><a href="#kpi" style="color: #334155; text-decoration: none;">KPI 與 A/B 實驗</a></li>
+        <li><a href="#seo" style="color: #334155; text-decoration: none;">SEO / GEO 在地化</a></li>
+        <li><a href="#prompts" style="color: #334155; text-decoration: none;">可複製的 AI 提示詞</a></li>
+      </ol>
+    </div>
+
+    <h2 id="icp" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">一、ICP 與訊息金字塔</h2>
+    <div style="display:grid; gap:14px; grid-template-columns:1fr;">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">1) ICP（Ideal Customer Profile）</h3>
+        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
+          <li><b>族群</b>：年齡 / 地區（台灣北中南）/ 身分（上班族、自由工作者）</li>
+          <li><b>情境</b>：通勤、午休、下班後剪片、週末批量拍攝</li>
+          <li><b>痛點</b>：無法穩定上片、腳本卡關、轉換率低</li>
+          <li><b>期望</b>：每週 3 支、30 秒腳本、導流到 IG/Line</li>
+        </ul>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">2) 訊息金字塔</h3>
+        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
+          <li><b>品牌主張</b>：用 AI 把短影音變成可複製的系統</li>
+          <li><b>價值證明</b>：一鍵生成腳本、IP 人設、資料庫與 A/B</li>
+          <li><b>功能說明</b>：Hook/CTA 模板、14 天節奏、在地化語氣</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 id="pillars" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">二、內容支柱與矩陣</h2>
+    <div style="display:grid; gap:14px; grid-template-columns:1fr;">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">支柱 × 目標</h3>
+        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
+          <li><b>教育</b>：教方法 / 拆步驟（建立專業感）</li>
+          <li><b>娛樂</b>：反差 / 梗化 / 快節奏（擴觸及）</li>
+          <li><b>啟發</b>：故事 / 心法 / 轉折（情感連結）</li>
+          <li><b>成交</b>：案例 / 規劃 / CTA（導流轉換）</li>
+        </ul>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">內容矩陣建議</h3>
+        <p style="color:#475569; line-height:1.8; margin:10px 0;">橫軸：支柱；縱軸：形式（口播 / 開箱 / 錄幕 / 重演 / 清單）。完成 4×5 矩陣＝20 題，足夠兩週上片。</p>
+      </div>
+    </div>
+
+    <h2 id="hooks" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">三、Hook / CTA 庫（可直接套用）</h2>
+    <div style="display:grid; gap:14px; grid-template-columns:1fr;">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">20 種 Hook 模板</h3>
+        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
+          <li>反差：其實我一開始是失敗的…</li>
+          <li>數據：用 30 秒學會 X，至少快 5 倍</li>
+          <li>清單：這 3 件事讓我上片率翻倍</li>
+          <li>錯誤：你可能一直做錯了</li>
+          <li>提問：3 秒內告訴我，你會選哪個？</li>
+          <li>挑戰：我用 7 天證明一件事</li>
+          <li>祕技：99% 人忽略的設定</li>
+          <li>拆解：把 X 拆成 3 步</li>
+          <li>對比：沒有 AI v.s. 有 AI</li>
+          <li>故事：我在北車地下街學到的…</li>
+        </ul>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">CTA 範本（台灣語氣）</h3>
+        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
+          <li>留言關鍵字：「<b>腳本</b>」，我把清單傳給你</li>
+          <li>導流：想要模板？點簡介連結下載</li>
+          <li>互動：你會選 A 還是 B？留言告訴我</li>
+          <li>收藏：這招很實用，先存起來</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 id="script" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">四、拍攝腳本模板</h2>
+    <div style="display:grid; gap:14px; grid-template-columns:1fr 1fr; max-width:100%;">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">口播（SOV）</h3>
+        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
+          <li>0–3s Hook（反差/數據/提問）</li>
+          <li>3–20s 步驟 1/2/3（每步 5–7 秒）</li>
+          <li>20–27s 成果畫面（前/後對比）</li>
+          <li>27–30s CTA（單一行動）</li>
+        </ul>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">B-Roll 清單</h3>
+        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
+          <li>器材特寫、手部操作、畫面跳切</li>
+          <li>螢幕錄影（快捷鍵顯示）</li>
+          <li>表情反應鏡頭、點頭、指點</li>
+          <li>城市/通勤情境做轉場</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 id="calendar" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">五、14 天日曆與每日任務</h2>
+    <div style="display:grid; gap:14px; grid-template-columns:1fr 1fr; max-width:100%;">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">日曆（建議時段：12:00 / 20:00）</h3>
+        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
+          <li><b>Day 1–2：</b>受眾/支柱確認＋題庫 20 題</li>
+          <li><b>Day 3–4：</b>一鍵生成腳本 8 支</li>
+          <li><b>Day 5–6：</b>錄影＋剪輯</li>
+          <li><b>Day 7：</b>上片 2 支＋記錄數據</li>
+          <li><b>Day 8–9：</b>再產 8 支（優化 Hook）</li>
+          <li><b>Day 10–11：</b>錄影＋剪輯（批量）</li>
+          <li><b>Day 12–13：</b>上片 4 支＋A/B 測試</li>
+          <li><b>Day 14：</b>匯總與題目準備</li>
+        </ul>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">每日任務（15–30 分鐘）</h3>
+        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
+          <li>10 分鐘選題＋腳本微調</li>
+          <li>10 分鐘回覆留言、蒐集痛點</li>
+          <li>5 分鐘記錄：播放 / 完播 / 互動</li>
+          <li>每晚安排明日素材（服裝、場景）</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 id="kpi" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">六、KPI 與 A/B 實驗</h2>
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+      <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
+        <li>完播率 ≥ 35%（30 秒片）</li>
+        <li>3 秒留存 ≥ 70%</li>
+        <li>互動率 ≥ 3%（按讚+留言+收藏 / 觀看）</li>
+        <li>每輪只改「一件事」，記錄版本差異</li>
+      </ul>
+    </div>
+
+    <h2 id="seo" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">七、SEO / GEO 在地化（繁中）</h2>
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+      <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
+        <li>保留台灣口語（例：先存起來、這招）</li>
+        <li>標題含關鍵詞：平台＋動詞＋目標</li>
+        <li>描述前 80 字放主關鍵詞＋CTA；Hashtag 3–7 個</li>
+      </ul>
+    </div>
+
+    <h2 id="prompts" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">八、可複製的 AI 提示詞</h2>
+    <div style="background:#0f172a;color:#fff;border-radius:12px;padding:12px;overflow:auto;">
+系統：你是短影音腳本教練，輸出繁中（台灣），字數精煉。
+使用者：平台＝IG Reels；支柱＝教育；題目＝「租屋房間也能拍出清晰人像」；長度＝30 秒。
+請輸出：1) Hook 3 種 2) 口播逐句 3) 分鏡（SOV/B-roll/字幕）4) 單一 CTA（留言關鍵字）。
+    </div>
+
+    <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin: 18px 0;">
+      <button onclick="handleGuideUnlockButton('article2');" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">立即登入，生成我的 14 天計畫</button>
+      <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid #cbd5e1; color: #334155; background: white; text-decoration: none; cursor: pointer; flex: 1;">加入 Discord，和大家一起執行</a>
+    </div>
+  </div>
+</article>
+
+<!-- Footer -->
+<footer style="padding: 26px 0; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; font-size: 14px;">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">© 2025 ReelMind · AI 短影音 · 台灣</div>
+</footer>`,
+        
+        article3: `<!-- Header -->
+<header style="padding: 56px 0 18px; border-bottom: 1px solid #e2e8f0; background: linear-gradient(135deg, rgba(14,165,233,.10), transparent 60%), linear-gradient(135deg, rgba(167,139,250,.10), transparent 60%);">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+    <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+      <a onclick="backToArticleList(); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
+      <a onclick="backToArticleList(); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+    </div>
+    <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">Reels / Shorts / TikTok 腳本差異</h1>
+    <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">三平台同題目「不同寫法」：Reels 重品牌敘事、Shorts 強快資訊、TikTok 重娛樂互動。把同一支素材改寫出三種打法。</p>
+  </div>
+</header>
+
+<!-- Article -->
+<article style="padding: 28px 0;">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+    <section style="background:#0f172a;border:1px solid #1f2937;border-radius:16px;padding:16px;color:#e5e7eb;">
+      <h2 style="font-size: 22px; margin: 0 0 8px; color:#e5e7eb;">一、差異速覽</h2>
+      <div style="overflow:auto;">
+        <table style="width:100%; border-collapse:separate; border-spacing:0 10px;">
+          <tr style="background:#111827;">
+            <td style="padding:10px 12px; font-weight:700; color:#94a3b8;">重點</td>
+            <td style="padding:10px 12px;">Reels：品牌調性、畫面一致</td>
+            <td style="padding:10px 12px;">Shorts：快訊息、可檢索標題</td>
+            <td style="padding:10px 12px;">TikTok：娛樂性、互動誘發</td>
+          </tr>
+          <tr style="background:#0f172a;">
+            <td style="padding:10px 12px; font-weight:700; color:#94a3b8;">Hook</td>
+            <td style="padding:10px 12px;">敘事式：你也遇到這問題嗎？</td>
+            <td style="padding:10px 12px;">數據式：30 秒教會你…</td>
+            <td style="padding:10px 12px;">反差式：其實我一開始是失敗的…</td>
+          </tr>
+          <tr style="background:#111827;">
+            <td style="padding:10px 12px; font-weight:700; color:#94a3b8;">CTA</td>
+            <td style="padding:10px 12px;">存起來＋關注品牌</td>
+            <td style="padding:10px 12px;">看描述連結 / 文章</td>
+            <td style="padding:10px 12px;">留言關鍵字領檔案</td>
+          </tr>
+        </table>
+      </div>
+    </section>
+
+    <section style="display:grid; gap:14px; grid-template-columns:1fr; margin-top:14px;">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#ecfeff;border:1px solid #cffafe;color:#06b6d4;font-weight:800;font-size:12px;margin-bottom:6px;">Reels</span>
+        <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">寫法建議</div>
+        <p style="color:#475569;">語氣穩重、鏡頭乾淨、字幕少而準。用品牌色封面與固定模板。</p>
+        <div style="font-weight:700;color:#0f172a;">範例 Hook</div>
+        <p style="color:#475569;">「如果今天重來，我只保留三個動作…」</p>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#f5f3ff;border:1px solid #ede9fe;color:#7c3aed;font-weight:800;font-size:12px;margin-bottom:6px;">Shorts</span>
+        <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">寫法建議</div>
+        <p style="color:#475569;">前 3 秒就給結論，標題含關鍵詞，字幕節奏快。</p>
+        <div style="font-weight:700;color:#0f172a;">範例 Hook</div>
+        <p style="color:#475569;">「90 秒教你完成 X，步驟都在這裡。」</p>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#ecfccb;border:1px solid #d9f99d;color:#65a30d;font-weight:800;font-size:12px;margin-bottom:6px;">TikTok</span>
+        <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">寫法建議</div>
+        <p style="color:#475569;">表情多、互動詞強、可用梗音樂或挑戰格式。</p>
+        <div style="font-weight:700;color:#0f172a;">範例 Hook</div>
+        <p style="color:#475569;">「我保證看完你一定會試一次。」</p>
+      </div>
+    </section>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0 0;">
+      <a class="btn sky" onclick="handleGuideUnlockButton('article3'); return false;" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;background:#06b6d4;color:#001018;text-decoration:none;cursor:pointer;">登入解鎖 AI 生成</a>
+      <a class="btn alt" href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;border:1px solid #cbd5e1;color:#334155;background:#fff;text-decoration:none;">到 Discord 看範例</a>
+    </div>
+  </div>
+</article>
+
+<!-- Footer -->
+<footer style="padding: 26px 0; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; font-size: 14px;">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">© 2025 ReelMind · AI 短影音 · 台灣</div>
+</footer>`,
+        
+        article4: `<!-- Header -->
+<header style="padding: 56px 0 18px; border-bottom: 1px solid #e2e8f0; background: linear-gradient(135deg, rgba(14,165,233,.10), transparent 60%), linear-gradient(135deg, rgba(167,139,250,.10), transparent 60%);">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+    <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+      <a onclick="backToArticleList(); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
+      <a onclick="backToArticleList(); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+    </div>
+    <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">腳本結構選擇指南</h1>
+    <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">了解 ReelMind 提供的 5 種腳本結構（A/B/C/D/E），每種結構適合不同的內容類型和目標，幫助你選擇最適合的腳本結構。</p>
+  </div>
+</header>
+
+<!-- Article -->
+<article style="padding: 28px 0;">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+    <section style="background:#0f172a;border:1px solid #1f2937;border-radius:16px;padding:16px;color:#e5e7eb;">
+      <h2 style="font-size: 22px; margin: 0 0 8px; color:#e5e7eb;">一、五種腳本結構總覽</h2>
+      <div style="overflow:auto;">
+        <table style="width:100%; border-collapse:separate; border-spacing:0 10px;">
+          <tr style="background:#111827;">
+            <td style="padding:10px 12px; font-weight:700; color:#94a3b8;">結構</td>
+            <td style="padding:10px 12px; font-weight:700; color:#94a3b8;">特點</td>
+            <td style="padding:10px 12px; font-weight:700; color:#94a3b8;">適用場景</td>
+          </tr>
+          <tr style="background:#0f172a;">
+            <td style="padding:10px 12px; font-weight:700; color:#3b82f6;">結構 A</td>
+            <td style="padding:10px 12px;">開場吸引 + 問題提出 + 解決方案</td>
+            <td style="padding:10px 12px;">教學類、知識分享</td>
+          </tr>
+          <tr style="background:#111827;">
+            <td style="padding:10px 12px; font-weight:700; color:#10b981;">結構 B</td>
+            <td style="padding:10px 12px;">故事敘述 + 轉折點 + 啟發</td>
+            <td style="padding:10px 12px;">品牌故事、個人經歷</td>
+          </tr>
+          <tr style="background:#0f172a;">
+            <td style="padding:10px 12px; font-weight:700; color:#f59e0b;">結構 C</td>
+            <td style="padding:10px 12px;">快速列點 + 重點強調 + CTA</td>
+            <td style="padding:10px 12px;">產品介紹、功能說明</td>
+          </tr>
+          <tr style="background:#111827;">
+            <td style="padding:10px 12px; font-weight:700; color:#ef4444;">結構 D</td>
+            <td style="padding:10px 12px;">對比呈現 + 優勢分析 + 行動呼籲</td>
+            <td style="padding:10px 12px;">比較類、說服型內容</td>
+          </tr>
+          <tr style="background:#0f172a;">
+            <td style="padding:10px 12px; font-weight:700; color:#8b5cf6;">結構 E</td>
+            <td style="padding:10px 12px;">互動開場 + 共鳴點 + 深度內容</td>
+            <td style="padding:10px 12px;">社群互動、討論型</td>
+          </tr>
+        </table>
+      </div>
+    </section>
+
+    <section style="display:grid; gap:14px; grid-template-columns:1fr; margin-top:14px;">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#dbeafe;border:1px solid #bfdbfe;color:#2563eb;font-weight:800;font-size:12px;margin-bottom:6px;">結構 A：教學型</span>
+        <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">適用內容</div>
+        <p style="color:#475569;">知識分享、技能教學、步驟說明、工具介紹</p>
+        <div style="font-weight:700;color:#0f172a;">範例</div>
+        <p style="color:#475569;">「3 個步驟讓你學會...」、「30 秒教會你...」</p>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#d1fae5;border:1px solid #a7f3d0;color:#059669;font-weight:800;font-size:12px;margin-bottom:6px;">結構 B：故事型</span>
+        <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">適用內容</div>
+        <p style="color:#475569;">個人經歷、品牌故事、成功案例、轉折故事</p>
+        <div style="font-weight:700;color:#0f172a;">範例</div>
+        <p style="color:#475569;">「我曾經也遇到這個問題，直到我發現...」</p>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#fef3c7;border:1px solid #fde68a;color:#d97706;font-weight:800;font-size:12px;margin-bottom:6px;">結構 C：列點型</span>
+        <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">適用內容</div>
+        <p style="color:#475569;">產品功能、特色介紹、清單式內容、快速資訊</p>
+        <div style="font-weight:700;color:#0f172a;">範例</div>
+        <p style="color:#475569;">「5 個你必須知道的...」、「這 3 個功能改變了我...」</p>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#fee2e2;border:1px solid #fecaca;color:#dc2626;font-weight:800;font-size:12px;margin-bottom:6px;">結構 D：對比型</span>
+        <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">適用內容</div>
+        <p style="color:#475569;">產品比較、方法對比、前後差異、優劣分析</p>
+        <div style="font-weight:700;color:#0f172a;">範例</div>
+        <p style="color:#475569;">「這樣做 vs 那樣做，差別在哪裡？」</p>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#ede9fe;border:1px solid #ddd6fe;color:#7c3aed;font-weight:800;font-size:12px;margin-bottom:6px;">結構 E：互動型</span>
+        <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">適用內容</div>
+        <p style="color:#475569;">討論話題、觀點分享、問答互動、共鳴內容</p>
+        <div style="font-weight:700;color:#0f172a;">範例</div>
+        <p style="color:#475569;">「你有沒有想過...」、「我發現一個有趣的現象...」</p>
+      </div>
+    </section>
+
+    <section style="margin-top:28px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:20px;">
+      <h2 style="font-size: 20px; margin: 0 0 12px; color:#0f172a;">二、如何選擇適合的結構？</h2>
+      <div style="color:#475569; line-height:1.8;">
+        <p style="margin:0 0 12px;"><strong>1. 根據內容目標：</strong>教學選 A、故事選 B、產品選 C、比較選 D、互動選 E</p>
+        <p style="margin:0 0 12px;"><strong>2. 根據目標受眾：</strong>專業人士偏好 A/C，一般用戶偏好 B/E，決策者偏好 D</p>
+        <p style="margin:0 0 12px;"><strong>3. 根據平台特性：</strong>Reels 適合 B/E，Shorts 適合 A/C，TikTok 適合 E/D</p>
+        <p style="margin:0;"><strong>4. 測試與優化：</strong>可以嘗試不同結構，觀察哪種效果最好</p>
+      </div>
+    </section>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0 0;">
+      <a class="btn sky" onclick="handleGuideUnlockButton('article1'); return false;" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;background:#06b6d4;color:#001018;text-decoration:none;cursor:pointer;">登入解鎖 AI 生成</a>
+      <a class="btn alt" href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;border:1px solid #cbd5e1;color:#334155;background:#fff;text-decoration:none;">到 Discord 看範例</a>
+    </div>
+  </div>
+</article>
+
+<!-- Footer -->
+<footer style="padding: 26px 0; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; font-size: 14px;">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">© 2025 ReelMind · AI 短影音 · 台灣</div>
+</footer>`,
+        
+        article5: `<!-- Header -->
+<header style="padding: 56px 0 18px; border-bottom: 1px solid #e2e8f0; background: linear-gradient(135deg, rgba(245,158,11,.10), transparent 60%), linear-gradient(135deg, rgba(217,119,6,.10), transparent 60%);">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+    <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+      <a onclick="backToArticleList(); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
+      <a onclick="backToArticleList(); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+    </div>
+    <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">如何拿到自己的LLM金鑰</h1>
+    <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">詳細教學如何取得 Gemini、GPT 等 LLM API 金鑰，並在 ReelMind 中設定使用。使用自己的金鑰可以節省成本，並獲得更好的使用體驗。</p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; color: #64748b; font-size: 12px; margin-top: 8px;">
+      <span>閱讀約 8 分鐘</span>
+      <span>適用角色：所有用戶</span>
+    </div>
+  </div>
+</header>
+
+<!-- Article -->
+<article style="padding: 28px 0;">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+    <!-- 快速導覽 -->
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 28px;">
+      <strong style="display: block; margin-bottom: 8px; color: #0f172a;">快速導覽</strong>
+      <ol style="margin: 0; padding-left: 20px; color: #334155;">
+        <li><a href="#why" style="color: #334155; text-decoration: none;">為什麼要使用自己的LLM金鑰？</a></li>
+        <li><a href="#gemini" style="color: #334155; text-decoration: none;">如何取得 Gemini API 金鑰</a></li>
+        <li><a href="#gpt" style="color: #334155; text-decoration: none;">如何取得 GPT API 金鑰</a></li>
+        <li><a href="#setup" style="color: #334155; text-decoration: none;">在 ReelMind 中設定金鑰</a></li>
+      </ol>
+    </div>
+
+    <h2 id="why" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">為什麼要使用自己的LLM金鑰？</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      使用自己的 LLM API 金鑰有幾個重要優勢：
+    </p>
+    <ul style="color: #475569; line-height: 1.8;">
+      <li><strong>節省成本</strong>：使用自己的金鑰，可以更精確控制 API 使用量，避免超出預算</li>
+      <li><strong>更好的使用體驗</strong>：不受系統配額限制，可以更自由地使用 AI 功能</li>
+      <li><strong>數據隱私</strong>：你的 API 金鑰由你管理，數據更安全</li>
+      <li><strong>靈活性</strong>：可以選擇不同的 LLM 模型（Gemini、GPT 等）</li>
+    </ul>
+
+    <h2 id="gemini" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">如何取得 Gemini API 金鑰</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      <strong>步驟 1：前往 Google AI Studio</strong>
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      1. 打開瀏覽器，前往 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #2563eb; text-decoration: underline;">Google AI Studio</a>
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      2. 使用你的 Google 帳號登入
+    </p>
+    
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      <strong>步驟 2：建立 API 金鑰</strong>
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      1. 點擊「Create API Key」按鈕
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      2. 選擇要使用的 Google Cloud 專案（或建立新專案）
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      3. 系統會自動生成 API 金鑰，複製並妥善保存
+    </p>
+    
+    <div style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; padding: 12px 14px; color: #1e3a8a; margin: 14px 0;">
+      <strong>注意事項：</strong>API 金鑰只會顯示一次，請務必複製並保存在安全的地方。不要將金鑰分享給他人。
+    </div>
+
+    <!-- Gemini API 金鑰教學影片 -->
+    <div style="margin: 28px 0; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+      <div style="aspect-ratio: 16/9; background: #E2E8F0; position: relative;">
+        <iframe 
+          width="100%" 
+          height="100%" 
+          src="https://www.youtube.com/embed/MlxRy6qmFBo" 
+          title="如何取得 Gemini API 金鑰教學" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen 
+          style="display: block; position: absolute; top: 0; left: 0;">
+        </iframe>
+      </div>
+      <div style="padding: 16px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0; color: #475569; font-size: 14px; font-weight: 600;">
+          <i class="fas fa-video" style="margin-right: 8px; color: #3B82F6;"></i>影片教學：如何取得 Gemini API 金鑰
+        </p>
+      </div>
+    </div>
+
+    <h2 id="gpt" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">如何取得 GPT API 金鑰</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      <strong>步驟 1：前往 OpenAI 官網</strong>
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      1. 打開瀏覽器，前往 <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #2563eb; text-decoration: underline;">OpenAI Platform</a>
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      2. 使用你的 OpenAI 帳號登入（如果沒有帳號，需要先註冊）
+    </p>
+    
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      <strong>步驟 2：建立 API 金鑰</strong>
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      1. 點擊「Create new secret key」按鈕
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      2. 為金鑰命名（可選）
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      3. 點擊「Create secret key」，複製並妥善保存
+    </p>
+    
+    <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 12px; padding: 12px 14px; color: #92400e; margin: 14px 0;">
+      <strong>重要提醒：</strong>OpenAI API 是付費服務，使用前請確認你的帳號有足夠的餘額。建議設定使用上限以避免超支。
+    </div>
+
+    <!-- GPT API 金鑰教學影片 -->
+    <div style="margin: 28px 0; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+      <div style="aspect-ratio: 16/9; background: #E2E8F0; position: relative;">
+        <iframe 
+          width="100%" 
+          height="100%" 
+          src="https://www.youtube.com/embed/lIh8wCSn_PM" 
+          title="如何取得 GPT API 金鑰教學" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen 
+          style="display: block; position: absolute; top: 0; left: 0;">
+        </iframe>
+      </div>
+      <div style="padding: 16px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0; color: #475569; font-size: 14px; font-weight: 600;">
+          <i class="fas fa-video" style="margin-right: 8px; color: #3B82F6;"></i>影片教學：如何取得 GPT API 金鑰
+        </p>
+      </div>
+    </div>
+
+    <h2 id="setup" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">在 ReelMind 中設定金鑰</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      <strong>步驟 1：進入創作者資料庫</strong>
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      1. 登入 ReelMind 後，點擊右上角的「創作者資料庫」
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      2. 在左側選單中找到「設定」或「API 金鑰管理」
+    </p>
+    
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      <strong>步驟 2：輸入 API 金鑰</strong>
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      1. 選擇 LLM 類型（Gemini 或 GPT）
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      2. 貼上你剛才複製的 API 金鑰
+    </p>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      3. 點擊「儲存」按鈕
+    </p>
+    
+    <div style="background: #d1fae5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 12px 14px; color: #065f46; margin: 14px 0;">
+      <strong>完成！</strong>設定完成後，ReelMind 會優先使用你的 API 金鑰進行 AI 生成。如果金鑰無效或額度用完，系統會自動切換回系統預設金鑰。
+    </div>
+
+    <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin: 18px 0;">
+      <button onclick="window.location.href='userDB.html'; setTimeout(() => { if (typeof showDbSection === 'function') showDbSection('settings'); }, 100);" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">
+        前往創作者資料庫設定
+      </button>
+      <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid #cbd5e1; color: #334155; background: white; text-decoration: none; cursor: pointer; flex: 1;">
+        到 Discord 詢問問題
+      </a>
+    </div>
+  </div>
+</article>
+
+<!-- Footer -->
+<footer style="padding: 26px 0; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; font-size: 14px;">
+  <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">© 2025 ReelMind · AI 短影音 · 台灣</div>
+</footer>`
+      };
+      
+      // 載入文章內容
+      function loadArticleContent(articleId) {
+        const articlePages = document.getElementById('articlePages');
+        if (!articlePages) return;
+        
+        const content = articleContents[articleId];
+        if (!content) {
+          console.error('找不到文章內容:', articleId);
+          return;
+        }
+        
+        const articlePage = document.createElement('div');
+        articlePage.id = `guide-article-${articleId}`;
+        articlePage.className = 'guide-article-page active';
+        articlePage.innerHTML = '<div class="guide-article-content">' + content + '</div>';
+        articlePages.appendChild(articlePage);
+      }
+      
+      // 智能處理實戰指南的「登入解鎖AI生成」按鈕
+      async function handleGuideUnlockButton(articleType = 'article1') {
+        try {
+          let isLoggedIn = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+            isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
+          } else {
+            const token = localStorage.getItem('ipPlanningToken');
+            isLoggedIn = !!token;
+          }
+          
+          if (!isLoggedIn) {
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+              window.ReelMindCommon.goToLogin();
+            } else {
+              goToLogin();
+            }
+            return;
+          }
+          
+          let isSubscribed = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkSubscriptionStatus === 'function') {
+            await window.ReelMindCommon.checkSubscriptionStatus();
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+              isSubscribed = window.ReelMindCommon.isSubscribed();
+            }
+          } else {
+            const subscriptionStatus = localStorage.getItem('subscriptionStatus');
+            isSubscribed = subscriptionStatus === 'active';
+          }
+          
+          if (!isSubscribed) {
+            window.location.href = '/subscription.html';
+            return;
+          }
+          
+          if (articleType === 'article1' || articleType === 'article3') {
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.checkFeatureAccess === 'function') {
+              const canAccess = await window.ReelMindCommon.checkFeatureAccess();
+              if (canAccess) {
+                window.location.href = '/mode3.html';
+              }
+            } else {
+              window.location.href = '/mode3.html';
+            }
+          } else if (articleType === 'article2') {
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.checkFeatureAccess === 'function') {
+              const canAccess = await window.ReelMindCommon.checkFeatureAccess();
+              if (canAccess) {
+                window.location.href = '/mode1.html';
+              }
+            } else {
+              window.location.href = '/mode1.html';
+            }
+          }
+        } catch (error) {
+          console.error('處理按鈕點擊失敗:', error);
+          goToLogin();
+        }
+      }
+      window.handleGuideUnlockButton = handleGuideUnlockButton;
+      
+      // 更新按鈕文字
+      async function updateGuideButtonTexts() {
+        try {
+          let isLoggedIn = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+            isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
+          } else {
+            const token = localStorage.getItem('ipPlanningToken');
+            isLoggedIn = !!token;
+          }
+          
+          if (!isLoggedIn) {
+            return;
+          }
+          
+          let isSubscribed = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkSubscriptionStatus === 'function') {
+            await window.ReelMindCommon.checkSubscriptionStatus();
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+              isSubscribed = window.ReelMindCommon.isSubscribed();
+            }
+          } else {
+            const subscriptionStatus = localStorage.getItem('subscriptionStatus');
+            isSubscribed = subscriptionStatus === 'active';
+          }
+          
+          if (!isSubscribed) {
+            return;
+          }
+          
+          const article1Buttons = document.querySelectorAll('button[onclick*="handleGuideUnlockButton(\'article1\')"], a[onclick*="handleGuideUnlockButton(\'article1\')"]');
+          article1Buttons.forEach(btn => {
+            if (btn.textContent.includes('登入解鎖 AI 生成')) {
+              btn.textContent = btn.textContent.replace('登入解鎖 AI 生成', '使用一鍵生成功能');
+            }
+          });
+          
+          const article2Buttons = document.querySelectorAll('button[onclick*="handleGuideUnlockButton(\'article2\')"], a[onclick*="handleGuideUnlockButton(\'article2\')"]');
+          article2Buttons.forEach(btn => {
+            if (btn.textContent.includes('登入解鎖 AI 生成')) {
+              btn.textContent = btn.textContent.replace('登入解鎖 AI 生成', '使用IP人設規劃功能');
+            }
+          });
+          
+          const article3Buttons = document.querySelectorAll('button[onclick*="handleGuideUnlockButton(\'article3\')"], a[onclick*="handleGuideUnlockButton(\'article3\')"]');
+          article3Buttons.forEach(btn => {
+            if (btn.textContent.includes('登入解鎖 AI 生成')) {
+              btn.textContent = btn.textContent.replace('登入解鎖 AI 生成', '使用一鍵生成功能');
+            }
+          });
+        } catch (error) {
+          console.error('更新按鈕文字失敗:', error);
+        }
+      }
+      window.updateGuideButtonTexts = updateGuideButtonTexts;
+      
+      // 處理模式導航（從 mode1.js 和 mode3.js 複製）
+      async function handleModeNavigation(event, targetMode) {
+        if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        
+        if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+          const loggedIn = await window.ReelMindCommon.checkLoginStatus();
+          
+          if (!loggedIn) {
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+              window.ReelMindCommon.showToast('請先登入以使用此功能', 3000);
+            }
+            if (typeof goToLogin === 'function') {
+              goToLogin();
+            } else if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+              window.ReelMindCommon.goToLogin();
+            } else {
+              const backendUrl = 'https://aivideobackend.zeabur.app';
+              const redirectUri = encodeURIComponent(window.location.origin + '/');
+              window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
+            }
+            return;
+          }
+          
+          let isSubscribed = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkSubscriptionStatus === 'function') {
+            await window.ReelMindCommon.checkSubscriptionStatus();
+            isSubscribed = window.ReelMindCommon.isSubscribed();
+          }
+          
+          if (!isSubscribed) {
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+              window.ReelMindCommon.showToast('您尚未訂閱，請先訂閱以使用此功能', 3000);
+            }
+            window.location.href = '/subscription.html';
+            return;
+          }
+        }
+        
+        // 如果通過所有檢查，則導航到目標頁面
+        window.location.href = `/${targetMode}.html`;
+      }
+      window.handleModeNavigation = handleModeNavigation;
+      
+      // 更新用戶資訊
+      async function updateUserInfo() {
+        const userInfo = document.getElementById('userInfo');
+        const authButtons = document.getElementById('authButtons');
+        const userDBTab = document.getElementById('userDBTab');
+        const userDBMobileTab = document.getElementById('userDBMobileTab');
+        
+        if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+          const loggedIn = await window.ReelMindCommon.checkLoginStatus();
+          
+          if (loggedIn) {
+            if (userInfo) {
+              userInfo.style.display = 'flex';
+              const userAvatar = document.getElementById('userAvatar');
+              const userName = document.getElementById('userName');
+              
+              if (window.ReelMindCommon && window.ReelMindCommon.getUser) {
+                const user = window.ReelMindCommon.getUser();
+                if (user) {
+                  if (userAvatar && user.picture) {
+                    userAvatar.src = user.picture;
+                  }
+                  if (userName && user.name) {
+                    userName.textContent = user.name;
+                  }
+                }
+              }
+            }
+            if (authButtons) {
+              authButtons.style.display = 'none';
+            }
+            if (userDBTab) {
+              userDBTab.style.display = 'block';
+            }
+            if (userDBMobileTab) {
+              userDBMobileTab.style.display = 'block';
+            }
+          } else {
+            if (userInfo) {
+              userInfo.style.display = 'none';
+            }
+            if (authButtons) {
+              authButtons.style.display = 'flex';
+            }
+            if (userDBTab) {
+              userDBTab.style.display = 'none';
+            }
+            if (userDBMobileTab) {
+              userDBMobileTab.style.display = 'none';
+            }
+          }
+        }
+      }
+      
+      // 處理 hash 和查詢參數導航（如果 URL 中有 #article1 或 ?article=article1）
+      function handleHashNavigation() {
+        // 優先處理查詢參數（從其他頁面跳轉過來）
+        const urlParams = new URLSearchParams(window.location.search);
+        const articleParam = urlParams.get('article');
+        if (articleParam && articleParam.startsWith('article')) {
+          setTimeout(() => {
+            showGuideArticle(articleParam);
+          }, 100);
+          return;
+        }
+        
+        // 其次處理 hash（在同一頁面內導航）
+        const hash = window.location.hash;
+        if (hash) {
+          const articleId = hash.replace('#', '');
+          if (articleId.startsWith('article')) {
+            setTimeout(() => {
+              showGuideArticle(articleId);
+            }, 100);
+          }
+        }
+      }
+      
+      // 頁面載入時初始化
+      document.addEventListener('DOMContentLoaded', function() {
+        updateUserInfo();
+        updateGuideButtonTexts();
+        handleHashNavigation();
+        
+        // 監聽 hash 變化
+        window.addEventListener('hashchange', handleHashNavigation);
+      });
+    </script>
+  </body>
+</html>
+
