@@ -52,6 +52,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.openMode1OneClickModal = openMode1OneClickModal;
     window.closeMode1OneClickModal = closeMode1OneClickModal;
     window.handleQuickButton = handleQuickButton;
+    window.saveMode1Result = saveMode1Result;
+    window.saveMode1OneClickResult = saveMode1OneClickResult;
   }
   
   // 綁定生成結果按鈕事件（確保使用新的彈跳視窗）
@@ -847,6 +849,17 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
           
           try {
             const parsed = JSON.parse(data);
+            
+            // 處理儲存請求事件
+            if (parsed.type === 'save_request') {
+              console.log('收到後端儲存請求，自動保存中...');
+              // 延遲一下確保內容已渲染，然後自動保存
+              setTimeout(async () => {
+                await saveMode1Result();
+              }, 500);
+              continue; // 繼續處理其他事件
+            }
+            
             if (parsed.content) {
               fullContent += parsed.content;
               contentDiv.innerHTML = renderMode1Markdown(fullContent);
@@ -1852,7 +1865,7 @@ async function generateMode1TodayScripts() {
   return generateMode1WeeklyScripts();
 }
 
-// 儲存結果
+// 儲存結果（支援 Modal 系統）
 async function saveMode1Result() {
   const token = localStorage.getItem('ipPlanningToken');
   const userStr = localStorage.getItem('ipPlanningUser');
@@ -1866,10 +1879,49 @@ async function saveMode1Result() {
   
   try {
     const user = JSON.parse(userStr);
+    
+    // 檢查是否在 Modal 的「一鍵生成」標籤頁中
+    const overlay = document.getElementById('mode1OneClickModalOverlay');
+    const isModalOpen = overlay && overlay.classList.contains('open');
+    const generateTab = document.getElementById('mode1OneClickTabGenerate');
+    const isGenerateTabActive = generateTab && generateTab.classList.contains('active');
+    
+    if (isModalOpen && isGenerateTabActive) {
+      // 在 Modal 的「一鍵生成」標籤頁中，檢查哪個結果有內容
+      const types = ['positioning', 'topics', 'weekly'];
+      let savedCount = 0;
+      let hasContent = false;
+      
+      for (const type of types) {
+        const contentEl = document.getElementById(`mode1OneClick${type === 'positioning' ? 'Positioning' : type === 'topics' ? 'Topics' : 'Weekly'}Content`);
+        if (contentEl && contentEl.innerHTML.trim() && !contentEl.innerHTML.includes('點擊上方按鈕開始生成')) {
+          hasContent = true;
+          // 調用一鍵生成的儲存函數
+          await saveMode1OneClickResult(type);
+          savedCount++;
+        }
+      }
+      
+      if (!hasContent) {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('沒有可儲存的內容，請先生成結果', 3000);
+        }
+        return;
+      }
+      
+      if (savedCount > 0) {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast(`✅ 已儲存 ${savedCount} 個結果到創作者資料庫的「IP人設規劃結果」`, 5000);
+        }
+      }
+      return;
+    }
+    
+    // 舊的 drawer 系統（保留作為備用）
     const activeTab = document.querySelector('.mode1-tab.active');
     if (!activeTab) {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('請先選擇要儲存的結果', 3000);
+        window.ReelMindCommon.showToast('請先選擇要儲存的結果，或在「一鍵生成」標籤頁中生成內容', 3000);
       }
       return;
     }
@@ -1878,24 +1930,22 @@ async function saveMode1Result() {
     let title = '';
     const tabText = activeTab.textContent;
     if (tabText.includes('帳號定位')) {
-      resultType = 'profile'; // 映射到後端接受的 'profile'
+      resultType = 'profile';
       title = '帳號定位';
     } else if (tabText.includes('選題方向')) {
-      resultType = 'plan'; // 映射到後端接受的 'plan'
+      resultType = 'plan';
       title = '選題方向（影片類型配比）';
     } else if (tabText.includes('一週腳本')) {
-      resultType = 'scripts'; // 映射到後端接受的 'scripts'
+      resultType = 'scripts';
       title = '一週腳本';
-    }
-    // 保留舊的匹配邏輯作為備用
-    else if (tabText.includes('Profile')) {
-      resultType = 'profile'; // 映射到後端接受的 'profile'
+    } else if (tabText.includes('Profile')) {
+      resultType = 'profile';
       title = 'IP Profile';
     } else if (tabText.includes('規劃')) {
-      resultType = 'plan'; // 映射到後端接受的 'plan'
+      resultType = 'plan';
       title = '14天短影音規劃';
     } else if (tabText.includes('腳本')) {
-      resultType = 'scripts'; // 映射到後端接受的 'scripts'
+      resultType = 'scripts';
       title = '今日腳本';
     }
     
@@ -1907,7 +1957,7 @@ async function saveMode1Result() {
       return;
     }
     
-    // 映射結果類型到 HTML ID（前端使用 positioning/topics/weekly，但後端使用 profile/plan/scripts）
+    // 映射結果類型到 HTML ID
     const frontendResultType = resultType === 'profile' ? 'positioning' : 
                                resultType === 'plan' ? 'topics' : 
                                resultType === 'scripts' ? 'weekly' : resultType;
@@ -1928,7 +1978,6 @@ async function saveMode1Result() {
       return;
     }
     
-    // 使用預設標題「請在此編輯你的標題」
     const defaultTitle = '請在此編輯你的標題';
     
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1948,7 +1997,7 @@ async function saveMode1Result() {
         content: content.innerHTML,
         metadata: {
           timestamp: new Date().toISOString(),
-          source: 'mode3'
+          source: 'mode1'
         }
       })
     });
@@ -1959,7 +2008,6 @@ async function saveMode1Result() {
         const errorData = await response.json();
         errorMessage = errorData.error || errorData.message || errorMessage;
       } catch (e) {
-        // 如果無法解析 JSON，使用狀態碼
         errorMessage = `HTTP ${response.status}: ${response.statusText || '請求失敗'}`;
       }
       throw new Error(errorMessage);
@@ -3093,7 +3141,7 @@ async function saveMode1OneClickResult(type) {
     }
     
     // 直接調用 API 儲存
-    const response = await fetch('https://aivideobackend.zeabur.app/api/ip-planning/save', {
+    const response = await fetch(`${API_URL}/api/ip-planning/save`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
