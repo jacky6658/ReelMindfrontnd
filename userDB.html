@@ -535,7 +535,8 @@
         padding: 24px;
         box-shadow: 0 1px 3px var(--shadow);
         transition: background-color 0.3s ease;
-        display: block; /* 桌面版顯示 */
+        display: flex; /* 桌面版顯示 */
+        flex-direction: column;
       }
       
       .db-section {
@@ -1060,7 +1061,7 @@
           width: 100%;
           height: 100%;
           background: rgba(0, 0, 0, 0.5);
-          display: none;
+          display: none !important;
           justify-content: center;
           align-items: center;
           z-index: 10000;
@@ -1070,7 +1071,7 @@
         }
         
         .userdb-modal-overlay.show {
-          display: flex;
+          display: flex !important;
         }
         
         .userdb-modal-content {
@@ -2095,7 +2096,12 @@
         const titleEl = document.getElementById('userdbModalTitle');
         const bodyEl = document.getElementById('userdbModalBody');
         
-        if (!overlay || !titleEl || !bodyEl) return;
+        if (!overlay || !titleEl || !bodyEl) {
+          console.error('彈跳視窗元素未找到:', { overlay, titleEl, bodyEl });
+          return;
+        }
+        
+        console.log('打開彈跳視窗:', sectionName);
         
         // 設置標題
         const titleMap = {
@@ -2125,66 +2131,84 @@
         
         // 獲取對應的內容區域
         const targetSection = document.getElementById(`db-${sectionName}`);
-        if (targetSection) {
-          // 先顯示內容區域（臨時）以獲取內容
-          targetSection.style.display = 'block';
-          const sectionContent = targetSection.querySelector('.section-content');
-          
-          // 載入數據
-          const loadContent = async () => {
-            try {
-              switch(sectionName) {
-                case 'personalInfo':
-                  await loadPersonalInfoForUserDB();
-                  break;
-                case 'myScripts':
-                  await loadMyScriptsForUserDB();
-                  break;
-                case 'settings':
-                  loadSavedApiKey();
-                  // 等待一下讓內容渲染
-                  await new Promise(resolve => setTimeout(resolve, 100));
-                  break;
-                case 'accountPositioning':
-                  await loadPositioningRecordsForUserDB();
-                  break;
-                case 'topicRecords':
-                  await loadTopicHistoryForUserDB();
-                  break;
-                case 'ipPlanning':
-                  await loadIpPlanningResultsForUserDB();
-                  break;
-                case 'myOrders':
-                  await loadMyOrdersForUserDB();
-                  break;
-                case 'usageStats':
-                  await loadUsageStatsForUserDB();
-                  break;
-                case 'helpCenter':
-                  // 幫助中心內容已在HTML中定義，無需動態載入
-                  break;
-              }
-              
-              // 等待內容渲染後再複製
-              await new Promise(resolve => setTimeout(resolve, 200));
-              
-              if (sectionContent) {
-                bodyEl.innerHTML = sectionContent.innerHTML;
-              }
-            } catch (error) {
-              console.error('載入內容失敗:', error);
-              bodyEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #ef4444;">載入失敗，請稍後再試</div>';
-            } finally {
-              targetSection.style.display = 'none';
-            }
-          };
-          
-          loadContent();
+        if (!targetSection) {
+          console.error('找不到目標區塊:', `db-${sectionName}`);
+          bodyEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #ef4444;">找不到對應的內容區塊</div>';
+          return;
         }
         
+        // 先顯示內容區域（臨時）以獲取內容
+        const originalDisplay = targetSection.style.display;
+        targetSection.style.display = 'block';
+        const sectionContent = targetSection.querySelector('.section-content');
+        
+        if (!sectionContent) {
+          console.error('找不到 section-content:', targetSection);
+          bodyEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #ef4444;">找不到內容區域</div>';
+          targetSection.style.display = originalDisplay;
+          return;
+        }
+        
+        // 載入數據
+        const loadContent = async () => {
+          try {
+            switch(sectionName) {
+              case 'personalInfo':
+                await loadPersonalInfoForUserDB();
+                break;
+              case 'myScripts':
+                await loadMyScriptsForUserDB();
+                break;
+              case 'settings':
+                loadSavedApiKey();
+                // 等待一下讓內容渲染
+                await new Promise(resolve => setTimeout(resolve, 100));
+                break;
+              case 'accountPositioning':
+                await loadPositioningRecordsForUserDB();
+                break;
+              case 'topicRecords':
+                await loadTopicHistoryForUserDB();
+                break;
+              case 'ipPlanning':
+                await loadIpPlanningResultsForUserDB();
+                break;
+              case 'myOrders':
+                await loadMyOrdersForUserDB();
+                break;
+              case 'usageStats':
+                await loadUsageStatsForUserDB();
+                break;
+              case 'helpCenter':
+                // 幫助中心內容已在HTML中定義，無需動態載入
+                break;
+            }
+            
+            // 等待內容渲染後再複製
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            if (sectionContent && sectionContent.innerHTML) {
+              bodyEl.innerHTML = sectionContent.innerHTML;
+              console.log('內容已載入到彈跳視窗');
+            } else {
+              bodyEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #6b7280;">暫無內容</div>';
+            }
+          } catch (error) {
+            console.error('載入內容失敗:', error);
+            bodyEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #ef4444;">載入失敗，請稍後再試</div>';
+          } finally {
+            targetSection.style.display = originalDisplay || 'none';
+          }
+        };
+        
+        loadContent();
+        
         // 顯示彈跳視窗
+        overlay.style.display = 'flex'; // 強制顯示
         overlay.classList.add('show');
         document.body.style.overflow = 'hidden';
+        
+        console.log('彈跳視窗已顯示，overlay classes:', overlay.className);
         
         // 點擊背景關閉
         overlay.onclick = function(e) {
@@ -2208,9 +2232,14 @@
         const overlay = document.getElementById('userdbModalOverlay');
         if (overlay) {
           overlay.classList.remove('show');
+          overlay.style.display = 'none'; // 強制隱藏
           document.body.style.overflow = '';
         }
       }
+      
+      // 將函數導出到全局，方便調試
+      window.openUserDbModal = openUserDbModal;
+      window.closeUserDbModal = closeUserDbModal;
       
       // 初始化頁面
       document.addEventListener('DOMContentLoaded', async () => {
