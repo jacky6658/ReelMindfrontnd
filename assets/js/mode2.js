@@ -1,22 +1,35 @@
-// mode2.js - AI顧問模式專用函數
-// 從 mode2.html 提取的所有 JavaScript 代碼
+// mode3.js - 一鍵生成模式專用函數
+// 從 mode3.html 提取的所有 JavaScript 代碼
 
 // API_BASE_URL 已在 config.js 中定義為全局變數
 // 這裡直接使用 window.APP_CONFIG，避免重複聲明
-const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+// 使用 window 檢查避免重複聲明錯誤
+if (typeof window.API_URL === 'undefined') {
+  window.API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+}
+// 使用 window 對象避免 const 重複聲明錯誤（如果腳本被載入兩次）
+// 檢查是否已經在當前作用域中聲明過 API_URL
+if (typeof API_URL === 'undefined') {
+  var API_URL = window.API_URL; // 使用 var 而不是 const，避免重複聲明錯誤
+}
+let currentPlatform = null;
+let currentTopic = null;
+let currentProfile = null;
+let selectedScriptStructure = null; // 選中的腳本結構（A/B/C/D/E）
+const styleInstruction = '格式要求：分段清楚，短句，每段換行，適度加入表情符號（如：✅✨🔥📌），避免口頭禪。絕對不要使用 ** 或任何 Markdown 格式符號，所有內容必須是純文字格式。';
+
+// 從 localStorage 獲取用戶資訊
 let ipPlanningToken = localStorage.getItem('ipPlanningToken') || '';
 let ipPlanningUser = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
-let isSending = false;
 
-// 頁面載入時初始化
+// 頁面初始化
 document.addEventListener('DOMContentLoaded', async function() {
-  console.log('🚀 ========== Mode2 (AI顧問) 頁面初始化 ==========');
+  console.log('🚀 ========== Mode3 (一鍵生成) 頁面初始化 ==========');
   
-  // 檢查登入狀態
+  // 載入用戶資訊
   if (window.Auth && window.Auth.getToken()) {
     ipPlanningToken = window.Auth.getToken();
   }
-  
   // 從 localStorage 或 common.js 獲取用戶資訊
   if (window.ReelMindCommon && window.ReelMindCommon.getUser) {
     ipPlanningUser = window.ReelMindCommon.getUser();
@@ -63,37 +76,40 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
   
-  // 更新用戶資訊顯示
-  updateUserInfo();
-  
-  // 載入用戶記憶（長期記憶和短期記憶）- 在權限檢查之前載入，確保日誌能輸出
-  if (isLoggedIn && ipPlanningUser?.user_id) {
-    console.log('📚 開始載入用戶記憶...');
-    await loadUserMemory();
-  } else {
-    console.warn('⚠️ 無法載入記憶：用戶未登入或缺少用戶ID');
-  }
-  
-  // 檢查認證和訂閱狀態
-  if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
-    const canAccess = await window.ReelMindCommon.checkFeatureAccess();
-    if (!canAccess) {
+  // 檢查權限（需要登入和訂閱）
+  if (window.ReelMindCommon) {
+    const hasAccess = await window.ReelMindCommon.checkFeatureAccess();
+    if (!hasAccess) {
       console.warn('⚠️ 權限檢查失敗，無法訪問此功能');
-      return; // checkFeatureAccess 已經處理了跳轉
+      return;
     }
     console.log('✅ 權限檢查通過，可以訪問此功能');
   }
+
+  // 更新用戶資訊顯示
+  updateUserInfo();
   
-  // 初始化聊天功能
-  console.log('💬 開始初始化聊天功能...');
-  try {
-    initChatGPTFeatures();
-    console.log('✅ 聊天功能初始化完成');
-  } catch (error) {
-    console.error('❌ 初始化聊天功能時出錯:', error);
+  // 載入用戶記憶（長期記憶和短期記憶）
+  if (isLoggedIn && ipPlanningUser?.user_id) {
+    await loadUserMemory();
   }
   
-  console.log('✅ ========== Mode2 頁面初始化完成 ==========');
+  // 初始化步驟式流程
+  initStepFlow();
+  
+  // 初始化按鈕選擇器（平台、目標）
+  initButtonSelectors();
+  
+  // 初始化腳本結構選擇按鈕
+  initScriptStructureButtons();
+  
+  // 初始化標籤切換（Step 3 結果頁面）
+  initTabs();
+  
+  // 初始化表單驗證
+  initFormValidation();
+  
+  console.log('✅ ========== Mode3 頁面初始化完成 ==========');
 });
 
 // 載入用戶記憶（長期記憶和短期記憶）
@@ -155,459 +171,900 @@ async function loadUserMemory() {
 // 更新用戶資訊顯示
 // 使用 common.js 中的統一函數
 function updateUserInfo() {
+  // 直接調用 common.js 中的函數，避免無限遞迴
   if (window.ReelMindCommon && window.ReelMindCommon.updateUserInfo) {
     window.ReelMindCommon.updateUserInfo();
-  } else if (window.updateUserInfo) {
-    window.updateUserInfo();
   }
+  // 不再調用 window.updateUserInfo()，因為它可能指向自己，導致無限遞迴
 }
 
-// 使用 common.js 中的統一函數（已導出到 window）
-// goToLogin, toggleMobileDrawer, openMobileDrawer, closeMobileDrawer 現在都在 common.js 中統一管理
-
-// 切換說明抽屜
-function toggleInstructionsDrawer() {
-  const drawer = document.getElementById('instructionsDrawer');
-  const overlay = document.getElementById('drawerOverlay');
+// 初始化設定區塊
+function initSettingsBlock() {
+  const settingsToggle = document.getElementById('settingsToggle');
+  const settingsContent = document.getElementById('settingsContent');
+  const instructions = document.getElementById('oneClickInstructions');
   
-  if (drawer && overlay) {
-    const isOpen = drawer.classList.contains('open');
-    
-    if (isOpen) {
-      drawer.classList.remove('open');
-      overlay.classList.remove('show');
-    } else {
-      drawer.classList.add('open');
-      overlay.classList.add('show');
-    }
-  }
-}
+  if (settingsToggle && settingsContent && instructions) {
+    settingsToggle.addEventListener('click', () => {
+      const isExpanded = settingsContent.style.display !== 'none';
+      settingsContent.style.display = isExpanded ? 'none' : 'block';
+      instructions.style.display = isExpanded ? 'none' : 'block';
+      const toggleIcon = settingsToggle.querySelector('.settings-toggle');
+      if (toggleIcon) {
+        toggleIcon.textContent = isExpanded ? '▶' : '▼';
+      }
+    });
 
-// 初始化 ChatGPT 風格功能
-function initChatGPTFeatures() {
-  console.log('🔧 initChatGPTFeatures() 被調用');
-  try {
-    // 初始化 Markdown 渲染器
-    if (typeof initMarkdownRenderer === 'function') {
-      console.log('📝 初始化 Markdown 渲染器...');
-      initMarkdownRenderer();
-      console.log('✅ Markdown 渲染器初始化完成');
-    } else {
-      console.warn('⚠️ initMarkdownRenderer 函數不存在');
-    }
-  
-    // 設置輸入框事件監聽器
-    console.log('🔍 查找輸入框和按鈕元素...');
-    const messageInput = document.getElementById('messageInput');
-    const sendBtn = document.getElementById('sendBtn');
-    
-    console.log('📝 messageInput:', messageInput ? '找到' : '未找到');
-    console.log('🔘 sendBtn:', sendBtn ? '找到' : '未找到');
-    
-    if (messageInput) {
-      console.log('✅ 設置輸入框事件監聽器...');
-      // 自動調整高度
-      messageInput.addEventListener('input', () => {
-        autoResizeTextarea();
-        // 確保在輸入時快速按鈕保持顯示
-        const quickButtons = document.getElementById('quickButtons');
-        if (quickButtons && !isSending) {
-          quickButtons.style.display = 'flex';
-          quickButtons.style.visibility = 'visible';
-          quickButtons.style.opacity = '1';
+    // 監聽設定區塊的展開/收合
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          const isExpanded = settingsContent.style.display !== 'none';
+          instructions.style.display = isExpanded ? 'block' : 'none';
         }
       });
+    });
+    
+    observer.observe(settingsContent, { attributes: true });
+    
+    // 初始狀態檢查
+    const isExpanded = settingsContent.style.display !== 'none';
+    instructions.style.display = isExpanded ? 'block' : 'none';
+  }
+
+  // 套用設定按鈕
+  const applyBtn = document.getElementById('applyBtn');
+  if (applyBtn) {
+    applyBtn.addEventListener('click', () => {
+      const platform = document.getElementById('platformSelect')?.value;
+      const topic = document.getElementById('topicInput')?.value;
+      const duration = document.getElementById('durationInput')?.value;
+      const positioning = document.getElementById('positioningInput')?.value;
       
-      // 鍵盤事件：Enter發送，Shift+Enter換行
-      messageInput.addEventListener('keydown', (e) => {
-        // 確保空白鍵不會觸發任何會隱藏快速按鈕的邏輯
-        if (e.key === ' ') {
-          // 空白鍵正常輸入，不做任何處理，確保快速按鈕保持顯示
-          const quickButtons = document.getElementById('quickButtons');
-          if (quickButtons) {
-            quickButtons.style.display = 'flex';
-            quickButtons.style.visibility = 'visible';
-            quickButtons.style.opacity = '1';
-          }
-          return;
+      if (!platform) {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('請選擇平台', 3000);
         }
-        
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          if (!sendBtn.disabled && !isSending) {
-            handleSendMessage();
-          }
+        return;
+      }
+      
+      if (!selectedScriptStructure) {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('請選擇腳本結構', 3000);
         }
-      });
-    }
-    
-    if (sendBtn) {
-      console.log('✅ 設置發送按鈕事件監聽器...');
-      sendBtn.addEventListener('click', handleSendMessage);
-    } else {
-      console.warn('⚠️ 找不到發送按鈕元素');
-    }
-    
-    // 快速按鈕事件
-    console.log('🔍 查找快速按鈕元素...');
-    const quickButtons = document.getElementById('quickButtons');
-    console.log('⚡ quickButtons:', quickButtons ? '找到' : '未找到');
-    if (quickButtons) {
-      quickButtons.addEventListener('click', (e) => {
-        if (e.target.classList.contains('quick-btn')) {
-          const text = e.target.getAttribute('data-text');
-          if (text && messageInput) {
-            messageInput.value = text;
-            autoResizeTextarea();
-            handleSendMessage();
+        return;
+      }
+      
+      currentPlatform = platform;
+      currentTopic = topic;
+      currentProfile = positioning;
+      
+      // 顯示通知（確保一定會顯示）
+      const showNotification = (message, duration = 3000) => {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast(message, duration);
+        } else {
+          const toastEl = document.getElementById('toast');
+          if (toastEl) {
+            toastEl.textContent = message;
+            toastEl.style.display = 'block';
+            toastEl.style.opacity = '1';
+            setTimeout(() => {
+              toastEl.style.opacity = '0';
+              setTimeout(() => {
+                toastEl.style.display = 'none';
+              }, 300);
+            }, duration);
+          } else {
+            alert(message);
           }
         }
-      });
-      console.log('✅ 快速按鈕事件監聽器設置完成');
-    } else {
-      console.warn('⚠️ 找不到快速按鈕元素');
-    }
-    
-    console.log('✅ initChatGPTFeatures() 初始化完成');
-  } catch (error) {
-    console.error('❌ 初始化 ChatGPT 功能錯誤:', error);
-    console.error('錯誤堆疊:', error.stack);
+      };
+      
+      showNotification('✅ 設定已套用', 2000);
+      
+      // 自動收合設定區塊
+      if (settingsContent) {
+        settingsContent.style.display = 'none';
+        if (instructions) instructions.style.display = 'none';
+        const toggleIcon = settingsToggle?.querySelector('.settings-toggle');
+        if (toggleIcon) toggleIcon.textContent = '▶';
+      }
+    });
   }
 }
 
-// 處理發送訊息
-async function handleSendMessage() {
-  const messageInput = document.getElementById('messageInput');
-  if (!messageInput || isSending) return;
+// 初始化步驟式流程
+function initStepFlow() {
+  let currentStep = 1;
   
-  const message = messageInput.value.trim();
-  if (!message) {
-    // 如果訊息為空，確保快速按鈕仍然顯示
-    const quickButtons = document.getElementById('quickButtons');
-    if (quickButtons) {
-      quickButtons.style.display = 'flex';
+  // Step 1 → Step 2
+  const nextToStep2Btn = document.getElementById('nextToStep2');
+  if (nextToStep2Btn) {
+    nextToStep2Btn.addEventListener('click', () => {
+      if (validateStep1()) {
+        updateConfirmContent();
+        goToStep(2);
+      }
+    });
+  }
+  
+  // Step 2 → Step 1 (返回)
+  const backToStep1Btn = document.getElementById('backToStep1');
+  if (backToStep1Btn) {
+    backToStep1Btn.addEventListener('click', () => {
+      goToStep(1);
+    });
+  }
+  
+  // Step 2 → Step 3 (生成)
+  const generateAllBtn = document.getElementById('generateAll');
+  if (generateAllBtn) {
+    generateAllBtn.addEventListener('click', async () => {
+      await generateAll();
+    });
+  }
+  
+  // 重新生成按鈕
+  const regenerateAllBtn = document.getElementById('regenerateAll');
+  if (regenerateAllBtn) {
+    regenerateAllBtn.addEventListener('click', () => {
+      goToStep(1);
+      // 重置表單
+      resetForm();
+    });
+  }
+}
+
+// 切換步驟
+function goToStep(step) {
+  // 隱藏所有步驟內容
+  document.querySelectorAll('.step-content').forEach(el => {
+    el.classList.remove('active');
+  });
+  
+  // 顯示對應步驟
+  if (step === 1) {
+    const stepEl = document.getElementById('step1');
+    if (stepEl) stepEl.classList.add('active');
+  } else if (step === 2) {
+    const stepEl = document.getElementById('step2');
+    if (stepEl) stepEl.classList.add('active');
+  } else if (step === 3) {
+    // Step 3 有兩個狀態：載入中和結果
+    // 預設顯示結果頁面（如果已有結果）
+    const resultStep = document.getElementById('step3Result');
+    const loadingStep = document.getElementById('step3Loading');
+    
+    // 檢查是否已有結果
+    const hasResults = document.getElementById('positioningContent')?.textContent.trim() && 
+                       document.getElementById('positioningContent')?.textContent.trim() !== '正在生成...';
+    
+    if (hasResults && resultStep) {
+      resultStep.classList.add('active');
+    } else if (loadingStep) {
+      loadingStep.classList.add('active');
+    }
+  }
+  
+  // 更新進度指示器
+  updateProgressIndicator(step);
+  
+  // 滾動到頂部
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 更新進度指示器
+function updateProgressIndicator(currentStep) {
+  for (let i = 1; i <= 3; i++) {
+    const circle = document.getElementById(`stepCircle${i}`);
+    const label = document.getElementById(`stepLabel${i}`);
+    const connector = document.getElementById(`connector${i}`);
+    
+    if (i < currentStep) {
+      // 已完成
+      if (circle) circle.className = 'progress-step-circle completed';
+      if (label) label.className = 'progress-step-label';
+      if (connector) connector.className = 'progress-step-connector active';
+    } else if (i === currentStep) {
+      // 當前步驟
+      if (circle) circle.className = 'progress-step-circle active';
+      if (label) label.className = 'progress-step-label active';
+      if (i > 1 && connector) {
+        const prevConnector = document.getElementById(`connector${i - 1}`);
+        if (prevConnector) prevConnector.className = 'progress-step-connector active';
+      }
+    } else {
+      // 未完成
+      if (circle) circle.className = 'progress-step-circle inactive';
+      if (label) label.className = 'progress-step-label inactive';
+      if (i > 1 && connector) {
+        const prevConnector = document.getElementById(`connector${i - 1}`);
+        if (prevConnector) prevConnector.className = 'progress-step-connector inactive';
+      }
+    }
+  }
+}
+
+// 初始化按鈕選擇器（平台、目標）
+function initButtonSelectors() {
+  // 目標選擇器
+  document.querySelectorAll('.button-selector[data-goal]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // 找到最近的 .button-grid 父元素，只移除該組內的按鈕選中狀態
+      const buttonGrid = btn.closest('.button-grid');
+      if (buttonGrid) {
+        buttonGrid.querySelectorAll('.button-selector[data-goal]').forEach(b => {
+          b.classList.remove('selected');
+        });
+      }
+      
+      // 添加選中狀態
+      btn.classList.add('selected');
+      checkStep1Validation();
+    });
+  });
+  
+  // 平台選擇器
+  document.querySelectorAll('.button-selector[data-platform]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // 找到最近的 .button-grid 父元素，只移除該組內的按鈕選中狀態
+      const buttonGrid = btn.closest('.button-grid');
+      if (buttonGrid) {
+        buttonGrid.querySelectorAll('.button-selector[data-platform]').forEach(b => {
+          b.classList.remove('selected');
+        });
+      }
+      
+      // 添加選中狀態
+      btn.classList.add('selected');
+      checkStep1Validation();
+    });
+  });
+}
+
+// 初始化表單驗證
+function initFormValidation() {
+  // 監聽所有必填項的變化
+  const requiredInputs = ['topicInput', 'positioningInput', 'durationInput'];
+  requiredInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', checkStep1Validation);
+      el.addEventListener('change', checkStep1Validation);
+    }
+  });
+  
+  // 監聽結構選擇
+  document.querySelectorAll('.structure-btn').forEach(btn => {
+    btn.addEventListener('click', checkStep1Validation);
+  });
+  
+  // 初始檢查
+  checkStep1Validation();
+}
+
+// 檢查 Step 1 表單驗證
+function checkStep1Validation() {
+  try {
+    const topicInput = document.getElementById('topicInput');
+    const positioningInput = document.getElementById('positioningInput');
+    const durationInput = document.getElementById('durationInput');
+    
+    const topic = topicInput?.value?.trim() || '';
+    const positioning = positioningInput?.value?.trim() || '';
+    const duration = durationInput?.value || '';
+    const goal = document.querySelector('.button-selector[data-goal].selected');
+    const platform = document.querySelector('.button-selector[data-platform].selected');
+    const structure = document.querySelector('.structure-btn.selected');
+    
+    const isValid = !!(topic && positioning && duration && goal && platform && structure);
+    
+    const nextBtn = document.getElementById('nextToStep2');
+    if (nextBtn) {
+      nextBtn.disabled = !isValid;
+    } else {
+      console.warn('nextToStep2 按鈕不存在');
+    }
+    
+    return isValid;
+  } catch (error) {
+    console.error('表單驗證錯誤:', error);
+    const nextBtn = document.getElementById('nextToStep2');
+    if (nextBtn) {
+      nextBtn.disabled = true;
+    }
+    return false;
+  }
+}
+
+// 驗證 Step 1
+function validateStep1() {
+  if (!checkStep1Validation()) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請填寫所有必填項', 3000);
+    }
+    return false;
+  }
+  return true;
+}
+
+// 更新確認頁面內容
+function updateConfirmContent() {
+  // 獲取 HTML 轉義函數（XSS 防護）
+  const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
+    if (text == null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+  });
+  
+  const topicInput = document.getElementById('topicInput');
+  const positioningInput = document.getElementById('positioningInput');
+  const durationInput = document.getElementById('durationInput');
+  const styleInput = document.getElementById('styleInput');
+  
+  const topic = topicInput?.value.trim() || '';
+  const positioning = positioningInput?.value.trim() || '';
+  const duration = durationInput?.value || '30';
+  const goal = document.querySelector('.button-selector[data-goal].selected')?.getAttribute('data-goal') || '';
+  const platform = document.querySelector('.button-selector[data-platform].selected')?.getAttribute('data-platform') || '';
+  const structure = document.querySelector('.structure-btn.selected')?.getAttribute('data-structure') || '';
+  const style = styleInput?.value.trim() || '';
+  
+  const structureNames = {
+    'A': '標準行銷三段式',
+    'B': '問題→解決→證明',
+    'C': 'Before→After',
+    'D': '教學知識型',
+    'E': '故事敘事型'
+  };
+  
+  const confirmContent = document.getElementById('confirmContent');
+  if (!confirmContent) {
+    console.warn('confirmContent 元素不存在');
+    return;
+  }
+  
+  // 使用 HTML 轉義防止 XSS 攻擊
+  confirmContent.innerHTML = `
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">主題或產品</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(topic)}</p>
+    </div>
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">帳號定位</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(positioning)}</p>
+    </div>
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">影片目標</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(goal)}</p>
+    </div>
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">社群平台</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(platform)}</p>
+    </div>
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">腳本秒數</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(duration)}秒</p>
+    </div>
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">腳本結構</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(structureNames[structure] || structure)}</p>
+    </div>
+    ${style ? `
+    <div>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">補充說明</p>
+      <p style="font-weight: 500; font-size: 16px;">${escapeHtml(style)}</p>
+    </div>
+    ` : ''}
+  `;
+}
+
+// 重置表單
+function resetForm() {
+  const topicInput = document.getElementById('topicInput');
+  const positioningInput = document.getElementById('positioningInput');
+  const durationInput = document.getElementById('durationInput');
+  const styleInput = document.getElementById('styleInput');
+  
+  if (topicInput) topicInput.value = '';
+  if (positioningInput) positioningInput.value = '';
+  if (durationInput) durationInput.value = '30';
+  if (styleInput) styleInput.value = '';
+  
+  document.querySelectorAll('.button-selector').forEach(btn => btn.classList.remove('selected'));
+  document.querySelectorAll('.structure-btn').forEach(btn => btn.classList.remove('selected'));
+  selectedScriptStructure = null;
+  checkStep1Validation();
+}
+
+// 初始化腳本結構選擇按鈕
+function initScriptStructureButtons() {
+  const structureButtons = document.querySelectorAll('.structure-btn');
+  
+  structureButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // 移除所有按鈕的選中狀態
+      structureButtons.forEach(b => b.classList.remove('selected'));
+      
+      // 添加選中狀態到當前按鈕
+      btn.classList.add('selected');
+      
+      // 保存選中的結構
+      selectedScriptStructure = btn.getAttribute('data-structure');
+      
+      // 顯示提示
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        const structureNames = {
+          'A': '標準行銷三段式',
+          'B': '問題→解決→證明',
+          'C': 'Before→After',
+          'D': '教學知識型',
+          'E': '故事敘事型'
+        };
+        window.ReelMindCommon.showToast(`已選擇：${structureNames[selectedScriptStructure]}`, 2000);
+      }
+      
+      // 觸發表單驗證
+      checkStep1Validation();
+    });
+  });
+}
+
+// 初始化標籤切換
+function initTabs() {
+  document.querySelectorAll('.result-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.getAttribute('data-tab');
+      switchTab(tabName);
+    });
+  });
+}
+
+// 標籤切換功能
+function switchTab(tabName) {
+  // 移除所有標籤的 active 類別
+  document.querySelectorAll('.result-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  
+  // 隱藏所有結果內容
+  document.querySelectorAll('.result-content').forEach(content => {
+    content.style.display = 'none';
+  });
+  
+  // 激活選中的標籤
+  const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
+  if (activeTab) {
+    activeTab.classList.add('active');
+  }
+  
+  // 顯示對應的結果內容
+  let contentId = '';
+  if (tabName === 'positioning') {
+    contentId = 'positioningResult';
+  } else if (tabName === 'topics') {
+    contentId = 'topicSelectionResult';
+  } else if (tabName === 'script') {
+    contentId = 'scriptResult';
+  }
+  
+  const activeContent = document.getElementById(contentId);
+  if (activeContent) {
+    activeContent.style.display = 'block';
+  }
+}
+
+// 顯示生成中動畫
+function showGeneratingAnimation(blockId, message = '生成中') {
+  const block = document.getElementById(blockId);
+  if (block) {
+    // 使用 escapeHtml 防止 XSS
+    const safeMessage = window.escapeHtml ? window.escapeHtml(message) : message;
+    block.innerHTML = `
+      <div class="generating-container">
+        <div class="generating-spinner"></div>
+        <div class="generating-text">${safeMessage}<span class="generating-dots"></span></div>
+      </div>
+    `;
+    block.classList.remove('has-content');
+  }
+}
+
+// 更新結果區塊內容
+function updateResultBlock(blockId, content, hasContent = true) {
+  const block = document.getElementById(blockId);
+  if (block) {
+    if (window.safeSetText) {
+      window.safeSetText(block, content);
+    } else {
+      block.textContent = content;
+    }
+    if (hasContent) {
+      block.classList.add('has-content');
+    } else {
+      block.classList.remove('has-content');
+    }
+  }
+}
+
+// 一次性生成所有內容（定位、選題、腳本）
+async function generateAll() {
+  // 獲取表單數據
+  const topic = document.getElementById('topicInput')?.value.trim();
+  const positioning = document.getElementById('positioningInput')?.value.trim();
+  const duration = document.getElementById('durationInput')?.value;
+  const goal = document.querySelector('.button-selector[data-goal].selected')?.getAttribute('data-goal');
+  const platform = document.querySelector('.button-selector[data-platform].selected')?.getAttribute('data-platform');
+  const structure = document.querySelector('.structure-btn.selected')?.getAttribute('data-structure');
+  const style = document.getElementById('styleInput')?.value.trim() || styleInstruction;
+  
+  if (!topic || !positioning || !duration || !goal || !platform || !structure) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請填寫所有必填項', 3000);
     }
     return;
   }
   
-  isSending = true;
-  await sendMessage(message);
-  isSending = false;
-}
-
-// 創建訊息元素
-function createMessage(role, content) {
-  const messageDiv = document.createElement('div');
-  messageDiv.className = `message ${role}`;
-  
-  const avatarDiv = document.createElement('div');
-  avatarDiv.className = 'message-avatar';
-  
-  if (role === 'user') {
-    // 嘗試載入Google用戶頭像
-    const userAvatarImg = document.getElementById('userAvatar');
-    if (userAvatarImg && userAvatarImg.src && userAvatarImg.src !== '') {
-      const img = document.createElement('img');
-      img.src = userAvatarImg.src;
-      img.alt = '用戶頭像';
-      img.style.width = '100%';
-      img.style.height = '100%';
-      img.style.borderRadius = '50%';
-      img.style.objectFit = 'cover';
-      avatarDiv.appendChild(img);
-    } else {
-      avatarDiv.textContent = '👤';
-    }
-  } else {
-    avatarDiv.textContent = '🤖';
+  // 切換到載入頁面
+  document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+  const loadingStep = document.getElementById('step3Loading');
+  if (loadingStep) {
+    loadingStep.classList.add('active');
   }
+  updateProgressIndicator(3);
   
-  const contentDiv = document.createElement('div');
-  contentDiv.className = 'message-content';
+  // 保存當前設定
+  currentPlatform = platform;
+  currentTopic = topic;
+  currentProfile = positioning;
+  selectedScriptStructure = structure;
   
-  if (role === 'assistant' && content) {
-    // 處理換行：將單個換行符轉換成 <br>，確保腳本結構選項能正確換行顯示
-    let processedContent = content;
-    // 如果內容包含連續的腳本結構選項（如 "A. Hook → Value → CTA B. 問題→解決 → 證明"），確保每個選項獨立一行
-    // 檢測模式：字母 + 點號 + 空格 + 內容 + 空格 + 字母 + 點號
-    processedContent = processedContent.replace(/([ABCDE])\.\s+([^ABCDE\n]+?)(?=\s+[ABCDE]\.)/g, '$1. $2\n');
-    
-    if (window.safeRenderMarkdown) {
-      let html = window.safeRenderMarkdown(processedContent);
-      // 確保換行符被轉換成 <br>
-      html = html.replace(/\n/g, '<br>');
-      contentDiv.innerHTML = html;
-    } else if (typeof marked !== 'undefined') {
-      // 確保 marked 的 breaks 選項啟用
-      if (!marked.getDefaults || !marked.getDefaults().breaks) {
-        marked.setOptions({ breaks: true, gfm: true });
-      }
-      let html = marked.parse(processedContent);
-      // 確保換行符被轉換成 <br>
-      html = html.replace(/\n/g, '<br>');
-      contentDiv.innerHTML = html;
-    } else {
-      // 純文字模式，將換行符轉換成 <br>，並轉義 HTML 防止 XSS
-      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
-        if (text == null || text === undefined) return '';
-        const div = document.createElement('div');
-        div.textContent = String(text);
-        return div.innerHTML;
-      });
-      const safeContent = escapeHtml(processedContent).replace(/\n/g, '<br>');
-      contentDiv.innerHTML = safeContent;
-    }
-    // 對代碼塊進行語法高亮
-    if (typeof hljs !== 'undefined') {
-      contentDiv.querySelectorAll('pre code').forEach((block) => {
-        hljs.highlightElement(block);
-      });
-    }
-  } else if (role === 'user') {
-    contentDiv.textContent = content;
-  }
-  
-  messageDiv.appendChild(avatarDiv);
-  messageDiv.appendChild(contentDiv);
-  
-  return messageDiv;
-}
-
-// 創建載入動畫
-function createTypingIndicator() {
-  const messageDiv = document.createElement('div');
-  messageDiv.className = 'message assistant';
-  
-  const avatarDiv = document.createElement('div');
-  avatarDiv.className = 'message-avatar';
-  avatarDiv.textContent = '🤖';
-  
-  const contentDiv = document.createElement('div');
-  contentDiv.className = 'message-content';
-  // 使用靜態 HTML，無需轉義（不包含用戶輸入）
-  contentDiv.innerHTML = `
-    <div class="typing-indicator">
-      <span>AI正在思考中</span>
-      <div class="typing-dots">
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-      </div>
-    </div>
-  `;
-  
-  messageDiv.appendChild(avatarDiv);
-  messageDiv.appendChild(contentDiv);
-  
-  return messageDiv;
-}
-
-// 自動調整輸入框高度
-function autoResizeTextarea() {
-  const textarea = document.getElementById('messageInput');
-  if (textarea) {
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
-    
-    // 更新發送按鈕狀態
-    const sendBtn = document.getElementById('sendBtn');
-    if (sendBtn) {
-      sendBtn.disabled = textarea.value.trim() === '';
-    }
-  }
-}
-
-// 發送訊息（整合原有後端和LLM設定）
-async function sendMessage(message) {
-  if (!message || !message.trim()) return;
-  
-  const chatMessages = document.getElementById('chatMessages');
-  const messageInput = document.getElementById('messageInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const quickButtons = document.getElementById('quickButtons');
-  
-  // 添加用戶訊息
-  const userMessage = createMessage('user', message);
-  chatMessages.appendChild(userMessage);
-  
-  // 記錄長期記憶（用戶訊息）
-  if (window.recordConversationMessage) {
-    try { 
-      await window.recordConversationMessage('ai_advisor', 'user', message); 
-    } catch (error) {
-      console.error('長期記憶儲存異常 (AI 顧問 - user):', error);
-    }
-  }
-  
-  // 隱藏快速按鈕（只在真正發送訊息時隱藏）
-  if (quickButtons && message && message.trim()) {
-    quickButtons.style.display = 'none';
-  }
-  
-  // 清空輸入框並禁用
-  messageInput.value = '';
-  messageInput.disabled = true;
-  sendBtn.disabled = true;
-  autoResizeTextarea();
-  
-  // 添加載入動畫
-  const typingIndicator = createTypingIndicator();
-  chatMessages.appendChild(typingIndicator);
-  
-  // 滾動到底部
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  // 顯示初始狀態
+  updateResultBlock('positioningContent', '正在生成...', false);
+  updateResultBlock('topicContent', '正在生成...', false);
+  updateResultBlock('scriptContent', '正在生成...', false);
   
   try {
-    // 使用原有的後端API和LLM設定
-    const endpoint = `${API_URL}/api/chat/stream`;
-    const headers = { 'Content-Type': 'application/json' };
-    if (ipPlanningToken) {
-      headers['Authorization'] = `Bearer ${ipPlanningToken}`;
+    // 同時發起三個生成請求
+    const [positioningResult, topicsResult, scriptResult] = await Promise.allSettled([
+      generatePositioningStream(platform, topic, positioning, style),
+      generateTopicsStream(platform, topic, positioning, style),
+      generateScriptStream(platform, topic, positioning, duration, structure, style)
+    ]);
+    
+    // 處理結果
+    if (positioningResult.status === 'fulfilled') {
+      updateResultBlock('positioningContent', positioningResult.value, true);
+      document.getElementById('positioningActions').style.display = 'flex';
+    } else {
+      updateResultBlock('positioningContent', '生成失敗，請稍後再試', false);
     }
     
-    // 檢查用戶訊息是否包含腳本相關請求，如果是，添加結構選擇提示
-    let enhancedMessage = message;
-    const scriptKeywords = ['腳本', '腳本建議', '生成腳本', '寫腳本', '腳本結構', '腳本格式', '腳本範例', '提供腳本', '給我腳本', '幫我寫腳本', '腳本給我'];
-    const planningKeywords = ['規劃', '接下來', '未來', '之後', '下一步', '內容規劃', '腳本規劃', '選題規劃', '14天', '內容策略'];
-    const isScriptRequest = scriptKeywords.some(keyword => message.includes(keyword));
-    const isPlanningRequest = planningKeywords.some(keyword => message.includes(keyword));
-    
-    if (isScriptRequest) {
-      // 在訊息中添加強化的提示，讓 AI 必須先詢問結構或提供多種選項，而不是直接生成 A 結構
-      enhancedMessage = `${message}\n\n[重要系統提示：用戶要求提供腳本。請務必遵守以下規則：
-1. 絕對不要直接生成腳本，必須先詢問用戶想要的腳本結構（A/B/C/D/E）
-2. ⚠️ 極重要格式要求：當詢問腳本結構時，必須使用換行格式，每個選項獨立一行，並且每個選項後面必須加上兩個換行符（空一行），例如：
-   想用哪種腳本結構呢？
-   
-   A. 標準行銷三段式
-   
-   B. 問題 → 解決 → 證明
-   
-   C. Before → After → 秘密揭露
-   
-   D. 教學知識型
-   
-   E. 故事敘事型
-   
-   絕對不要在同一行用斜線分隔顯示所有選項（如：A / B / C / D / E）
-   絕對不要在同一行顯示多個選項（如：A. Hook → Value → CTA B. 問題→解決 → 證明）
-   每個選項必須獨立一行，並且選項之間要有空行分隔
-3. 或者提供多種結構選項讓用戶選擇，以表格形式呈現，包含以下五種結構的詳細說明：
-
-A. 標準行銷三段式（Hook → Value → CTA）【通用/帶貨】
-   - 30秒版本：Hook 0–5s / Value 5–25s / CTA 25–30s
-   - 45秒版本：Hook 0–7s / Value 7–38s / CTA 38–45s
-   - 60秒版本：Hook 0–10s / Value 10–52s / CTA 52–60s
-   - Hook：吸睛鉤子（痛點/反差/數據/疑問）
-   - Value：最多三個重點（機制/步驟/見證/對比）
-   - CTA：明確下一步（點連結、留言、關注/收藏）
-   適合：產品推廣、快速轉換
-
-B. 問題 → 解決 → 證明（Problem → Solution → Proof）【教育/建立信任】
-   - 30秒版本：問題 0–8s / 解決 8–22s / 證明 22–30s
-   - 45秒版本：問題 0–12s / 解決 12–35s / 證明 35–45s
-   - 60秒版本：問題 0–15s / 解決 15–48s / 證明 48–60s
-   - 用場景/台詞丟痛點 → 給解法 → 拿實證/案例/對比收尾
-   適合：教學內容、建立專業形象
-
-C. Before → After → 秘密揭露【視覺反差/爆量】
-   - 30秒版本：After 0–5s / Before 5–20s / 秘密揭露 20–30s
-   - 45秒版本：After 0–7s / Before 7–32s / 秘密揭露 32–45s
-   - 60秒版本：After 0–10s / Before 10–45s / 秘密揭露 45–60s
-   - 先閃現結果（After）→ 回顧 Before → 揭露方法/產品/關鍵動作
-   適合：效果展示、吸引眼球
-
-D. 教學知識型（迷思 → 原理 → 要點 → 行動）【冷受眾】
-   - 30秒版本：迷思 0–6s / 原理 6–15s / 要點 15–24s / 行動 24–30s
-   - 45秒版本：迷思 0–9s / 原理 9–22s / 要點 22–36s / 行動 36–45s
-   - 60秒版本：迷思 0–12s / 原理 12–30s / 要點 30–48s / 行動 48–60s
-   - 用「你知道為什麼…？」切入；重點條列，搭字幕與圖示
-   適合：知識科普、教育內容
-
-E. 故事敘事型（起 → 承 → 轉 → 合）【人設/口碑】
-   - 30秒版本：起 0–7s / 承 7–15s / 轉 15–23s / 合 23–30s
-   - 45秒版本：起 0–10s / 承 10–22s / 轉 22–35s / 合 35–45s
-   - 60秒版本：起 0–13s / 承 13–30s / 轉 30–47s / 合 47–60s
-   - 個人經歷/阻礙/轉折/感悟，最後落到價值與行動
-   適合：個人品牌、情感連結
-
-3. 每種結構請簡要說明其特點和適用場景
-4. 如果用戶提到時長（如30秒、45秒、60秒），請根據時長和選擇的結構調整時間分配（參考上面的時間分配表）
-5. 等待用戶選擇結構後，再根據選擇的結構和時長生成對應格式的腳本
-6. 如果用戶沒有明確選擇結構，請再次提醒用戶選擇，不要預設使用 A 結構
-7. ⚠️ 極重要：生成腳本時必須使用對應結構的專屬命名，絕對不要混用：
-   - A 結構：使用「Hook、Value、CTA」
-   - B 結構：使用「問題、解決、證明」（絕對不要用 Hook、Value、CTA）
-   - C 結構：使用「After、Before、秘密揭露」（絕對不要用 Hook、Value、CTA）
-   - D 結構：使用「迷思、原理、要點、行動」（絕對不要用 Hook、Value、CTA）
-   - E 結構：使用「起、承、轉、合」（絕對不要用 Hook、Value、CTA）
-   例如：B 結構應標示為「問題（開場鉤子:問題）」，而不是「Hook（開場鉤子:問題）」
-8. ⚠️ 極重要格式要求：生成腳本時必須按照時間分配為主軸，每個時間段都要明確標示：
-   - 時間標示：例如「0-5s (Hook)」或「0-8s (問題)」
-   - 台詞內容：該時間段要說的台詞
-   - 畫面描述：該時間段的鏡頭/畫面建議（必須詳細說明需要什麼樣的畫面、鏡頭角度、視覺元素、資訊融入等）
-   - 資訊融入建議：該時間段可以融入的視覺資訊、圖表、文字、標示等（例如：數據圖表、對比圖、重點標示、產品展示等）
-   - 字幕建議：該時間段的字幕文字
-   - 音效建議：該時間段的音效或轉場
-9. 完整腳本還應包含：
-   - 整體畫面感描述（整體鏡頭風格、視覺調性、色彩建議）
-   - 資訊融入總覽（整個腳本中可以融入的視覺資訊、圖表、文字標示等建議）
-   這樣才能正確儲存到創作者資料庫中]`;
+    if (topicsResult.status === 'fulfilled') {
+      updateResultBlock('topicContent', topicsResult.value, true);
+      document.getElementById('topicActions').style.display = 'flex';
+    } else {
+      updateResultBlock('topicContent', '生成失敗，請稍後再試', false);
     }
     
-    // 檢查是否為腳本規劃請求
-    if (isPlanningRequest && !isScriptRequest) {
-      // 在訊息中添加規劃提示
-      enhancedMessage = `${message}\n\n[系統提示：用戶要求規劃接下來的腳本或內容策略。請協助用戶：
-1. 分析用戶的帳號定位、目標受眾和內容目標
-2. 提供選題方向建議（3-5個具體選題）
-3. 建議適合的腳本結構（A/B/C/D/E）和時長（30s/45s/60s）
-4. 可以規劃短期（1週）或中期（14天）的內容策略
-5. 提供內容發布節奏建議
-6. 根據用戶的目標和受眾，給出專業的內容規劃建議]`;
+    if (scriptResult.status === 'fulfilled') {
+      updateResultBlock('scriptContent', scriptResult.value, true);
+      document.getElementById('scriptActions').style.display = 'flex';
+    } else {
+      updateResultBlock('scriptContent', '生成失敗，請稍後再試', false);
     }
     
-    const response = await fetch(endpoint, {
+    // 切換到結果頁面
+    if (loadingStep) {
+      loadingStep.classList.remove('active');
+    }
+    const resultStep = document.getElementById('step3Result');
+    if (resultStep) {
+      resultStep.classList.add('active');
+    }
+    
+    // 顯示成功通知
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('✅ 生成完成！', 3000);
+    }
+    
+    // 自動切換到第一個標籤
+    switchTab('positioning');
+    
+  } catch (error) {
+    console.error('生成失敗:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('生成失敗，請稍後再試', 3000);
+    }
+    
+    // 切換到結果頁面（即使失敗也顯示）
+    if (loadingStep) {
+      loadingStep.classList.remove('active');
+    }
+    const resultStep = document.getElementById('step3Result');
+    if (resultStep) {
+      resultStep.classList.add('active');
+    }
+  }
+}
+
+// 生成帳號定位（Stream 版本，返回 Promise）
+async function generatePositioningStream(platform, topic, positioning, style) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch(`${API_URL}/api/generate/positioning`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ipPlanningToken}`
+        },
+        body: JSON.stringify({
+          message: '請幫我進行帳號定位分析',
+          platform: platform,
+          topic: topic,
+          duration: '30',
+          style: style,
+          profile: positioning,
+          history: [],
+          user_id: ipPlanningUser?.user_id || null
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('生成失敗');
+      }
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let result = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.type === 'token' && data.content) {
+                result += data.content;
+                // 實時更新（可選）
+                updateResultBlock('positioningContent', result, true);
+              } else if (data.type === 'end') {
+                break;
+              } else if (data.type === 'error') {
+                throw new Error(data.message || '生成失敗');
+              }
+            } catch (e) {
+              console.error('解析錯誤:', e);
+            }
+          }
+        }
+      }
+      
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// 生成選題（Stream 版本，返回 Promise）
+async function generateTopicsStream(platform, topic, positioning, style) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch(`${API_URL}/api/generate/topics`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ipPlanningToken}`
+        },
+        body: JSON.stringify({
+          message: '請幫我推薦選題',
+          platform: platform,
+          topic: topic,
+          duration: '30',
+          style: style,
+          profile: positioning,
+          history: [],
+          user_id: ipPlanningUser?.user_id || null
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('生成失敗');
+      }
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let result = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.type === 'token' && data.content) {
+                result += data.content;
+                // 實時更新（可選）
+                updateResultBlock('topicContent', result, true);
+              } else if (data.type === 'end') {
+                break;
+              } else if (data.type === 'error') {
+                throw new Error(data.message || '生成失敗');
+              }
+            } catch (e) {
+              console.error('解析錯誤:', e);
+            }
+          }
+        }
+      }
+      
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// 生成腳本（Stream 版本，返回 Promise）
+async function generateScriptStream(platform, topic, positioning, duration, structure, style) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const structureMessages = {
+        'A': '請使用標準行銷三段式（Hook → Value → CTA）結構生成完整腳本',
+        'B': '請使用問題 → 解決 → 證明（Problem → Solution → Proof）結構生成完整腳本',
+        'C': '請使用Before → After → 秘密揭露結構生成完整腳本',
+        'D': '請使用教學知識型（迷思 → 原理 → 要點 → 行動）結構生成完整腳本',
+        'E': '請使用故事敘事型（起 → 承 → 轉 → 合）結構生成完整腳本'
+      };
+      
+      const durationNum = duration.toString().replace('秒', '');
+      
+      const response = await fetch(`${API_URL}/api/generate/script`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ipPlanningToken}`
+        },
+        body: JSON.stringify({
+          message: structureMessages[structure] || '請幫我生成完整腳本',
+          platform: platform,
+          topic: topic,
+          duration: durationNum,
+          style: style,
+          profile: positioning,
+          script_structure: structure,
+          history: [],
+          user_id: ipPlanningUser?.user_id || null
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('生成失敗');
+      }
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let result = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.type === 'token' && data.content) {
+                result += data.content;
+                // 實時更新（可選）
+                updateResultBlock('scriptContent', result, true);
+              } else if (data.type === 'end') {
+                break;
+              } else if (data.type === 'error') {
+                throw new Error(data.message || '生成失敗');
+              }
+            } catch (e) {
+              console.error('解析錯誤:', e);
+            }
+          }
+        }
+      }
+      
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// 生成帳號定位（保留原有函數以支援獨立生成）
+async function generatePositioning() {
+  // 支援新的按鈕選擇器和舊的下拉選單
+  const platformEl = document.getElementById('platformSelect');
+  const platformBtn = document.querySelector('.button-selector[data-platform].selected');
+  const topicEl = document.getElementById('topicInput');
+  const positioningEl = document.getElementById('positioningInput');
+  
+  const platform = platformBtn ? platformBtn.getAttribute('data-platform') : (platformEl ? platformEl.value : '');
+  const topic = topicEl ? topicEl.value : '';
+  const positioning = positioningEl ? positioningEl.value : '';
+  
+  if (!platform) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先選擇平台', 3000);
+    }
+    return;
+  }
+  
+  // 顯示生成中動畫
+  showGeneratingAnimation('positioningContent', '正在分析帳號定位');
+  document.getElementById('positioningActions').style.display = 'flex';
+  
+  // 手機版：滾動到頂部（用戶需求設定區域）
+  if (window.innerWidth <= 768) {
+    const settingsBlock = document.querySelector('.settings-block');
+    if (settingsBlock) {
+      settingsBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/api/generate/positioning`, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ipPlanningToken}`
+      },
       body: JSON.stringify({
-        message: enhancedMessage,
-        platform: null,
-        topic: null,
-        duration: null,
-        style: null,
-        profile: null,
+        message: '請幫我進行帳號定位分析',
+        platform: platform,
+        topic: topic,
+        duration: '30',
+        style: styleInstruction,
+        profile: positioning,
         history: [],
-        user_id: ipPlanningUser?.user_id || null,
-        conversation_type: 'ai_advisor'  // 指定對話類型
+        user_id: ipPlanningUser?.user_id || null
       })
     });
     
     if (!response.ok) {
-      // 如果請求失敗，移除載入動畫並顯示錯誤
-      chatMessages.removeChild(typingIndicator);
-      const errorMessage = createMessage('assistant', '❌ 發生錯誤，請稍後再試。');
-      chatMessages.appendChild(errorMessage);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error('生成失敗');
     }
     
-    // 創建AI回應容器（先創建，但內容先顯示載入動畫）
-    const aiMessage = createMessage('assistant', '');
-    const contentDiv = aiMessage.querySelector('.message-content');
-    // 先將載入動畫移到 AI 訊息容器中
-    contentDiv.innerHTML = typingIndicator.querySelector('.message-content').innerHTML;
-    // 移除舊的載入動畫
-    chatMessages.removeChild(typingIndicator);
-    // 添加 AI 訊息容器
-    chatMessages.appendChild(aiMessage);
-    
-    // 處理串流回應
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
-    let fullContent = '';
-    let hasReceivedContent = false; // 標記是否已收到內容
+    let result = '';
     
     while (true) {
       const { done, value } = await reader.read();
@@ -615,116 +1072,525 @@ E. 故事敘事型（起 → 承 → 轉 → 合）【人設/口碑】
       
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
-      buffer = lines.pop();
+      buffer = lines.pop() || '';
       
       for (const line of lines) {
         if (line.startsWith('data: ')) {
-          const data = line.slice(6);
-          if (data === '[DONE]') {
-            // 記錄長期記憶（AI 回覆）
-            if (window.recordConversationMessage) {
-              try { 
-                await window.recordConversationMessage('ai_advisor', 'assistant', fullContent); 
-              } catch (error) {
-                console.error('長期記憶儲存異常 (AI 顧問 - assistant):', error);
-              }
-            }
-            break;
-          }
-          
           try {
-            const parsed = JSON.parse(data);
-            if (parsed.content) {
-              // 第一次收到內容時，移除載入動畫
-              if (!hasReceivedContent) {
-                hasReceivedContent = true;
-                contentDiv.innerHTML = ''; // 清空載入動畫
-              }
-              
-              fullContent += parsed.content;
-              // 處理換行：將單個換行符轉換成 <br>，確保腳本結構選項能正確換行顯示
-              let processedContent = fullContent;
-              // 如果內容包含連續的腳本結構選項（如 "A. Hook → Value → CTA B. 問題→解決 → 證明"），確保每個選項獨立一行
-              // 檢測模式：字母 + 點號 + 空格 + 內容 + 空格 + 字母 + 點號
-              processedContent = processedContent.replace(/([ABCDE])\.\s+([^ABCDE\n]+?)(?=\s+[ABCDE]\.)/g, '$1. $2\n');
-              
-              if (window.safeRenderMarkdown) {
-                let html = window.safeRenderMarkdown(processedContent);
-                // 確保換行符被轉換成 <br>
-                html = html.replace(/\n/g, '<br>');
-                contentDiv.innerHTML = html;
-              } else if (typeof marked !== 'undefined') {
-                // 確保 marked 的 breaks 選項啟用
-                if (!marked.getDefaults || !marked.getDefaults().breaks) {
-                  marked.setOptions({ breaks: true, gfm: true });
-                }
-                let html = marked.parse(processedContent);
-                // 確保換行符被轉換成 <br>
-                html = html.replace(/\n/g, '<br>');
-                contentDiv.innerHTML = html;
-              } else {
-                // 純文字模式，將換行符轉換成 <br>，並轉義 HTML 防止 XSS
-                const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
-                  if (text == null || text === undefined) return '';
-                  const div = document.createElement('div');
-                  div.textContent = String(text);
-                  return div.innerHTML;
-                });
-                const safeContent = escapeHtml(processedContent).replace(/\n/g, '<br>');
-                contentDiv.innerHTML = safeContent;
-              }
-              
-              // 對代碼塊進行語法高亮
-              if (typeof hljs !== 'undefined') {
-                contentDiv.querySelectorAll('pre code').forEach((block) => {
-                  if (!block.classList.contains('hljs')) {
-                    hljs.highlightElement(block);
-                  }
-                });
-              }
-              
-              chatMessages.scrollTop = chatMessages.scrollHeight;
+            const data = JSON.parse(line.slice(6));
+            if (data.type === 'token' && data.content) {
+              result += data.content;
+              updateResultBlock('positioningContent', result, true);
+            } else if (data.type === 'end') {
+              break;
+            } else if (data.type === 'error') {
+              throw new Error(data.message || '生成失敗');
             }
           } catch (e) {
-            // 忽略解析錯誤
+            console.error('解析錯誤:', e);
           }
         }
       }
     }
     
-  } catch (error) {
-    console.error('發送訊息錯誤:', error);
+    switchTab('positioning');
     
-    // 移除載入動畫
-    if (chatMessages.contains(typingIndicator)) {
-      chatMessages.removeChild(typingIndicator);
+    // 移除自動儲存功能，改由用戶手動決定是否儲存
+    
+  } catch (error) {
+    updateResultBlock('positioningContent', '生成失敗，請稍後再試', false);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('生成帳號定位失敗', 3000);
+    }
+  }
+}
+
+// 生成選題
+async function generateTopics() {
+  // 支援新的按鈕選擇器和舊的下拉選單
+  const platformEl = document.getElementById('platformSelect');
+  const platformBtn = document.querySelector('.button-selector[data-platform].selected');
+  const topicEl = document.getElementById('topicInput');
+  const positioningEl = document.getElementById('positioningInput');
+  
+  const platform = platformBtn ? platformBtn.getAttribute('data-platform') : (platformEl ? platformEl.value : '');
+  const topic = topicEl ? topicEl.value : '';
+  const positioning = positioningEl ? positioningEl.value : '';
+  
+  // 移除帳號定位的前置檢查，允許獨立生成選題
+  // 如果用戶有輸入帳號定位，則使用；如果沒有，則使用空值讓 AI 自行判斷
+  
+  if (!platform) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先選擇平台', 3000);
+    }
+    return;
+  }
+  
+  // 顯示生成中動畫
+  showGeneratingAnimation('topicContent', '正在推薦選題');
+  document.getElementById('topicActions').style.display = 'flex';
+  
+  // 手機版：滾動到頂部（用戶需求設定區域）
+  if (window.innerWidth <= 768) {
+    const settingsBlock = document.querySelector('.settings-block');
+    if (settingsBlock) {
+      settingsBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/api/generate/topics`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ipPlanningToken}`
+      },
+      body: JSON.stringify({
+        message: '請幫我推薦選題',
+        platform: platform,
+        topic: topic,
+        duration: '30',
+        style: styleInstruction,
+        profile: positioning,
+        history: [],
+        user_id: ipPlanningUser?.user_id || null
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error('生成失敗');
     }
     
-    // 顯示錯誤訊息
-    const errorMessage = createMessage('assistant', `抱歉，發生了錯誤：${error.message}`);
-    chatMessages.appendChild(errorMessage);
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let result = '';
+    let generationEnded = false;
+    
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.type === 'token' && data.content) {
+              result += data.content;
+              updateResultBlock('topicContent', result, true);
+            } else if (data.type === 'end') {
+              generationEnded = true;
+              break;
+            } else if (data.type === 'error') {
+              throw new Error(data.message || '生成失敗');
+            }
+          } catch (e) {
+            console.error('解析錯誤:', e);
+          }
+        }
+      }
+        
+      if (generationEnded) break;
+    }
+    
+    switchTab('topics');
+    
+    // 移除自動儲存功能，改由用戶手動決定是否儲存
+    
+  } catch (error) {
+    updateResultBlock('topicContent', '生成失敗，請稍後再試', false);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('生成選題失敗', 3000);
+    }
   }
-  
-  // 恢復輸入框和按鈕
-  if (messageInput) {
-    messageInput.disabled = false;
-    messageInput.value = '';
-    messageInput.style.height = 'auto';
-    autoResizeTextarea();
-  }
-  if (sendBtn) {
-    sendBtn.disabled = false;
-  }
-  
-  // 顯示快速按鈕（確保總是顯示，除非正在發送訊息）
-  if (quickButtons && !isSending) {
-    quickButtons.style.display = 'flex';
-    // 強制顯示，防止被其他樣式覆蓋
-    quickButtons.style.visibility = 'visible';
-    quickButtons.style.opacity = '1';
-  }
-  
-  // 滾動到底部
-  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+
+// 生成腳本
+async function generateScript() {
+  // 支援新的按鈕選擇器和舊的下拉選單
+  const platformEl = document.getElementById('platformSelect');
+  const platformBtn = document.querySelector('.button-selector[data-platform].selected');
+  const topicEl = document.getElementById('topicInput');
+  const positioningEl = document.getElementById('positioningInput');
+  const durationInput = document.getElementById('durationInput');
+  
+  const platform = platformBtn ? platformBtn.getAttribute('data-platform') : (platformEl ? platformEl.value : '');
+  const topic = topicEl ? topicEl.value : '';
+  const positioning = positioningEl ? positioningEl.value : '';
+  
+  // 移除帳號定位和選題的前置檢查，允許獨立生成腳本
+  // 如果用戶有輸入帳號定位或選題，則使用；如果沒有，則使用空值讓 AI 自行判斷
+  
+  if (!platform) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先選擇平台', 3000);
+    }
+    return;
+  }
+  
+  // 檢查是否選擇了腳本結構
+  if (!selectedScriptStructure) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先選擇腳本結構', 3000);
+    }
+    return;
+  }
+  
+  // 顯示生成中動畫
+  showGeneratingAnimation('scriptContent', '正在生成腳本');
+  document.getElementById('scriptActions').style.display = 'flex';
+  
+  // 手機版：滾動到頂部（用戶需求設定區域）
+  if (window.innerWidth <= 768) {
+    const settingsBlock = document.querySelector('.settings-block');
+    if (settingsBlock) {
+      settingsBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+  
+  try {
+    // durationInput 已在函數開頭定義，無需重複定義
+    
+    // 根據選擇的結構生成對應的提示詞
+    const structureMessages = {
+      'A': '請使用標準行銷三段式（Hook → Value → CTA）結構生成完整腳本',
+      'B': '請使用問題 → 解決 → 證明（Problem → Solution → Proof）結構生成完整腳本',
+      'C': '請使用Before → After → 秘密揭露結構生成完整腳本',
+      'D': '請使用教學知識型（迷思 → 原理 → 要點 → 行動）結構生成完整腳本',
+      'E': '請使用故事敘事型（起 → 承 → 轉 → 合）結構生成完整腳本'
+    };
+    
+    const response = await fetch(`${API_URL}/api/generate/script`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ipPlanningToken}`
+      },
+      body: JSON.stringify({
+        message: structureMessages[selectedScriptStructure] || '請幫我生成完整腳本',
+        platform: platform,
+        topic: topic,
+        duration: durationInput ? (durationInput.value || '30').replace('秒', '') : '30',
+        style: styleInstruction,
+        profile: positioning,
+        script_structure: selectedScriptStructure, // 傳遞選中的結構
+        history: [],
+        user_id: ipPlanningUser?.user_id || null
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error('生成失敗');
+    }
+    
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let result = '';
+    
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.type === 'token' && data.content) {
+              result += data.content;
+              updateResultBlock('scriptContent', result, true);
+            } else if (data.type === 'end') {
+              break;
+            } else if (data.type === 'error') {
+              throw new Error(data.message || '生成失敗');
+            }
+          } catch (e) {
+            console.error('解析錯誤:', e);
+          }
+        }
+      }
+    }
+    
+    switchTab('script');
+    
+  } catch (error) {
+    updateResultBlock('scriptContent', '生成失敗，請稍後再試', false);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('生成腳本失敗', 3000);
+    }
+  }
+}
+
+// 儲存結果
+async function saveResult(type) {
+  if (!ipPlanningUser || !ipPlanningUser.user_id) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入', 3000);
+    }
+    return;
+  }
+  
+  let content = '';
+  let contentElement = null;
+  
+  switch(type) {
+    case 'positioning':
+      contentElement = document.getElementById('positioningContent');
+      break;
+    case 'topics':
+      contentElement = document.getElementById('topicContent');
+      break;
+    case 'script':
+      contentElement = document.getElementById('scriptContent');
+      break;
+  }
+  
+  if (contentElement) {
+    content = contentElement.textContent;
+    
+    if (type === 'positioning') {
+      try {
+        const response = await fetch(`${API_URL}/api/user/positioning/save`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${ipPlanningToken}`
+          },
+          body: JSON.stringify({
+            user_id: ipPlanningUser.user_id,
+            content: content
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          // 顯示通知（確保一定會顯示）
+          const showNotification = (message, duration = 3000) => {
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+              window.ReelMindCommon.showToast(message, duration);
+            } else {
+              const toastEl = document.getElementById('toast');
+              if (toastEl) {
+                toastEl.textContent = message;
+                toastEl.style.display = 'block';
+                toastEl.style.opacity = '1';
+                setTimeout(() => {
+                  toastEl.style.opacity = '0';
+                  setTimeout(() => {
+                    toastEl.style.display = 'none';
+                  }, 300);
+                }, duration);
+              } else {
+                alert(message);
+              }
+            }
+          };
+          showNotification(`✅ 帳號定位已儲存（編號：${data.record_number}）`, 3000);
+        } else {
+          throw new Error('儲存失敗');
+        }
+      } catch (error) {
+        console.error('儲存錯誤:', error);
+        // 顯示通知（確保一定會顯示）
+        const showNotification = (message, duration = 3000) => {
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast(message, duration);
+          } else {
+            const toastEl = document.getElementById('toast');
+            if (toastEl) {
+              toastEl.textContent = message;
+              toastEl.style.display = 'block';
+              toastEl.style.opacity = '1';
+              setTimeout(() => {
+                toastEl.style.opacity = '0';
+                setTimeout(() => {
+                  toastEl.style.display = 'none';
+                }, 300);
+              }, duration);
+            } else {
+              alert(message);
+            }
+          }
+        };
+        showNotification('❌ 儲存失敗，請稍後再試', 3000);
+      }
+    } else {
+      localStorage.setItem(`saved_${type}`, content);
+      // 顯示通知（確保一定會顯示）
+      const showNotification = (message, duration = 3000) => {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast(message, duration);
+        } else {
+          const toastEl = document.getElementById('toast');
+          if (toastEl) {
+            toastEl.textContent = message;
+            toastEl.style.display = 'block';
+            toastEl.style.opacity = '1';
+            setTimeout(() => {
+              toastEl.style.opacity = '0';
+              setTimeout(() => {
+                toastEl.style.display = 'none';
+              }, 300);
+            }, duration);
+          } else {
+            alert(message);
+          }
+        }
+      };
+      showNotification(`✅ ${type === 'topics' ? '選題' : '腳本'}已儲存`, 2000);
+    }
+  }
+}
+
+// 儲存腳本
+async function saveScript() {
+  console.log('saveScript() 被調用');
+  
+  // 輔助函數：顯示通知（確保一定會顯示）
+  const showNotification = (message, duration = 3000) => {
+    console.log('顯示通知:', message);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast(message, duration);
+      console.log('使用 ReelMindCommon.showToast');
+    } else {
+      // 備用方案：使用 alert 或創建簡單的 toast
+      const toastEl = document.getElementById('toast');
+      if (toastEl) {
+        toastEl.textContent = message;
+        toastEl.style.display = 'block';
+        toastEl.style.opacity = '1';
+        console.log('使用 toast 元素');
+        setTimeout(() => {
+          toastEl.style.opacity = '0';
+          setTimeout(() => {
+            toastEl.style.display = 'none';
+          }, 300);
+        }, duration);
+      } else {
+        console.log('使用 alert 備用方案');
+        alert(message);
+      }
+    }
+  };
+  
+  if (!ipPlanningUser || !ipPlanningUser.user_id || !ipPlanningToken) {
+    console.log('用戶未登入');
+    showNotification('請先登入', 3000);
+    return;
+  }
+  
+  const content = document.getElementById('scriptContent').textContent;
+  if (!content || content.includes('請點選「一鍵生成腳本」按鈕開始') || content.includes('請先完成')) {
+    console.log('沒有可儲存的內容');
+    showNotification('沒有可儲存的內容', 3000);
+    return;
+  }
+  
+  // 顯示儲存中提示
+  console.log('開始儲存腳本...');
+  showNotification('正在儲存...', 2000);
+  
+  try {
+    const response = await fetch(`${API_URL}/api/scripts/save`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ipPlanningToken}`
+      },
+      body: JSON.stringify({
+        user_id: ipPlanningUser.user_id,
+        content: content,
+        platform: currentPlatform || '未設定',
+        topic: currentTopic || '未設定',
+        profile: currentProfile || '未設定'
+      })
+    });
+    
+    if (response.ok) {
+      const data = await response.json().catch(() => ({}));
+      console.log('腳本儲存成功:', data);
+      showNotification('✅ 腳本儲存成功！', 3000);
+    } else if (response.status === 404) {
+      localStorage.setItem(`saved_script_${Date.now()}`, content);
+      console.log('腳本已儲存到本地（API 不存在）');
+      showNotification('✅ 腳本已儲存到本地！', 3000);
+    } else {
+      const errorData = await response.json().catch(() => ({ error: '儲存失敗' }));
+      console.error('儲存失敗:', errorData);
+      throw new Error(errorData.error || '儲存失敗');
+    }
+  } catch (error) {
+    console.error('Save script error:', error);
+    // 儲存到本地作為備份
+    localStorage.setItem(`saved_script_${Date.now()}`, content);
+    console.log('腳本已儲存到本地（伺服器儲存失敗）');
+    showNotification('⚠️ 腳本已儲存到本地（伺服器儲存失敗）', 3000);
+  }
+}
+
+// 重新生成結果
+async function regenerateResult(type) {
+  // 顯示通知：開始重新生成
+  const showNotification = (message, duration = 3000) => {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast(message, duration);
+    } else {
+      const toastEl = document.getElementById('toast');
+      if (toastEl) {
+        toastEl.textContent = message;
+        toastEl.style.display = 'block';
+        toastEl.style.opacity = '1';
+        setTimeout(() => {
+          toastEl.style.opacity = '0';
+          setTimeout(() => {
+            toastEl.style.display = 'none';
+          }, 300);
+        }, duration);
+      } else {
+        alert(message);
+      }
+    }
+  };
+  
+  const typeNames = {
+    'positioning': '帳號定位',
+    'topics': '選題推薦',
+    'script': '短影音腳本'
+  };
+  
+  showNotification(`正在重新生成${typeNames[type]}...`, 2000);
+  
+  switch(type) {
+    case 'positioning':
+      await generatePositioning();
+      break;
+    case 'topics':
+      await generateTopics();
+      break;
+    case 'script':
+      await generateScript();
+      break;
+  }
+  
+  // 生成完成後顯示通知
+  setTimeout(() => {
+    showNotification(`✅ ${typeNames[type]}已重新生成`, 2000);
+  }, 500);
+}
+
+// 使用 common.js 中的統一函數（已導出到 window）
+// goToLogin, toggleMobileDrawer, openMobileDrawer, closeMobileDrawer 現在都在 common.js 中統一管理
 
