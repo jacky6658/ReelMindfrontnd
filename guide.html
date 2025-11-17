@@ -461,6 +461,9 @@
         transition: all 0.3s;
         border: 1px solid #E2E8F0;
         cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
       }
       
       .guide-article-card:hover {
@@ -470,7 +473,9 @@
       
       .guide-article-card-content {
         padding: 32px;
-        border-bottom: 1px solid #F1F5F9;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
       }
       
       .guide-article-card-title {
@@ -484,11 +489,14 @@
         font-size: 1rem;
         color: #64748B;
         line-height: 1.6;
+        flex: 1;
       }
       
       .guide-article-card-footer {
         padding: 20px 32px;
         background: #F8FAFC;
+        border-top: 1px solid #F1F5F9;
+        margin-top: auto;
       }
       
       .guide-article-card-footer span {
@@ -656,7 +664,7 @@
             <div class="guide-article-card-content">
               <div class="guide-article-card-title">三步生成 30 秒短影音腳本</div>
               <div class="guide-article-card-description">
-                只需三步：設定平台與主題、AI 生成劇本大綱、確認並儲存。本教學將示範完整流程，幫你在 5 分鐘內產出 Instagram Reels 腳本...
+                只需三步：填寫需求資訊、確認並生成、儲存與優化。本教學將示範完整流程，幫你在 5 分鐘內產出完整短影音腳本，適用所有主流平台...
               </div>
             </div>
             <div class="guide-article-card-footer">
@@ -669,7 +677,7 @@
             <div class="guide-article-card-content">
               <div class="guide-article-card-title">AI 帳號定位：內容支柱與 14 天計畫</div>
               <div class="guide-article-card-description">
-                了解如何用 AI 分析你的內容定位，並自動生成 14 天發布計畫。包含內容支柱（教育、娛樂、啟發、成交）與排程建議...
+                透過 ReelMind 的「IP人設規劃」功能，與 AI 深度對話建立個人品牌檔案，自動生成帳號定位、選題方向（內容支柱配比）和一週腳本，打造完整的短影音內容策略...
               </div>
             </div>
             <div class="guide-article-card-footer">
@@ -682,7 +690,7 @@
             <div class="guide-article-card-content">
               <div class="guide-article-card-title">Reels / Shorts / TikTok<br>腳本差異</div>
               <div class="guide-article-card-description">
-                每個平台的短影音都有不同特性：IG Reels 偏重品牌敘事，YouTube Shorts 強調快速爆點，TikTok 重視娛樂性。本指南解析 AI 如何自動調整...
+                每個平台的短影音都有不同特性：IG Reels 偏重品牌敘事，YouTube Shorts 強調快速爆點，TikTok 重視娛樂性。了解平台差異，讓 ReelMind AI 自動為你調整腳本風格...
               </div>
             </div>
             <div class="guide-article-card-footer">
@@ -963,7 +971,7 @@
     </div>
     <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">三步生成 30 秒短影音腳本</h1>
     <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">
-      用 ReelMind 一鍵生成，三步完成 Hook、口播與分鏡。適用 IG Reels / TikTok / YouTube Shorts，含台灣市場在地化語氣建議。
+      用 ReelMind 一鍵生成功能，填寫需求、確認資訊、AI 自動生成完整腳本。適用 IG Reels / TikTok / YouTube Shorts / 小紅書 / Facebook Reels，含台灣市場在地化語氣建議。
     </p>
     <div style="display: flex; gap: 12px; flex-wrap: wrap; color: #64748b; font-size: 12px; margin-top: 8px;">
       <span>閱讀約 6 分鐘</span>
@@ -987,27 +995,39 @@
     <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 28px;">
       <strong style="display: block; margin-bottom: 8px; color: #0f172a;">快速導覽</strong>
       <ol style="margin: 0; padding-left: 20px; color: #334155;">
-        <li><a href="#step1" style="color: #334155; text-decoration: none;">Step 1：設定平台與主題</a></li>
-        <li><a href="#step2" style="color: #334155; text-decoration: none;">Step 2：一鍵生成（Hook／口播／分鏡）</a></li>
-        <li><a href="#step3" style="color: #334155; text-decoration: none;">Step 3：優化與上片（CTA／標題／Hashtag）</a></li>
+        <li><a href="#step1" style="color: #334155; text-decoration: none;">Step 1：填寫需求資訊</a></li>
+        <li><a href="#step2" style="color: #334155; text-decoration: none;">Step 2：確認資訊並生成</a></li>
+        <li><a href="#step3" style="color: #334155; text-decoration: none;">Step 3：儲存、匯出與優化</a></li>
       </ol>
     </div>
 
-    <h2 id="step1" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">Step 1：設定平台與主題</h2>
+    <h2 id="step1" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">Step 1：填寫需求資訊</h2>
     <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
-      在 ReelMind 的「一鍵生成」中，選擇 <strong>IG Reels / TikTok / Shorts</strong>，填入你的主題（產品／服務／風格），以及影片長度（建議 20–45 秒）。
+      在 ReelMind 的「一鍵生成」頁面，填寫以下必填資訊：
     </p>
+    <ul style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      <li><strong>主題或產品</strong>：例如「美白咀嚼錠」、「健身教學」、「美食分享」</li>
+      <li><strong>帳號定位</strong>：目標受眾描述，例如「25-35歲女性、健身新手、上班族」</li>
+      <li><strong>影片目標</strong>：選擇「流量型」（吸粉/破圈）、「轉換型」（帶貨/留資）或「教育型」（建立信任）</li>
+      <li><strong>社群平台</strong>：選擇 TikTok、Instagram Reels、小紅書、YouTube Shorts 或 Facebook Reels</li>
+      <li><strong>腳本秒數</strong>：選擇 15、30、45 或 60 秒</li>
+      <li><strong>腳本結構</strong>：選擇 A（標準行銷三段式）、B（問題→解決→證明）、C（Before→After）、D（教學知識型）或 E（故事敘事型）</li>
+      <li><strong>風格描述</strong>（選填）：可自訂語氣、風格等特殊要求</li>
+    </ul>
     <div style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; padding: 12px 14px; color: #1e3a8a; margin: 14px 0;">
-      小技巧：主題請具體到「族群＋場景＋痛點」（例：上班族／午休／快速備餐）。
+      <strong>小技巧：</strong>主題請具體到「族群＋場景＋痛點」（例：上班族／午休／快速備餐）。帳號定位越詳細，AI 生成的內容越精準。
     </div>
 
-    <h2 id="step2" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">Step 2：一鍵生成（Hook／口播／分鏡）</h2>
-    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">按下「生成」，系統會輸出：</p>
+    <h2 id="step2" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">Step 2：確認資訊並生成</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">填寫完成後，點擊「下一步」進入確認頁面，檢查所有資訊是否正確。確認無誤後，點擊「一鍵生成全部」，系統會同時生成三種內容：</p>
     <ul style="color: #475569; line-height: 1.8;">
-      <li><strong>Hook 開場</strong>：前 3–5 秒抓住注意力（數據／疑問／反差）。</li>
-      <li><strong>口播文字</strong>：一句話一重點，避免冗長。</li>
-      <li><strong>鏡頭指示</strong>：特寫／中景／轉場，搭配動作與表情。</li>
+      <li><strong>帳號定位</strong>：包含目標受眾、傳達目標、帳號定位、內容方向、風格調性、差異化優勢等完整分析</li>
+      <li><strong>選題方向（影片類型配比）</strong>：根據帳號定位生成適合的影片類型、佔比、目的和內容方向建議，以表格形式呈現</li>
+      <li><strong>短影音腳本</strong>：包含 Hook 開場（前 3–5 秒抓住注意力）、口播文字（一句話一重點）、畫面描述（特寫／中景／轉場）和 CTA（行動呼籲）</li>
     </ul>
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px 14px; color: #166534; margin: 14px 0;">
+      <strong>進階功能：</strong>你也可以選擇「個別生成」，依序生成帳號定位、選題方向或腳本，逐步調整和優化。
+    </div>
     <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin: 14px 0; position: relative;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
         <span style="font-size: 14px; font-weight: 600; color: #64748b;">代碼示例</span>
@@ -1021,15 +1041,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
 分鏡：0-5s 開場特寫；5-20s 步驟畫面；20-30s 成品＋CTA</pre>
     </div>
 
-    <h2 id="step3" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">Step 3：優化與上片（CTA／標題／Hashtag）</h2>
-    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">確認節奏後，加入 <strong>CTA</strong>（留言關鍵字、下載清單、私訊連結），並依平台最佳做法調整：</p>
+    <h2 id="step3" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">Step 3：儲存、匯出與優化</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">生成完成後，你可以：</p>
     <ul style="color: #475569; line-height: 1.8;">
-      <li>IG Reels：品牌感與一致視覺。</li>
-      <li>Shorts：強節奏與關鍵字標題。</li>
-      <li>TikTok：娛樂性與互動誘發。</li>
+      <li><strong>儲存結果</strong>：點擊「儲存」按鈕，將生成的內容儲存到「創作者資料庫」，方便日後查看和管理</li>
+      <li><strong>重新生成</strong>：如果對結果不滿意，可以點擊「再換一個」按鈕，讓 AI 生成不同版本的內容</li>
+      <li><strong>個別調整</strong>：可以針對帳號定位、選題方向或腳本進行個別重新生成，直到滿意為止</li>
+      <li><strong>匯出資料</strong>：在「創作者資料庫」中，可以匯出為 Excel 檔案，包含所有生成的內容</li>
     </ul>
     <div style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; padding: 12px 14px; color: #1e3a8a; margin: 14px 0;">
-      若你已訂閱，用「創作者資料庫」下載 PDF/CSV、重生不同版本，持續做 A/B 測試。
+      <strong>上片建議：</strong>腳本中的 CTA（行動呼籲）已根據你選擇的平台特性自動調整。IG Reels 偏重品牌感，Shorts 強調關鍵字標題，TikTok 重視娛樂互動。你可以根據實際情況微調後再上片。
     </div>
 
     <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin: 18px 0;">
@@ -1058,7 +1079,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       <a onclick="backToArticleList(); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
     </div>
     <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">AI 帳號定位：內容支柱與 14 天計畫</h1>
-    <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">建立 ICP 與訊息金字塔 → 內容支柱與矩陣 → Hook/CTA 庫 → 拍攝模板 → 14 天上片日曆 → KPI 與 A/B 實驗 → SEO/GEO 在地化。</p>
+    <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">透過 ReelMind 的「IP人設規劃」功能，與 AI 深度對話建立個人品牌檔案，自動生成帳號定位、選題方向（內容支柱與影片類型配比）和一週腳本，打造完整的短影音內容策略。</p>
     <div style="display: flex; gap: 12px; flex-wrap: wrap; color: #64748b; font-size: 12px; margin-top: 8px;">
       <span>閱讀約 8 分鐘</span>
       <span>適用角色：創作者 / 行銷人 / 老闆</span>
@@ -1077,155 +1098,128 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
     <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 28px;">
       <strong style="display: block; margin-bottom: 8px; color: #0f172a;">快速導覽</strong>
       <ol style="margin: 0; padding-left: 20px; color: #334155;">
-        <li><a href="#icp" style="color: #334155; text-decoration: none;">ICP 與訊息金字塔</a></li>
-        <li><a href="#pillars" style="color: #334155; text-decoration: none;">內容支柱與矩陣</a></li>
-        <li><a href="#hooks" style="color: #334155; text-decoration: none;">Hook / CTA 庫</a></li>
-        <li><a href="#script" style="color: #334155; text-decoration: none;">拍攝腳本模板</a></li>
-        <li><a href="#calendar" style="color: #334155; text-decoration: none;">14 天日曆與每日任務</a></li>
-        <li><a href="#kpi" style="color: #334155; text-decoration: none;">KPI 與 A/B 實驗</a></li>
-        <li><a href="#seo" style="color: #334155; text-decoration: none;">SEO / GEO 在地化</a></li>
-        <li><a href="#prompts" style="color: #334155; text-decoration: none;">可複製的 AI 提示詞</a></li>
+        <li><a href="#start" style="color: #334155; text-decoration: none;">開始對話：使用快速按鈕或自由輸入</a></li>
+        <li><a href="#dialogue" style="color: #334155; text-decoration: none;">深度交流：建立個人品牌檔案</a></li>
+        <li><a href="#generate" style="color: #334155; text-decoration: none;">生成內容：帳號定位、選題方向、一週腳本</a></li>
+        <li><a href="#save" style="color: #334155; text-decoration: none;">儲存與管理：查看歷史、匯出資料</a></li>
+        <li><a href="#tips" style="color: #334155; text-decoration: none;">使用技巧與最佳實踐</a></li>
       </ol>
     </div>
 
-    <h2 id="icp" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">一、ICP 與訊息金字塔</h2>
+    <h2 id="start" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">一、開始對話：使用快速按鈕或自由輸入</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      進入「IP人設規劃」頁面後，你可以使用以下方式開始與 AI 對話：
+    </p>
     <div style="display:grid; gap:14px; grid-template-columns:1fr;">
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
-        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">1) ICP（Ideal Customer Profile）</h3>
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">快速按鈕（推薦新手）</h3>
         <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
-          <li><b>族群</b>：年齡 / 地區（台灣北中南）/ 身分（上班族、自由工作者）</li>
-          <li><b>情境</b>：通勤、午休、下班後剪片、週末批量拍攝</li>
-          <li><b>痛點</b>：無法穩定上片、腳本卡關、轉換率低</li>
-          <li><b>期望</b>：每週 3 支、30 秒腳本、導流到 IG/Line</li>
+          <li><b>IP Profile</b>：快速建立個人品牌檔案，AI 會詢問你的背景、專長、價值觀</li>
+          <li><b>14天規劃</b>：直接生成 14 天短影音發布計畫</li>
+          <li><b>今日腳本</b>：生成今天可以拍攝的 3 支腳本</li>
+          <li><b>換腳本結構</b>：改變腳本的敘事結構（A/B/C/D/E）</li>
+          <li><b>重新定位</b>：完全重置對話，開始全新的帳號定位</li>
         </ul>
       </div>
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
-        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">2) 訊息金字塔</h3>
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">自由輸入（進階用戶）</h3>
+        <p style="color:#475569; line-height:1.8; margin:10px 0;">你也可以直接在輸入框輸入任何問題或想法，與 AI 進行自然對話。建議分享：</p>
         <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
-          <li><b>品牌主張</b>：用 AI 把短影音變成可複製的系統</li>
-          <li><b>價值證明</b>：一鍵生成腳本、IP 人設、資料庫與 A/B</li>
-          <li><b>功能說明</b>：Hook/CTA 模板、14 天節奏、在地化語氣</li>
+          <li>你的專業經驗、成就和獨特見解</li>
+          <li>你的價值觀、人生目標和想傳達的訊息</li>
+          <li>你的個性、溝通風格和內容調性</li>
+          <li>你的目標受眾和想解決的問題</li>
         </ul>
       </div>
     </div>
 
-    <h2 id="pillars" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">二、內容支柱與矩陣</h2>
+    <h2 id="dialogue" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">二、深度交流：建立個人品牌檔案</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      建議進行 5-10 輪對話，讓 AI 充分了解你的個人特色。對話越深入，AI 生成的內容越精準。AI 會記住你之前說過的內容（長期記憶），所以不需要重複說明。
+    </p>
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px 14px; color: #166534; margin: 14px 0;">
+      <strong>對話建議：</strong>分享你的專業經驗、價值觀、個性特質、目標受眾和內容方向。AI 會根據這些資訊建立你的個人品牌檔案。
+    </div>
+    
+    <h2 id="generate" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">三、生成內容：帳號定位、選題方向、一週腳本</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      對話完成後，點擊右上角的「生成結果」按鈕，開啟彈出視窗。視窗中有兩個標籤：
+    </p>
     <div style="display:grid; gap:14px; grid-template-columns:1fr;">
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
-        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">支柱 × 目標</h3>
-        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
-          <li><b>教育</b>：教方法 / 拆步驟（建立專業感）</li>
-          <li><b>娛樂</b>：反差 / 梗化 / 快節奏（擴觸及）</li>
-          <li><b>啟發</b>：故事 / 心法 / 轉折（情感連結）</li>
-          <li><b>成交</b>：案例 / 規劃 / CTA（導流轉換）</li>
-        </ul>
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">過往紀錄</h3>
+        <p style="color:#475569; line-height:1.8; margin:10px 0;">查看之前生成的所有內容，包括帳號定位、選題方向和一週腳本。可以重新查看、儲存或匯出。</p>
       </div>
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
-        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">內容矩陣建議</h3>
-        <p style="color:#475569; line-height:1.8; margin:10px 0;">橫軸：支柱；縱軸：形式（口播 / 開箱 / 錄幕 / 重演 / 清單）。完成 4×5 矩陣＝20 題，足夠兩週上片。</p>
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">一鍵生成</h3>
+        <p style="color:#475569; line-height:1.8; margin:10px 0;">生成新的內容。你可以：</p>
+        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
+          <li><b>一鍵生成全部</b>：同時生成帳號定位、選題方向、一週腳本三個內容</li>
+          <li><b>個別生成</b>：依序生成帳號定位、選題方向或一週腳本，逐步調整</li>
+        </ul>
       </div>
     </div>
-
-    <h2 id="hooks" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">三、Hook / CTA 庫（可直接套用）</h2>
+    
+    <h3 style="font-size: 18px; margin: 18px 0 6px; color: #0f172a; font-weight: 700;">生成內容說明</h3>
     <div style="display:grid; gap:14px; grid-template-columns:1fr;">
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
-        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">20 種 Hook 模板</h3>
+        <h4 style="font-size:16px;margin:0 0 6px;color:#0f172a;">帳號定位</h4>
+        <p style="color:#475569; line-height:1.8; margin:10px 0;">包含目標受眾、傳達目標、帳號定位、內容方向、風格調性、差異化優勢等完整分析</p>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h4 style="font-size:16px;margin:0 0 6px;color:#0f172a;">選題方向（影片類型配比）</h4>
+        <p style="color:#475569; line-height:1.8; margin:10px 0;">根據帳號定位生成適合的影片類型、佔比、目的和內容方向建議，以表格形式呈現。包含教育、娛樂、啟發、成交四大內容支柱的配比建議</p>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h4 style="font-size:16px;margin:0 0 6px;color:#0f172a;">一週腳本</h4>
+        <p style="color:#475569; line-height:1.8; margin:10px 0;">生成一週 7 天的短影音腳本，包含主題、開場鉤子（Hook）、核心內容、行動呼籲（CTA）、畫面描述和發佈文案</p>
+      </div>
+    </div>
+    
+    <h2 id="save" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">四、儲存與管理：查看歷史、匯出資料</h2>
+    <p style="color: #475569; line-height: 1.8; margin: 10px 0;">生成完成後，你可以：</p>
+    <ul style="color: #475569; line-height: 1.8; margin: 10px 0;">
+      <li><strong>儲存結果</strong>：點擊「儲存」按鈕，將內容儲存到「創作者資料庫」的「IP人設規劃結果」中</li>
+      <li><strong>重新生成</strong>：如果對結果不滿意，可以點擊「再換一個」按鈕，讓 AI 生成不同版本</li>
+      <li><strong>查看歷史</strong>：在「過往紀錄」標籤中查看所有之前生成的內容</li>
+      <li><strong>匯出資料</strong>：在「創作者資料庫」中，可以匯出為 Excel 檔案，包含所有生成的內容</li>
+    </ul>
+    <div style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; padding: 12px 14px; color: #1e3a8a; margin: 14px 0;">
+      <strong>自動儲存功能：</strong>在對話中說「儲存」或「保存」，AI 會自動將生成的內容儲存到創作者資料庫。
+    </div>
+    
+    <h2 id="tips" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">五、使用技巧與最佳實踐</h2>
+    <div style="display:grid; gap:14px; grid-template-columns:1fr;">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">對話技巧</h3>
         <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
-          <li>反差：其實我一開始是失敗的…</li>
-          <li>數據：用 30 秒學會 X，至少快 5 倍</li>
-          <li>清單：這 3 件事讓我上片率翻倍</li>
-          <li>錯誤：你可能一直做錯了</li>
-          <li>提問：3 秒內告訴我，你會選哪個？</li>
-          <li>挑戰：我用 7 天證明一件事</li>
-          <li>祕技：99% 人忽略的設定</li>
-          <li>拆解：把 X 拆成 3 步</li>
-          <li>對比：沒有 AI v.s. 有 AI</li>
-          <li>故事：我在北車地下街學到的…</li>
+          <li>首次使用建議進行 5-10 輪對話，讓 AI 充分了解你的背景</li>
+          <li>分享具體的經驗和故事，而不是抽象的概念</li>
+          <li>如果 AI 生成的內容不符合預期，可以繼續對話調整</li>
+          <li>使用「重新定位」快速按鈕可以完全重置對話，開始全新的定位</li>
         </ul>
       </div>
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
-        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">CTA 範本（台灣語氣）</h3>
+        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">生成策略</h3>
         <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
-          <li>留言關鍵字：「<b>腳本</b>」，我把清單傳給你</li>
-          <li>導流：想要模板？點簡介連結下載</li>
-          <li>互動：你會選 A 還是 B？留言告訴我</li>
-          <li>收藏：這招很實用，先存起來</li>
+          <li>先使用「一鍵生成全部」快速取得完整規劃，再根據需要個別調整</li>
+          <li>如果對某個部分不滿意，可以只重新生成該部分（帳號定位、選題方向或一週腳本）</li>
+          <li>生成的內容會根據你的對話內容自動調整，對話越深入，結果越精準</li>
+          <li>所有生成的內容都會保存在「過往紀錄」中，方便日後查看和比較</li>
         </ul>
       </div>
     </div>
-
-    <h2 id="script" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">四、拍攝腳本模板</h2>
-    <div style="display:grid; gap:14px; grid-template-columns:1fr 1fr; max-width:100%;">
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
-        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">口播（SOV）</h3>
-        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
-          <li>0–3s Hook（反差/數據/提問）</li>
-          <li>3–20s 步驟 1/2/3（每步 5–7 秒）</li>
-          <li>20–27s 成果畫面（前/後對比）</li>
-          <li>27–30s CTA（單一行動）</li>
-        </ul>
-      </div>
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
-        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">B-Roll 清單</h3>
-        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
-          <li>器材特寫、手部操作、畫面跳切</li>
-          <li>螢幕錄影（快捷鍵顯示）</li>
-          <li>表情反應鏡頭、點頭、指點</li>
-          <li>城市/通勤情境做轉場</li>
-        </ul>
-      </div>
-    </div>
-
-    <h2 id="calendar" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">五、14 天日曆與每日任務</h2>
-    <div style="display:grid; gap:14px; grid-template-columns:1fr 1fr; max-width:100%;">
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
-        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">日曆（建議時段：12:00 / 20:00）</h3>
-        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
-          <li><b>Day 1–2：</b>受眾/支柱確認＋題庫 20 題</li>
-          <li><b>Day 3–4：</b>一鍵生成腳本 8 支</li>
-          <li><b>Day 5–6：</b>錄影＋剪輯</li>
-          <li><b>Day 7：</b>上片 2 支＋記錄數據</li>
-          <li><b>Day 8–9：</b>再產 8 支（優化 Hook）</li>
-          <li><b>Day 10–11：</b>錄影＋剪輯（批量）</li>
-          <li><b>Day 12–13：</b>上片 4 支＋A/B 測試</li>
-          <li><b>Day 14：</b>匯總與題目準備</li>
-        </ul>
-      </div>
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
-        <h3 style="font-size:18px;margin:0 0 6px;color:#0f172a;">每日任務（15–30 分鐘）</h3>
-        <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
-          <li>10 分鐘選題＋腳本微調</li>
-          <li>10 分鐘回覆留言、蒐集痛點</li>
-          <li>5 分鐘記錄：播放 / 完播 / 互動</li>
-          <li>每晚安排明日素材（服裝、場景）</li>
-        </ul>
-      </div>
-    </div>
-
-    <h2 id="kpi" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">六、KPI 與 A/B 實驗</h2>
-    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
-      <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
-        <li>完播率 ≥ 35%（30 秒片）</li>
-        <li>3 秒留存 ≥ 70%</li>
-        <li>互動率 ≥ 3%（按讚+留言+收藏 / 觀看）</li>
-        <li>每輪只改「一件事」，記錄版本差異</li>
+    
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:18px;padding:16px;margin:14px 0;">
+      <h3 style="font-size:18px;margin:0 0 6px;color:#166534;">內容支柱與影片類型配比</h3>
+      <p style="color:#166534; line-height:1.8; margin:10px 0;">AI 生成的選題方向會包含四大內容支柱的配比建議：</p>
+      <ul style="margin:0; padding-left:20px; color:#166534; line-height:1.8;">
+        <li><b>教育</b>：教方法 / 拆步驟（建立專業感）</li>
+        <li><b>娛樂</b>：反差 / 梗化 / 快節奏（擴觸及）</li>
+        <li><b>啟發</b>：故事 / 心法 / 轉折（情感連結）</li>
+        <li><b>成交</b>：案例 / 規劃 / CTA（導流轉換）</li>
       </ul>
-    </div>
-
-    <h2 id="seo" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">七、SEO / GEO 在地化（繁中）</h2>
-    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
-      <ul style="margin:0; padding-left:20px; color:#475569; line-height:1.8;">
-        <li>保留台灣口語（例：先存起來、這招）</li>
-        <li>標題含關鍵詞：平台＋動詞＋目標</li>
-        <li>描述前 80 字放主關鍵詞＋CTA；Hashtag 3–7 個</li>
-      </ul>
-    </div>
-
-    <h2 id="prompts" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">八、可複製的 AI 提示詞</h2>
-    <div style="background:#0f172a;color:#fff;border-radius:12px;padding:12px;overflow:auto;">
-系統：你是短影音腳本教練，輸出繁中（台灣），字數精煉。
-使用者：平台＝IG Reels；支柱＝教育；題目＝「租屋房間也能拍出清晰人像」；長度＝30 秒。
-請輸出：1) Hook 3 種 2) 口播逐句 3) 分鏡（SOV/B-roll/字幕）4) 單一 CTA（留言關鍵字）。
+      <p style="color:#166534; line-height:1.8; margin:10px 0 0 0;">AI 會根據你的帳號定位自動計算最適合的配比，並以表格形式呈現每種影片類型的建議佔比、目的和內容方向。</p>
     </div>
 
     <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin: 18px 0;">
@@ -1346,28 +1340,28 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           </tr>
           <tr style="background:#0f172a;">
             <td style="padding:10px 12px; font-weight:700; color:#3b82f6;">結構 A</td>
-            <td style="padding:10px 12px;">開場吸引 + 問題提出 + 解決方案</td>
-            <td style="padding:10px 12px;">教學類、知識分享</td>
+            <td style="padding:10px 12px;">標準行銷三段式（Hook → Value → CTA）</td>
+            <td style="padding:10px 12px;">產品推廣、行銷內容</td>
           </tr>
           <tr style="background:#111827;">
             <td style="padding:10px 12px; font-weight:700; color:#10b981;">結構 B</td>
-            <td style="padding:10px 12px;">故事敘述 + 轉折點 + 啟發</td>
-            <td style="padding:10px 12px;">品牌故事、個人經歷</td>
+            <td style="padding:10px 12px;">問題→解決→證明（Problem → Solution → Proof）</td>
+            <td style="padding:10px 12px;">教育內容、建立信任、教學類</td>
           </tr>
           <tr style="background:#0f172a;">
             <td style="padding:10px 12px; font-weight:700; color:#f59e0b;">結構 C</td>
-            <td style="padding:10px 12px;">快速列點 + 重點強調 + CTA</td>
-            <td style="padding:10px 12px;">產品介紹、功能說明</td>
+            <td style="padding:10px 12px;">Before→After（視覺反差）</td>
+            <td style="padding:10px 12px;">效果展示、爆量內容</td>
           </tr>
           <tr style="background:#111827;">
             <td style="padding:10px 12px; font-weight:700; color:#ef4444;">結構 D</td>
-            <td style="padding:10px 12px;">對比呈現 + 優勢分析 + 行動呼籲</td>
-            <td style="padding:10px 12px;">比較類、說服型內容</td>
+            <td style="padding:10px 12px;">教學知識型（迷思→原理→要點→行動）</td>
+            <td style="padding:10px 12px;">知識科普、深度教學</td>
           </tr>
           <tr style="background:#0f172a;">
             <td style="padding:10px 12px; font-weight:700; color:#8b5cf6;">結構 E</td>
-            <td style="padding:10px 12px;">互動開場 + 共鳴點 + 深度內容</td>
-            <td style="padding:10px 12px;">社群互動、討論型</td>
+            <td style="padding:10px 12px;">故事敘事型（起→承→轉→合）</td>
+            <td style="padding:10px 12px;">品牌故事、個人經歷、情感連結</td>
           </tr>
         </table>
       </div>
@@ -1375,54 +1369,54 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
 
     <section style="display:grid; gap:14px; grid-template-columns:1fr; margin-top:14px;">
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
-        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#dbeafe;border:1px solid #bfdbfe;color:#2563eb;font-weight:800;font-size:12px;margin-bottom:6px;">結構 A：教學型</span>
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#dbeafe;border:1px solid #bfdbfe;color:#2563eb;font-weight:800;font-size:12px;margin-bottom:6px;">結構 A：標準行銷三段式</span>
         <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">結構</div>
+        <p style="color:#475569;">Hook（開場吸引）→ Value（價值呈現）→ CTA（行動呼籲）</p>
         <div style="font-weight:700;color:#0f172a;">適用內容</div>
-        <p style="color:#475569;">知識分享、技能教學、步驟說明、工具介紹</p>
-        <div style="font-weight:700;color:#0f172a;">範例</div>
-        <p style="color:#475569;">「3 個步驟讓你學會...」、「30 秒教會你...」</p>
+        <p style="color:#475569;">產品推廣、服務介紹、行銷內容</p>
       </div>
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
-        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#d1fae5;border:1px solid #a7f3d0;color:#059669;font-weight:800;font-size:12px;margin-bottom:6px;">結構 B：故事型</span>
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#d1fae5;border:1px solid #a7f3d0;color:#059669;font-weight:800;font-size:12px;margin-bottom:6px;">結構 B：問題→解決→證明</span>
         <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">結構</div>
+        <p style="color:#475569;">Problem（問題提出）→ Solution（解決方案）→ Proof（證明效果）</p>
         <div style="font-weight:700;color:#0f172a;">適用內容</div>
-        <p style="color:#475569;">個人經歷、品牌故事、成功案例、轉折故事</p>
-        <div style="font-weight:700;color:#0f172a;">範例</div>
-        <p style="color:#475569;">「我曾經也遇到這個問題，直到我發現...」</p>
+        <p style="color:#475569;">教育內容、建立信任、教學類、知識分享</p>
       </div>
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
-        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#fef3c7;border:1px solid #fde68a;color:#d97706;font-weight:800;font-size:12px;margin-bottom:6px;">結構 C：列點型</span>
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#fef3c7;border:1px solid #fde68a;color:#d97706;font-weight:800;font-size:12px;margin-bottom:6px;">結構 C：Before→After</span>
         <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">結構</div>
+        <p style="color:#475569;">Before（改變前）→ After（改變後）→ 秘密揭露</p>
         <div style="font-weight:700;color:#0f172a;">適用內容</div>
-        <p style="color:#475569;">產品功能、特色介紹、清單式內容、快速資訊</p>
-        <div style="font-weight:700;color:#0f172a;">範例</div>
-        <p style="color:#475569;">「5 個你必須知道的...」、「這 3 個功能改變了我...」</p>
+        <p style="color:#475569;">效果展示、視覺反差、爆量內容、轉變故事</p>
       </div>
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
-        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#fee2e2;border:1px solid #fecaca;color:#dc2626;font-weight:800;font-size:12px;margin-bottom:6px;">結構 D：對比型</span>
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#fee2e2;border:1px solid #fecaca;color:#dc2626;font-weight:800;font-size:12px;margin-bottom:6px;">結構 D：教學知識型</span>
         <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">結構</div>
+        <p style="color:#475569;">迷思（常見誤解）→ 原理（核心知識）→ 要點（關鍵步驟）→ 行動（實際應用）</p>
         <div style="font-weight:700;color:#0f172a;">適用內容</div>
-        <p style="color:#475569;">產品比較、方法對比、前後差異、優劣分析</p>
-        <div style="font-weight:700;color:#0f172a;">範例</div>
-        <p style="color:#475569;">「這樣做 vs 那樣做，差別在哪裡？」</p>
+        <p style="color:#475569;">知識科普、深度教學、專業內容、技能傳授</p>
       </div>
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
-        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#ede9fe;border:1px solid #ddd6fe;color:#7c3aed;font-weight:800;font-size:12px;margin-bottom:6px;">結構 E：互動型</span>
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#ede9fe;border:1px solid #ddd6fe;color:#7c3aed;font-weight:800;font-size:12px;margin-bottom:6px;">結構 E：故事敘事型</span>
         <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+        <div style="font-weight:700;color:#0f172a;">結構</div>
+        <p style="color:#475569;">起（開場）→ 承（發展）→ 轉（轉折）→ 合（結局/啟發）</p>
         <div style="font-weight:700;color:#0f172a;">適用內容</div>
-        <p style="color:#475569;">討論話題、觀點分享、問答互動、共鳴內容</p>
-        <div style="font-weight:700;color:#0f172a;">範例</div>
-        <p style="color:#475569;">「你有沒有想過...」、「我發現一個有趣的現象...」</p>
+        <p style="color:#475569;">品牌故事、個人經歷、情感連結、共鳴內容</p>
       </div>
     </section>
 
     <section style="margin-top:28px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:20px;">
       <h2 style="font-size: 20px; margin: 0 0 12px; color:#0f172a;">二、如何選擇適合的結構？</h2>
       <div style="color:#475569; line-height:1.8;">
-        <p style="margin:0 0 12px;"><strong>1. 根據內容目標：</strong>教學選 A、故事選 B、產品選 C、比較選 D、互動選 E</p>
-        <p style="margin:0 0 12px;"><strong>2. 根據目標受眾：</strong>專業人士偏好 A/C，一般用戶偏好 B/E，決策者偏好 D</p>
-        <p style="margin:0 0 12px;"><strong>3. 根據平台特性：</strong>Reels 適合 B/E，Shorts 適合 A/C，TikTok 適合 E/D</p>
-        <p style="margin:0;"><strong>4. 測試與優化：</strong>可以嘗試不同結構，觀察哪種效果最好</p>
+        <p style="margin:0 0 12px;"><strong>1. 根據內容目標：</strong>產品推廣選 A、教育內容選 B、效果展示選 C、知識科普選 D、故事敘事選 E</p>
+        <p style="margin:0 0 12px;"><strong>2. 根據影片目標：</strong>轉換型（帶貨/留資）適合 A/C，教育型（建立信任）適合 B/D，流量型（吸粉/破圈）適合 C/E</p>
+        <p style="margin:0 0 12px;"><strong>3. 根據平台特性：</strong>Reels 適合 A/B/E，Shorts 適合 A/C/D，TikTok 適合 C/E</p>
+        <p style="margin:0;"><strong>4. 測試與優化：</strong>在 ReelMind 中生成不同結構的腳本，觀察哪種效果最好，持續優化</p>
       </div>
     </section>
 
