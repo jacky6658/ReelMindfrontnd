@@ -535,6 +535,7 @@
         padding: 24px;
         box-shadow: 0 1px 3px var(--shadow);
         transition: background-color 0.3s ease;
+        display: block; /* 桌面版顯示 */
       }
       
       .db-section {
@@ -1037,15 +1038,11 @@
           margin-bottom: 20px;
           border-radius: 12px;
           max-width: 100%;
+          display: block !important; /* 確保手機版顯示 */
         }
         
         .user-db-content {
-          width: 100%;
-          max-width: 100%;
-          overflow-x: hidden;
-          overflow-y: auto;
-          -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
-          overscroll-behavior: contain; /* 防止滾動穿透 */
+          display: none !important; /* 手機版隱藏內容區域 */
         }
         
         .db-section {
@@ -1053,6 +1050,87 @@
           overflow-x: hidden;
           overflow-y: auto;
           -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
+        }
+        
+        /* 手機版彈跳視窗樣式 */
+        .userdb-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          display: none;
+          justify-content: center;
+          align-items: center;
+          z-index: 10000;
+          padding: 20px;
+          box-sizing: border-box;
+          -webkit-overflow-scrolling: touch;
+        }
+        
+        .userdb-modal-overlay.show {
+          display: flex;
+        }
+        
+        .userdb-modal-content {
+          background: white;
+          border-radius: 12px;
+          max-width: 95%;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+          position: relative;
+          width: 100%;
+          -webkit-overflow-scrolling: touch;
+        }
+        
+        .userdb-modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px 24px;
+          border-bottom: 1px solid #e5e7eb;
+          position: sticky;
+          top: 0;
+          background: white;
+          z-index: 1;
+          border-radius: 12px 12px 0 0;
+        }
+        
+        .userdb-modal-title {
+          margin: 0;
+          color: #1f2937;
+          font-size: 20px;
+          font-weight: 600;
+        }
+        
+        .userdb-modal-close {
+          background: none;
+          border: none;
+          font-size: 28px;
+          cursor: pointer;
+          color: #6b7280;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 4px;
+          transition: background 0.2s;
+          -webkit-tap-highlight-color: transparent;
+          touch-action: manipulation;
+        }
+        
+        .userdb-modal-close:hover {
+          background: #f3f4f6;
+        }
+        
+        .userdb-modal-body {
+          padding: 24px;
+          overflow-y: auto;
+          max-height: calc(90vh - 80px);
+          -webkit-overflow-scrolling: touch;
         }
         
         .section-content {
@@ -1250,7 +1328,7 @@
           <span class="mobile-drawer-icon"><i class="fas fa-comments"></i></span>
           <span class="mobile-drawer-text">論壇介紹</span>
         </a>
-        <a href="guide.html" class="mobile-drawer-item" onclick="closeMobileDrawer(); return false;">
+        <a href="guide.html" class="mobile-drawer-item" onclick="window.location.href='guide.html'; closeMobileDrawer(); return false;">
           <span class="mobile-drawer-icon"><i class="fas fa-book-open"></i></span>
           <span class="mobile-drawer-text">實戰指南</span>
         </a>
@@ -1320,6 +1398,19 @@
             </div>
           </nav>
         </div>
+        <!-- 手機版彈跳視窗 -->
+        <div class="userdb-modal-overlay" id="userdbModalOverlay">
+          <div class="userdb-modal-content" onclick="event.stopPropagation();">
+            <div class="userdb-modal-header">
+              <h3 class="userdb-modal-title" id="userdbModalTitle">標題</h3>
+              <button class="userdb-modal-close" onclick="closeUserDbModal()">×</button>
+            </div>
+            <div class="userdb-modal-body" id="userdbModalBody">
+              <p>載入中...</p>
+            </div>
+          </div>
+        </div>
+        
         <!-- 右側內容區域 -->
         <div class="user-db-content">
           <!-- 個人資料 -->
@@ -1985,6 +2076,142 @@
         }
       }
       
+      // 處理選單點擊（手機版用彈跳視窗，桌面版用原有方式）
+      function handleMenuClick(sectionName) {
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+          // 手機版：顯示彈跳視窗
+          openUserDbModal(sectionName);
+        } else {
+          // 桌面版：使用原有方式
+          showDbSection(sectionName);
+        }
+      }
+      
+      // 打開彈跳視窗
+      function openUserDbModal(sectionName) {
+        const overlay = document.getElementById('userdbModalOverlay');
+        const titleEl = document.getElementById('userdbModalTitle');
+        const bodyEl = document.getElementById('userdbModalBody');
+        
+        if (!overlay || !titleEl || !bodyEl) return;
+        
+        // 設置標題
+        const titleMap = {
+          'personalInfo': '個人資料',
+          'myScripts': '我的腳本',
+          'accountPositioning': '帳號定位',
+          'topicRecords': '選題內容',
+          'ipPlanning': 'IP人設規劃',
+          'myOrders': '我的訂單',
+          'settings': '設定',
+          'usageStats': '使用統計',
+          'helpCenter': '幫助中心'
+        };
+        titleEl.textContent = titleMap[sectionName] || '內容';
+        
+        // 更新選單項的 active 狀態
+        document.querySelectorAll('.menu-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        const targetMenuItem = document.querySelector(`[onclick="handleMenuClick('${sectionName}')"]`);
+        if (targetMenuItem) {
+          targetMenuItem.classList.add('active');
+        }
+        
+        // 載入內容
+        bodyEl.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; padding: 40px;"><div class="spinner" style="width: 24px; height: 24px; border: 3px solid #e5e7eb; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;"></div></div>';
+        
+        // 獲取對應的內容區域
+        const targetSection = document.getElementById(`db-${sectionName}`);
+        if (targetSection) {
+          // 先顯示內容區域（臨時）以獲取內容
+          targetSection.style.display = 'block';
+          const sectionContent = targetSection.querySelector('.section-content');
+          
+          // 載入數據
+          const loadContent = async () => {
+            try {
+              switch(sectionName) {
+                case 'personalInfo':
+                  await loadPersonalInfoForUserDB();
+                  break;
+                case 'myScripts':
+                  await loadMyScriptsForUserDB();
+                  break;
+                case 'settings':
+                  loadSavedApiKey();
+                  // 等待一下讓內容渲染
+                  await new Promise(resolve => setTimeout(resolve, 100));
+                  break;
+                case 'accountPositioning':
+                  await loadPositioningRecordsForUserDB();
+                  break;
+                case 'topicRecords':
+                  await loadTopicHistoryForUserDB();
+                  break;
+                case 'ipPlanning':
+                  await loadIpPlanningResultsForUserDB();
+                  break;
+                case 'myOrders':
+                  await loadMyOrdersForUserDB();
+                  break;
+                case 'usageStats':
+                  await loadUsageStatsForUserDB();
+                  break;
+                case 'helpCenter':
+                  // 幫助中心內容已在HTML中定義，無需動態載入
+                  break;
+              }
+              
+              // 等待內容渲染後再複製
+              await new Promise(resolve => setTimeout(resolve, 200));
+              
+              if (sectionContent) {
+                bodyEl.innerHTML = sectionContent.innerHTML;
+              }
+            } catch (error) {
+              console.error('載入內容失敗:', error);
+              bodyEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #ef4444;">載入失敗，請稍後再試</div>';
+            } finally {
+              targetSection.style.display = 'none';
+            }
+          };
+          
+          loadContent();
+        }
+        
+        // 顯示彈跳視窗
+        overlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        
+        // 點擊背景關閉
+        overlay.onclick = function(e) {
+          if (e.target === overlay) {
+            closeUserDbModal();
+          }
+        };
+        
+        // ESC 鍵關閉
+        const handleEsc = (e) => {
+          if (e.key === 'Escape') {
+            closeUserDbModal();
+            document.removeEventListener('keydown', handleEsc);
+          }
+        };
+        document.addEventListener('keydown', handleEsc);
+      }
+      
+      // 關閉彈跳視窗
+      function closeUserDbModal() {
+        const overlay = document.getElementById('userdbModalOverlay');
+        if (overlay) {
+          overlay.classList.remove('show');
+          document.body.style.overflow = '';
+        }
+      }
+      
       // 初始化頁面
       document.addEventListener('DOMContentLoaded', async () => {
         // 檢查登入狀態（創作者資料庫允許未訂閱用戶訪問，至少可查看個人資訊和登出）
@@ -2011,7 +2238,16 @@
         updateUserInfo();
         
         // 載入個人資料（預設顯示）
-        loadPersonalInfoForUserDB();
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+          // 手機版：預設打開個人資料彈跳視窗
+          setTimeout(() => {
+            openUserDbModal('personalInfo');
+          }, 300);
+        } else {
+          // 桌面版：使用原有方式
+          loadPersonalInfoForUserDB();
+        }
         
         // 如果沒有用戶資訊但有 token，嘗試獲取
         if (ipPlanningToken && (!ipPlanningUser || !ipPlanningUser.user_id)) {

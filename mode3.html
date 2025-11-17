@@ -354,12 +354,17 @@
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          position: fixed;
+          left: 50%;
+          top: calc(12px + var(--safe-area-inset-top, 0px) + 18px);
+          transform: translateX(-50%);
           text-align: center;
-          justify-self: center;
-          grid-column: 2;
-          width: 100%;
-          max-width: 100%;
+          pointer-events: auto;
+          z-index: 1001;
+          width: auto;
+          max-width: 200px;
         }
+        
         
         .navbar-right {
           display: flex;
@@ -664,6 +669,9 @@
       @media (max-width: 768px) {
         .step-card {
           padding: 16px;
+          max-width: 95%;
+          margin-left: auto;
+          margin-right: auto;
         }
         
         .step-card-header {
@@ -1544,6 +1552,70 @@
         background: #d97706;
         border-color: #d97706;
       }
+      
+      /* Toast 通知樣式（與首頁一致） */
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        font-size: 14px;
+        max-width: 300px;
+        word-wrap: break-word;
+        display: none;
+      }
+      
+      .theme-dark .toast {
+        background: #10b981 !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+      }
+      
+      .toast.show {
+        animation: slideIn 0.3s ease-out;
+        display: block;
+      }
+      
+      .toast.hide {
+        animation: slideOut 0.3s ease-in;
+      }
+      
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .toast {
+          top: 10px;
+          right: 10px;
+          left: 10px;
+          max-width: none;
+          font-size: 13px;
+        }
+      }
     </style>
     
     <!-- 共享 JavaScript（必須按順序載入） -->
@@ -1606,7 +1678,7 @@
           <span class="mobile-drawer-icon"><i class="fas fa-comments"></i></span>
           <span class="mobile-drawer-text">論壇介紹</span>
         </a>
-        <a href="guide.html" class="mobile-drawer-item" onclick="closeMobileDrawer(); return false;">
+        <a href="guide.html" class="mobile-drawer-item" onclick="window.location.href='guide.html'; closeMobileDrawer(); return false;">
           <span class="mobile-drawer-icon"><i class="fas fa-book-open"></i></span>
           <span class="mobile-drawer-text">實戰指南</span>
         </a>

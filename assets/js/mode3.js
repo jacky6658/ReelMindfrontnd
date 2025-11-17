@@ -1506,39 +1506,27 @@ async function saveResult(type) {
               }
             }
           };
-          showNotification(`✅ 帳號定位已儲存（編號：${data.record_number}）`, 3000);
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast(`✅ 帳號定位已儲存（編號：${data.record_number}）`, 3000);
+          } else {
+            showToastNotification(`✅ 帳號定位已儲存（編號：${data.record_number}）`, 3000);
+          }
         } else {
           throw new Error('儲存失敗');
         }
       } catch (error) {
         console.error('儲存錯誤:', error);
-        // 顯示通知（確保一定會顯示）
-        const showNotification = (message, duration = 3000) => {
-          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast(message, duration);
-          } else {
-            const toastEl = document.getElementById('toast');
-            if (toastEl) {
-              toastEl.textContent = message;
-              toastEl.style.display = 'block';
-              toastEl.style.opacity = '1';
-              setTimeout(() => {
-                toastEl.style.opacity = '0';
-                setTimeout(() => {
-                  toastEl.style.display = 'none';
-                }, 300);
-              }, duration);
-            } else {
-              alert(message);
-            }
-          }
-        };
-        showNotification('❌ 儲存失敗，請稍後再試', 3000);
+        // 顯示通知（使用統一的 toast 樣式）
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('❌ 儲存失敗，請稍後再試', 3000);
+        } else {
+          showToastNotification('❌ 儲存失敗，請稍後再試', 3000);
+        }
       }
     } else if (type === 'topics') {
-      // 儲存選題到 userDB
+      // 儲存選題到 userDB（使用 /api/generations 端點）
       try {
-        const response = await fetch(`${API_URL}/api/user/topics/save`, {
+        const response = await fetch(`${API_URL}/api/generations`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1546,7 +1534,9 @@ async function saveResult(type) {
           },
           body: JSON.stringify({
             user_id: ipPlanningUser.user_id,
-            content: content
+            content: content,
+            platform: currentPlatform || '未設定',
+            topic: currentTopic || '選題推薦'
           })
         });
         
@@ -1573,7 +1563,11 @@ async function saveResult(type) {
               }
             }
           };
-          showNotification(`✅ 選題已儲存${data.record_number ? `（編號：${data.record_number}）` : ''}`, 3000);
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast(`✅ 選題已儲存${data.generation_id ? `（ID：${data.generation_id}）` : ''}`, 3000);
+          } else {
+            showToastNotification(`✅ 選題已儲存${data.generation_id ? `（ID：${data.generation_id}）` : ''}`, 3000);
+          }
         } else {
           throw new Error('儲存失敗');
         }
@@ -1602,7 +1596,11 @@ async function saveResult(type) {
             }
           }
         };
-        showNotification('⚠️ 選題已儲存到本地（伺服器儲存失敗）', 3000);
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('⚠️ 選題已儲存到本地（伺服器儲存失敗）', 3000);
+        } else {
+          showToastNotification('⚠️ 選題已儲存到本地（伺服器儲存失敗）', 3000);
+        }
       }
     } else if (type === 'script') {
       // script 類型應該使用 saveScript() 函數，這裡只是備用處理
@@ -1667,20 +1665,32 @@ async function saveScript() {
   
   if (!ipPlanningUser || !ipPlanningUser.user_id || !ipPlanningToken) {
     console.log('用戶未登入');
-    showNotification('請先登入', 3000);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入', 3000);
+    } else {
+      showToastNotification('請先登入', 3000);
+    }
     return;
   }
   
   const content = document.getElementById('scriptContent').textContent;
   if (!content || content.includes('請點選「一鍵生成腳本」按鈕開始') || content.includes('請先完成')) {
     console.log('沒有可儲存的內容');
-    showNotification('沒有可儲存的內容', 3000);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('沒有可儲存的內容', 3000);
+    } else {
+      showToastNotification('沒有可儲存的內容', 3000);
+    }
     return;
   }
   
   // 顯示儲存中提示
   console.log('開始儲存腳本...');
-  showNotification('正在儲存...', 2000);
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast('正在儲存...', 2000);
+  } else {
+    showToastNotification('正在儲存...', 2000);
+  }
   
   try {
     const response = await fetch(`${API_URL}/api/scripts/save`, {
@@ -1701,11 +1711,19 @@ async function saveScript() {
     if (response.ok) {
       const data = await response.json().catch(() => ({}));
       console.log('腳本儲存成功:', data);
-      showNotification('✅ 腳本儲存成功！', 3000);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('✅ 腳本儲存成功！', 3000);
+      } else {
+        showToastNotification('✅ 腳本儲存成功！', 3000);
+      }
     } else if (response.status === 404) {
       localStorage.setItem(`saved_script_${Date.now()}`, content);
       console.log('腳本已儲存到本地（API 不存在）');
-      showNotification('✅ 腳本已儲存到本地！', 3000);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('✅ 腳本已儲存到本地！', 3000);
+      } else {
+        showToastNotification('✅ 腳本已儲存到本地！', 3000);
+      }
     } else {
       const errorData = await response.json().catch(() => ({ error: '儲存失敗' }));
       console.error('儲存失敗:', errorData);
@@ -1716,7 +1734,11 @@ async function saveScript() {
     // 儲存到本地作為備份
     localStorage.setItem(`saved_script_${Date.now()}`, content);
     console.log('腳本已儲存到本地（伺服器儲存失敗）');
-    showNotification('⚠️ 腳本已儲存到本地（伺服器儲存失敗）', 3000);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('⚠️ 腳本已儲存到本地（伺服器儲存失敗）', 3000);
+    } else {
+      showToastNotification('⚠️ 腳本已儲存到本地（伺服器儲存失敗）', 3000);
+    }
   }
 }
 

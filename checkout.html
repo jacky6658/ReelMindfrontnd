@@ -397,7 +397,7 @@ a{text-decoration:none;color:inherit}
         
         <!-- 方案摘要 -->
         <div class="plan-summary" id="planSummary">
-          <div class="plan-name" id="summaryPlanName">買斷方案</div>
+          <div class="plan-name" id="summaryPlanName">永久使用方案</div>
           <div class="plan-price" id="summaryPlanPrice">NT$9,900</div>
           <div class="plan-desc" id="summaryPlanDesc">一次購買，永久使用</div>
         </div>
@@ -440,7 +440,7 @@ a{text-decoration:none;color:inherit}
       <div class="body">
         <h2 class="h2">訂單摘要</h2>
         <div class="sum" aria-live="polite">
-          <div class="line"><span id="sumPlan">買斷方案</span><b id="sumPrice">NT$9,900</b></div>
+          <div class="line"><span id="sumPlan">永久使用方案</span><b id="sumPrice">NT$9,900</b></div>
           <div class="line"><span>手續費</span><b id="fee">NT$0</b></div>
           <div class="line" style="border-top:1px dashed #334155;margin-top:8px;padding-top:8px">
             <span><b>應付金額</b></span><b id="total">NT$9,900</b>
@@ -528,7 +528,7 @@ a{text-decoration:none;color:inherit}
     // 更新方案摘要
     let planName, planDesc;
     if (currentPlan === 'lifetime') {
-      planName = '買斷方案';
+      planName = '永久使用方案';
       planDesc = '一次購買，永久使用';
     } else if (isYearly) {
       planName = '年費方案 🔥';
@@ -547,7 +547,7 @@ a{text-decoration:none;color:inherit}
       : planDesc;
 
     // 更新訂單摘要
-    const displayPlanName = currentPlan === 'lifetime' ? '買斷方案' : (isYearly ? '年費方案' : '月費方案');
+    const displayPlanName = currentPlan === 'lifetime' ? '永久使用方案' : (isYearly ? '年費方案' : '月費方案');
     document.getElementById('sumPlan').textContent = testMode 
       ? `${displayPlanName} (測試)` 
       : displayPlanName;
