@@ -477,7 +477,7 @@ a{text-decoration:none;color:inherit}
 
 <script>
   // 價格設定
-  const price = { monthly: 2480, yearly: 23760 };
+  const price = { monthly: 2480, yearly: 7980 };
   let currentPlan = 'monthly';
   let testMode = false;  // 測試模式標記
   let testAmount = null;  // 測試金額
@@ -534,11 +534,11 @@ a{text-decoration:none;color:inherit}
     document.getElementById('summaryPlanDesc').textContent = testMode
       ? `⚠️ 測試模式：金額為 NT$${testAmount.toLocaleString('zh-Hant-TW')}`
       : (isYearly 
-        ? '最划算，節省 NT$5,000（20% OFF）' 
+        ? '最划算的長期方案' 
         : '彈性方案，適合短期使用者');
 
     // 更新訂單摘要
-    const displayPlanName = isYearly ? '年費方案（省 NT$5,000）' : '月費方案';
+    const displayPlanName = isYearly ? '年費方案' : '月費方案';
     document.getElementById('sumPlan').textContent = testMode 
       ? `${displayPlanName} (測試)` 
       : displayPlanName;

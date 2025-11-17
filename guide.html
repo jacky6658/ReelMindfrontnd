@@ -1054,7 +1054,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
     </div>
 
     <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin: 18px 0;">
-      <button onclick="handleGuideUnlockButton('article1');" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">
+      <button onclick="handleArticle1Button();" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">
         立即登入，生成我的第一支腳本
       </button>
       <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid #cbd5e1; color: #334155; background: white; text-decoration: none; cursor: pointer; flex: 1;">
@@ -1635,6 +1635,58 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
       
       // 智能處理實戰指南的「登入解鎖AI生成」按鈕
+      // 處理文章1的按鈕點擊（已登入已訂閱用戶直接跳轉到一鍵生成）
+      async function handleArticle1Button() {
+        try {
+          // 檢查是否已登入
+          let isLoggedIn = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.isLoggedIn === 'function') {
+            isLoggedIn = window.ReelMindCommon.isLoggedIn();
+          } else if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+            isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
+          } else {
+            const token = localStorage.getItem('ipPlanningToken');
+            isLoggedIn = !!token;
+          }
+          
+          // 檢查是否已訂閱
+          let isSubscribed = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+            isSubscribed = window.ReelMindCommon.isSubscribed();
+          } else {
+            // 降級處理：檢查多個來源
+            const backendSubscribed = document.body.dataset.subscribed === 'true';
+            const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
+            const localSubscribed = localSubscriptionStatus === 'active';
+            const userStr = localStorage.getItem('ipPlanningUser');
+            let userSubscribed = false;
+            if (userStr) {
+              try {
+                const user = JSON.parse(userStr);
+                userSubscribed = !!(user && (user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1'));
+              } catch (e) {
+                // 忽略解析錯誤
+              }
+            }
+            isSubscribed = backendSubscribed || localSubscribed || userSubscribed;
+          }
+          
+          // 如果已登入且已訂閱，直接跳轉到一鍵生成
+          if (isLoggedIn && isSubscribed) {
+            window.location.href = 'mode3.html';
+            return;
+          }
+          
+          // 否則調用原有的處理函數（會引導登入或訂閱）
+          handleGuideUnlockButton('article1');
+        } catch (error) {
+          console.error('處理文章1按鈕時出錯:', error);
+          // 出錯時也調用原有函數
+          handleGuideUnlockButton('article1');
+        }
+      }
+      window.handleArticle1Button = handleArticle1Button;
+      
       async function handleGuideUnlockButton(articleType = 'article1') {
         try {
           let isLoggedIn = false;
@@ -1726,10 +1778,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             return;
           }
           
-          const article1Buttons = document.querySelectorAll('button[onclick*="handleGuideUnlockButton(\'article1\')"], a[onclick*="handleGuideUnlockButton(\'article1\')"]');
+          // 更新文章1的按鈕（包括新的 handleArticle1Button 和舊的 handleGuideUnlockButton）
+          const article1Buttons = document.querySelectorAll('button[onclick*="handleArticle1Button"], button[onclick*="handleGuideUnlockButton(\'article1\')"], a[onclick*="handleGuideUnlockButton(\'article1\')"]');
           article1Buttons.forEach(btn => {
             if (btn.textContent.includes('登入解鎖 AI 生成')) {
               btn.textContent = btn.textContent.replace('登入解鎖 AI 生成', '使用一鍵生成功能');
+            } else if (btn.textContent.includes('立即登入，生成我的第一支腳本')) {
+              btn.textContent = '使用一鍵生成功能';
             }
           });
           
@@ -1877,7 +1932,46 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
       
       // 頁面載入時初始化
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('DOMContentLoaded', async function() {
+        // 檢查訪問權限（未登入或未訂閱用戶直接導向）
+        if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+          const loggedIn = await window.ReelMindCommon.checkLoginStatus();
+          
+          if (!loggedIn) {
+            // 未登入：導向登入頁
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+              window.ReelMindCommon.showToast('請先登入以查看實戰指南', 3000);
+            }
+            if (typeof goToLogin === 'function') {
+              goToLogin();
+            } else if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+              window.ReelMindCommon.goToLogin();
+            } else {
+              const backendUrl = 'https://aivideobackend.zeabur.app';
+              const redirectUri = encodeURIComponent(window.location.origin + '/guide.html');
+              window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
+            }
+            return;
+          }
+          
+          // 檢查訂閱狀態
+          let isSubscribed = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkSubscriptionStatus === 'function') {
+            await window.ReelMindCommon.checkSubscriptionStatus();
+            isSubscribed = window.ReelMindCommon.isSubscribed();
+          }
+          
+          if (!isSubscribed) {
+            // 未訂閱：導向訂閱頁
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+              window.ReelMindCommon.showToast('請先訂閱以查看實戰指南', 3000);
+            }
+            window.location.href = '/subscription.html';
+            return;
+          }
+        }
+        
+        // 已登入且已訂閱，繼續初始化
         updateUserInfo();
         updateGuideButtonTexts();
         handleHashNavigation();
