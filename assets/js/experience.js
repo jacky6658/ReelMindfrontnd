@@ -42,6 +42,58 @@ document.addEventListener('DOMContentLoaded', async function() {
   const isLoggedIn = !!(ipPlanningToken && ipPlanningUser);
   console.log('🔐 登入狀態:', isLoggedIn ? '✅ 已登入（可儲存結果）' : '❌ 未登入（僅體驗功能）');
   
+  // 檢查訂閱狀態
+  let isSubscribed = false;
+  if (isLoggedIn) {
+    if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+      isSubscribed = window.ReelMindCommon.isSubscribed();
+    } else {
+      const userSubscribed = !!(ipPlanningUser && (
+        ipPlanningUser.is_subscribed === true || 
+        ipPlanningUser.is_subscribed === 1 || 
+        ipPlanningUser.is_subscribed === '1' ||
+        ipPlanningUser.is_subscribed === 'true'
+      ));
+      isSubscribed = userSubscribed;
+    }
+  }
+  
+  // 如果未登入，要求登入
+  if (!isLoggedIn) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入後再使用免費體驗功能', 3000);
+    } else {
+      alert('請先登入後再使用免費體驗功能');
+    }
+    setTimeout(() => {
+      window.location.href = '/#login';
+    }, 1500);
+    return;
+  }
+  
+  // 如果已登入但未訂閱，檢查使用次數並顯示提示
+  if (!isSubscribed) {
+    const usageCount = getFreeTrialUsageCount();
+    const remaining = 3 - usageCount;
+    if (usageCount >= 3) {
+      // 超過3次，顯示升級提示並跳轉
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('您已使用完3次免費體驗，升級訂閱可享有更多生成福利和完整功能', 5000);
+      } else {
+        alert('您已使用完3次免費體驗，升級訂閱可享有更多生成福利和完整功能');
+      }
+      setTimeout(() => {
+        window.location.href = 'subscription.html';
+      }, 2000);
+      return;
+    } else {
+      // 顯示剩餘次數提示
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(`您還有 ${remaining} 次免費體驗機會，升級訂閱可享有更多生成福利`, 4000);
+      }
+    }
+  }
+  
   // 更新用戶資訊顯示（如果已登入）
   if (isLoggedIn) {
     updateUserInfo();
@@ -66,6 +118,62 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // 體驗模式不需要載入用戶記憶
+
+// 獲取免費體驗使用次數
+function getFreeTrialUsageCount() {
+  try {
+    const countStr = localStorage.getItem('freeTrialUsageCount');
+    return countStr ? parseInt(countStr, 10) : 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+// 增加免費體驗使用次數
+function incrementFreeTrialUsageCount() {
+  try {
+    const currentCount = getFreeTrialUsageCount();
+    localStorage.setItem('freeTrialUsageCount', (currentCount + 1).toString());
+    console.log(`📊 免費體驗使用次數已更新: ${currentCount + 1}/3`);
+  } catch (e) {
+    console.error('無法更新使用次數:', e);
+  }
+}
+
+// 檢查是否可以使用免費體驗
+function checkFreeTrialUsage() {
+  const isLoggedIn = !!(ipPlanningToken && ipPlanningUser);
+  if (!isLoggedIn) {
+    return { allowed: false, reason: 'not_logged_in' };
+  }
+  
+  // 檢查訂閱狀態
+  let isSubscribed = false;
+  if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+    isSubscribed = window.ReelMindCommon.isSubscribed();
+  } else {
+    const userSubscribed = !!(ipPlanningUser && (
+      ipPlanningUser.is_subscribed === true || 
+      ipPlanningUser.is_subscribed === 1 || 
+      ipPlanningUser.is_subscribed === '1' ||
+      ipPlanningUser.is_subscribed === 'true'
+    ));
+    isSubscribed = userSubscribed;
+  }
+  
+  // 如果已訂閱，允許使用
+  if (isSubscribed) {
+    return { allowed: true, reason: 'subscribed' };
+  }
+  
+  // 未訂閱，檢查使用次數
+  const usageCount = getFreeTrialUsageCount();
+  if (usageCount >= 3) {
+    return { allowed: false, reason: 'exceeded_limit', count: usageCount };
+  }
+  
+  return { allowed: true, reason: 'free_trial', count: usageCount, remaining: 3 - usageCount };
+}
 
 // 更新用戶資訊顯示
 // 使用 common.js 中的統一函數
@@ -612,6 +720,22 @@ async function generateAll() {
     return;
   }
   
+  // 檢查免費體驗使用次數（未訂閱用戶）
+  const usageCheck = checkFreeTrialUsage();
+  if (!usageCheck.allowed) {
+    if (usageCheck.reason === 'exceeded_limit') {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('您已使用完3次免費體驗，升級訂閱可享有更多生成福利和完整功能', 5000);
+      } else {
+        alert('您已使用完3次免費體驗，升級訂閱可享有更多生成福利和完整功能');
+      }
+      setTimeout(() => {
+        window.location.href = 'subscription.html';
+      }, 2000);
+    }
+    return;
+  }
+  
   // 顯示開始生成通知
   if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
     window.ReelMindCommon.showToast('⏳ 正在生成內容，請稍候...', 2000);
@@ -675,9 +799,25 @@ async function generateAll() {
       resultStep.classList.add('active');
     }
     
-    // 顯示成功通知
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('✅ 生成完成！', 3000);
+    // 生成成功，增加使用次數（僅未訂閱用戶，一鍵生成算一次）
+    if (usageCheck.reason === 'free_trial') {
+      incrementFreeTrialUsageCount();
+      const newCount = getFreeTrialUsageCount();
+      const remaining = 3 - newCount;
+      if (remaining > 0) {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast(`✅ 生成完成！您還有 ${remaining} 次免費體驗機會`, 3000);
+        }
+      } else {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('✅ 生成完成！您已用完3次免費體驗，升級訂閱可享有更多生成福利', 4000);
+        }
+      }
+    } else {
+      // 已訂閱用戶
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('✅ 生成完成！', 3000);
+      }
     }
     
     // 自動切換到第一個標籤
@@ -952,6 +1092,22 @@ async function generatePositioning() {
     return;
   }
   
+  // 檢查免費體驗使用次數（未訂閱用戶）
+  const usageCheck = checkFreeTrialUsage();
+  if (!usageCheck.allowed) {
+    if (usageCheck.reason === 'exceeded_limit') {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('您已使用完3次免費體驗，升級訂閱可享有更多生成福利和完整功能', 5000);
+      } else {
+        alert('您已使用完3次免費體驗，升級訂閱可享有更多生成福利和完整功能');
+      }
+      setTimeout(() => {
+        window.location.href = 'subscription.html';
+      }, 2000);
+    }
+    return;
+  }
+  
   // 顯示開始生成通知
   if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
     window.ReelMindCommon.showToast('⏳ 正在生成帳號定位...', 2000);
@@ -1016,6 +1172,21 @@ async function generatePositioning() {
               result += data.content;
               updateResultBlock('positioningContent', result, true);
             } else if (data.type === 'end') {
+              // 生成成功，增加使用次數（僅未訂閱用戶）
+              if (usageCheck.reason === 'free_trial') {
+                incrementFreeTrialUsageCount();
+                const newCount = getFreeTrialUsageCount();
+                const remaining = 3 - newCount;
+                if (remaining > 0) {
+                  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+                    window.ReelMindCommon.showToast(`生成成功！您還有 ${remaining} 次免費體驗機會`, 3000);
+                  }
+                } else {
+                  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+                    window.ReelMindCommon.showToast('生成成功！您已用完3次免費體驗，升級訂閱可享有更多生成福利', 4000);
+                  }
+                }
+              }
               break;
             } else if (data.type === 'error') {
               throw new Error(data.message || '生成失敗');
@@ -1066,6 +1237,22 @@ async function generateTopics() {
   if (!platform) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('請先選擇平台', 3000);
+    }
+    return;
+  }
+  
+  // 檢查免費體驗使用次數（未訂閱用戶）
+  const usageCheck = checkFreeTrialUsage();
+  if (!usageCheck.allowed) {
+    if (usageCheck.reason === 'exceeded_limit') {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('您已使用完3次免費體驗，升級訂閱可享有更多生成福利和完整功能', 5000);
+      } else {
+        alert('您已使用完3次免費體驗，升級訂閱可享有更多生成福利和完整功能');
+      }
+      setTimeout(() => {
+        window.location.href = 'subscription.html';
+      }, 2000);
     }
     return;
   }
@@ -1135,6 +1322,21 @@ async function generateTopics() {
               result += data.content;
               updateResultBlock('topicContent', result, true);
             } else if (data.type === 'end') {
+              // 生成成功，增加使用次數（僅未訂閱用戶）
+              if (usageCheck.reason === 'free_trial') {
+                incrementFreeTrialUsageCount();
+                const newCount = getFreeTrialUsageCount();
+                const remaining = 3 - newCount;
+                if (remaining > 0) {
+                  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+                    window.ReelMindCommon.showToast(`生成成功！您還有 ${remaining} 次免費體驗機會`, 3000);
+                  }
+                } else {
+                  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+                    window.ReelMindCommon.showToast('生成成功！您已用完3次免費體驗，升級訂閱可享有更多生成福利', 4000);
+                  }
+                }
+              }
               generationEnded = true;
               break;
             } else if (data.type === 'error') {
@@ -1197,6 +1399,22 @@ async function generateScript() {
   if (!selectedScriptStructure) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('請先選擇腳本結構', 3000);
+    }
+    return;
+  }
+  
+  // 檢查免費體驗使用次數（未訂閱用戶）
+  const usageCheck = checkFreeTrialUsage();
+  if (!usageCheck.allowed) {
+    if (usageCheck.reason === 'exceeded_limit') {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('您已使用完3次免費體驗，升級訂閱可享有更多生成福利和完整功能', 5000);
+      } else {
+        alert('您已使用完3次免費體驗，升級訂閱可享有更多生成福利和完整功能');
+      }
+      setTimeout(() => {
+        window.location.href = 'subscription.html';
+      }, 2000);
     }
     return;
   }
@@ -1277,6 +1495,21 @@ async function generateScript() {
               result += data.content;
               updateResultBlock('scriptContent', result, true);
             } else if (data.type === 'end') {
+              // 生成成功，增加使用次數（僅未訂閱用戶）
+              if (usageCheck.reason === 'free_trial') {
+                incrementFreeTrialUsageCount();
+                const newCount = getFreeTrialUsageCount();
+                const remaining = 3 - newCount;
+                if (remaining > 0) {
+                  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+                    window.ReelMindCommon.showToast(`生成成功！您還有 ${remaining} 次免費體驗機會`, 3000);
+                  }
+                } else {
+                  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+                    window.ReelMindCommon.showToast('生成成功！您已用完3次免費體驗，升級訂閱可享有更多生成福利', 4000);
+                  }
+                }
+              }
               break;
             } else if (data.type === 'error') {
               throw new Error(data.message || '生成失敗');

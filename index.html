@@ -11707,7 +11707,7 @@
                         
                         <!-- CTA 按鈕（增強動畫和 FOMO） -->
                         <div style="text-align: center; position: relative;">
-                          <a href="experience.html" class="experience-cta-btn" style="display: inline-flex; align-items: center; gap: 12px; padding: 18px 40px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 1.1rem; box-shadow: 0 4px 20px rgba(59,130,246,0.3), 0 0 0 0 rgba(59,130,246,0.5); transition: all 0.3s; transform: scale(1); animation: ctaPulse 2s ease-in-out infinite; position: relative; overflow: hidden;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 30px rgba(59,130,246,0.5), 0 0 0 4px rgba(59,130,246,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 20px rgba(59,130,246,0.3), 0 0 0 0 rgba(59,130,246,0.5)'">
+                          <a href="#" onclick="handleFreeTrialClick(event); return false;" class="experience-cta-btn" style="display: inline-flex; align-items: center; gap: 12px; padding: 18px 40px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 1.1rem; box-shadow: 0 4px 20px rgba(59,130,246,0.3), 0 0 0 0 rgba(59,130,246,0.5); transition: all 0.3s; transform: scale(1); animation: ctaPulse 2s ease-in-out infinite; position: relative; overflow: hidden; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 30px rgba(59,130,246,0.5), 0 0 0 4px rgba(59,130,246,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 20px rgba(59,130,246,0.3), 0 0 0 0 rgba(59,130,246,0.5)'">
                             <span style="position: relative; z-index: 2;">
                               <i class="fas fa-magic" style="font-size: 1.2rem; animation: magicSpin 2s ease-in-out infinite;"></i>
                             </span>
@@ -15090,6 +15090,97 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
       
       // 處理訂閱按鈕點擊
+      // 處理免費體驗按鈕點擊
+      async function handleFreeTrialClick(event) {
+        event.preventDefault();
+        
+        // 檢查登入狀態
+        let isLoggedIn = false;
+        let isSubscribed = false;
+        
+        if (window.ReelMindCommon) {
+          if (typeof window.ReelMindCommon.isLoggedIn === 'function') {
+            isLoggedIn = window.ReelMindCommon.isLoggedIn();
+          }
+          if (typeof window.ReelMindCommon.isSubscribed === 'function') {
+            isSubscribed = window.ReelMindCommon.isSubscribed();
+          }
+        } else {
+          // 降級處理：直接檢查 localStorage
+          const token = localStorage.getItem('ipPlanningToken');
+          const userStr = localStorage.getItem('ipPlanningUser');
+          isLoggedIn = !!(token && userStr);
+          if (isLoggedIn && userStr) {
+            try {
+              const user = JSON.parse(userStr);
+              isSubscribed = !!(user && (user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1' || user.is_subscribed === 'true'));
+            } catch (e) {
+              console.warn('無法解析用戶資料:', e);
+            }
+          }
+        }
+        
+        // 如果未登入，要求登入
+        if (!isLoggedIn) {
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('請先登入後再使用免費體驗功能', 3000);
+          } else {
+            alert('請先登入後再使用免費體驗功能');
+          }
+          // 跳轉到登入頁面
+          setTimeout(() => {
+            window.location.href = '/#login';
+          }, 1500);
+          return;
+        }
+        
+        // 如果已登入但未訂閱，檢查使用次數
+        if (!isSubscribed) {
+          const usageCount = getFreeTrialUsageCount();
+          if (usageCount >= 3) {
+            // 超過3次，顯示升級提示
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+              window.ReelMindCommon.showToast('您已使用完3次免費體驗，升級訂閱可享有更多生成福利和完整功能', 5000);
+            } else {
+              alert('您已使用完3次免費體驗，升級訂閱可享有更多生成福利和完整功能');
+            }
+            // 跳轉到訂閱頁面
+            setTimeout(() => {
+              window.location.href = 'subscription.html';
+            }, 2000);
+            return;
+          }
+        }
+        
+        // 允許使用，跳轉到體驗頁面
+        window.location.href = 'experience.html';
+      }
+      
+      // 獲取免費體驗使用次數
+      function getFreeTrialUsageCount() {
+        try {
+          const countStr = localStorage.getItem('freeTrialUsageCount');
+          return countStr ? parseInt(countStr, 10) : 0;
+        } catch (e) {
+          return 0;
+        }
+      }
+      
+      // 增加免費體驗使用次數
+      function incrementFreeTrialUsageCount() {
+        try {
+          const currentCount = getFreeTrialUsageCount();
+          localStorage.setItem('freeTrialUsageCount', (currentCount + 1).toString());
+        } catch (e) {
+          console.error('無法更新使用次數:', e);
+        }
+      }
+      
+      // 將函數導出到全局作用域
+      window.handleFreeTrialClick = handleFreeTrialClick;
+      window.getFreeTrialUsageCount = getFreeTrialUsageCount;
+      window.incrementFreeTrialUsageCount = incrementFreeTrialUsageCount;
+      
       async function handleSubscriptionClick(plan) {
         console.log('Subscription button clicked:', plan);
         
