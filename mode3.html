@@ -1558,9 +1558,11 @@
     <!-- 導航欄 -->
     <div class="top-navbar">
       <div class="navbar-left">
+        <!-- 手機版抽屜按鈕 -->
         <button class="mobile-drawer-toggle" onclick="toggleMobileDrawer()">
           <span class="hamburger-icon">☰</span>
         </button>
+        <div class="navbar-title clickable-title" onclick="window.location.href='index.html'">ReelMind</div>
         <div class="navbar-tabs">
           <a href="index.html" class="navbar-tab">首頁</a>
           <a href="mode1.html" class="navbar-tab" onclick="handleModeNavigation(event, 'mode1')">IP人設規劃</a>
@@ -1570,10 +1572,9 @@
           <a href="userDB.html" id="userDBTab" class="navbar-tab" style="display:none;">創作者資料庫</a>
         </div>
       </div>
-      <div class="navbar-title clickable-title" onclick="window.location.href='index.html'">ReelMind</div>
       <div class="navbar-right">
         <div class="user-info" id="userInfo" style="display: none;" onclick="window.location.href='userDB.html'">
-          <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+          <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: center;">
           <span id="userName" class="user-name"></span>
         </div>
         <div class="auth-buttons" id="authButtons" style="display: none;">

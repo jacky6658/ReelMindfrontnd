@@ -1004,6 +1004,7 @@ async function renderPersonalInfoContent() {
   let expiresAtText = '未知';
   let daysLeftText = '';
   let expirationWarning = '';
+  let autoRenew = true; // 預設為 true
   
   if (ipPlanningToken && ipPlanningUser?.user_id) {
     try {
@@ -1016,6 +1017,9 @@ async function renderPersonalInfoContent() {
       
       if (subResponse.ok) {
         const subData = await subResponse.json();
+        // 獲取自動續費狀態
+        autoRenew = subData.auto_renew !== false; // 預設為 true
+        
         if (subData.expires_at) {
           expiresAt = new Date(subData.expires_at);
           const now = new Date();
@@ -1046,7 +1050,12 @@ async function renderPersonalInfoContent() {
       }
     } catch (e) {
       console.warn('載入訂閱詳情失敗:', e);
+      // 如果 API 失敗，嘗試從 ipPlanningUser 獲取 auto_renew
+      autoRenew = ipPlanningUser.auto_renew !== false;
     }
+  } else {
+    // 如果沒有 token，嘗試從 ipPlanningUser 獲取 auto_renew
+    autoRenew = ipPlanningUser?.auto_renew !== false;
   }
   
   content.innerHTML = `
@@ -1077,17 +1086,23 @@ async function renderPersonalInfoContent() {
         <span>${escapeHtml(expiresAtText)} ${daysLeftText}</span>
       </div>
       ${expirationWarning}
+      ${autoRenew === false ? `
+      <div style="margin-top: 12px; padding: 12px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; color: #92400e;">
+        <strong>ℹ️ 自動續費已取消</strong><br>
+        <span style="font-size: 14px;">您的訂閱到期後將不會自動續費，請記得手動續費以繼續使用服務。</span>
+      </div>
+      ` : ''}
       <div class="detail-actions" style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-        <a href="/subscription.html" style="display: inline-block; padding: 8px 16px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500;">
-          💳 續費訂閱
+        <a href="/subscription.html" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; min-height: 44px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 14px;">
+          <i class="fas fa-credit-card" style="margin-right: 4px;"></i>續費訂閱
         </a>
-        ${userInfo.auto_renew !== false ? `
-        <button onclick="cancelAutoRenewForUserDB()" style="display: inline-block; padding: 8px 16px; background: #EF4444; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px;">
-          🚫 取消自動續費
+        ${autoRenew !== false ? `
+        <button onclick="cancelAutoRenewForUserDB()" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; min-height: 44px; background: #EF4444; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px;">
+          <i class="fas fa-ban" style="margin-right: 4px;"></i>取消自動續費
         </button>
         ` : `
-        <div style="display: inline-block; padding: 8px 16px; background: #F3F4F6; color: #6B7280; border-radius: 6px; font-weight: 500; font-size: 14px;">
-          ✅ 已取消自動續費
+        <div style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; min-height: 44px; background: #F3F4F6; color: #6B7280; border-radius: 6px; font-weight: 500; font-size: 14px;">
+          <i class="fas fa-check-circle" style="margin-right: 4px;"></i>已取消自動續費
         </div>
         `}
       </div>
@@ -2531,6 +2546,7 @@ function displayOrdersForUserDB(orders) {
             <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">付款時間</th>
             <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">到期日期</th>
             <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">發票號碼</th>
+            <th style="padding: 12px; text-align: center; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">操作</th>
           </tr>
         </thead>
         <tbody>
@@ -2549,16 +2565,28 @@ function displayOrdersForUserDB(orders) {
               : '<span style="display: inline-block; padding: 4px 12px; background: #fee2e2; color: #991b1b; border-radius: 12px; font-size: 12px; font-weight: 600;">⏳ 待付款</span>';
             
             const planText = order.plan_type === 'monthly' ? '月費方案' : order.plan_type === 'yearly' ? '年費方案' : order.plan_type || '-';
+            const orderId = order.order_id || order.id;
+            
+            // 操作按鈕：待付款訂單顯示「繼續付款」按鈕
+            let actionButton = '';
+            if (order.payment_status === 'pending') {
+              const planParam = order.plan_type === 'monthly' ? 'monthly' : 'yearly';
+              const amountParam = order.amount || '';
+              actionButton = `<a href="/checkout.html?plan=${planParam}&amount=${amountParam}" style="display: inline-block; padding: 6px 12px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#2563EB'" onmouseout="this.style.background='#3B82F6'" onclick="event.stopPropagation()">繼續付款</a>`;
+            } else {
+              actionButton = '<span style="color: #9ca3af;">-</span>';
+            }
             
             return `
-              <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s; cursor: pointer;" onclick="showOrderDetail('${order.order_id || order.id}')" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
-                <td style="padding: 12px; color: #1f2937; font-weight: 500;">${escapeHtml(order.order_id || order.id || '-')}</td>
-                <td style="padding: 12px; color: #4b5563;">${escapeHtml(planText)}</td>
-                <td style="padding: 12px; text-align: right; color: #1f2937; font-weight: 600;">NT$${order.amount?.toLocaleString() || 0}</td>
-                <td style="padding: 12px; text-align: center;">${statusBadge}</td>
-                <td style="padding: 12px; color: #6b7280; font-size: 14px;">${escapeHtml(paidDate)}</td>
-                <td style="padding: 12px; color: #6b7280; font-size: 14px;">${escapeHtml(expiresDate)}</td>
-                <td style="padding: 12px; color: #6b7280; font-size: 14px;">${escapeHtml(order.invoice_number || '-')}</td>
+              <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
+                <td style="padding: 12px; color: #1f2937; font-weight: 500; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(orderId || '-')}</td>
+                <td style="padding: 12px; color: #4b5563; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(planText)}</td>
+                <td style="padding: 12px; text-align: right; color: #1f2937; font-weight: 600; cursor: pointer;" onclick="showOrderDetail('${orderId}')">NT$${order.amount?.toLocaleString() || 0}</td>
+                <td style="padding: 12px; text-align: center; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${statusBadge}</td>
+                <td style="padding: 12px; color: #6b7280; font-size: 14px; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(paidDate)}</td>
+                <td style="padding: 12px; color: #6b7280; font-size: 14px; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(expiresDate)}</td>
+                <td style="padding: 12px; color: #6b7280; font-size: 14px; cursor: pointer;" onclick="showOrderDetail('${orderId}')">${escapeHtml(order.invoice_number || '-')}</td>
+                <td style="padding: 12px; text-align: center;" onclick="event.stopPropagation()">${actionButton}</td>
               </tr>
             `;
           }).join('')}
@@ -2567,6 +2595,10 @@ function displayOrdersForUserDB(orders) {
     </div>
   `;
 }
+
+// 刪除訂單
+// 刪除訂單功能已停用 - 訂單將由系統自動清理（超過24小時的待付款訂單）
+// window.deleteOrder 函數已移除
 
 // 顯示訂單詳情
 window.showOrderDetail = async function(orderId) {
@@ -2792,7 +2824,16 @@ window.closeOrderDetail = function(event) {
 
 // 載入已保存的 API Key
 async function loadSavedApiKey() {
+  const llmProvider = document.getElementById('llmProvider');
+  const llmModel = document.getElementById('llmModel');
+  
+  // 如果沒有登入，仍然初始化模型選項（使用預設提供商）
   if (!ipPlanningToken || !ipPlanningUser || !ipPlanningUser.user_id) {
+    // 使用預設提供商（gemini）初始化模型選項
+    if (llmProvider && llmModel) {
+      llmProvider.value = 'gemini';
+      await updateModelOptions();
+    }
     return;
   }
   
@@ -2809,21 +2850,59 @@ async function loadSavedApiKey() {
       const data = await response.json();
       const savedKeyDisplay = document.getElementById('savedKeyDisplay');
       const savedKeyLast4 = document.getElementById('savedKeyLast4');
-      const llmProvider = document.getElementById('llmProvider');
       
       if (data.keys && data.keys.length > 0) {
         const key = data.keys[0];
-        if (key.provider) {
+        if (key.provider && llmProvider) {
           llmProvider.value = key.provider;
+          // 更新模型選項以匹配 provider（等待完成後再設置模型值）
+          await updateModelOptions();
+        } else if (llmProvider) {
+          // 如果沒有已保存的提供商，使用預設（gemini）
+          llmProvider.value = 'gemini';
+          await updateModelOptions();
         }
+        
         if (key.last4) {
-          savedKeyLast4.textContent = `****${key.last4}`;
-          savedKeyDisplay.style.display = 'block';
+          if (savedKeyLast4) savedKeyLast4.textContent = `****${key.last4}`;
+          if (savedKeyDisplay) savedKeyDisplay.style.display = 'block';
         }
+        
+        // 載入用戶選擇的模型（在 updateModelOptions 完成後）
+        if (llmModel && key.model_name) {
+          // 等待一小段時間確保選項已載入
+          setTimeout(() => {
+            const optionExists = Array.from(llmModel.options).some(opt => opt.value === key.model_name);
+            if (optionExists) {
+              llmModel.value = key.model_name;
+            } else {
+              llmModel.value = ''; // 如果模型不存在，使用系統預設
+            }
+          }, 100);
+        } else if (llmModel) {
+          llmModel.value = ''; // 使用系統預設
+        }
+      } else {
+        // 如果沒有已保存的 key，使用預設提供商初始化模型選項
+        if (llmProvider) {
+          llmProvider.value = 'gemini';
+          await updateModelOptions();
+        }
+      }
+    } else {
+      // API 請求失敗，使用預設提供商初始化模型選項
+      if (llmProvider) {
+        llmProvider.value = 'gemini';
+        await updateModelOptions();
       }
     }
   } catch (error) {
     console.error('載入已保存的 API Key 失敗:', error);
+    // 發生錯誤時，使用預設提供商初始化模型選項
+    if (llmProvider) {
+      llmProvider.value = 'gemini';
+      await updateModelOptions();
+    }
   }
 }
 
@@ -2883,7 +2962,8 @@ async function saveApiKey() {
       body: JSON.stringify({
         user_id: ipPlanningUser.user_id,
         provider: provider,
-        api_key: apiKey
+        api_key: apiKey,
+        model_name: document.getElementById('llmModel')?.value || null  // 新增：保存用戶選擇的模型
       })
     });
     
@@ -3044,11 +3124,118 @@ function toggleApiKeyVisibility() {
   if (apiKeyInput && toggleIcon) {
     if (apiKeyInput.type === 'password') {
       apiKeyInput.type = 'text';
-      toggleIcon.textContent = '🙈';
+      toggleIcon.className = 'fas fa-eye-slash';
     } else {
       apiKeyInput.type = 'password';
-      toggleIcon.textContent = '👁️';
+      toggleIcon.className = 'fas fa-eye';
     }
+  }
+}
+
+// 更新模型選項（根據 provider 顯示對應的模型，從後端動態載入）
+async function updateModelOptions() {
+  const providerSelect = document.getElementById('llmProvider');
+  const modelSelect = document.getElementById('llmModel');
+  
+  if (!providerSelect || !modelSelect) {
+    return;
+  }
+  
+  const selectedProvider = providerSelect.value;
+  
+  // 如果沒有選擇提供商，顯示提示
+  if (!selectedProvider) {
+    modelSelect.innerHTML = '<option value="">請先選擇提供商...</option>';
+    return;
+  }
+  
+  const currentValue = modelSelect.value;
+  
+  // 清空現有選項，顯示載入中
+  modelSelect.innerHTML = '<option value="">載入中...</option>';
+  modelSelect.disabled = true;
+  
+  try {
+    // 從後端動態載入模型列表
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/llm/models`);
+    
+    if (response.ok) {
+      const data = await response.json();
+      const models = data[selectedProvider] || [];
+      
+      // 清空選項
+      modelSelect.innerHTML = '';
+      
+      // 添加模型選項
+      models.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.value;
+        optionElement.textContent = option.label;
+        modelSelect.appendChild(optionElement);
+      });
+      
+      modelSelect.disabled = false;
+      
+      // 嘗試恢復之前選擇的值（如果仍然有效）
+      if (currentValue) {
+        const optionExists = Array.from(modelSelect.options).some(opt => opt.value === currentValue);
+        if (optionExists) {
+          modelSelect.value = currentValue;
+        } else {
+          modelSelect.value = ''; // 如果之前的選擇無效，使用系統預設
+        }
+      } else {
+        modelSelect.value = ''; // 使用系統預設
+      }
+    } else {
+      // 如果後端載入失敗，使用預設選項（向後兼容）
+      console.warn('無法從後端載入模型列表，使用預設選項');
+      modelSelect.innerHTML = '';
+      loadDefaultModelOptions(selectedProvider, modelSelect);
+      modelSelect.disabled = false;
+    }
+  } catch (error) {
+    console.error('載入模型列表失敗:', error);
+    // 如果載入失敗，使用預設選項（向後兼容）
+    modelSelect.innerHTML = '';
+    loadDefaultModelOptions(selectedProvider, modelSelect);
+    modelSelect.disabled = false;
+  }
+}
+
+// 載入預設模型選項（向後兼容，當後端 API 不可用時使用）
+function loadDefaultModelOptions(provider, modelSelect) {
+  if (provider === 'gemini') {
+    const geminiOptions = [
+      { value: '', text: '使用系統預設 (gemini-2.5-flash)' },
+      { value: 'gemini-2.0-flash-exp', text: 'Gemini 2.0 Flash (實驗版)' },
+      { value: 'gemini-2.5-flash', text: 'Gemini 2.5 Flash' },
+      { value: 'gemini-1.5-pro', text: 'Gemini 1.5 Pro' },
+      { value: 'gemini-1.5-flash', text: 'Gemini 1.5 Flash' }
+    ];
+    
+    geminiOptions.forEach(option => {
+      const optionElement = document.createElement('option');
+      optionElement.value = option.value;
+      optionElement.textContent = option.text;
+      modelSelect.appendChild(optionElement);
+    });
+  } else if (provider === 'openai') {
+    const gptOptions = [
+      { value: '', text: '使用系統預設' },
+      { value: 'gpt-4o', text: 'GPT-4o' },
+      { value: 'gpt-4-turbo', text: 'GPT-4 Turbo' },
+      { value: 'gpt-4', text: 'GPT-4' },
+      { value: 'gpt-3.5-turbo', text: 'GPT-3.5 Turbo' }
+    ];
+    
+    gptOptions.forEach(option => {
+      const optionElement = document.createElement('option');
+      optionElement.value = option.value;
+      optionElement.textContent = option.text;
+      modelSelect.appendChild(optionElement);
+    });
   }
 }
 
@@ -3126,7 +3313,8 @@ async function exportUserData() {
       scripts: [],
       positioning: [],
       topics: [],
-      conversations: []
+      conversations: [],
+      ipPlanning: []
     };
     
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
@@ -3179,20 +3367,25 @@ async function exportUserData() {
       console.warn('獲取對話數據失敗:', e);
     }
     
-    const csvContent = generateUserDataCSV(allData, ipPlanningUser);
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const timestamp = new Date().toISOString().split('T')[0];
-    a.download = `aijob_user_data_${timestamp}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      const ipPlanningResponse = await fetch(`${API_URL}/api/ip-planning/my`, {
+        headers: { 'Authorization': `Bearer ${ipPlanningToken}` }
+      });
+      if (ipPlanningResponse.ok) {
+        const ipPlanningData = await ipPlanningResponse.json();
+        if (ipPlanningData.success && ipPlanningData.results) {
+          allData.ipPlanning = ipPlanningData.results || [];
+        }
+      }
+    } catch (e) {
+      console.warn('獲取 IP 人設規劃數據失敗:', e);
+    }
+    
+    // 生成 Excel 檔案（不同功能分不同分頁）
+    generateUserDataExcel(allData, ipPlanningUser);
     
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('資料已匯出為 CSV 檔案', 3000);
+      window.ReelMindCommon.showToast('資料已匯出為 Excel 檔案', 3000);
     }
   } catch (error) {
     console.error('匯出資料失敗:', error);
@@ -3202,40 +3395,156 @@ async function exportUserData() {
   }
 }
 
-// 生成用戶數據 CSV
-function generateUserDataCSV(data, userInfo) {
-  const rows = [];
-  rows.push('資料類型,ID,編號,標題/主題,內容預覽,平台,創建時間\n');
+// 生成用戶數據 Excel（不同功能分不同分頁）
+function generateUserDataExcel(data, userInfo) {
+  // 檢查 SheetJS 是否可用
+  if (typeof XLSX === 'undefined') {
+    console.error('SheetJS 庫未載入，無法生成 Excel 檔案');
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('Excel 匯出功能需要載入額外庫，請稍後再試', 3000);
+    }
+    return;
+  }
   
-  data.scripts.forEach(script => {
-    const title = (script.title || script.script_name || '未命名').replace(/"/g, '""');
-    const content = (script.content || '').substring(0, 100).replace(/"/g, '""').replace(/\n/g, ' ');
-    const platform = (script.platform || '').replace(/"/g, '""');
-    const createdAt = formatTaiwanTime(script.created_at || '').split(' ')[0];
-    rows.push(`腳本,${script.id || ''},${script.id || ''},"${title}","${content}","${platform}",${createdAt}\n`);
-  });
+  // 創建工作簿
+  const wb = XLSX.utils.book_new();
   
-  data.positioning.forEach(record => {
-    const content = (record.content || '').substring(0, 100).replace(/"/g, '""').replace(/\n/g, ' ');
-    const createdAt = formatTaiwanTime(record.created_at || '').split(' ')[0];
-    rows.push(`帳號定位,${record.id || ''},${record.record_number || ''},"","${content}","",${createdAt}\n`);
-  });
+  // 1. 我的腳本分頁
+  if (data.scripts && data.scripts.length > 0) {
+    const scriptsData = data.scripts.map(script => ({
+      'ID': script.id || '',
+      '腳本名稱': script.title || script.script_name || '未命名',
+      '平台': script.platform || '',
+      '內容': script.content || '',
+      '創建時間': formatTaiwanTime(script.created_at || '')
+    }));
+    const wsScripts = XLSX.utils.json_to_sheet(scriptsData);
+    XLSX.utils.book_append_sheet(wb, wsScripts, '我的腳本');
+  } else {
+    // 即使沒有數據也創建分頁
+    const wsScripts = XLSX.utils.aoa_to_sheet([['ID', '腳本名稱', '平台', '內容', '創建時間'], ['無數據']]);
+    XLSX.utils.book_append_sheet(wb, wsScripts, '我的腳本');
+  }
   
-  data.topics.forEach(topic => {
-    const topicName = (topic.topic || '').replace(/"/g, '""');
-    const content = (topic.content || '').substring(0, 100).replace(/"/g, '""').replace(/\n/g, ' ');
-    const platform = (topic.platform || '').replace(/"/g, '""');
-    const createdAt = formatTaiwanTime(topic.created_at || '').split(' ')[0];
-    rows.push(`選題,${topic.id || ''},${topic.id || ''},"${topicName}","${content}","${platform}",${createdAt}\n`);
-  });
+  // 2. 帳號定位分頁
+  if (data.positioning && data.positioning.length > 0) {
+    const positioningData = data.positioning.map(record => ({
+      'ID': record.id || '',
+      '編號': record.record_number || '',
+      '內容': record.content || '',
+      '創建時間': formatTaiwanTime(record.created_at || '')
+    }));
+    const wsPositioning = XLSX.utils.json_to_sheet(positioningData);
+    XLSX.utils.book_append_sheet(wb, wsPositioning, '帳號定位');
+  } else {
+    const wsPositioning = XLSX.utils.aoa_to_sheet([['ID', '編號', '內容', '創建時間'], ['無數據']]);
+    XLSX.utils.book_append_sheet(wb, wsPositioning, '帳號定位');
+  }
   
-  data.conversations.forEach(conv => {
-    const summary = (conv.summary || '').substring(0, 100).replace(/"/g, '""').replace(/\n/g, ' ');
-    const createdAt = formatTaiwanTime(conv.created_at || '').split(' ')[0];
-    rows.push(`對話,${conv.id || ''},${conv.id || ''},"${conv.conversation_type || ''}","${summary}","",${createdAt}\n`);
-  });
+  // 3. 選題內容分頁
+  if (data.topics && data.topics.length > 0) {
+    const topicsData = data.topics.map(topic => ({
+      'ID': topic.id || '',
+      '選題名稱': topic.topic || '',
+      '平台': topic.platform || '',
+      '內容': topic.content || '',
+      '創建時間': formatTaiwanTime(topic.created_at || '')
+    }));
+    const wsTopics = XLSX.utils.json_to_sheet(topicsData);
+    XLSX.utils.book_append_sheet(wb, wsTopics, '選題內容');
+  } else {
+    const wsTopics = XLSX.utils.aoa_to_sheet([['ID', '選題名稱', '平台', '內容', '創建時間'], ['無數據']]);
+    XLSX.utils.book_append_sheet(wb, wsTopics, '選題內容');
+  }
   
-  return rows.join('');
+  // 4. 對話記錄分頁
+  if (data.conversations && data.conversations.length > 0) {
+    const conversationsData = data.conversations.map(conv => ({
+      'ID': conv.id || '',
+      '對話類型': conv.conversation_type || '',
+      '摘要': conv.summary || '',
+      '創建時間': formatTaiwanTime(conv.created_at || '')
+    }));
+    const wsConversations = XLSX.utils.json_to_sheet(conversationsData);
+    XLSX.utils.book_append_sheet(wb, wsConversations, '對話記錄');
+  } else {
+    const wsConversations = XLSX.utils.aoa_to_sheet([['ID', '對話類型', '摘要', '創建時間'], ['無數據']]);
+    XLSX.utils.book_append_sheet(wb, wsConversations, '對話記錄');
+  }
+  
+  // 5. IP人設規劃分頁
+  if (data.ipPlanning && data.ipPlanning.length > 0) {
+    // 按類型分組
+    const ipPlanningByType = {
+      profile: [],
+      plan: [],
+      scripts: []
+    };
+    
+    data.ipPlanning.forEach(result => {
+      const type = result.result_type || 'profile';
+      if (ipPlanningByType[type]) {
+        ipPlanningByType[type].push(result);
+      }
+    });
+    
+    // 帳號定位 (Profile)
+    if (ipPlanningByType.profile.length > 0) {
+      const profileData = ipPlanningByType.profile.map(result => ({
+        'ID': result.id || '',
+        '標題': result.title || '帳號定位',
+        '內容': (result.content || '').replace(/<[^>]*>/g, ''), // 移除 HTML 標籤
+        '創建時間': formatTaiwanTime(result.created_at || '')
+      }));
+      const wsProfile = XLSX.utils.json_to_sheet(profileData);
+      XLSX.utils.book_append_sheet(wb, wsProfile, 'IP-帳號定位');
+    } else {
+      const wsProfile = XLSX.utils.aoa_to_sheet([['ID', '標題', '內容', '創建時間'], ['無數據']]);
+      XLSX.utils.book_append_sheet(wb, wsProfile, 'IP-帳號定位');
+    }
+    
+    // 選題方向 (Plan)
+    if (ipPlanningByType.plan.length > 0) {
+      const planData = ipPlanningByType.plan.map(result => ({
+        'ID': result.id || '',
+        '標題': result.title || '選題方向（影片類型配比）',
+        '內容': (result.content || '').replace(/<[^>]*>/g, ''),
+        '創建時間': formatTaiwanTime(result.created_at || '')
+      }));
+      const wsPlan = XLSX.utils.json_to_sheet(planData);
+      XLSX.utils.book_append_sheet(wb, wsPlan, 'IP-選題方向');
+    } else {
+      const wsPlan = XLSX.utils.aoa_to_sheet([['ID', '標題', '內容', '創建時間'], ['無數據']]);
+      XLSX.utils.book_append_sheet(wb, wsPlan, 'IP-選題方向');
+    }
+    
+    // 一週腳本 (Scripts)
+    if (ipPlanningByType.scripts.length > 0) {
+      const scriptsData = ipPlanningByType.scripts.map(result => ({
+        'ID': result.id || '',
+        '標題': result.title || '一週腳本',
+        '內容': (result.content || '').replace(/<[^>]*>/g, ''),
+        '創建時間': formatTaiwanTime(result.created_at || '')
+      }));
+      const wsScripts = XLSX.utils.json_to_sheet(scriptsData);
+      XLSX.utils.book_append_sheet(wb, wsScripts, 'IP-一週腳本');
+    } else {
+      const wsScripts = XLSX.utils.aoa_to_sheet([['ID', '標題', '內容', '創建時間'], ['無數據']]);
+      XLSX.utils.book_append_sheet(wb, wsScripts, 'IP-一週腳本');
+    }
+  } else {
+    // 即使沒有數據也創建分頁
+    const wsProfile = XLSX.utils.aoa_to_sheet([['ID', '標題', '內容', '創建時間'], ['無數據']]);
+    XLSX.utils.book_append_sheet(wb, wsProfile, 'IP-帳號定位');
+    const wsPlan = XLSX.utils.aoa_to_sheet([['ID', '標題', '內容', '創建時間'], ['無數據']]);
+    XLSX.utils.book_append_sheet(wb, wsPlan, 'IP-選題方向');
+    const wsScripts = XLSX.utils.aoa_to_sheet([['ID', '標題', '內容', '創建時間'], ['無數據']]);
+    XLSX.utils.book_append_sheet(wb, wsScripts, 'IP-一週腳本');
+  }
+  
+  // 生成 Excel 檔案並下載
+  const timestamp = new Date().toISOString().split('T')[0];
+  XLSX.writeFile(wb, `aijob_user_data_${timestamp}.xlsx`);
 }
 
 // 清除本地快取

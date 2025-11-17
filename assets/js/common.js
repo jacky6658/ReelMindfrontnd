@@ -286,25 +286,283 @@
         redirect: 'manual'
       });
       
-      if (response.ok || response.status === 302) {
+      // 記錄響應狀態以便調試
+      console.log('授權驗證響應狀態:', response.status, response.statusText);
+      console.log('授權驗證響應 headers:', Object.fromEntries(response.headers.entries()));
+      
+      // 檢查響應類型
+      const contentType = response.headers.get('content-type') || '';
+      const isJson = contentType.includes('application/json');
+      const isRedirect = response.status === 302 || response.status === 301;
+      
+      if (response.ok || isRedirect) {
         // 驗證成功
-        await checkSubscriptionStatus();
-        showToast('✅ 訂閱啟用成功！', 5000);
+        // 如果是 JSON 響應，嘗試解析
+        let responseData = null;
+        if (isJson && response.ok) {
+          try {
+            responseData = await response.json();
+            console.log('授權驗證成功響應數據:', responseData);
+          } catch (e) {
+            console.warn('無法解析 JSON 響應:', e);
+          }
+        }
+        
+        // 等待一小段時間確保後端完成資料庫更新
+        await new Promise(resolve => setTimeout(resolve, 1500)); // 增加到 1.5 秒，給後端更多時間
+        
+        // 強制刷新用戶資訊（優先獲取最新的訂閱狀態）
+        let userInfoFromAPI = null;
+        if (ipPlanningUser && ipPlanningUser.user_id) {
+          try {
+            const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+              headers: {
+                'Authorization': `Bearer ${currentToken}`
+              }
+            });
+            if (userResponse.ok) {
+              userInfoFromAPI = await userResponse.json();
+              // 更新本地用戶資訊
+              if (userInfoFromAPI.is_subscribed) {
+                document.body.dataset.subscribed = 'true';
+                localStorage.setItem('subscriptionStatus', 'active');
+                // 更新 ipPlanningUser
+                if (ipPlanningUser) {
+                  ipPlanningUser.is_subscribed = userInfoFromAPI.is_subscribed;
+                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('刷新用戶資訊失敗:', e);
+          }
+        }
+        
+        // 重試檢查訂閱狀態（最多重試 5 次，增加重試次數）
+        let retryCount = 0;
+        let subscriptionActive = false;
+        
+        // 如果 API 已經返回訂閱狀態，直接使用
+        if (userInfoFromAPI && userInfoFromAPI.is_subscribed) {
+          subscriptionActive = true;
+        } else {
+          // 否則重試檢查
+          while (retryCount < 5 && !subscriptionActive) {
+            await checkSubscriptionStatus();
+            // 檢查訂閱狀態
+            const isSubscribed = document.body.dataset.subscribed === 'true' || 
+                                localStorage.getItem('subscriptionStatus') === 'active';
+            
+            if (isSubscribed) {
+              subscriptionActive = true;
+              break;
+            }
+            
+            // 如果還沒生效，等待後重試
+            if (retryCount < 4) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            retryCount++;
+          }
+        }
+        
+        // 獲取方案類型（從後端響應或預設為 yearly）
+        let planType = 'yearly';
+        if (responseData && responseData.plan_type) {
+          planType = responseData.plan_type;
+        } else {
+          // 如果響應中沒有方案資訊，嘗試再次獲取（但不要重複驗證）
+          try {
+            // 直接從用戶資訊獲取訂閱狀態，而不是再次調用驗證 API
+            const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+              headers: {
+                'Authorization': `Bearer ${currentToken}`
+              }
+            });
+            if (userResponse.ok) {
+              const userInfo = await userResponse.json();
+              // 可以從用戶資訊中獲取方案類型（如果有）
+              console.log('用戶資訊:', userInfo);
+            }
+          } catch (e) {
+            console.warn('無法獲取用戶資訊，使用預設值');
+          }
+        }
+        
+        // 再次確認訂閱狀態（確保顯示正確）
+        const finalCheck = document.body.dataset.subscribed === 'true' || 
+                          localStorage.getItem('subscriptionStatus') === 'active' ||
+                          (userInfoFromAPI && userInfoFromAPI.is_subscribed);
+        
+        if (finalCheck || subscriptionActive) {
+          const planName = planType === 'yearly' ? '年費' : '月費';
+          const planDays = planType === 'yearly' ? '1年' : '1個月';
+          showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+        } else {
+          // 如果最終檢查還是沒有訂閱，可能是後端更新延遲，顯示提示而不是錯誤
+          console.warn('授權驗證成功，但訂閱狀態尚未更新，繼續等待...');
+          showToast('✅ 授權啟用成功！正在更新訂閱狀態...', 5000);
+          // 再次嘗試刷新訂閱狀態（增加重試次數和延遲）
+          setTimeout(async () => {
+            // 再次強制刷新用戶資訊
+            try {
+              const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                headers: {
+                  'Authorization': `Bearer ${currentToken}`
+                }
+              });
+              if (userResponse.ok) {
+                const latestUserInfo = await userResponse.json();
+                if (latestUserInfo.is_subscribed) {
+                  document.body.dataset.subscribed = 'true';
+                  localStorage.setItem('subscriptionStatus', 'active');
+                  if (ipPlanningUser) {
+                    ipPlanningUser.is_subscribed = latestUserInfo.is_subscribed;
+                    localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  }
+                  const planName = planType === 'yearly' ? '年費' : '月費';
+                  const planDays = planType === 'yearly' ? '1年' : '1個月';
+                  showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+                  return;
+                }
+              }
+            } catch (e) {
+              console.warn('再次刷新用戶資訊失敗:', e);
+            }
+            
+            // 如果還是沒有，再等待一次
+            await checkSubscriptionStatus();
+            const recheck = document.body.dataset.subscribed === 'true' || 
+                           localStorage.getItem('subscriptionStatus') === 'active';
+            if (recheck) {
+              const planName = planType === 'yearly' ? '年費' : '月費';
+              const planDays = planType === 'yearly' ? '1年' : '1個月';
+              showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+            } else {
+              // 如果還是沒有，但後端已經授權成功（response.ok），顯示成功訊息而不是錯誤
+              console.warn('授權驗證成功，但訂閱狀態更新較慢，請稍後重新整理頁面');
+              showToast('✅ 授權啟用成功！如果未看到訂閱狀態，請重新整理頁面', 8000);
+            }
+          }, 3000); // 增加到 3 秒
+        }
+        
         // 清除 URL 參數
         window.history.replaceState({}, document.title, window.location.pathname);
       } else {
         // 嘗試獲取詳細錯誤訊息
         let errorMessage = '啟用失敗，請稍後再試';
+        let isAlreadyActivated = false;
         try {
           const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
+          
+          // 檢查是否為「已經啟用」的成功訊息（同一個帳戶）
+          if (errorData.status === 'already_activated' && errorData.message) {
+            // 更新本地狀態
+            document.body.dataset.subscribed = 'true';
+            localStorage.setItem('subscriptionStatus', 'active');
+            if (ipPlanningUser) {
+              ipPlanningUser.is_subscribed = true;
+              localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+            }
+            // 顯示友好訊息
+            const activatedDate = errorData.activated_at ? 
+              new Date(errorData.activated_at).toLocaleString('zh-TW') : '';
+            const message = activatedDate ? 
+              `✅ ${errorData.message}（啟用時間：${activatedDate}）` : 
+              `✅ ${errorData.message}`;
+            showToast(message, 5000);
+            return; // 提前返回，不顯示錯誤訊息
+          }
+          
+          errorMessage = errorData.error || errorData.message || errorMessage;
+          
+          // 如果有詳細資訊，顯示給用戶
+          if (errorData.activated_at) {
+            isAlreadyActivated = true;
+            const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW');
+            errorMessage = `此授權連結已使用（${activatedDate}）`;
+            
+            // 如果連結已使用，檢查用戶當前的訂閱狀態
+            // 如果用戶已經有訂閱，這可能是成功的（用戶之前已經啟用過）
+            try {
+              const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                headers: {
+                  'Authorization': `Bearer ${currentToken}`
+                }
+              });
+              if (userResponse.ok) {
+                const userInfo = await userResponse.json();
+                if (userInfo.is_subscribed) {
+                  // 用戶已經有訂閱，這表示之前已經成功啟用過
+                  // 更新本地狀態
+                  document.body.dataset.subscribed = 'true';
+                  localStorage.setItem('subscriptionStatus', 'active');
+                  if (ipPlanningUser) {
+                    ipPlanningUser.is_subscribed = userInfo.is_subscribed;
+                    localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  }
+                  // 顯示成功訊息而不是錯誤
+                  showToast(`✅ 您已擁有授權！此連結已於 ${activatedDate} 啟用`, 5000);
+                  return; // 提前返回，不顯示錯誤訊息
+                }
+              }
+            } catch (e) {
+              console.warn('檢查訂閱狀態失敗:', e);
+              // 如果檢查失敗，繼續顯示錯誤訊息
+            }
+          } else if (errorData.expired_at) {
+            const expiredDate = new Date(errorData.expired_at).toLocaleString('zh-TW');
+            errorMessage = `此授權連結已過期（${expiredDate}）`;
+          }
         } catch (e) {
-          // 如果無法解析 JSON，使用預設錯誤訊息
+          // 如果無法解析 JSON，根據狀態碼顯示不同訊息
+          if (response.status === 500) {
+            errorMessage = '伺服器錯誤，請稍後再試或聯繫客服';
+          } else if (response.status === 404) {
+            errorMessage = '授權連結無效或不存在';
+          } else if (response.status === 400) {
+            errorMessage = '授權連結格式錯誤';
+          } else {
+            errorMessage = `啟用失敗（錯誤代碼：${response.status}）`;
+          }
         }
-        showToast(errorMessage, 5000);
+        // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
+        if (!isAlreadyActivated || !document.body.dataset.subscribed) {
+          showToast(`❌ ${errorMessage}`, 5000);
+        }
       }
     } catch (error) {
       console.error('啟用失敗:', error);
+      
+      // 即使發生錯誤，也檢查一下用戶的訂閱狀態（可能後端已經授權成功）
+      try {
+        const currentToken = localStorage.getItem('ipPlanningToken');
+        if (currentToken) {
+          const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${currentToken}`
+            }
+          });
+          if (userResponse.ok) {
+            const userInfo = await userResponse.json();
+            if (userInfo.is_subscribed) {
+              // 用戶已經有訂閱，表示授權成功
+              document.body.dataset.subscribed = 'true';
+              localStorage.setItem('subscriptionStatus', 'active');
+              if (ipPlanningUser) {
+                ipPlanningUser.is_subscribed = userInfo.is_subscribed;
+                localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+              }
+              showToast('✅ 授權啟用成功！', 5000);
+              return; // 提前返回，不顯示錯誤
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('檢查訂閱狀態失敗:', e);
+      }
+      
+      // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
       showToast('⚠️ 啟用失敗，請稍後再試', 5000);
     }
   }
@@ -510,17 +768,19 @@
       toastEl.className = 'toast';
       toastEl.style.cssText = `
         position: fixed;
-        top: 20px;
-        right: 20px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         background: #1f2937;
         color: white;
         padding: 16px 24px;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 10000;
+        z-index: 100001;
         display: none;
         opacity: 0;
         transition: opacity 0.3s;
+        pointer-events: auto;
       `;
       document.body.appendChild(toastEl);
     }
@@ -595,13 +855,15 @@
       }
     }
     
-    // 檢查頁面權限（首頁 index.html 不需要檢查，允許未登入用戶訪問）
+    // 檢查頁面權限（首頁 index.html 和體驗頁面 experience.html 不需要檢查，允許未登入用戶訪問）
     const isHomePage = window.location.pathname === '/' || 
                        window.location.pathname.endsWith('/index.html') ||
                        window.location.pathname.endsWith('/');
+    const isExperiencePage = window.location.pathname.endsWith('/experience.html') ||
+                             window.location.pathname.includes('experience.html');
     
-    if (!isHomePage) {
-      // 非首頁才需要檢查權限
+    if (!isHomePage && !isExperiencePage) {
+      // 非首頁且非體驗頁面才需要檢查權限
       const hasPermission = await checkPagePermission();
       
       if (!hasPermission) {
@@ -609,7 +871,7 @@
         return;
       }
     } else {
-      // 首頁：只檢查登入和訂閱狀態（不強制要求），用於更新 UI
+      // 首頁或體驗頁面：只檢查登入和訂閱狀態（不強制要求），用於更新 UI
       await checkLoginStatus();
       await checkSubscriptionStatus();
     }

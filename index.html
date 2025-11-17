@@ -15,7 +15,72 @@
         visibility: visible;
         transition: opacity 0.3s ease-in;
       }
+      /* Fallback: 如果 3 秒後 JavaScript 仍未執行，強制顯示頁面 */
+      body:not(.page-loaded)::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        z-index: 999999;
+        animation: showPageFallback 3s forwards;
+      }
+      @keyframes showPageFallback {
+        0%, 99% { opacity: 0; }
+        100% { opacity: 1; display: none; }
+      }
     </style>
+    
+    <!-- 立即處理授權連結（不依賴 DOMContentLoaded） -->
+    <script>
+      (function() {
+        'use strict';
+        try {
+          // 立即檢查 URL 中的 token 參數
+          const urlParams = new URLSearchParams(window.location.search);
+          const token = urlParams.get('token');
+          
+          if (token) {
+            console.log('🔗 檢測到授權連結 token:', token.substring(0, 20) + '...');
+            
+            // 檢查是否已登入
+            const currentToken = localStorage.getItem('ipPlanningToken');
+            
+            if (!currentToken) {
+              // 未登入，先顯示 popup-callback.html 動畫，然後跳轉到 Google 登入
+              console.log('🔐 未登入，顯示動畫後跳轉到登入頁');
+              // 保存 activation_token 到 sessionStorage，供 popup-callback.html 使用
+              sessionStorage.setItem('pendingActivationToken', token);
+              // 跳轉到 popup-callback.html，它會自動處理登入流程
+              window.location.replace('/auth/popup-callback.html?activation_token=' + encodeURIComponent(token));
+              return;
+            } else {
+              // 已登入，標記需要處理授權（等 DOMContentLoaded 時處理）
+              sessionStorage.setItem('pendingActivationToken', token);
+              console.log('✅ 已登入，標記待處理授權');
+            }
+          }
+          
+          // 確保頁面在 3 秒後顯示（fallback）
+          setTimeout(function() {
+            if (document.body && !document.body.classList.contains('page-loaded')) {
+              console.warn('⚠️ JavaScript 載入超時，強制顯示頁面');
+              document.body.classList.add('page-loaded');
+            }
+          }, 3000);
+        } catch (e) {
+          console.error('❌ 授權連結處理錯誤:', e);
+          // 發生錯誤時，確保頁面能顯示
+          setTimeout(function() {
+            if (document.body) {
+              document.body.classList.add('page-loaded');
+            }
+          }, 1000);
+        }
+      })();
+    </script>
     
     <!-- Primary SEO Meta Tags -->
     <title>ReelMind | AI 短影音智能體 - AI 生成腳本 × AI 帳號定位 × 爆款短影音</title>
@@ -110,15 +175,15 @@
       "offers": [
         {
           "@type": "Offer",
-          "name": "月費方案",
-          "price": "2980",
+          "name": "買斷方案",
+          "price": "9900",
           "priceCurrency": "TWD",
           "availability": "https://schema.org/InStock"
         },
         {
           "@type": "Offer",
           "name": "年費方案",
-          "price": "23760",
+          "price": "7980",
           "priceCurrency": "TWD",
           "availability": "https://schema.org/InStock"
         }
@@ -2473,6 +2538,108 @@
         to {
           opacity: 1;
           transform: translateY(0);
+        }
+      }
+      
+      /* 體驗區塊動畫 */
+      @keyframes floatAnimation {
+        0%, 100% {
+          transform: translate(0, 0) scale(1);
+          opacity: 0.6;
+        }
+        50% {
+          transform: translate(30px, -30px) scale(1.1);
+          opacity: 0.8;
+        }
+      }
+      
+      @keyframes sparkleAnimation {
+        0%, 100% {
+          opacity: 0;
+          transform: scale(0);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      
+      @keyframes pulseGlow {
+        0%, 100% {
+          box-shadow: 0 4px 12px rgba(239,68,68,0.4);
+          transform: scale(1);
+        }
+        50% {
+          box-shadow: 0 4px 20px rgba(239,68,68,0.6);
+          transform: scale(1.05);
+        }
+      }
+      
+      @keyframes firePulse {
+        0%, 100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+      }
+      
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      @keyframes sparkleRotate {
+        0%, 100% {
+          transform: rotate(0deg) scale(1);
+        }
+        50% {
+          transform: rotate(180deg) scale(1.2);
+        }
+      }
+      
+      @keyframes ctaPulse {
+        0%, 100% {
+          box-shadow: 0 4px 20px rgba(59,130,246,0.3), 0 0 0 0 rgba(59,130,246,0.5);
+        }
+        50% {
+          box-shadow: 0 4px 20px rgba(59,130,246,0.3), 0 0 0 8px rgba(59,130,246,0);
+        }
+      }
+      
+      @keyframes magicSpin {
+        0%, 100% {
+          transform: rotate(0deg);
+        }
+        25% {
+          transform: rotate(-10deg);
+        }
+        75% {
+          transform: rotate(10deg);
+        }
+      }
+      
+      @keyframes arrowBounce {
+        0%, 100% {
+          transform: translateX(0);
+        }
+        50% {
+          transform: translateX(5px);
+        }
+      }
+      
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
         }
       }
       
@@ -11077,7 +11244,7 @@
         <!-- 頁面內容區域 -->
         <div class="page-content">
           <!-- 首頁 -->
-          <div id="homepage" class="page active page-enter">
+          <div id="homepage" class="page page-enter">
             <div class="homepage">
               <!-- 未登入用戶（訪客）視圖 - 顯示 index_unsubscribed.html 的內容 -->
               <div id="homepage-unsubscribed" class="homepage-view">
@@ -11101,8 +11268,8 @@
                         <a href="#" onclick="goToPricing(); return false;" style="padding: 16px 24px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px rgba(16,185,129,0.3); transition: all 0.3s; font-size: 0.9rem; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden;">
                           立即啟用<br>AI 智能體
                         </a>
-                        <a href="#rm-overview-v2" onclick="smoothScrollTo('rm-overview-v2'); return false;" style="padding: 16px 24px; background: rgba(255,255,255,0.95); color: #2563EB; border: 2px solid rgba(255,255,255,0.5); border-radius: 12px; font-weight: 600; text-decoration: none; transition: all 0.3s; font-size: 0.9rem; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden; backdrop-filter: blur(10px);">
-                          了解使用方式
+                        <a href="#experience-demo" id="hero-experience-btn" onclick="smoothScrollTo('experience-demo'); return false;" style="padding: 16px 24px; background: rgba(255,255,255,0.95); color: #2563EB; border: 2px solid rgba(255,255,255,0.5); border-radius: 12px; font-weight: 600; text-decoration: none; transition: all 0.3s; font-size: 0.9rem; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden; backdrop-filter: blur(10px);">
+                          搶先體驗ReelMind
                         </a>
                       </div>
                     </div>
@@ -11389,7 +11556,7 @@
               <section class="rm-guide-section" style="background: #F8FAFC; padding: 100px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw;">
                 <div style="max-width: 1400px; margin: 0 auto; padding: 0 16px;">
                   <div style="text-align: center; margin-bottom: 60px;">
-                    <h2 style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; color: #1E293B; margin-bottom: 16px;"><i class="fas fa-book-open" style="margin-right: 10px;"></i>AI 短影音實戰指南</h2>
+                    <h2 onclick="switchPage('guide'); return false;" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; color: #1E293B; margin-bottom: 16px; cursor: pointer; transition: color 0.3s;" onmouseover="this.style.color='#2563EB';" onmouseout="this.style.color='#1E293B';"><i class="fas fa-book-open" style="margin-right: 10px;"></i>AI 短影音實戰指南</h2>
                     <p style="font-size: 1.1rem; color: #64748B; max-width: 600px; margin: 0 auto;">學習如何用 AI 打造爆款短影音內容</p>
                 </div>
                   
@@ -11438,58 +11605,132 @@
                         </div>
                       </div>
                     </a>
+                    
+                    <!-- 文章 4 -->
+                    <a onclick="switchPage('guide-article4'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                      <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
+                        <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
+                          <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">腳本結構選擇指南</div>
+                          <div style="font-size: 0.95rem; color: #64748B; line-height: 1.6;">
+                            了解 ReelMind 提供的 5 種腳本結構（A/B/C/D/E），每種結構適合不同的內容類型和目標。本指南幫助你選擇最適合的腳本結構，提升內容效果...
+                          </div>
+                        </div>
+                        <div style="padding: 20px 32px; background: #F8FAFC;">
+                          <span style="color: #2563EB; font-weight: 600; font-size: 0.95rem;">閱讀更多 →</span>
+                        </div>
+                      </div>
+                    </a>
                   </div>
                 </div>
               </section>
 
-              <!-- 別人怎麼用 - 兩個區塊 -->
-              <section class="user-story-section" style="background: white; padding: 100px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw;">
-                <div style="max-width: 1400px; margin: 0 auto; padding: 0 16px;">
+              <!-- 免費體驗版區塊（移到"別人怎麼用"前面，增強動態動畫和 FOMO 感） -->
+              <section id="experience-demo" style="background: linear-gradient(to bottom right, #F0FDF4 0%, #EFF6FF 100%); padding: 100px 0; margin: -20px calc(-50vw + 50%) 0 calc(-50vw + 50%); width: 100vw; max-width: 100vw; position: relative; overflow: hidden;">
+                <!-- 動態背景動畫 -->
+                <div class="experience-animated-bg" style="position: absolute; inset: 0; overflow: hidden; pointer-events: none;">
+                  <div class="floating-shape" style="position: absolute; width: 300px; height: 300px; background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(16,185,129,0.15)); border-radius: 50%; filter: blur(80px); animation: floatAnimation 8s ease-in-out infinite; top: 10%; left: 10%;"></div>
+                  <div class="floating-shape" style="position: absolute; width: 250px; height: 250px; background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.15)); border-radius: 50%; filter: blur(70px); animation: floatAnimation 10s ease-in-out infinite reverse; top: 60%; right: 15%;"></div>
+                  <div class="floating-shape" style="position: absolute; width: 200px; height: 200px; background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(139,92,246,0.15)); border-radius: 50%; filter: blur(60px); animation: floatAnimation 12s ease-in-out infinite; bottom: 20%; left: 20%;"></div>
+                </div>
+                
+                <!-- 閃爍星星動畫 -->
+                <div class="sparkle-container" style="position: absolute; inset: 0; pointer-events: none; z-index: 1;">
+                  <div class="sparkle" style="position: absolute; width: 4px; height: 4px; background: #3B82F6; border-radius: 50%; animation: sparkleAnimation 3s ease-in-out infinite; top: 20%; left: 15%;"></div>
+                  <div class="sparkle" style="position: absolute; width: 3px; height: 3px; background: #10B981; border-radius: 50%; animation: sparkleAnimation 2.5s ease-in-out infinite 0.5s; top: 40%; right: 20%;"></div>
+                  <div class="sparkle" style="position: absolute; width: 5px; height: 5px; background: #8B5CF6; border-radius: 50%; animation: sparkleAnimation 3.5s ease-in-out infinite 1s; bottom: 30%; left: 25%;"></div>
+                  <div class="sparkle" style="position: absolute; width: 4px; height: 4px; background: #3B82F6; border-radius: 50%; animation: sparkleAnimation 2.8s ease-in-out infinite 1.5s; top: 60%; left: 50%;"></div>
+                </div>
+                <div style="max-width: 1400px; margin: 0 auto; padding: 0 16px; position: relative; z-index: 10;">
                   <div style="text-align: center; margin-bottom: 60px;">
-                    <h2 style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; color: #1E293B; margin-bottom: 16px;">
-                      <i class="fas fa-users" style="margin-right: 10px; color: #3B82F6;"></i>別人怎麼用
+                    <!-- FOMO 標籤：限時免費 -->
+                    <div style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); color: white; border-radius: 9999px; font-weight: 700; font-size: 0.9rem; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(239,68,68,0.4); animation: pulseGlow 2s ease-in-out infinite;">
+                      <i class="fas fa-fire" style="animation: firePulse 1.5s ease-in-out infinite;"></i>
+                      <span>限時免費體驗</span>
+                    </div>
+                    <h2 style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; color: #1E293B; margin-bottom: 16px; animation: fadeInUp 0.8s ease-out;">
+                      <i class="fas fa-sparkles" style="margin-right: 10px; color: #3B82F6; animation: sparkleRotate 3s ease-in-out infinite;"></i>立即體驗 AI 短影音生成
                     </h2>
-                    <p style="font-size: 1.1rem; color: #64748B; max-width: 600px; margin: 0 auto;">
-                      看看其他創作者如何用 ReelMind 打造爆款內容
+                    <p style="font-size: 1.1rem; color: #64748B; max-width: 700px; margin: 0 auto 24px; line-height: 1.7; animation: fadeInUp 0.8s ease-out 0.2s both;">
+                      無需登入，立即體驗 ReelMind 的一鍵生成功能。填寫你的需求，AI 將為你生成帳號定位、選題建議和完整腳本。
                     </p>
-                  </div>
-                  
-                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 32px; margin-top: 40px;">
-                    <!-- 使用案例 1 -->
-                    <div class="user-story-card">
-                      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
-                        <img src="https://ui-avatars.com/api/?name=Nick+Wu&background=3B82F6&color=fff&size=128&bold=true" alt="Nick Wu" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #E5E7EB;" />
-                        <div>
-                          <div style="font-size: 1.1rem; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Nick Wu｜行銷顧問</div>
-                          <div style="font-size: 0.9rem; color: #64748B;">使用 ReelMind 3 個月</div>
-                        </div>
+                    <!-- FOMO 統計：增加緊迫感 -->
+                    <div style="display: inline-flex; align-items: center; gap: 16px; padding: 12px 24px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); border-radius: 12px; border: 1px solid rgba(59,130,246,0.2); margin-bottom: 24px; animation: fadeInUp 0.8s ease-out 0.4s both;">
+                      <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #3B82F6; line-height: 1;">1,234+</div>
+                        <div style="font-size: 0.75rem; color: #64748B;">今日體驗</div>
                       </div>
-                      <div style="font-size: 1rem; color: #475569; line-height: 1.8; margin-bottom: 20px; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; width: 100%; max-width: 100%; box-sizing: border-box;">
-                        「之前每天要花 2-3 小時想腳本，現在用 ReelMind 一鍵生成，5 分鐘就搞定。最棒的是 AI 會記住我的品牌調性，每次生成的內容都很符合我的風格。上個月 IG Reels 的觀看次數提升了 180%！」
+                      <div style="width: 1px; height: 30px; background: #E2E8F0;"></div>
+                      <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #10B981; line-height: 1;">98%</div>
+                        <div style="font-size: 0.75rem; color: #64748B;">滿意度</div>
                       </div>
-                      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <span style="padding: 6px 12px; background: #EFF6FF; color: #2563EB; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">#一鍵生成</span>
-                        <span style="padding: 6px 12px; background: #F0FDF4; color: #059669; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">#IG Reels</span>
-                        <span style="padding: 6px 12px; background: #FEF3C7; color: #D97706; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">#觀看提升 180%</span>
+                      <div style="width: 1px; height: 30px; background: #E2E8F0;"></div>
+                      <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #8B5CF6; line-height: 1;">5分鐘</div>
+                        <div style="font-size: 0.75rem; color: #64748B;">平均生成</div>
                       </div>
                     </div>
-                    
-                    <!-- 使用案例 2 -->
-                    <div class="user-story-card">
-                      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
-                        <img src="https://ui-avatars.com/api/?name=李美華&background=10B981&color=fff&size=128&bold=true" alt="李美華" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #E5E7EB;" />
-                        <div>
-                          <div style="font-size: 1.1rem; font-weight: 700; color: #1E293B; margin-bottom: 4px;">李美華｜內容創作者</div>
-                          <div style="font-size: 0.9rem; color: #64748B;">使用 ReelMind 6 個月</div>
+                  </div>
+                  
+                  <!-- 體驗版卡片 -->
+                  <div style="max-width: 800px; margin: 0 auto;">
+                    <div style="background: white; border-radius: 24px; padding: 48px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); border: 1px solid #E2E8F0; position: relative; overflow: hidden;">
+                      <!-- 背景裝飾 -->
+                      <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(16,185,129,0.1)); border-radius: 50%; filter: blur(60px);"></div>
+                      <div style="position: absolute; bottom: -50px; left: -50px; width: 200px; height: 200px; background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,130,246,0.1)); border-radius: 50%; filter: blur(60px);"></div>
+                      
+                      <div style="position: relative; z-index: 10;">
+                        <!-- 功能特色 -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 40px;">
+                          <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 4px 12px rgba(59,130,246,0.3);">
+                              <i class="fas fa-bullseye" style="font-size: 1.5rem; color: white;"></i>
+                        </div>
+                            <h3 style="font-size: 1rem; font-weight: 700; color: #1E293B; margin-bottom: 8px;">帳號定位</h3>
+                            <p style="font-size: 0.875rem; color: #64748B; line-height: 1.5;">AI 分析你的特質，打造專屬定位</p>
+                      </div>
+                          <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+                              <i class="fas fa-lightbulb" style="font-size: 1.5rem; color: white;"></i>
+                      </div>
+                            <h3 style="font-size: 1rem; font-weight: 700; color: #1E293B; margin-bottom: 8px;">選題建議</h3>
+                            <p style="font-size: 0.875rem; color: #64748B; line-height: 1.5;">基於知識庫生成高流量選題</p>
+                      </div>
+                          <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 4px 12px rgba(139,92,246,0.3);">
+                              <i class="fas fa-file-alt" style="font-size: 1.5rem; color: white;"></i>
+                    </div>
+                            <h3 style="font-size: 1rem; font-weight: 700; color: #1E293B; margin-bottom: 8px;">完整腳本</h3>
+                            <p style="font-size: 0.875rem; color: #64748B; line-height: 1.5;">Hook → Value → CTA 完整結構</p>
                         </div>
                       </div>
-                      <div style="font-size: 1rem; color: #475569; line-height: 1.8; margin-bottom: 20px; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; width: 100%; max-width: 100%; box-sizing: border-box;">
-                        「IP 人設規劃功能幫我建立了完整的內容策略，14 天規劃讓我知道每天要發什麼。現在每週固定上片 5-7 支，粉絲互動率提升了 3 倍。最喜歡的是 AI 顧問功能，可以隨時討論內容方向，就像有個專業顧問在身邊。」
+                        
+                        <!-- CTA 按鈕（增強動畫和 FOMO） -->
+                        <div style="text-align: center; position: relative;">
+                          <a href="experience.html" class="experience-cta-btn" style="display: inline-flex; align-items: center; gap: 12px; padding: 18px 40px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 1.1rem; box-shadow: 0 4px 20px rgba(59,130,246,0.3), 0 0 0 0 rgba(59,130,246,0.5); transition: all 0.3s; transform: scale(1); animation: ctaPulse 2s ease-in-out infinite; position: relative; overflow: hidden;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 30px rgba(59,130,246,0.5), 0 0 0 4px rgba(59,130,246,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 20px rgba(59,130,246,0.3), 0 0 0 0 rgba(59,130,246,0.5)'">
+                            <span style="position: relative; z-index: 2;">
+                              <i class="fas fa-magic" style="font-size: 1.2rem; animation: magicSpin 2s ease-in-out infinite;"></i>
+                            </span>
+                            <span style="position: relative; z-index: 2;">立即免費體驗</span>
+                            <span style="position: relative; z-index: 2;">
+                              <i class="fas fa-arrow-right" style="font-size: 1rem; animation: arrowBounce 1.5s ease-in-out infinite;"></i>
+                            </span>
+                            <!-- 按鈕光暈效果 -->
+                            <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent); opacity: 0; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'"></div>
+                          </a>
+                          <!-- 緊迫感文字 -->
+                          <p style="margin-top: 16px; font-size: 0.85rem; color: #EF4444; font-weight: 600; animation: fadeIn 1s ease-out 1s both;">
+                            <i class="fas fa-clock" style="margin-right: 4px;"></i>限時免費，立即體驗後升級解鎖更多功能
+                          </p>
                       </div>
-                      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <span style="padding: 6px 12px; background: #F3E8FF; color: #7C3AED; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">#IP人設規劃</span>
-                        <span style="padding: 6px 12px; background: #EFF6FF; color: #2563EB; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">#AI顧問</span>
-                        <span style="padding: 6px 12px; background: #FEF3C7; color: #D97706; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">#互動率提升 3 倍</span>
+                        
+                        <!-- 提示文字 -->
+                        <div style="margin-top: 32px; padding: 20px; background: #FEF3C7; border-radius: 12px; border: 1px solid #FCD34D; text-align: center;">
+                          <p style="font-size: 0.9rem; color: #92400E; margin: 0; line-height: 1.6;">
+                            <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                            <strong>體驗版說明：</strong>此為免費體驗功能，生成結果可複製使用。升級完整版可解鎖 AI 顧問對話、IP 人設規劃、創作者資料庫等更多功能。
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -11510,16 +11751,15 @@
                   
                   <!-- 定價卡片（桌機橫式／手機直式） -->
                   <div class="rm-pricing-cards" style="display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin-bottom: 60px; padding: 0 20px;">
-                    <!-- 月費卡 -->
+                    <!-- 買斷卡 -->
                     <div style="flex: 0 1 320px; max-width: 380px; padding: 40px; background: rgba(255,255,255,0.15); backdrop-filter: blur(20px); border-radius: 24px; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s; display: flex; flex-direction: column;">
-                      <div style="font-size: 1rem; color: rgba(255,255,255,0.9); margin-bottom: 12px; font-weight: 600;">月費方案</div>
+                      <div style="font-size: 1rem; color: rgba(255,255,255,0.9); margin-bottom: 12px; font-weight: 600;">買斷價格</div>
                       <div style="display: flex; align-items: flex-end; flex-wrap: nowrap; gap: 4px; margin-bottom: 8px;">
-                        <div style="font-size: 2.5rem; font-weight: 800; color: white; line-height: 1;">NT$2,480</div>
-                        <div style="font-size: 0.9rem; color: rgba(255,255,255,0.8); flex-shrink: 0;">/月</div>
+                        <div style="font-size: 2.5rem; font-weight: 800; color: white; line-height: 1;">NT$9,900</div>
                       </div>
-                      <div style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin-bottom: 16px;">彈性方案，適合短期使用者</div>
-                      <a href="#" onclick="handleSubscriptionClick('monthly'); return false;" style="display: block; margin-top: auto; padding: 0 32px; background: white; color: #2563EB; border-radius: 12px; font-weight: 700; text-decoration: none; transition: all 0.3s; text-align: center; height: 56px; display: flex; align-items: center; justify-content: center;">
-                        立即訂閱
+                      <div style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin-bottom: 16px; text-decoration: line-through;">原價 NT$10,800</div>
+                      <a href="#" onclick="handleSubscriptionClick('lifetime'); return false;" style="display: block; margin-top: auto; padding: 0 32px; background: white; color: #2563EB; border-radius: 12px; font-weight: 700; text-decoration: none; transition: all 0.3s; text-align: center; height: 56px; display: flex; align-items: center; justify-content: center;">
+                        立即購買
                       </a>
                     </div>
                     
@@ -11530,11 +11770,11 @@
                       </div>
                       <div style="font-size: 1rem; color: #64748B; margin-bottom: 12px; font-weight: 600; margin-top: 12px;">年費方案</div>
                       <div style="display: flex; align-items: flex-end; flex-wrap: nowrap; gap: 4px; margin-bottom: 8px;">
-                        <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #10B981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1;">NT$23,760</div>
+                        <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #10B981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1;">NT$7,980</div>
                         <div style="font-size: 0.9rem; color: #94A3B8; flex-shrink: 0; margin-bottom: 0.3rem;">/年</div>
                       </div>
-                      <div style="font-size: 0.9rem; color: #10B981; font-weight: 600; margin-bottom: 4px;">平均每月 NT$1,980</div>
-                      <div style="font-size: 0.9rem; color: #94A3B8; margin-bottom: 16px;">節省 NT$5,000（20% OFF）</div>
+                      <div style="font-size: 0.9rem; color: #10B981; font-weight: 600; margin-bottom: 4px;">平均每個月 NT$690</div>
+                      <div style="font-size: 0.9rem; color: #94A3B8; margin-bottom: 16px;">最划算的長期方案</div>
                       <a href="#" onclick="handleSubscriptionClick('yearly'); return false;" style="display: block; margin-top: auto; padding: 0 32px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px rgba(16,185,129,0.3); transition: all 0.3s; text-align: center; height: 56px; display: flex; align-items: center; justify-content: center;">
                         立即訂閱
                       </a>
@@ -11641,43 +11881,60 @@
                     </div>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; margin-top: 40px;">
-                      <!-- 步驟 1：建立IP人設 -->
+                      <!-- 步驟 1：儲存自己的AI金鑰 -->
+                      <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 8px 30px rgba(17,24,39,0.06); border: 1px solid #E2E8F0; text-align: center; position: relative;">
+                        <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 700; box-shadow: 0 4px 12px rgba(245,158,11,0.3);">
+                          1
+                        </div>
+                        <div style="margin-top: 30px; margin-bottom: 24px;">
+                          <i class="fas fa-key" style="font-size: 3rem; color: #F59E0B; margin-bottom: 16px;"></i>
+                        </div>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">儲存自己的AI金鑰</h3>
+                        <p style="font-size: 1rem; color: #64748B; line-height: 1.7; margin-bottom: 20px;">
+                          在「創作者資料庫」中儲存你的 LLM API 金鑰（支援 Gemini、GPT 等），讓 AI 使用你的金鑰進行生成，節省成本並提升使用體驗。
+                        </p>
+                        <a href="#" onclick="switchPage('guide-article5'); return false;" style="display: inline-block; padding: 10px 20px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.3s; box-shadow: 0 2px 8px rgba(245,158,11,0.3);">
+                          如何拿到自己的LLM金鑰？
+                        </a>
+                      </div>
+                      
+                      <!-- 步驟 2：建立IP人設規劃 -->
                       <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 8px 30px rgba(17,24,39,0.06); border: 1px solid #E2E8F0; text-align: center; position: relative;">
                         <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 700; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
-                          1
+                          2
                         </div>
                         <div style="margin-top: 30px; margin-bottom: 24px;">
                           <i class="fas fa-user-tie" style="font-size: 3rem; color: #10B981; margin-bottom: 16px;"></i>
                         </div>
-                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">建立IP人設</h3>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">建立IP人設規劃</h3>
                         <p style="font-size: 1rem; color: #64748B; line-height: 1.7;">
-                          使用「IP人設規劃模式」，透過聊天記錄你的人生曲線與品牌故事，AI 會協助建立專屬的 IP Profile 和 14 天內容規劃。
+                          使用「IP人設規劃模式」，透過聊天記錄你的人生曲線與品牌故事，AI 會協助建立專屬的 IP Profile 和 14 天內容規劃。你也可以深度與 AI 討論短影音矩陣策略，打造完整的內容架構。
                         </p>
                       </div>
                       
-                      <!-- 步驟 2：一鍵生成 -->
+                      <!-- 步驟 3：一鍵生成模式 -->
                       <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 8px 30px rgba(17,24,39,0.06); border: 1px solid #E2E8F0; text-align: center; position: relative;">
                         <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 700; box-shadow: 0 4px 12px rgba(59,130,246,0.3);">
-                          2
+                          3
                         </div>
                         <div style="margin-top: 30px; margin-bottom: 24px;">
                           <i class="fas fa-magic" style="font-size: 3rem; color: #3B82F6; margin-bottom: 16px;"></i>
                         </div>
-                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">一鍵生成腳本</h3>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">一鍵生成模式</h3>
                         <p style="font-size: 1rem; color: #64748B; line-height: 1.7;">
-                          使用「一鍵生成模式」，輸入平台與主題，AI 會根據你的 IP 人設自動生成符合風格的腳本、選題與帳號定位建議。
+                          針對你的需求「快速」產生帳號定位、選題和腳本。AI 會根據你過往的 IP 人設規劃和生成記錄，自動調整內容風格，讓每次生成都更符合你的品牌調性。
                         </p>
                       </div>
                       
-                      <!-- 步驟 3：開始創作 -->
+                      <!-- 步驟 4：創作者資料庫 -->
                       <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 8px 30px rgba(17,24,39,0.06); border: 1px solid #E2E8F0; text-align: center; position: relative;">
                         <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 700; box-shadow: 0 4px 12px rgba(139,92,246,0.3);">
-                          3
+                          4
                         </div>
                         <div style="margin-top: 30px; margin-bottom: 24px;">
-                          <i class="fas fa-video" style="font-size: 3rem; color: #8B5CF6; margin-bottom: 16px;"></i>
+                          <i class="fas fa-database" style="font-size: 3rem; color: #8B5CF6; margin-bottom: 16px;"></i>
                         </div>
-                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">開始創作</h3>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 16px;">創作者資料庫</h3>
                         <p style="font-size: 1rem; color: #64748B; line-height: 1.7;">
                           完成腳本後，可以儲存到「創作者資料庫」，隨時查看、下載或重新生成。AI 會記住你的內容風格，持續優化每次生成的品質。
                         </p>
@@ -11688,7 +11945,7 @@
                     <div style="margin-top: 60px; padding: 32px; background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-radius: 20px; border: 2px solid #FCD34D; text-align: center;">
                       <p style="font-size: 1.1rem; color: #92400E; line-height: 1.7;">
                         <i class="fas fa-lightbulb" style="margin-right: 8px; color: #F59E0B;"></i>
-                        <strong style="font-weight: 700;">建議使用順序：</strong>先建立 IP 人設 → 一鍵生成腳本 → 開始創作。AI 會記住你之前的內容並持續優化。
+                        <strong style="font-weight: 700;">建議使用順序：</strong>先儲存 AI 金鑰 → 建立 IP 人設規劃 → 一鍵生成腳本 → 創作者資料庫管理。AI 會記住你之前的內容並持續優化。
                       </p>
                     </div>
                   </div>
@@ -11767,6 +12024,36 @@
                             <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">Reels / Shorts / TikTok<br>腳本差異</div>
                             <div style="font-size: 0.95rem; color: #64748B; line-height: 1.6;">
                               每個平台的短影音都有不同特性：IG Reels 偏重品牌敘事，YouTube Shorts 強調快速爆點，TikTok 重視娛樂性。本指南解析 AI 如何自動調整...
+                            </div>
+                          </div>
+                          <div style="padding: 20px 32px; background: #F8FAFC;">
+                            <span style="color: #2563EB; font-weight: 600; font-size: 0.95rem;">閱讀更多 →</span>
+                          </div>
+                        </div>
+                      </a>
+                      
+                      <!-- 文章 4 -->
+                      <a href="#" onclick="switchPage('guide-article4'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                        <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
+                          <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
+                            <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">腳本結構選擇指南</div>
+                            <div style="font-size: 0.95rem; color: #64748B; line-height: 1.6;">
+                              了解 ReelMind 提供的 5 種腳本結構（A/B/C/D/E），每種結構適合不同的內容類型和目標。本指南幫助你選擇最適合的腳本結構，提升內容效果...
+                            </div>
+                          </div>
+                          <div style="padding: 20px 32px; background: #F8FAFC;">
+                            <span style="color: #2563EB; font-weight: 600; font-size: 0.95rem;">閱讀更多 →</span>
+                          </div>
+                        </div>
+                      </a>
+                      
+                      <!-- 文章 5：如何拿到自己的LLM金鑰 -->
+                      <a href="#" onclick="switchPage('guide-article5'); return false;" style="text-decoration: none; display: block; cursor: pointer;">
+                        <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; height: 100%;">
+                          <div style="padding: 32px; border-bottom: 1px solid #F1F5F9; flex: 1 1 auto;">
+                            <div style="font-size: 1.25rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">如何拿到自己的LLM金鑰</div>
+                            <div style="font-size: 0.95rem; color: #64748B; line-height: 1.6;">
+                              詳細教學如何取得 Gemini、GPT 等 LLM API 金鑰，並在 ReelMind 中設定使用。使用自己的金鑰可以節省成本，並獲得更好的使用體驗...
                             </div>
                           </div>
                           <div style="padding: 20px 32px; background: #F8FAFC;">
@@ -12099,6 +12386,32 @@
                     <span style="color: #2563EB; font-weight: 600; font-size: 0.95rem;">閱讀更多 →</span>
                   </div>
                 </div>
+                
+                <!-- 文章 4 -->
+                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="switchPage('guide-article4')">
+                  <div style="padding: 32px; border-bottom: 1px solid #F1F5F9;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">腳本結構選擇指南</div>
+                    <div style="font-size: 1rem; color: #64748B; line-height: 1.6;">
+                      了解 ReelMind 提供的 5 種腳本結構（A/B/C/D/E），每種結構適合不同的內容類型和目標。本指南幫助你選擇最適合的腳本結構，提升內容效果...
+                    </div>
+                  </div>
+                  <div style="padding: 20px 32px; background: #F8FAFC;">
+                    <span style="color: #2563EB; font-weight: 600; font-size: 0.95rem;">閱讀更多 →</span>
+                  </div>
+                </div>
+                
+                <!-- 文章 5：如何拿到自己的LLM金鑰 -->
+                <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(17,24,39,0.06); transition: all 0.3s; border: 1px solid #E2E8F0; cursor: pointer;" onclick="switchPage('guide-article5')">
+                  <div style="padding: 32px; border-bottom: 1px solid #F1F5F9;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #1E293B; margin-bottom: 12px;">如何拿到自己的LLM金鑰</div>
+                    <div style="font-size: 1rem; color: #64748B; line-height: 1.6;">
+                      詳細教學如何取得 Gemini、GPT 等 LLM API 金鑰，並在 ReelMind 中設定使用。使用自己的金鑰可以節省成本，並獲得更好的使用體驗...
+                    </div>
+                  </div>
+                  <div style="padding: 20px 32px; background: #F8FAFC;">
+                    <span style="color: #2563EB; font-weight: 600; font-size: 0.95rem;">閱讀更多 →</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -12122,7 +12435,7 @@
                   <span>適用角色：創作者 / 行銷人 / 老闆</span>
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin-top: 18px; margin-bottom: 32px;">
-                  <button onclick="switchPage('homepage');" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">
+                  <button onclick="handleGuideUnlockButton('article1');" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">
                     登入解鎖 AI 生成
                   </button>
                   <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid #cbd5e1; color: #334155; background: white; text-decoration: none; cursor: pointer; flex: 1;">
@@ -12221,7 +12534,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                     <span>適用角色：創作者 / 行銷人 / 老闆</span>
                   </div>
                   <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin-top: 18px; margin-bottom: 32px;">
-                    <button onclick="goToLogin();" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">登入解鎖 AI 生成</button>
+                    <button onclick="handleGuideUnlockButton('article2');" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">登入解鎖 AI 生成</button>
                     <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid #cbd5e1; color: #334155; background: white; text-decoration: none; cursor: pointer; flex: 1;">加入 Discord 討論</a>
                   </div>
                 </div>
@@ -12386,7 +12699,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   </div>
 
                   <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin: 18px 0;">
-                    <button onclick="goToLogin();" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">立即登入，生成我的 14 天計畫</button>
+                    <button onclick="handleGuideUnlockButton('article2');" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">立即登入，生成我的 14 天計畫</button>
                     <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid #cbd5e1; color: #334155; background: white; text-decoration: none; cursor: pointer; flex: 1;">加入 Discord，和大家一起執行</a>
                   </div>
                 </div>
@@ -12471,8 +12784,319 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   </section>
 
                   <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0 0;">
-                    <a class="btn sky" onclick="goToLogin();" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;background:#06b6d4;color:#001018;text-decoration:none;cursor:pointer;">登入解鎖 AI 生成</a>
+                    <a class="btn sky" onclick="handleGuideUnlockButton('article3'); return false;" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;background:#06b6d4;color:#001018;text-decoration:none;cursor:pointer;">登入解鎖 AI 生成</a>
                     <a class="btn alt" href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;border:1px solid #cbd5e1;color:#334155;background:#fff;text-decoration:none;">到 Discord 看範例</a>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Footer -->
+              <footer style="padding: 26px 0; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; font-size: 14px;">
+                <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">© 2025 ReelMind · AI 短影音 · 台灣</div>
+              </footer>
+            </div>
+          </div>
+
+          <!-- 文章 4：腳本結構選擇指南 -->
+          <div id="guide-article4" class="page">
+            <div>
+              <!-- Header -->
+              <header style="padding: 56px 0 18px; border-bottom: 1px solid #e2e8f0; background: linear-gradient(135deg, rgba(14,165,233,.10), transparent 60%), linear-gradient(135deg, rgba(167,139,250,.10), transparent 60%);">
+                <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+                  <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+                    <a onclick="switchPage('homepage'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
+                    <a onclick="switchPage('guide'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+                  </div>
+                  <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">腳本結構選擇指南</h1>
+                  <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">了解 ReelMind 提供的 5 種腳本結構（A/B/C/D/E），每種結構適合不同的內容類型和目標，幫助你選擇最適合的腳本結構。</p>
+                </div>
+              </header>
+
+              <!-- Article -->
+              <article style="padding: 28px 0;">
+                <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+                  <section style="background:#0f172a;border:1px solid #1f2937;border-radius:16px;padding:16px;color:#e5e7eb;">
+                    <h2 style="font-size: 22px; margin: 0 0 8px; color:#e5e7eb;">一、五種腳本結構總覽</h2>
+                    <div style="overflow:auto;">
+                      <table style="width:100%; border-collapse:separate; border-spacing:0 10px;">
+                        <tr style="background:#111827;">
+                          <td style="padding:10px 12px; font-weight:700; color:#94a3b8;">結構</td>
+                          <td style="padding:10px 12px; font-weight:700; color:#94a3b8;">特點</td>
+                          <td style="padding:10px 12px; font-weight:700; color:#94a3b8;">適用場景</td>
+                        </tr>
+                        <tr style="background:#0f172a;">
+                          <td style="padding:10px 12px; font-weight:700; color:#3b82f6;">結構 A</td>
+                          <td style="padding:10px 12px;">開場吸引 + 問題提出 + 解決方案</td>
+                          <td style="padding:10px 12px;">教學類、知識分享</td>
+                        </tr>
+                        <tr style="background:#111827;">
+                          <td style="padding:10px 12px; font-weight:700; color:#10b981;">結構 B</td>
+                          <td style="padding:10px 12px;">故事敘述 + 轉折點 + 啟發</td>
+                          <td style="padding:10px 12px;">品牌故事、個人經歷</td>
+                        </tr>
+                        <tr style="background:#0f172a;">
+                          <td style="padding:10px 12px; font-weight:700; color:#f59e0b;">結構 C</td>
+                          <td style="padding:10px 12px;">快速列點 + 重點強調 + CTA</td>
+                          <td style="padding:10px 12px;">產品介紹、功能說明</td>
+                        </tr>
+                        <tr style="background:#111827;">
+                          <td style="padding:10px 12px; font-weight:700; color:#ef4444;">結構 D</td>
+                          <td style="padding:10px 12px;">對比呈現 + 優勢分析 + 行動呼籲</td>
+                          <td style="padding:10px 12px;">比較類、說服型內容</td>
+                        </tr>
+                        <tr style="background:#0f172a;">
+                          <td style="padding:10px 12px; font-weight:700; color:#8b5cf6;">結構 E</td>
+                          <td style="padding:10px 12px;">互動開場 + 共鳴點 + 深度內容</td>
+                          <td style="padding:10px 12px;">社群互動、討論型</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </section>
+
+                  <section style="display:grid; gap:14px; grid-template-columns:1fr; margin-top:14px;">
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                      <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#dbeafe;border:1px solid #bfdbfe;color:#2563eb;font-weight:800;font-size:12px;margin-bottom:6px;">結構 A：教學型</span>
+                      <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+                      <div style="font-weight:700;color:#0f172a;">適用內容</div>
+                      <p style="color:#475569;">知識分享、技能教學、步驟說明、工具介紹</p>
+                      <div style="font-weight:700;color:#0f172a;">範例</div>
+                      <p style="color:#475569;">「3 個步驟讓你學會...」、「30 秒教會你...」</p>
+                    </div>
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                      <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#d1fae5;border:1px solid #a7f3d0;color:#059669;font-weight:800;font-size:12px;margin-bottom:6px;">結構 B：故事型</span>
+                      <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+                      <div style="font-weight:700;color:#0f172a;">適用內容</div>
+                      <p style="color:#475569;">個人經歷、品牌故事、成功案例、轉折故事</p>
+                      <div style="font-weight:700;color:#0f172a;">範例</div>
+                      <p style="color:#475569;">「我曾經也遇到這個問題，直到我發現...」</p>
+                    </div>
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                      <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#fef3c7;border:1px solid #fde68a;color:#d97706;font-weight:800;font-size:12px;margin-bottom:6px;">結構 C：列點型</span>
+                      <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+                      <div style="font-weight:700;color:#0f172a;">適用內容</div>
+                      <p style="color:#475569;">產品功能、特色介紹、清單式內容、快速資訊</p>
+                      <div style="font-weight:700;color:#0f172a;">範例</div>
+                      <p style="color:#475569;">「5 個你必須知道的...」、「這 3 個功能改變了我...」</p>
+                    </div>
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                      <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#fee2e2;border:1px solid #fecaca;color:#dc2626;font-weight:800;font-size:12px;margin-bottom:6px;">結構 D：對比型</span>
+                      <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+                      <div style="font-weight:700;color:#0f172a;">適用內容</div>
+                      <p style="color:#475569;">產品比較、方法對比、前後差異、優劣分析</p>
+                      <div style="font-weight:700;color:#0f172a;">範例</div>
+                      <p style="color:#475569;">「這樣做 vs 那樣做，差別在哪裡？」</p>
+                    </div>
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;">
+                      <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:#ede9fe;border:1px solid #ddd6fe;color:#7c3aed;font-weight:800;font-size:12px;margin-bottom:6px;">結構 E：互動型</span>
+                      <div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent);margin:10px 0"></div>
+                      <div style="font-weight:700;color:#0f172a;">適用內容</div>
+                      <p style="color:#475569;">討論話題、觀點分享、問答互動、共鳴內容</p>
+                      <div style="font-weight:700;color:#0f172a;">範例</div>
+                      <p style="color:#475569;">「你有沒有想過...」、「我發現一個有趣的現象...」</p>
+                    </div>
+                  </section>
+
+                  <section style="margin-top:28px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:20px;">
+                    <h2 style="font-size: 20px; margin: 0 0 12px; color:#0f172a;">二、如何選擇適合的結構？</h2>
+                    <div style="color:#475569; line-height:1.8;">
+                      <p style="margin:0 0 12px;"><strong>1. 根據內容目標：</strong>教學選 A、故事選 B、產品選 C、比較選 D、互動選 E</p>
+                      <p style="margin:0 0 12px;"><strong>2. 根據目標受眾：</strong>專業人士偏好 A/C，一般用戶偏好 B/E，決策者偏好 D</p>
+                      <p style="margin:0 0 12px;"><strong>3. 根據平台特性：</strong>Reels 適合 B/E，Shorts 適合 A/C，TikTok 適合 E/D</p>
+                      <p style="margin:0;"><strong>4. 測試與優化：</strong>可以嘗試不同結構，觀察哪種效果最好</p>
+                    </div>
+                  </section>
+
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0 0;">
+                    <a class="btn sky" onclick="handleGuideUnlockButton('article1'); return false;" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;background:#06b6d4;color:#001018;text-decoration:none;cursor:pointer;">登入解鎖 AI 生成</a>
+                    <a class="btn alt" href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display:inline-flex;height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:999px;font-weight:900;border:1px solid #cbd5e1;color:#334155;background:#fff;text-decoration:none;">到 Discord 看範例</a>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Footer -->
+              <footer style="padding: 26px 0; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; font-size: 14px;">
+                <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">© 2025 ReelMind · AI 短影音 · 台灣</div>
+              </footer>
+            </div>
+          </div>
+
+          <!-- 文章 5：如何拿到自己的LLM金鑰 -->
+          <div id="guide-article5" class="page">
+            <div>
+              <!-- Header -->
+              <header style="padding: 56px 0 18px; border-bottom: 1px solid #e2e8f0; background: linear-gradient(135deg, rgba(245,158,11,.10), transparent 60%), linear-gradient(135deg, rgba(217,119,6,.10), transparent 60%);">
+                <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+                  <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+                    <a onclick="switchPage('homepage'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">首頁</a> / 
+                    <a onclick="switchPage('guide'); return false;" style="text-decoration: none; color: #64748b; cursor: pointer;">AI 短影音實戰指南</a> / 文章
+                  </div>
+                  <h1 style="font-size: 30px; margin: 0 0 6px; color: #0f172a; font-weight: 800;">如何拿到自己的LLM金鑰</h1>
+                  <p style="color: #475569; margin: 0 0 8px; line-height: 1.6;">詳細教學如何取得 Gemini、GPT 等 LLM API 金鑰，並在 ReelMind 中設定使用。使用自己的金鑰可以節省成本，並獲得更好的使用體驗。</p>
+                  <div style="display: flex; gap: 12px; flex-wrap: wrap; color: #64748b; font-size: 12px; margin-top: 8px;">
+                    <span>閱讀約 8 分鐘</span>
+                    <span>適用角色：所有用戶</span>
+                  </div>
+                </div>
+              </header>
+
+              <!-- Article -->
+              <article style="padding: 28px 0;">
+                <div style="max-width: 880px; margin: 0 auto; padding: 0 40px;">
+                  <!-- 快速導覽 -->
+                  <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 28px;">
+                    <strong style="display: block; margin-bottom: 8px; color: #0f172a;">快速導覽</strong>
+                    <ol style="margin: 0; padding-left: 20px; color: #334155;">
+                      <li><a href="#why" style="color: #334155; text-decoration: none;">為什麼要使用自己的LLM金鑰？</a></li>
+                      <li><a href="#gemini" style="color: #334155; text-decoration: none;">如何取得 Gemini API 金鑰</a></li>
+                      <li><a href="#gpt" style="color: #334155; text-decoration: none;">如何取得 GPT API 金鑰</a></li>
+                      <li><a href="#setup" style="color: #334155; text-decoration: none;">在 ReelMind 中設定金鑰</a></li>
+                    </ol>
+                  </div>
+
+                  <h2 id="why" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">為什麼要使用自己的LLM金鑰？</h2>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    使用自己的 LLM API 金鑰有幾個重要優勢：
+                  </p>
+                  <ul style="color: #475569; line-height: 1.8;">
+                    <li><strong>節省成本</strong>：使用自己的金鑰，可以更精確控制 API 使用量，避免超出預算</li>
+                    <li><strong>更好的使用體驗</strong>：不受系統配額限制，可以更自由地使用 AI 功能</li>
+                    <li><strong>數據隱私</strong>：你的 API 金鑰由你管理，數據更安全</li>
+                    <li><strong>靈活性</strong>：可以選擇不同的 LLM 模型（Gemini、GPT 等）</li>
+                  </ul>
+
+                  <h2 id="gemini" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">如何取得 Gemini API 金鑰</h2>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    <strong>步驟 1：前往 Google AI Studio</strong>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    1. 打開瀏覽器，前往 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #2563eb; text-decoration: underline;">Google AI Studio</a>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    2. 使用你的 Google 帳號登入
+                  </p>
+                  
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    <strong>步驟 2：建立 API 金鑰</strong>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    1. 點擊「Create API Key」按鈕
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    2. 選擇要使用的 Google Cloud 專案（或建立新專案）
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    3. 系統會自動生成 API 金鑰，複製並妥善保存
+                  </p>
+                  
+                  <div style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; padding: 12px 14px; color: #1e3a8a; margin: 14px 0;">
+                    <strong>注意事項：</strong>API 金鑰只會顯示一次，請務必複製並保存在安全的地方。不要將金鑰分享給他人。
+                  </div>
+
+                  <!-- Gemini API 金鑰教學影片 -->
+                  <div style="margin: 28px 0; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+                    <div style="aspect-ratio: 16/9; background: #E2E8F0; position: relative;">
+                      <iframe 
+                        width="100%" 
+                        height="100%" 
+                        src="https://www.youtube.com/embed/MlxRy6qmFBo" 
+                        title="如何取得 Gemini API 金鑰教學" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen 
+                        style="display: block; position: absolute; top: 0; left: 0;">
+                      </iframe>
+                    </div>
+                    <div style="padding: 16px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                      <p style="margin: 0; color: #475569; font-size: 14px; font-weight: 600;">
+                        <i class="fas fa-video" style="margin-right: 8px; color: #3B82F6;"></i>影片教學：如何取得 Gemini API 金鑰
+                      </p>
+                    </div>
+                  </div>
+
+                  <h2 id="gpt" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">如何取得 GPT API 金鑰</h2>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    <strong>步驟 1：前往 OpenAI 官網</strong>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    1. 打開瀏覽器，前往 <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #2563eb; text-decoration: underline;">OpenAI Platform</a>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    2. 使用你的 OpenAI 帳號登入（如果沒有帳號，需要先註冊）
+                  </p>
+                  
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    <strong>步驟 2：建立 API 金鑰</strong>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    1. 點擊「Create new secret key」按鈕
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    2. 為金鑰命名（可選）
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    3. 點擊「Create secret key」，複製並妥善保存
+                  </p>
+                  
+                  <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 12px; padding: 12px 14px; color: #92400e; margin: 14px 0;">
+                    <strong>重要提醒：</strong>OpenAI API 是付費服務，使用前請確認你的帳號有足夠的餘額。建議設定使用上限以避免超支。
+                  </div>
+
+                  <!-- GPT API 金鑰教學影片 -->
+                  <div style="margin: 28px 0; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+                    <div style="aspect-ratio: 16/9; background: #E2E8F0; position: relative;">
+                      <iframe 
+                        width="100%" 
+                        height="100%" 
+                        src="https://www.youtube.com/embed/lIh8wCSn_PM" 
+                        title="如何取得 GPT API 金鑰教學" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen 
+                        style="display: block; position: absolute; top: 0; left: 0;">
+                      </iframe>
+                    </div>
+                    <div style="padding: 16px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                      <p style="margin: 0; color: #475569; font-size: 14px; font-weight: 600;">
+                        <i class="fas fa-video" style="margin-right: 8px; color: #3B82F6;"></i>影片教學：如何取得 GPT API 金鑰
+                      </p>
+                    </div>
+                  </div>
+
+                  <h2 id="setup" style="font-size: 22px; margin: 22px 0 8px; color: #0f172a; font-weight: 700;">在 ReelMind 中設定金鑰</h2>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    <strong>步驟 1：進入創作者資料庫</strong>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    1. 登入 ReelMind 後，點擊右上角的「創作者資料庫」
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    2. 在左側選單中找到「設定」或「API 金鑰管理」
+                  </p>
+                  
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    <strong>步驟 2：輸入 API 金鑰</strong>
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    1. 選擇 LLM 類型（Gemini 或 GPT）
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    2. 貼上你剛才複製的 API 金鑰
+                  </p>
+                  <p style="color: #475569; line-height: 1.8; margin: 10px 0;">
+                    3. 點擊「儲存」按鈕
+                  </p>
+                  
+                  <div style="background: #d1fae5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 12px 14px; color: #065f46; margin: 14px 0;">
+                    <strong>完成！</strong>設定完成後，ReelMind 會優先使用你的 API 金鑰進行 AI 生成。如果金鑰無效或額度用完，系統會自動切換回系統預設金鑰。
+                  </div>
+
+                  <div style="display: flex; gap: 10px; flex-wrap: nowrap; margin: 18px 0;">
+                    <button onclick="window.location.href='userDB.html'; setTimeout(() => { if (typeof showDbSection === 'function') showDbSection('settings'); }, 100);" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; background: #2563eb; color: white; border: none; cursor: pointer; flex: 1;">
+                      前往創作者資料庫設定
+                    </button>
+                    <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid #cbd5e1; color: #334155; background: white; text-decoration: none; cursor: pointer; flex: 1;">
+                      到 Discord 詢問問題
+                    </a>
                   </div>
                 </div>
               </article>
@@ -12682,6 +13306,147 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
       // 確保 goToLogin 在全局作用域中可用
       window.goToLogin = goToLogin;
+      
+      // 智能處理實戰指南的「登入解鎖AI生成」按鈕
+      // articleType: 'article1' (一鍵生成) | 'article2' (IP人設規劃) | 'article3' (一鍵生成)
+      async function handleGuideUnlockButton(articleType = 'article1') {
+        try {
+          // 檢查登入狀態
+          let isLoggedIn = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+            isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
+          } else {
+            // 降級處理：直接檢查 localStorage
+            const token = localStorage.getItem('ipPlanningToken');
+            isLoggedIn = !!token;
+          }
+          
+          if (!isLoggedIn) {
+            // 未登入，跳轉到登入頁面
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+              window.ReelMindCommon.goToLogin();
+            } else {
+              goToLogin();
+            }
+            return;
+          }
+          
+          // 已登入，檢查訂閱狀態
+          let isSubscribed = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkSubscriptionStatus === 'function') {
+            await window.ReelMindCommon.checkSubscriptionStatus();
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+              isSubscribed = window.ReelMindCommon.isSubscribed();
+            }
+          } else {
+            // 降級處理：檢查 localStorage
+            const subscriptionStatus = localStorage.getItem('subscriptionStatus');
+            isSubscribed = subscriptionStatus === 'active';
+          }
+          
+          if (!isSubscribed) {
+            // 已登入但未訂閱，跳轉到訂閱頁面
+            window.location.href = '/subscription.html';
+            return;
+          }
+          
+          // 已登入且已訂閱，根據文章類型跳轉到對應的功能頁面
+          if (articleType === 'article1' || articleType === 'article3') {
+            // 一鍵生成相關文章，跳轉到 mode3
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.checkFeatureAccess === 'function') {
+              const canAccess = await window.ReelMindCommon.checkFeatureAccess();
+              if (canAccess) {
+                window.location.href = '/mode3.html';
+              }
+            } else {
+              window.location.href = '/mode3.html';
+            }
+          } else if (articleType === 'article2') {
+            // IP人設規劃相關文章，跳轉到 mode1
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.checkFeatureAccess === 'function') {
+              const canAccess = await window.ReelMindCommon.checkFeatureAccess();
+              if (canAccess) {
+                window.location.href = '/mode1.html';
+              }
+            } else {
+              window.location.href = '/mode1.html';
+            }
+          }
+        } catch (error) {
+          console.error('處理按鈕點擊失敗:', error);
+          // 發生錯誤時，降級到登入頁面
+          goToLogin();
+        }
+      }
+      // 確保函數在全局作用域中可用
+      window.handleGuideUnlockButton = handleGuideUnlockButton;
+      
+      // 更新實戰指南按鈕文字（僅針對已訂閱且已登入的用戶）
+      async function updateGuideButtonTexts() {
+        try {
+          // 檢查登入狀態
+          let isLoggedIn = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+            isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
+          } else {
+            const token = localStorage.getItem('ipPlanningToken');
+            isLoggedIn = !!token;
+          }
+          
+          if (!isLoggedIn) {
+            return; // 未登入，不更新按鈕文字
+          }
+          
+          // 檢查訂閱狀態
+          let isSubscribed = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkSubscriptionStatus === 'function') {
+            await window.ReelMindCommon.checkSubscriptionStatus();
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+              isSubscribed = window.ReelMindCommon.isSubscribed();
+            }
+          } else {
+            const subscriptionStatus = localStorage.getItem('subscriptionStatus');
+            isSubscribed = subscriptionStatus === 'active';
+          }
+          
+          if (!isSubscribed) {
+            return; // 未訂閱，不更新按鈕文字
+          }
+          
+          // 已登入且已訂閱，更新按鈕文字
+          // article1: 三步生成 30 秒短影音腳本 -> "使用一鍵生成功能"
+          const article1Buttons = document.querySelectorAll('button[onclick*="handleGuideUnlockButton(\'article1\')"], a[onclick*="handleGuideUnlockButton(\'article1\')"]');
+          article1Buttons.forEach(btn => {
+            if (btn.textContent.includes('登入解鎖 AI 生成')) {
+              btn.textContent = btn.textContent.replace('登入解鎖 AI 生成', '使用一鍵生成功能');
+            }
+          });
+          
+          // article2: AI 帳號定位：內容支柱與 14 天計畫 -> "使用IP人設規劃功能"
+          const article2Buttons = document.querySelectorAll('button[onclick*="handleGuideUnlockButton(\'article2\')"], a[onclick*="handleGuideUnlockButton(\'article2\')"]');
+          article2Buttons.forEach(btn => {
+            if (btn.textContent.includes('登入解鎖 AI 生成')) {
+              btn.textContent = btn.textContent.replace('登入解鎖 AI 生成', '使用IP人設規劃功能');
+            }
+          });
+          
+          // article3: Reels / Shorts / TikTok 腳本差異 -> "使用一鍵生成功能"
+          const article3Buttons = document.querySelectorAll('button[onclick*="handleGuideUnlockButton(\'article3\')"], a[onclick*="handleGuideUnlockButton(\'article3\')"]');
+          article3Buttons.forEach(btn => {
+            if (btn.textContent.includes('登入解鎖 AI 生成')) {
+              btn.textContent = btn.textContent.replace('登入解鎖 AI 生成', '使用一鍵生成功能');
+            }
+          });
+          
+          // article4: 腳本結構選擇指南 -> "使用一鍵生成功能"
+          // 注意：article4 可能使用 article1 的按鈕，所以已經在上面處理了
+          
+        } catch (error) {
+          console.error('更新按鈕文字失敗:', error);
+        }
+      }
+      // 確保函數在全局作用域中可用
+      window.updateGuideButtonTexts = updateGuideButtonTexts;
       
       // ===== 提前定義手機版抽屜函數，確保按鈕可以使用 =====
       function toggleMobileDrawer() {
@@ -12896,6 +13661,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           targetPage.classList.add('active');
           console.log('✅ Switched to page:', pageId);
           
+          // 滾動到頁面頂部（確保從其他頁面跳轉時能正確顯示）
+          window.scrollTo({ top: 0, behavior: 'instant' });
+          
           // 如果切換到首頁，更新首頁視圖（確保訂閱狀態正確顯示）
           if (pageId === 'homepage') {
             console.log('🏠 切換到首頁，更新首頁視圖...');
@@ -12919,6 +13687,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             console.log('✅', pageId === 'forum' ? '論壇介紹' : '實戰指南', '頁面已激活');
             // 滾動到頂部
             window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+          
+          // 如果是實戰指南文章頁面，更新按鈕文字
+          if (pageId && pageId.startsWith('guide-article')) {
+            setTimeout(() => {
+              updateGuideButtonTexts();
+            }, 100);
           }
         } else {
           console.error('❌ Page not found:', pageId);
@@ -13357,22 +14132,93 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             redirect: 'manual'  // 不自動跟隨 redirect
           });
           
-          if (response.ok || response.status === 302) {
-            // 驗證成功，後端會 redirect，但我們在前端處理
-            // 嘗試從 response 獲取方案資訊（如果有的話）
-            let planType = 'yearly';
-            try {
-              if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
-                const responseData = await response.json();
-                planType = responseData.plan_type || planType;
-              }
+          // 記錄響應狀態以便調試
+          console.log('授權驗證響應狀態:', response.status, response.statusText);
+          console.log('授權驗證響應 headers:', Object.fromEntries(response.headers.entries()));
+          
+          // 檢查響應類型
+          const contentType = response.headers.get('content-type') || '';
+          const isJson = contentType.includes('application/json');
+          const isRedirect = response.status === 302 || response.status === 301;
+          
+          if (response.ok || isRedirect) {
+            // 驗證成功
+            // 如果是 JSON 響應，嘗試解析
+            let responseData = null;
+            if (isJson && response.ok) {
+              try {
+                responseData = await response.json();
+                console.log('授權驗證成功響應數據:', responseData);
             } catch (e) {
-              // 如果無法解析 JSON（例如 302 redirect），使用預設值
-              console.log('無法從 response 獲取方案資訊，使用預設值');
+                console.warn('無法解析 JSON 響應:', e);
+              }
             }
             
-            // 重新檢查訂閱狀態
+            // 獲取方案類型（從後端響應或預設為 yearly）
+            let planType = 'yearly';
+            if (responseData && responseData.plan_type) {
+              planType = responseData.plan_type;
+            } else {
+              // 如果響應中沒有方案資訊，嘗試從 URL 參數獲取（後端 redirect 會帶上 plan 參數）
+              const urlParams = new URLSearchParams(window.location.search);
+              const hashParams = new URLSearchParams(window.location.hash.slice(1));
+              const planFromUrl = urlParams.get('plan') || hashParams.get('plan');
+              if (planFromUrl) {
+                planType = planFromUrl;
+              }
+            }
+            
+            // 等待一小段時間確保後端完成資料庫更新
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 增加到 1 秒
+            
+            // 重試檢查訂閱狀態（最多重試 5 次，增加重試次數）
+            let retryCount = 0;
+            let subscriptionActive = false;
+            
+            while (retryCount < 5 && !subscriptionActive) {
             await checkSubscriptionStatus();
+              // 檢查訂閱狀態
+              const isSubscribed = document.body.dataset.subscribed === 'true' || 
+                                  localStorage.getItem('subscriptionStatus') === 'active';
+              
+              if (isSubscribed) {
+                subscriptionActive = true;
+                break;
+              }
+              
+              // 如果還沒生效，等待後重試
+              if (retryCount < 4) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+              }
+              retryCount++;
+            }
+            
+            // 強制刷新用戶資訊（確保獲取最新的訂閱狀態）
+            const currentToken = localStorage.getItem('ipPlanningToken');
+            if (currentToken) {
+              try {
+                const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                  headers: {
+                    'Authorization': `Bearer ${currentToken}`
+                  }
+                });
+                if (userResponse.ok) {
+                  const userInfo = await userResponse.json();
+                  // 更新本地用戶資訊
+                  if (userInfo.is_subscribed) {
+                    document.body.dataset.subscribed = 'true';
+                    localStorage.setItem('subscriptionStatus', 'active');
+                    // 更新全局用戶資訊
+                    if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                      ipPlanningUser.is_subscribed = userInfo.is_subscribed;
+                      localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                    }
+                  }
+                }
+              } catch (e) {
+                console.warn('刷新用戶資訊失敗:', e);
+              }
+            }
             
             // 確保顯示主應用程式（而不是訂閱頁面）
             if (window.location.pathname.includes('subscription.html')) {
@@ -13385,9 +14231,84 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               updateHomepageView();
             }
             
-            // 顯示成功通知（包含方案資訊）
+            // 再次確認訂閱狀態（確保顯示正確）
+            // 先強制刷新一次用戶資訊
+            let finalUserInfo = null;
+            try {
+              const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                headers: {
+                  'Authorization': `Bearer ${currentToken}`
+                }
+              });
+              if (userResponse.ok) {
+                finalUserInfo = await userResponse.json();
+                if (finalUserInfo.is_subscribed) {
+                  document.body.dataset.subscribed = 'true';
+                  localStorage.setItem('subscriptionStatus', 'active');
+                  if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                    ipPlanningUser.is_subscribed = finalUserInfo.is_subscribed;
+                    localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  }
+                }
+              }
+            } catch (e) {
+              console.warn('最終檢查用戶資訊失敗:', e);
+            }
+            
+            const finalCheck = document.body.dataset.subscribed === 'true' || 
+                              localStorage.getItem('subscriptionStatus') === 'active' ||
+                              (finalUserInfo && finalUserInfo.is_subscribed);
+            
+            if (finalCheck) {
             const planName = planType === 'yearly' ? '年費' : '月費';
-            showToast(`✅ 訂閱啟用成功！方案：${planName}`, 5000);
+              const planDays = planType === 'yearly' ? '1年' : '1個月';
+              showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+            } else {
+              // 如果最終檢查還是沒有訂閱，可能是後端更新延遲，顯示提示而不是錯誤
+              console.warn('授權驗證成功，但訂閱狀態尚未更新，繼續等待...');
+              showToast('✅ 授權啟用成功！正在更新訂閱狀態...', 5000);
+              // 再次嘗試刷新訂閱狀態（增加重試次數和延遲）
+              setTimeout(async () => {
+                // 再次強制刷新用戶資訊
+                try {
+                  const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                    headers: {
+                      'Authorization': `Bearer ${currentToken}`
+                    }
+                  });
+                  if (userResponse.ok) {
+                    const latestUserInfo = await userResponse.json();
+                    if (latestUserInfo.is_subscribed) {
+                      document.body.dataset.subscribed = 'true';
+                      localStorage.setItem('subscriptionStatus', 'active');
+                      if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                        ipPlanningUser.is_subscribed = latestUserInfo.is_subscribed;
+                        localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                      }
+                      const planName = planType === 'yearly' ? '年費' : '月費';
+                      const planDays = planType === 'yearly' ? '1年' : '1個月';
+                      showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+                      return;
+                    }
+                  }
+                } catch (e) {
+                  console.warn('再次刷新用戶資訊失敗:', e);
+                }
+                
+                await checkSubscriptionStatus();
+                const recheck = document.body.dataset.subscribed === 'true' || 
+                               localStorage.getItem('subscriptionStatus') === 'active';
+                if (recheck) {
+                  const planName = planType === 'yearly' ? '年費' : '月費';
+                  const planDays = planType === 'yearly' ? '1年' : '1個月';
+                  showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+                } else {
+                  // 如果還是沒有，但後端已經授權成功（response.ok），顯示成功訊息而不是錯誤
+                  console.warn('授權驗證成功，但訂閱狀態更新較慢，請稍後重新整理頁面');
+                  showToast('✅ 授權啟用成功！如果未看到訂閱狀態，請重新整理頁面', 8000);
+                }
+              }, 3000); // 增加到 3 秒
+            }
             
             // 清除 URL 參數
             window.history.replaceState({}, document.title, window.location.pathname);
@@ -13395,14 +14316,68 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             // 嘗試獲取詳細錯誤訊息
             let errorMessage = '啟用失敗，請稍後再試';
             let errorDetails = '';
+            let isAlreadyActivated = false;
             try {
               const errorData = await response.json();
+              
+              // 檢查是否為「已經啟用」的成功訊息（同一個帳戶）
+              if (errorData.status === 'already_activated' && errorData.message) {
+                // 更新本地狀態
+                document.body.dataset.subscribed = 'true';
+                localStorage.setItem('subscriptionStatus', 'active');
+                if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                  ipPlanningUser.is_subscribed = true;
+                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                }
+                // 顯示友好訊息
+                const activatedDate = errorData.activated_at ? 
+                  new Date(errorData.activated_at).toLocaleString('zh-TW') : '';
+                const message = activatedDate ? 
+                  `✅ ${errorData.message}（啟用時間：${activatedDate}）` : 
+                  `✅ ${errorData.message}`;
+                showToast(message, 5000);
+                return; // 提前返回，不顯示錯誤訊息
+              }
+              
               errorMessage = errorData.error || errorData.message || errorMessage;
               
               // 如果有詳細資訊，顯示給用戶
               if (errorData.activated_at) {
+                isAlreadyActivated = true;
                 const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW');
                 errorDetails = `此連結已於 ${activatedDate} 使用`;
+                
+                // 如果連結已使用，檢查用戶當前的訂閱狀態
+                // 如果用戶已經有訂閱，這可能是成功的（用戶之前已經啟用過）
+                const currentToken = localStorage.getItem('ipPlanningToken');
+                if (currentToken) {
+                  try {
+                    const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                      headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                      }
+                    });
+                    if (userResponse.ok) {
+                      const userInfo = await userResponse.json();
+                      if (userInfo.is_subscribed) {
+                        // 用戶已經有訂閱，這表示之前已經成功啟用過
+                        // 更新本地狀態
+                        document.body.dataset.subscribed = 'true';
+                        localStorage.setItem('subscriptionStatus', 'active');
+                        if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                          ipPlanningUser.is_subscribed = userInfo.is_subscribed;
+                          localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                        }
+                        // 顯示成功訊息而不是錯誤
+                        showToast(`✅ 您已擁有授權！此連結已於 ${activatedDate} 啟用`, 5000);
+                        return; // 提前返回，不顯示錯誤訊息
+                      }
+                    }
+                  } catch (e) {
+                    console.warn('檢查訂閱狀態失敗:', e);
+                    // 如果檢查失敗，繼續顯示錯誤訊息
+                  }
+                }
               } else if (errorData.expired_at) {
                 const expiredDate = new Date(errorData.expired_at).toLocaleString('zh-TW');
                 errorDetails = `此連結已於 ${expiredDate} 過期`;
@@ -13416,15 +14391,48 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             } catch (e) {
               // 如果無法解析 JSON，使用預設錯誤訊息
             }
+            // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
+            if (!isAlreadyActivated || document.body.dataset.subscribed !== 'true') {
             // 顯示詳細錯誤訊息（支援多行）
             if (errorDetails) {
               showToast(`${errorMessage}\n${errorDetails}`, 8000);
             } else {
               showToast(errorMessage, 5000);
+              }
             }
           }
         } catch (error) {
           console.error('啟用失敗:', error);
+          
+          // 即使發生錯誤，也檢查一下用戶的訂閱狀態（可能後端已經授權成功）
+          const currentToken = localStorage.getItem('ipPlanningToken');
+          if (currentToken) {
+            try {
+              const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                headers: {
+                  'Authorization': `Bearer ${currentToken}`
+                }
+              });
+              if (userResponse.ok) {
+                const userInfo = await userResponse.json();
+                if (userInfo.is_subscribed) {
+                  // 用戶已經有訂閱，表示授權成功
+                  document.body.dataset.subscribed = 'true';
+                  localStorage.setItem('subscriptionStatus', 'active');
+                  if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                    ipPlanningUser.is_subscribed = userInfo.is_subscribed;
+                    localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  }
+                  showToast('✅ 授權啟用成功！', 5000);
+                  return; // 提前返回，不顯示錯誤
+                }
+              }
+            } catch (e) {
+              console.warn('檢查訂閱狀態失敗:', e);
+            }
+          }
+          
+          // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
           showToast('⚠️ 啟用失敗，請稍後再試', 5000);
         }
       }
@@ -13438,13 +14446,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 檢查 URL 參數中是否有 activation_token（授權連結）
         const urlParams = new URLSearchParams(window.location.search);
         const hashParams = new URLSearchParams(window.location.hash.slice(1));
-        const activationToken = urlParams.get('token') || hashParams.get('token');
+        let activationToken = urlParams.get('token') || hashParams.get('token');
         const activationSuccess = urlParams.get('activation') || hashParams.get('activation');
         
         // 處理授權成功頁面（從後端 redirect 回來）
         if (activationSuccess === 'success') {
           const plan = urlParams.get('plan') || hashParams.get('plan') || 'yearly';
-          showToast(`✅ 訂閱啟用成功！方案：${plan === 'yearly' ? '年費' : '月費'}`, 5000);
+          const planName = plan === 'yearly' ? '年費' : '月費';
+          const planDays = plan === 'yearly' ? '1年' : '1個月';
+          showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
           // 重新檢查訂閱狀態
           checkSubscriptionStatus().then(() => {
             // 清除 URL 參數
@@ -13453,6 +14463,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         // 處理授權連結（/activate?token=xxx 或根路徑 ?token=xxx）
+        // 優先檢查 sessionStorage 中的待處理授權（來自立即執行的腳本）
+        const pendingToken = sessionStorage.getItem('pendingActivationToken');
+        if (pendingToken) {
+          sessionStorage.removeItem('pendingActivationToken');
+          activationToken = pendingToken;
+          console.log('✅ 從 sessionStorage 獲取待處理授權 token');
+        }
+        
         if (activationToken) {
           // 檢查是否為授權連結（路徑是 /activate 或根路徑有 token 參數）
           const isActivatePath = window.location.pathname === '/activate' || 
@@ -13473,7 +14491,23 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             } else {
               // 已登入，處理授權
               console.log('✅ 檢測到授權連結且已登入，開始驗證授權');
+              if (typeof handleActivationToken === 'function') {
               handleActivationToken(activationToken);
+              } else {
+                console.error('❌ handleActivationToken 函數未定義，等待 common.js 載入...');
+                // 等待 common.js 載入
+                let retryCount = 0;
+                const checkFunction = setInterval(function() {
+                  if (typeof handleActivationToken === 'function') {
+                    clearInterval(checkFunction);
+                    handleActivationToken(activationToken);
+                  } else if (retryCount++ > 10) {
+                    clearInterval(checkFunction);
+                    console.error('❌ handleActivationToken 函數載入超時');
+                    showToast('⚠️ 授權處理失敗，請重新整理頁面', 5000);
+                  }
+                }, 200);
+              }
             }
           }
         }
@@ -13541,22 +14575,241 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             if (validPages.includes(pageId)) {
               console.log('🔗 檢測到 hash 導航:', pageId);
               // 立即執行，避免先顯示首頁
+              // 先隱藏所有頁面
+              document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+              });
+              // 立即切換到目標頁面（確保 switchPage 函數已定義）
+              if (typeof switchPage === 'function') {
               switchPage(pageId);
               return true; // 表示已處理 hash 導航
+              } else {
+                // 如果 switchPage 還未定義，等待它定義後再執行
+                console.log('⏳ switchPage 函數尚未定義，等待載入...');
+                let retryCount = 0;
+                const maxRetries = 50; // 最多重試 50 次（約 5 秒）
+                const checkInterval = setInterval(() => {
+                  if (typeof switchPage === 'function') {
+                    clearInterval(checkInterval);
+                    console.log('✅ switchPage 函數已載入，執行導航');
+                    switchPage(pageId);
+                  } else if (retryCount++ >= maxRetries) {
+                    clearInterval(checkInterval);
+                    console.warn('⚠️ switchPage 函數載入超時');
+                  }
+                }, 100);
+                return true; // 表示已處理 hash 導航（正在等待）
+              }
             }
           }
           return false; // 表示沒有 hash 導航
         };
         
         // 頁面載入時先處理 hash（優先處理）
-        const hasHashNavigation = handleHashNavigation();
+        // 立即檢查 hash，避免先顯示首頁
+        let hasHashNavigation = false;
         
-        // 如果沒有 hash 導航，才更新首頁視圖（確保訂閱狀態正確顯示）
+        // 立即檢查 hash（不等待 DOM 載入）
+        const currentHash = window.location.hash;
+        if (currentHash) {
+          const pageId = currentHash.replace('#', '');
+          const validPages = ['homepage', 'forum', 'guide', 'userDB', 'guide-article1', 'guide-article2', 'guide-article3'];
+          if (validPages.includes(pageId)) {
+            console.log('🔗 頁面載入時檢測到 hash 導航:', pageId);
+            // 立即隱藏所有頁面（如果 DOM 已準備好）
+            if (document.readyState !== 'loading') {
+              document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+              });
+            }
+            hasHashNavigation = true; // 標記有 hash 導航，稍後處理
+          }
+        }
+        
+        // 如果 DOM 已準備好，立即處理 hash
+        if (document.readyState !== 'loading') {
+          hasHashNavigation = handleHashNavigation() || hasHashNavigation;
+        }
+        
+        // 在 DOMContentLoaded 時再次處理 hash（確保處理從其他頁面跳轉過來的情況）
+        // 使用 setTimeout 確保所有腳本都已載入
+        setTimeout(() => {
         if (!hasHashNavigation) {
+            hasHashNavigation = handleHashNavigation();
+          }
+          // 如果仍然沒有處理，再次嘗試（處理從外部頁面跳轉的情況）
+          if (!hasHashNavigation && window.location.hash) {
+            const pageId = window.location.hash.replace('#', '');
+            const validPages = ['homepage', 'forum', 'guide', 'userDB', 'guide-article1', 'guide-article2', 'guide-article3'];
+            if (validPages.includes(pageId) && typeof switchPage === 'function') {
+              console.log('🔗 延遲處理 hash 導航:', pageId);
+              document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+              });
+              switchPage(pageId);
+              hasHashNavigation = true;
+            }
+          }
+        }, 100);
+        
+        // 監聽 hashchange 事件（處理從其他頁面跳轉過來的情況）
+        window.addEventListener('hashchange', function() {
+          console.log('🔗 Hash 改變:', window.location.hash);
+          const hash = window.location.hash;
+          if (hash) {
+            const pageId = hash.replace('#', '');
+            const validPages = ['homepage', 'forum', 'guide', 'userDB', 'guide-article1', 'guide-article2', 'guide-article3'];
+            if (validPages.includes(pageId) && typeof switchPage === 'function') {
+              console.log('🔗 Hashchange 觸發導航:', pageId);
+              document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+              });
+              switchPage(pageId);
+            }
+          }
+        });
+        
+        // 如果沒有 hash 導航，才顯示首頁並更新首頁視圖
+        if (!hasHashNavigation) {
+          const homepage = document.getElementById('homepage');
+          if (homepage) {
+            homepage.classList.add('active');
+          }
           console.log('🏠 初始化時更新首頁視圖...');
           setTimeout(() => {
             updateHomepageView();
+            // 檢查 LLM Key 綁定狀態並顯示通知
+            checkAndShowLlmKeyNotification();
+            // 更新實戰指南按鈕文字（僅針對已訂閱且已登入的用戶）
+            updateGuideButtonTexts();
           }, 500);
+        } else {
+          // 即使有 hash 導航，也要更新按鈕文字
+          setTimeout(() => {
+            updateGuideButtonTexts();
+          }, 500);
+        }
+        
+        // 檢查並顯示 LLM Key 綁定通知
+        async function checkAndShowLlmKeyNotification() {
+          try {
+            const token = localStorage.getItem('ipPlanningToken');
+            if (!token) {
+              return; // 未登入，不顯示通知
+            }
+            
+            const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+            const response = await fetch(`${API_URL}/api/user/llm-keys/check`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              if (!data.has_key) {
+                // 用戶未綁定 LLM Key，顯示通知
+                showLlmKeyNotification();
+              }
+            }
+          } catch (error) {
+            console.error('檢查 LLM Key 狀態失敗:', error);
+          }
+        }
+        
+        // 顯示 LLM Key 綁定通知
+        function showLlmKeyNotification() {
+          // 檢查是否已經顯示過通知（避免重複顯示）
+          if (document.getElementById('llm-key-notification')) {
+            return;
+          }
+          
+          const notification = document.createElement('div');
+          notification.id = 'llm-key-notification';
+          notification.style.cssText = `
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            z-index: 10000;
+            max-width: 90%;
+            width: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            animation: slideDown 0.3s ease-out;
+          `;
+          
+          notification.innerHTML = `
+            <div style="flex: 1;">
+              <div style="font-weight: 600; margin-bottom: 4px; font-size: 16px;">🔑 建議綁定您的 LLM API 金鑰</div>
+              <div style="font-size: 14px; opacity: 0.9;">綁定後可獲得更高的使用額度和更穩定的服務</div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button onclick="window.location.href='userDB.html'; setTimeout(() => { if (typeof showDbSection === 'function') showDbSection('settings'); }, 100);" style="
+                padding: 8px 16px;
+                background: white;
+                color: #d97706;
+                border: none;
+                border-radius: 6px;
+                font-weight: 600;
+                cursor: pointer;
+                font-size: 14px;
+                white-space: nowrap;
+              ">立即綁定</button>
+              <button onclick="this.closest('#llm-key-notification').remove()" style="
+                padding: 8px;
+                background: transparent;
+                color: white;
+                border: none;
+                cursor: pointer;
+                font-size: 20px;
+                line-height: 1;
+                opacity: 0.8;
+              ">×</button>
+            </div>
+          `;
+          
+          // 添加動畫樣式
+          if (!document.getElementById('llm-key-notification-style')) {
+            const style = document.createElement('style');
+            style.id = 'llm-key-notification-style';
+            style.textContent = `
+              @keyframes slideDown {
+                from {
+                  opacity: 0;
+                  transform: translateX(-50%) translateY(-20px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateX(-50%) translateY(0);
+                }
+              }
+            `;
+            document.head.appendChild(style);
+          }
+          
+          document.body.appendChild(notification);
+          
+          // 5 秒後自動隱藏（可選）
+          setTimeout(() => {
+            if (notification && notification.parentNode) {
+              notification.style.opacity = '0';
+              notification.style.transition = 'opacity 0.3s ease-out';
+              setTimeout(() => {
+                if (notification && notification.parentNode) {
+                  notification.remove();
+                }
+              }, 300);
+            }
+          }, 10000); // 10 秒後自動隱藏
         }
         
         // 監聽 hash 變化（當用戶在同一個頁面內點擊 hash 連結時）
@@ -24743,20 +25996,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       </div>
       <div class="mobile-drawer-content">
         <a href="#homepage" class="mobile-drawer-item" onclick="switchPage('homepage'); closeMobileDrawer(); return false;">
-          <span class="mobile-drawer-icon">🏠</span>
+          <span class="mobile-drawer-icon"><i class="fas fa-home"></i></span>
           <span class="mobile-drawer-text">首頁</span>
+        </a>
+        <a href="mode1.html" class="mobile-drawer-item" onclick="closeMobileDrawer(); return true;">
+          <span class="mobile-drawer-icon"><i class="fas fa-user-tie"></i></span>
+          <span class="mobile-drawer-text">IP人設規劃</span>
         </a>
         <a href="mode3.html" class="mobile-drawer-item" onclick="closeMobileDrawer(); return true;">
           <span class="mobile-drawer-icon"><i class="fas fa-magic"></i></span>
           <span class="mobile-drawer-text">一鍵生成</span>
-        </a>
-        <a href="mode2.html" class="mobile-drawer-item" onclick="closeMobileDrawer(); return true;">
-          <span class="mobile-drawer-icon"><i class="fas fa-comments"></i></span>
-          <span class="mobile-drawer-text">AI顧問</span>
-        </a>
-        <a href="mode1.html" class="mobile-drawer-item" onclick="closeMobileDrawer(); return true;">
-          <span class="mobile-drawer-icon"><i class="fas fa-user-tie"></i></span>
-          <span class="mobile-drawer-text">IP人設</span>
         </a>
         <a href="#forum" class="mobile-drawer-item" onclick="switchPage('forum'); closeMobileDrawer(); return false;">
           <span class="mobile-drawer-icon"><i class="fas fa-comments"></i></span>
@@ -24767,8 +26016,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           <span class="mobile-drawer-text">實戰指南</span>
         </a>
         <a href="#" id="mobileUserDBTab" class="mobile-drawer-item" onclick="handleUserDBClick(); closeMobileDrawer(); return false;" style="display:none;">
-          <span class="mobile-drawer-icon">👤</span>
-          <span class="mobile-drawer-text">資料庫</span>
+          <span class="mobile-drawer-icon"><i class="fas fa-database"></i></span>
+          <span class="mobile-drawer-text">創作者資料庫</span>
       </a>
     </div>
     </div>
@@ -25273,6 +26522,57 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       window.saveMode3Result = function() {
         console.log('儲存結果 - 函數未定義');
       };
+    }
+    
+    // 根據用戶狀態更新 Hero 區域的"搶先體驗ReelMind"按鈕
+    async function updateHeroExperienceButton() {
+      const btn = document.getElementById('hero-experience-btn');
+      if (!btn) return;
+      
+      // 檢查用戶登入和訂閱狀態
+      let isLoggedIn = false;
+      let isSubscribed = false;
+      
+      if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+        isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
+        
+        if (isLoggedIn && window.ReelMindCommon.checkSubscriptionStatus) {
+          await window.ReelMindCommon.checkSubscriptionStatus();
+          isSubscribed = window.ReelMindCommon.isSubscribed ? window.ReelMindCommon.isSubscribed() : false;
+        }
+      } else {
+        // 降級處理：直接檢查 localStorage
+        const token = localStorage.getItem('ipPlanningToken') || localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('ipPlanningUser') || localStorage.getItem('user') || 'null');
+        isLoggedIn = !!(token && user);
+        if (isLoggedIn && user) {
+          isSubscribed = user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1' || user.is_subscribed === 'true';
+        }
+      }
+      
+      // 只有未登入或未訂閱的用戶才顯示"搶先體驗ReelMind"
+      // 已登入且已訂閱的用戶顯示"了解使用方式"
+      if (isLoggedIn && isSubscribed) {
+        btn.textContent = '了解使用方式';
+        btn.setAttribute('onclick', "smoothScrollTo('rm-overview-v2'); return false;");
+        btn.href = '#rm-overview-v2';
+      } else {
+        btn.textContent = '搶先體驗ReelMind';
+        btn.setAttribute('onclick', "smoothScrollTo('experience-demo'); return false;");
+        btn.href = '#experience-demo';
+      }
+    }
+    
+    // 頁面載入時更新按鈕
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', updateHeroExperienceButton);
+    } else {
+      updateHeroExperienceButton();
+    }
+    
+    // 監聽用戶狀態變化（如果有的話）
+    if (window.ReelMindCommon && window.ReelMindCommon.onUserStatusChange) {
+      window.ReelMindCommon.onUserStatusChange(updateHeroExperienceButton);
     }
     
     if (typeof regenerateMode3Result === 'undefined') {

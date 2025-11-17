@@ -1209,6 +1209,7 @@
         <button class="mobile-drawer-toggle" onclick="toggleMobileDrawer()">
           <span class="hamburger-icon">☰</span>
         </button>
+        <div class="navbar-title clickable-title" onclick="window.location.href='index.html'">ReelMind</div>
         <div class="navbar-tabs">
           <a href="index.html" class="navbar-tab">首頁</a>
           <a href="mode1.html" class="navbar-tab">IP人設規劃</a>
@@ -1218,14 +1219,13 @@
           <a href="userDB.html" class="navbar-tab active">創作者資料庫</a>
         </div>
       </div>
-      <div class="navbar-title clickable-title" onclick="window.location.href='index.html'">ReelMind</div>
       <div class="navbar-right">
         <div class="user-info" id="userInfo" style="display: none;" onclick="window.location.href='userDB.html'">
-          <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+          <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: center;">
           <span id="userName" class="user-name"></span>
         </div>
         <div class="auth-buttons" id="authButtons" style="display: none;">
-          <button id="loginBtn" class="login-btn" onclick="goToLogin()" style="padding: 10px 16px; min-height: 44px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;"><i class="fas fa-lock" style="margin-right: 4px;"></i>登入</button>
+          <button id="loginBtn" class="login-btn" onclick="goToLogin()" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">🔐 登入</button>
         </div>
       </div>
     </div>
@@ -1926,7 +1926,7 @@
             </div>
             ${expirationWarning}
             <div class="detail-actions" style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-              <a href="subscription.html" style="display: inline-block; padding: 10px 16px; min-height: 44px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">
+              <a href="subscription.html" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; min-height: 44px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 14px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">
                 <i class="fas fa-credit-card" style="margin-right: 4px;"></i>續費訂閱
               </a>
               ${userInfo.auto_renew !== false ? `
