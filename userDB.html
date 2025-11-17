@@ -547,6 +547,13 @@
         display: block;
       }
       
+      /* 桌面版隱藏彈跳視窗 */
+      @media (min-width: 769px) {
+        .userdb-modal-overlay {
+          display: none !important;
+        }
+      }
+      
       .section-title {
         font-size: 20px;
         font-weight: 600;
@@ -1055,23 +1062,27 @@
         
         /* 手機版彈跳視窗樣式 */
         .userdb-modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.5);
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+          height: 100dvh !important; /* iOS Safari 動態視窗高度 */
+          background: rgba(0, 0, 0, 0.5) !important;
           display: none !important;
-          justify-content: center;
-          align-items: center;
-          z-index: 10000;
-          padding: 20px;
-          box-sizing: border-box;
-          -webkit-overflow-scrolling: touch;
+          justify-content: center !important;
+          align-items: center !important;
+          z-index: 99999 !important; /* 提高 z-index 確保在最上層 */
+          padding: 20px !important;
+          box-sizing: border-box !important;
+          -webkit-overflow-scrolling: touch !important;
+          margin: 0 !important;
         }
         
         .userdb-modal-overlay.show {
           display: flex !important;
+          visibility: visible !important;
+          opacity: 1 !important;
         }
         
         .userdb-modal-content {
@@ -2204,11 +2215,13 @@
         loadContent();
         
         // 顯示彈跳視窗
-        overlay.style.display = 'flex'; // 強制顯示
+        overlay.style.cssText = 'display: flex !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; z-index: 99999 !important;';
         overlay.classList.add('show');
         document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden'; // 防止 iOS Safari 滾動
         
         console.log('彈跳視窗已顯示，overlay classes:', overlay.className);
+        console.log('彈跳視窗 computed style:', window.getComputedStyle(overlay).display);
         
         // 點擊背景關閉
         overlay.onclick = function(e) {
@@ -2232,8 +2245,9 @@
         const overlay = document.getElementById('userdbModalOverlay');
         if (overlay) {
           overlay.classList.remove('show');
-          overlay.style.display = 'none'; // 強制隱藏
+          overlay.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important;';
           document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
         }
       }
       
