@@ -488,13 +488,13 @@ a{text-decoration:none;color:inherit}
 <main class="wrap" style="padding:28px 0">
   <div class="safe grid" style="grid-template-columns: repeat(3, 1fr); gap: 16px;">
 
-    <!-- 左：月費方案 -->
+    <!-- 左：買斷方案 -->
     <section class="card">
       <div class="body" style="text-align: center; display: flex; flex-direction: column; height: 100%;">
         <div style="flex: 1;">
-          <h2 class="h2">月費方案</h2>
-          <div class="price" style="color: var(--ink); margin: 16px 0;">NT$2,480</div>
-          <div class="sub" style="margin-bottom: 16px;">彈性方案，適合短期使用者</div>
+          <h2 class="h2">買斷方案</h2>
+          <div class="price" style="color: var(--ink); margin: 16px 0;">NT$9,900</div>
+          <div class="sub" style="margin-bottom: 16px;">一次購買，永久使用</div>
           <div class="hr"></div>
           <ul class="list" style="text-align: left; margin: 16px 0;">
             <li>AI 顧問對話：定位 / 節奏 / 變現 Q&A</li>
@@ -503,9 +503,9 @@ a{text-decoration:none;color:inherit}
             <li>創作者資料庫：PDF / CSV 下載、版本重生</li>
           </ul>
           <div class="hr"></div>
-          <div class="small" style="margin-top: 0; text-align: center; margin-bottom: 12px;">一次付款、自動續約、可隨時取消</div>
+          <div class="small" style="margin-top: 0; text-align: center; margin-bottom: 12px;">一次付款，終身使用，無需續費</div>
         </div>
-        <a href="#" onclick="handleSubscriptionClick('monthly'); return false;" class="btn blue monthly-btn" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none; position: relative; z-index: 10000 !important; cursor: pointer !important; pointer-events: auto !important; background: var(--blue) !important; color: white !important; padding: 12px 24px; border-radius: 999px; font-weight: 900;">立即加入</a>
+        <a href="#" onclick="handleSubscriptionClick('lifetime'); return false;" class="btn blue monthly-btn" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none; position: relative; z-index: 10000 !important; cursor: pointer !important; pointer-events: auto !important; background: var(--blue) !important; color: white !important; padding: 12px 24px; border-radius: 999px; font-weight: 900;">立即購買</a>
       </div>
     </section>
 
@@ -583,8 +583,8 @@ a{text-decoration:none;color:inherit}
 
 <script>
   // 價格設定（如未來調整，改這裡即可）
-  const price = { monthly: 2480, yearly: 7980 };
-  let current = 'monthly';
+  const price = { lifetime: 9900, yearly: 7980 };
+  let current = 'lifetime';
 
   function format(n){ return 'NT$' + n.toLocaleString('zh-Hant-TW'); }
 
@@ -736,7 +736,7 @@ a{text-decoration:none;color:inherit}
 
   // 初始化：從 URL 參數讀取方案，如果沒有則預設為月費
   const urlPlan = getUrlParam('plan');
-  const initialPlan = urlPlan === 'yearly' ? 'yearly' : 'monthly';
+  const initialPlan = urlPlan === 'yearly' ? 'yearly' : (urlPlan === 'lifetime' ? 'lifetime' : 'lifetime');
   setPlan(initialPlan);
 
   // 添加滾動到對應卡片的動畫
@@ -1050,7 +1050,7 @@ a{text-decoration:none;color:inherit}
         e.stopPropagation();
         e.stopImmediatePropagation();
         // 調用 handleSubscriptionClick 進行登入檢查
-        handleSubscriptionClick('monthly');
+        handleSubscriptionClick('lifetime');
         return false;
       }, true);
       

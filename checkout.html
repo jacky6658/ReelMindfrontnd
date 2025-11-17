@@ -397,9 +397,9 @@ a{text-decoration:none;color:inherit}
         
         <!-- 方案摘要 -->
         <div class="plan-summary" id="planSummary">
-          <div class="plan-name" id="summaryPlanName">月費方案</div>
-          <div class="plan-price" id="summaryPlanPrice">NT$2,480</div>
-          <div class="plan-desc" id="summaryPlanDesc">彈性方案，適合短期使用者</div>
+          <div class="plan-name" id="summaryPlanName">買斷方案</div>
+          <div class="plan-price" id="summaryPlanPrice">NT$9,900</div>
+          <div class="plan-desc" id="summaryPlanDesc">一次購買，永久使用</div>
         </div>
 
         <div class="row">
@@ -440,10 +440,10 @@ a{text-decoration:none;color:inherit}
       <div class="body">
         <h2 class="h2">訂單摘要</h2>
         <div class="sum" aria-live="polite">
-          <div class="line"><span id="sumPlan">月費方案</span><b id="sumPrice">NT$2,480</b></div>
+          <div class="line"><span id="sumPlan">買斷方案</span><b id="sumPrice">NT$9,900</b></div>
           <div class="line"><span>手續費</span><b id="fee">NT$0</b></div>
           <div class="line" style="border-top:1px dashed #334155;margin-top:8px;padding-top:8px">
-            <span><b>應付金額</b></span><b id="total">NT$2,480</b>
+            <span><b>應付金額</b></span><b id="total">NT$9,900</b>
           </div>
         </div>
 
@@ -477,8 +477,8 @@ a{text-decoration:none;color:inherit}
 
 <script>
   // 價格設定
-  const price = { monthly: 2480, yearly: 7980 };
-  let currentPlan = 'monthly';
+  const price = { lifetime: 9900, yearly: 7980 };
+  let currentPlan = 'lifetime';
   let testMode = false;  // 測試模式標記
   let testAmount = null;  // 測試金額
 
@@ -508,7 +508,7 @@ a{text-decoration:none;color:inherit}
       }
     }
     
-    if (plan === 'yearly' || plan === 'monthly') {
+    if (plan === 'yearly' || plan === 'lifetime') {
       currentPlan = plan;
       console.log('✅ 方案設定為:', currentPlan, '測試模式:', testMode, '測試金額:', testAmount);
       updatePlanDisplay();
@@ -526,19 +526,28 @@ a{text-decoration:none;color:inherit}
     const actualAmount = testMode && testAmount ? testAmount : price[currentPlan];
     
     // 更新方案摘要
-    const planName = isYearly ? '年費方案 🔥' : '月費方案';
+    let planName, planDesc;
+    if (currentPlan === 'lifetime') {
+      planName = '買斷方案';
+      planDesc = '一次購買，永久使用';
+    } else if (isYearly) {
+      planName = '年費方案 🔥';
+      planDesc = '最划算的長期方案';
+    } else {
+      planName = '月費方案';
+      planDesc = '彈性方案，適合短期使用者';
+    }
+    
     document.getElementById('summaryPlanName').textContent = testMode 
       ? `${planName} (測試模式)` 
       : planName;
     document.getElementById('summaryPlanPrice').textContent = format(actualAmount);
     document.getElementById('summaryPlanDesc').textContent = testMode
       ? `⚠️ 測試模式：金額為 NT$${testAmount.toLocaleString('zh-Hant-TW')}`
-      : (isYearly 
-        ? '最划算的長期方案' 
-        : '彈性方案，適合短期使用者');
+      : planDesc;
 
     // 更新訂單摘要
-    const displayPlanName = isYearly ? '年費方案' : '月費方案';
+    const displayPlanName = currentPlan === 'lifetime' ? '買斷方案' : (isYearly ? '年費方案' : '月費方案');
     document.getElementById('sumPlan').textContent = testMode 
       ? `${displayPlanName} (測試)` 
       : displayPlanName;
