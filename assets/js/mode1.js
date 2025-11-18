@@ -1,5 +1,6 @@
 // mode1.js - IP人設規劃模式專用函數
 // 從 mode1.html 提取的所有 JavaScript 代碼
+// 版本: 2025-01-13 (修復 checkLoginStatus, getCSRFToken 錯誤)
 
 // API_BASE_URL 已在 config.js 中定義為全局變數
 // 這裡直接使用 window.APP_CONFIG，避免重複聲明
@@ -817,13 +818,23 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       return;
     }
 
+    // 獲取 CSRF Token
+    let csrfToken = '';
+    if (window.Api && window.Api.getCsrfToken) {
+      try {
+        csrfToken = await window.Api.getCsrfToken() || '';
+      } catch (e) {
+        console.warn('獲取 CSRF Token 失敗:', e);
+      }
+    }
+    
     const response = await fetch(`${API_URL}/api/chat/stream`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'X-Conversation-Type': conversationType, // 傳遞會話類型
-        'X-CSRF-Token': getCSRFToken()
+        'X-CSRF-Token': csrfToken
       },
       body: JSON.stringify({ message: message })
     });
@@ -1023,13 +1034,23 @@ async function recordMode1ConversationMessage(conversationType, role, content, t
   }
 
   try {
+    // 獲取 CSRF Token
+    let csrfToken = '';
+    if (window.Api && window.Api.getCsrfToken) {
+      try {
+        csrfToken = await window.Api.getCsrfToken() || '';
+      } catch (e) {
+        console.warn('獲取 CSRF Token 失敗:', e);
+      }
+    }
+    
     const response = await fetch(`${API_URL}/api/memory/long-term`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'X-Conversation-Type': conversationType,
-        'X-CSRF-Token': getCSRFToken()
+        'X-CSRF-Token': csrfToken
       },
       body: JSON.stringify({
         user_id: user.user_id,
@@ -1194,13 +1215,23 @@ async function saveMode1Result(resultType) {
   }
   
   try {
+    // 獲取 CSRF Token
+    let csrfToken = '';
+    if (window.Api && window.Api.getCsrfToken) {
+      try {
+        csrfToken = await window.Api.getCsrfToken() || '';
+      } catch (e) {
+        console.warn('獲取 CSRF Token 失敗:', e);
+      }
+    }
+    
     const response = await fetch(`${API_URL}/api/generations`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'X-Conversation-Type': resultType, // 傳遞類型
-        'X-CSRF-Token': getCSRFToken()
+        'X-CSRF-Token': csrfToken
       },
       body: JSON.stringify({
         type: resultType,
@@ -1330,13 +1361,26 @@ document.addEventListener('DOMContentLoaded', async function() {
   updateUserInfo();
 
   // 檢查登入狀態並更新 UI
-  await checkLoginStatus();
-  await checkSubscriptionStatus();
+  if (window.ReelMindCommon && window.ReelMindCommon.checkLoginStatus) {
+    await window.ReelMindCommon.checkLoginStatus();
+  }
+  if (window.ReelMindCommon && window.ReelMindCommon.checkSubscriptionStatus) {
+    await window.ReelMindCommon.checkSubscriptionStatus();
+  }
 
   // 綁定生成結果按鈕事件（確保使用新的彈跳視窗）
   const resultsBtn = document.getElementById('mode1ResultsBtn');
   if (resultsBtn) {
-    resultsBtn.addEventListener('click', openMode1OneClickModal);
+    // 確保使用全局函數，避免作用域問題
+    const openModal = window.openMode1OneClickModal || openMode1OneClickModal;
+    if (typeof openModal === 'function') {
+      resultsBtn.addEventListener('click', openModal);
+      console.log('✅ 生成結果按鈕事件已綁定');
+    } else {
+      console.error('❌ openMode1OneClickModal 函數未定義');
+    }
+  } else {
+    console.warn('⚠️ 找不到生成結果按鈕 (mode1ResultsBtn)');
   }
 
   // 處理 SSE 事件
