@@ -1412,68 +1412,69 @@ let cachedPositioningRecords = null;
 
 // 查看帳號定位詳細內容（優化版：優先使用緩存數據）
 window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
-  if (!ipPlanningUser?.user_id) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('請先登入', 3000);
-    }
-    return;
-  }
-  
-  // 驗證和清理參數
-  if (!recordId) {
-    console.error('無效的 recordId:', recordId);
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('無效的記錄 ID', 3000);
-    }
-    return;
-  }
-  
-  // 先嘗試從緩存中獲取記錄
-  let record = null;
-  if (cachedPositioningRecords && cachedPositioningRecords.length > 0) {
-    record = cachedPositioningRecords.find(r => {
-      const rId = String(r.id || '');
-      const searchId = String(recordId || '');
-      return rId === searchId || r.id == recordId;
-    });
-  }
-  
-  // 如果緩存中沒有，才發送 API 請求
-  if (!record) {
-    try {
-      const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-      const response = await fetch(`${API_URL}/api/user/positioning/${ipPlanningUser.user_id}`, {
-        headers: {
-          'Authorization': `Bearer ${ipPlanningToken}`
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const records = data.records || [];
-        // 更新緩存
-        cachedPositioningRecords = records;
-        
-        // 查找記錄
-        record = records.find(r => {
-          const rId = String(r.id || '');
-          const searchId = String(recordId || '');
-          return rId === searchId || r.id == recordId;
-        });
-      } else {
-        throw new Error('載入失敗');
-      }
-    } catch (error) {
-      console.error('載入定位記錄失敗:', error);
+  try {
+    if (!ipPlanningUser?.user_id) {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
+        window.ReelMindCommon.showToast('請先登入', 3000);
       }
       return;
     }
-  }
-  
-  // 如果找到記錄，立即顯示 modal（不需要等待）
-  if (record) {
+    
+    // 驗證和清理參數
+    if (!recordId) {
+      console.error('無效的 recordId:', recordId);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('無效的記錄 ID', 3000);
+      }
+      return;
+    }
+    
+    // 先嘗試從緩存中獲取記錄
+    let record = null;
+    if (cachedPositioningRecords && cachedPositioningRecords.length > 0) {
+      record = cachedPositioningRecords.find(r => {
+        const rId = String(r.id || '');
+        const searchId = String(recordId || '');
+        return rId === searchId || r.id == recordId;
+      });
+    }
+    
+    // 如果緩存中沒有，才發送 API 請求
+    if (!record) {
+      try {
+        const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+        const response = await fetch(`${API_URL}/api/user/positioning/${ipPlanningUser.user_id}`, {
+          headers: {
+            'Authorization': `Bearer ${ipPlanningToken}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const records = data.records || [];
+          // 更新緩存
+          cachedPositioningRecords = records;
+          
+          // 查找記錄
+          record = records.find(r => {
+            const rId = String(r.id || '');
+            const searchId = String(recordId || '');
+            return rId === searchId || r.id == recordId;
+          });
+        } else {
+          throw new Error('載入失敗');
+        }
+      } catch (error) {
+        console.error('載入定位記錄失敗:', error);
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
+        }
+        return;
+      }
+    }
+    
+    // 如果找到記錄，立即顯示 modal（不需要等待）
+    if (record) {
         // 創建彈出視窗（使用內聯樣式確保顯示）
         const modal = document.createElement('div');
         modal.className = 'positioning-detail-modal-overlay';
@@ -1546,13 +1547,10 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
             modal.remove();
           });
         });
-      } else {
-        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast('找不到該記錄', 3000);
-        }
-      }
     } else {
-      throw new Error('載入失敗');
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('找不到該記錄', 3000);
+      }
     }
   } catch (error) {
     console.error('View positioning detail error:', error);

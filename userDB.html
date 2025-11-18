@@ -2075,7 +2075,7 @@
       }
       
       // 切換資料庫區塊
-      function showDbSection(sectionName) {
+      async function showDbSection(sectionName) {
         // 隱藏所有分區
         document.querySelectorAll('.db-section').forEach(section => {
           section.classList.remove('active');
@@ -2099,36 +2099,82 @@
         }
         
         // 根據分區載入相應數據
-        switch(sectionName) {
-          case 'personalInfo':
-            loadPersonalInfoForUserDB();
-            break;
-          case 'myScripts':
-            loadMyScriptsForUserDB();
-            break;
-          case 'settings':
-            loadSavedApiKey();
-            break;
-          case 'accountPositioning':
-            loadPositioningRecordsForUserDB();
-            break;
-          case 'topicRecords':
-            loadTopicHistoryForUserDB();
-            break;
-          case 'ipPlanning':
-            loadIpPlanningResultsForUserDB();
-            break;
-          case 'myOrders':
-            loadMyOrdersForUserDB();
-            break;
-          case 'usageStats':
-            loadUsageStatsForUserDB();
-            break;
-          case 'helpCenter':
-            // 幫助中心內容已在HTML中定義，無需動態載入
-            break;
+        try {
+          switch(sectionName) {
+            case 'personalInfo':
+              // 優先使用 userDB.js 中的函數
+              if (window.loadPersonalInfoForUserDB && typeof window.loadPersonalInfoForUserDB === 'function') {
+                await window.loadPersonalInfoForUserDB();
+              } else if (typeof loadPersonalInfoForUserDB === 'function') {
+                await loadPersonalInfoForUserDB();
+              }
+              break;
+            case 'myScripts':
+              if (window.loadMyScriptsForUserDB && typeof window.loadMyScriptsForUserDB === 'function') {
+                await window.loadMyScriptsForUserDB();
+              } else if (typeof loadMyScriptsForUserDB === 'function') {
+                await loadMyScriptsForUserDB();
+              }
+              break;
+            case 'settings':
+              // 確保 loadSavedApiKey 函數已載入
+              if (typeof loadSavedApiKey === 'function') {
+                await loadSavedApiKey();
+              } else if (window.loadSavedApiKey && typeof window.loadSavedApiKey === 'function') {
+                await window.loadSavedApiKey();
+              } else {
+                console.error('loadSavedApiKey 函數未找到');
+              }
+              break;
+            case 'accountPositioning':
+              if (window.loadPositioningRecordsForUserDB && typeof window.loadPositioningRecordsForUserDB === 'function') {
+                await window.loadPositioningRecordsForUserDB();
+              } else if (typeof loadPositioningRecordsForUserDB === 'function') {
+                await loadPositioningRecordsForUserDB();
+              }
+              break;
+            case 'topicRecords':
+              if (window.loadTopicHistoryForUserDB && typeof window.loadTopicHistoryForUserDB === 'function') {
+                await window.loadTopicHistoryForUserDB();
+              } else if (typeof loadTopicHistoryForUserDB === 'function') {
+                await loadTopicHistoryForUserDB();
+              }
+              break;
+            case 'ipPlanning':
+              if (window.loadIpPlanningResultsForUserDB && typeof window.loadIpPlanningResultsForUserDB === 'function') {
+                await window.loadIpPlanningResultsForUserDB();
+              } else if (typeof loadIpPlanningResultsForUserDB === 'function') {
+                await loadIpPlanningResultsForUserDB();
+              }
+              break;
+            case 'myOrders':
+              if (window.loadMyOrdersForUserDB && typeof window.loadMyOrdersForUserDB === 'function') {
+                await window.loadMyOrdersForUserDB();
+              } else if (typeof loadMyOrdersForUserDB === 'function') {
+                await loadMyOrdersForUserDB();
+              }
+              break;
+            case 'usageStats':
+              if (window.loadUsageStatsForUserDB && typeof window.loadUsageStatsForUserDB === 'function') {
+                await window.loadUsageStatsForUserDB();
+              } else if (typeof loadUsageStatsForUserDB === 'function') {
+                await loadUsageStatsForUserDB();
+              }
+              break;
+            case 'helpCenter':
+              // 幫助中心內容已在HTML中定義，無需動態載入
+              break;
+          }
+        } catch (error) {
+          console.error('載入分區數據失敗:', error);
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
+          }
         }
       }
+      
+      // 導出到 window 以便 HTML onclick 調用
+      window.showDbSection = showDbSection;
       
       // 統一的載入動畫函數
       function showLoadingAnimation(container, message = '載入中...') {
@@ -2174,9 +2220,17 @@
       
       // 載入個人資料庫的個人資料（此函數已被 assets/js/userDB.js 中的版本覆蓋，保留此處僅作為備用）
       async function loadPersonalInfoForUserDB() {
-        // 如果 userDB.js 中的函數已載入，使用那個版本
-        if (window.loadPersonalInfoForUserDB && window.loadPersonalInfoForUserDB.toString().includes('assets/js/userDB.js')) {
-          return window.loadPersonalInfoForUserDB();
+        // 如果 userDB.js 中的函數已載入，使用那個版本（避免遞迴調用）
+        const userDBJsFunction = window.loadPersonalInfoForUserDB;
+        if (userDBJsFunction && userDBJsFunction !== arguments.callee && typeof userDBJsFunction === 'function') {
+          try {
+            const funcString = userDBJsFunction.toString();
+            if (funcString.includes('assets/js/userDB.js') || funcString.length > 500) {
+              return await userDBJsFunction();
+            }
+          } catch (e) {
+            console.warn('調用 userDB.js 中的 loadPersonalInfoForUserDB 失敗，使用本地版本:', e);
+          }
         }
         
         const content = document.querySelector('#db-personalInfo .section-content');
