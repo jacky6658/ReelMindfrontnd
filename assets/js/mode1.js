@@ -10,6 +10,77 @@ let isMode1Sending = false;
 let mode1ChatInitialized = false;
 let currentMode1ConversationType = 'ip_planning';
 
+// ===== 使用說明抽屜相關函數（提前定義，確保可以被 HTML onclick 調用） =====
+
+// 切換說明抽屜/彈跳視窗（根據螢幕寬度決定）
+function toggleMode1InstructionsDrawer() {
+  const overlay = document.getElementById('mode1InstructionsOverlay');
+  const drawer = document.getElementById('mode1InstructionsDrawer');
+  
+  if (overlay && drawer) {
+    const isOpen = overlay.classList.contains('open');
+    
+    if (isOpen) {
+      closeMode1InstructionsDrawer();
+    } else {
+      openMode1InstructionsDrawer();
+    }
+  }
+}
+
+function openMode1InstructionsDrawer() {
+  const overlay = document.getElementById('mode1InstructionsOverlay');
+  const drawer = document.getElementById('mode1InstructionsDrawer');
+  
+  // 確保舊的抽屜不會被打開
+  const oldResultsOverlay = document.getElementById('mode1ResultsOverlay');
+  const oldResultsDrawer = document.getElementById('mode1ResultsDrawer');
+  if (oldResultsOverlay) {
+    oldResultsOverlay.style.display = 'none';
+    oldResultsOverlay.classList.remove('open');
+  }
+  if (oldResultsDrawer) {
+    oldResultsDrawer.style.display = 'none';
+    oldResultsDrawer.classList.remove('open');
+  }
+  
+  if (overlay && drawer) {
+    overlay.classList.add('open');
+    drawer.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    
+    // 手機版：防止背景滾動（iOS Safari）
+    if (window.innerWidth <= 768) {
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    }
+  }
+}
+
+function closeMode1InstructionsDrawer() {
+  const overlay = document.getElementById('mode1InstructionsOverlay');
+  const drawer = document.getElementById('mode1InstructionsDrawer');
+  
+  if (overlay && drawer) {
+    overlay.classList.remove('open');
+    drawer.classList.remove('open');
+    document.body.style.overflow = '';
+    
+    // 手機版：恢復背景滾動
+    if (window.innerWidth <= 768) {
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+  }
+}
+
+// 立即導出使用說明抽屜相關函數到全局作用域，供 HTML onclick 使用
+if (typeof window !== 'undefined') {
+  window.toggleMode1InstructionsDrawer = toggleMode1InstructionsDrawer;
+  window.openMode1InstructionsDrawer = openMode1InstructionsDrawer;
+  window.closeMode1InstructionsDrawer = closeMode1InstructionsDrawer;
+}
+
 // iOS Safari 視窗高度處理（解決 100vh 問題）
 function setIOSViewportHeight() {
   // 設置 CSS 變數來處理 iOS Safari 的動態視窗高度
@@ -1146,74 +1217,7 @@ async function recordMode1ConversationMessage(conversationType, role, content, t
   }
 }
 
-// 切換說明抽屜/彈跳視窗（根據螢幕寬度決定）
-function toggleMode1InstructionsDrawer() {
-  const overlay = document.getElementById('mode1InstructionsOverlay');
-  const drawer = document.getElementById('mode1InstructionsDrawer');
-  
-  if (overlay && drawer) {
-    const isOpen = overlay.classList.contains('open');
-    
-    if (isOpen) {
-      closeMode1InstructionsDrawer();
-    } else {
-      openMode1InstructionsDrawer();
-    }
-  }
-}
-
-function openMode1InstructionsDrawer() {
-  const overlay = document.getElementById('mode1InstructionsOverlay');
-  const drawer = document.getElementById('mode1InstructionsDrawer');
-  
-  // 確保舊的抽屜不會被打開
-  const oldResultsOverlay = document.getElementById('mode1ResultsOverlay');
-  const oldResultsDrawer = document.getElementById('mode1ResultsDrawer');
-  if (oldResultsOverlay) {
-    oldResultsOverlay.style.display = 'none';
-    oldResultsOverlay.classList.remove('open');
-  }
-  if (oldResultsDrawer) {
-    oldResultsDrawer.style.display = 'none';
-    oldResultsDrawer.classList.remove('open');
-  }
-  
-  if (overlay && drawer) {
-    overlay.classList.add('open');
-    drawer.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    
-    // 手機版：防止背景滾動（iOS Safari）
-    if (window.innerWidth <= 768) {
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-    }
-  }
-}
-
-function closeMode1InstructionsDrawer() {
-  const overlay = document.getElementById('mode1InstructionsOverlay');
-  const drawer = document.getElementById('mode1InstructionsDrawer');
-  
-  if (overlay && drawer) {
-    overlay.classList.remove('open');
-    drawer.classList.remove('open');
-    document.body.style.overflow = '';
-    
-    // 手機版：恢復背景滾動
-    if (window.innerWidth <= 768) {
-      document.body.style.position = '';
-      document.body.style.width = '';
-    }
-  }
-}
-
-// 導出使用說明抽屜相關函數到全局作用域，供 HTML onclick 使用
-if (typeof window !== 'undefined') {
-  window.toggleMode1InstructionsDrawer = toggleMode1InstructionsDrawer;
-  window.openMode1InstructionsDrawer = openMode1InstructionsDrawer;
-  window.closeMode1InstructionsDrawer = closeMode1InstructionsDrawer;
-}
+// 使用說明抽屜相關函數已在文件頂部定義並導出
 
 // 舊的抽屜函數已刪除，改用新的彈跳視窗
 // 保留這些函數以避免錯誤，但重定向到新的彈跳視窗
