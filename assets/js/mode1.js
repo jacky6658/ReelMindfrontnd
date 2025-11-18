@@ -47,13 +47,33 @@ document.addEventListener('DOMContentLoaded', async function() {
     oldResultsDrawer.style.zIndex = '-1';
   }
   
-  // 確保函數已導出到全局作用域
+  // 確保函數已導出到全局作用域（在綁定事件之前）
   if (typeof window !== 'undefined') {
-    window.openMode1OneClickModal = openMode1OneClickModal;
-    window.closeMode1OneClickModal = closeMode1OneClickModal;
-    window.handleQuickButton = handleQuickButton;
-    window.saveMode1Result = saveMode1Result;
-    window.saveMode1OneClickResult = saveMode1OneClickResult;
+    // 確保所有函數都已定義並導出
+    if (typeof openMode1OneClickModal === 'function') {
+      window.openMode1OneClickModal = openMode1OneClickModal;
+    }
+    if (typeof closeMode1OneClickModal === 'function') {
+      window.closeMode1OneClickModal = closeMode1OneClickModal;
+    }
+    if (typeof handleQuickButton === 'function') {
+      window.handleQuickButton = handleQuickButton;
+    }
+    if (typeof saveMode1Result === 'function') {
+      window.saveMode1Result = saveMode1Result;
+    }
+    if (typeof saveMode1OneClickResult === 'function') {
+      window.saveMode1OneClickResult = saveMode1OneClickResult;
+    }
+    if (typeof toggleMode1InstructionsDrawer === 'function') {
+      window.toggleMode1InstructionsDrawer = toggleMode1InstructionsDrawer;
+    }
+    if (typeof openMode1InstructionsDrawer === 'function') {
+      window.openMode1InstructionsDrawer = openMode1InstructionsDrawer;
+    }
+    if (typeof closeMode1InstructionsDrawer === 'function') {
+      window.closeMode1InstructionsDrawer = closeMode1InstructionsDrawer;
+    }
   }
   
   // 綁定生成結果按鈕事件（確保使用新的彈跳視窗）
@@ -68,7 +88,10 @@ document.addEventListener('DOMContentLoaded', async function() {
       e.preventDefault();
       e.stopPropagation();
       console.log('🔘 生成結果按鈕被點擊，打開彈跳視窗');
-      if (typeof openMode1OneClickModal === 'function') {
+      // 使用 window 上的函數，確保可以訪問
+      if (typeof window.openMode1OneClickModal === 'function') {
+        window.openMode1OneClickModal();
+      } else if (typeof openMode1OneClickModal === 'function') {
         openMode1OneClickModal();
       } else {
         console.error('❌ openMode1OneClickModal 函數未定義');
@@ -332,11 +355,60 @@ async function loadUserMemory() {
 // 更新用戶資訊顯示
 // 使用 common.js 中的統一函數
 function updateUserInfo() {
-  // 直接調用 common.js 中的函數，避免無限遞迴
-  if (window.ReelMindCommon && window.ReelMindCommon.updateUserInfo) {
-    window.ReelMindCommon.updateUserInfo();
+  // 確保用戶資訊已更新到 common.js 的變數中
+  if (window.ReelMindCommon) {
+    // 如果 common.js 有 getUser 函數，確保它返回最新的用戶資訊
+    if (typeof window.ReelMindCommon.getUser === 'function') {
+      const latestUser = window.ReelMindCommon.getUser();
+      if (latestUser && !window.ReelMindCommon.ipPlanningUser) {
+        // 如果 common.js 中的變數為空，嘗試設置
+        if (typeof window.ReelMindCommon.setUser === 'function') {
+          window.ReelMindCommon.setUser(latestUser);
+        }
+      }
+    }
+    
+    // 直接調用 common.js 中的函數，避免無限遞迴
+    if (window.ReelMindCommon.updateUserInfo) {
+      window.ReelMindCommon.updateUserInfo();
+    }
   }
-  // 不再調用 window.updateUserInfo()，因為它可能指向自己，導致無限遞迴
+  
+  // 降級處理：如果 common.js 不可用，直接更新元素
+  if (!window.ReelMindCommon || !window.ReelMindCommon.updateUserInfo) {
+    const userInfo = document.getElementById('userInfo');
+    const authButtons = document.getElementById('authButtons');
+    const userAvatar = document.getElementById('userAvatar');
+    const userName = document.getElementById('userName');
+    
+    if (ipPlanningUser && ipPlanningToken) {
+      if (userInfo) {
+        userInfo.style.display = 'flex';
+        if (userAvatar) {
+          const avatarUrl = ipPlanningUser.picture || ipPlanningUser.avatar || ipPlanningUser.photoURL || '';
+          if (avatarUrl) {
+            userAvatar.src = avatarUrl;
+            userAvatar.style.display = 'block';
+          } else {
+            userAvatar.style.display = 'none';
+          }
+        }
+        if (userName) {
+          userName.textContent = ipPlanningUser.name || ipPlanningUser.displayName || ipPlanningUser.email || '用戶';
+        }
+      }
+      if (authButtons) {
+        authButtons.style.display = 'none';
+      }
+    } else {
+      if (userInfo) {
+        userInfo.style.display = 'none';
+      }
+      if (authButtons) {
+        authButtons.style.display = 'flex';
+      }
+    }
+  }
 }
 
 // 初始化 Mode1 聊天功能
@@ -1134,6 +1206,13 @@ function closeMode1InstructionsDrawer() {
       document.body.style.width = '';
     }
   }
+}
+
+// 導出使用說明抽屜相關函數到全局作用域，供 HTML onclick 使用
+if (typeof window !== 'undefined') {
+  window.toggleMode1InstructionsDrawer = toggleMode1InstructionsDrawer;
+  window.openMode1InstructionsDrawer = openMode1InstructionsDrawer;
+  window.closeMode1InstructionsDrawer = closeMode1InstructionsDrawer;
 }
 
 // 舊的抽屜函數已刪除，改用新的彈跳視窗

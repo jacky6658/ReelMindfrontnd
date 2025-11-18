@@ -926,14 +926,52 @@
     const userDBLink = document.getElementById('userDBLink');  // mode3 右側的創作者資料庫連結
     const userDBMobileTab = document.getElementById('userDBMobileTab');
     
-    if (ipPlanningUser && ipPlanningToken) {
+    // 確保用戶資訊已載入（從 localStorage 或全局變數）
+    let currentUser = ipPlanningUser;
+    let currentToken = ipPlanningToken;
+    
+    // 如果 common.js 中的變數為空，嘗試從 localStorage 或全局變數獲取
+    if (!currentUser) {
+      const userStr = localStorage.getItem('ipPlanningUser');
+      if (userStr) {
+        try {
+          currentUser = JSON.parse(userStr);
+        } catch (e) {
+          console.warn('無法解析用戶資料:', e);
+        }
+      }
+    }
+    
+    // 如果還是沒有，嘗試從 window 對象獲取（mode1.js 等可能有自己的變數）
+    if (!currentUser && typeof window !== 'undefined') {
+      if (window.ipPlanningUser) {
+        currentUser = window.ipPlanningUser;
+      }
+    }
+    
+    if (!currentToken) {
+      currentToken = localStorage.getItem('ipPlanningToken');
+      if (!currentToken && typeof window !== 'undefined' && window.ipPlanningToken) {
+        currentToken = window.ipPlanningToken;
+      }
+    }
+    
+    if (currentUser && currentToken) {
       if (userInfo) {
         userInfo.style.display = 'flex';
-        if (userAvatar && ipPlanningUser.picture) {
-          userAvatar.src = ipPlanningUser.picture;
+        if (userAvatar) {
+          // 支援多種頭像欄位名稱
+          const avatarUrl = currentUser.picture || currentUser.avatar || currentUser.photoURL || '';
+          if (avatarUrl) {
+            userAvatar.src = avatarUrl;
+            userAvatar.style.display = 'block';
+          } else {
+            // 如果沒有頭像，顯示用戶名稱首字母
+            userAvatar.style.display = 'none';
+          }
         }
         if (userName) {
-          userName.textContent = ipPlanningUser.name || ipPlanningUser.email || '用戶';
+          userName.textContent = currentUser.name || currentUser.displayName || currentUser.email || '用戶';
         }
       }
       if (authButtons) {
