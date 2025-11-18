@@ -664,62 +664,49 @@
         visibility: visible;
       }
       
-      /* 手機版：側邊抽屜樣式 */
-      .mode1-instructions-drawer {
+      /* 使用說明 Modal 彈跳視窗樣式（桌面版和手機版都使用居中彈出） */
+      .mode1-instructions-modal {
         position: fixed;
-        top: 0;
-        right: -400px;
-        width: 400px;
-        height: 100%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.9);
+        width: 90%;
+        max-width: 600px;
+        height: auto;
+        max-height: 85vh;
         background: white;
-        z-index: 9999;
-        transition: right 0.3s ease;
-        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        z-index: 10001;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        opacity: 0;
+        visibility: hidden;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      
+      .mode1-instructions-modal.open {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        visibility: visible;
+      }
+      
+      /* 手機版：調整 Modal 大小 */
+      @media (max-width: 768px) {
+        .mode1-instructions-modal {
+          width: 95%;
+          max-width: none;
+          max-height: 90vh;
+          border-radius: 12px;
+        }
+      }
+      
+      /* 確保內容區域可以滾動 */
+      .mode1-instructions-modal-content {
+        flex: 1;
         overflow-y: auto;
-      }
-      
-      .mode1-instructions-drawer.open {
-        right: 0;
-      }
-      
-      /* 電腦版：居中彈跳視窗樣式 */
-      @media (min-width: 769px) {
-        .mode1-instructions-drawer {
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          right: auto;
-          transform: translate(-50%, -50%) scale(0.9);
-          width: 600px;
-          max-width: 90vw;
-          height: auto;
-          max-height: 85vh;
-          border-radius: 16px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-          transition: transform 0.3s ease, opacity 0.3s ease;
-          opacity: 0;
-          display: flex;
-          flex-direction: column;
-      }
-      
-      .mode1-instructions-drawer.open {
-          right: auto;
-          transform: translate(-50%, -50%) scale(1);
-          opacity: 1;
-        }
-        
-        .mode1-instructions-overlay {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        
-        /* 電腦版：確保內容區域可以滾動 */
-        .mode1-instructions-drawer-content {
-          flex: 1;
-          overflow-y: auto;
-          overflow-x: hidden;
-        }
+        overflow-x: hidden;
       }
       
       /* 一鍵生成 Modal 彈出視窗樣式 */
@@ -2269,39 +2256,42 @@
         border-color: #059669;
       }
       
-      .mode1-instructions-drawer-header {
+      .mode1-instructions-modal-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 20px;
         border-bottom: 1px solid #e5e7eb;
         background: #f8fafc;
+        border-radius: 16px 16px 0 0;
+        flex-shrink: 0;
       }
       
-      .mode1-instructions-drawer-header h3 {
+      .mode1-instructions-modal-header h3 {
         margin: 0;
         color: #1f2937;
         font-size: 18px;
         font-weight: 600;
       }
       
-      .mode1-instructions-drawer-close {
+      .mode1-instructions-modal-close {
         background: none;
         border: none;
-        font-size: 20px;
+        font-size: 24px;
         color: #6b7280;
         cursor: pointer;
-        padding: 4px;
+        padding: 4px 8px;
         border-radius: 4px;
         transition: all 0.2s ease;
+        line-height: 1;
       }
       
-      .mode1-instructions-drawer-close:hover {
+      .mode1-instructions-modal-close:hover {
         background: #e5e7eb;
         color: #374151;
       }
       
-      .mode1-instructions-drawer-content {
+      .mode1-instructions-modal-content {
         padding: 20px;
         color: #374151;
         line-height: 1.6;
@@ -3187,9 +3177,15 @@
           -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊高亮 */
           touch-action: manipulation; /* 優化觸控響應 */
         }
-        .mode1-instructions-drawer, .mode1-results-drawer {
+        .mode1-results-drawer {
           width: 100%;
           right: -100%;
+          padding-top: env(safe-area-inset-top, 0px); /* iOS 安全區域 */
+          padding-bottom: env(safe-area-inset-bottom, 0px); /* iOS 安全區域 */
+        }
+        
+        /* Modal 在手機版也是居中顯示，不需要 right 屬性 */
+        .mode1-instructions-modal {
           padding-top: env(safe-area-inset-top, 0px); /* iOS 安全區域 */
           padding-bottom: env(safe-area-inset-bottom, 0px); /* iOS 安全區域 */
         }
@@ -3341,14 +3337,14 @@
       </div>
     </div>
 
-    <!-- IP人設規劃使用說明抽屜 -->
-    <div class="mode1-instructions-overlay" id="mode1InstructionsOverlay" onclick="closeMode1InstructionsDrawer()"></div>
-    <div class="mode1-instructions-drawer" id="mode1InstructionsDrawer">
-      <div class="mode1-instructions-drawer-header">
+    <!-- IP人設規劃使用說明 Modal 彈跳視窗 -->
+    <div class="mode1-instructions-overlay" id="mode1InstructionsOverlay" onclick="if(event.target === this) closeMode1InstructionsDrawer()"></div>
+    <div class="mode1-instructions-modal" id="mode1InstructionsModal" onclick="event.stopPropagation()">
+      <div class="mode1-instructions-modal-header">
         <h3>IP人設規劃使用說明</h3>
-        <button class="mode1-instructions-drawer-close" onclick="closeMode1InstructionsDrawer()">✕</button>
+        <button class="mode1-instructions-modal-close" onclick="closeMode1InstructionsDrawer()">✕</button>
       </div>
-      <div class="mode1-instructions-drawer-content">
+      <div class="mode1-instructions-modal-content">
         <!-- 第一部分：模式簡介（讓用戶知道這是什麼） -->
         <p><strong>IP人設規劃模式</strong></p>
         <p>透過與AI深度對話，記錄您的人生曲線和個人特色，讓AI協助您建立完整的IP人設，並生成帳號定位、選題方向和短影音腳本。</p>

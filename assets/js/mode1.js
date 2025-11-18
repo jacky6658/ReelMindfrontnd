@@ -15,41 +15,7 @@ let cachedHistoryData = null;
 let cachedHistoryTimestamp = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 分鐘快取
 
-// ===== 全局函數導出（確保在 DOMContentLoaded 之前可用） =====
-if (typeof window !== 'undefined') {
-  // 使用說明抽屜相關函數
-  window.toggleMode1InstructionsDrawer = toggleMode1InstructionsDrawer;
-  window.openMode1InstructionsDrawer = openMode1InstructionsDrawer;
-  window.closeMode1InstructionsDrawer = closeMode1InstructionsDrawer;
-
-  // 快速按鈕處理函數
-  window.handleQuickButton = handleQuickButton;
-
-  // 生成結果 Modal 相關函數
-  window.openMode1OneClickModal = openMode1OneClickModal;
-  window.closeMode1OneClickModal = closeMode1OneClickModal;
-  window.switchMode1HistoryType = switchMode1HistoryType;
-  window.deleteMode1HistoryResult = deleteMode1HistoryResult;
-  // window.exportHistoryResult = exportHistoryResult; // 由於已直接定義為 window.exportHistoryResult，這裡可以省略
-  window.selectHistoryResult = selectHistoryResult;
-  window.removeSelectedSetting = removeSelectedSetting;
-  window.useSelectedSettingsToChat = useSelectedSettingsToChat;
-  window.editMode1HistoryTitle = editMode1HistoryTitle;
-  window.saveMode1HistoryTitle = saveMode1HistoryTitle;
-  window.cancelMode1HistoryTitleEdit = cancelMode1HistoryTitleEdit;
-
-  // 展開內容 Modal 相關函數
-  window.openMode1ExpandModal = openMode1ExpandModal;
-  window.closeMode1ExpandModal = closeMode1ExpandModal;
-
-  // 其他可能被 HTML onclick 直接調用的函數
-  if (typeof handleModeNavigation === 'function') {
-    window.handleModeNavigation = handleModeNavigation;
-  }
-  if (typeof goToLogin === 'function') {
-    window.goToLogin = goToLogin;
-  }
-}
+// ===== 全局函數導出將在所有函數定義之後進行 =====
 
 // iOS Safari 視窗高度處理（解決 100vh 問題）
 function setIOSViewportHeight() {
@@ -64,13 +30,13 @@ function setIOSViewportHeight() {
   }
 }
 
-// ===== 使用說明抽屜相關函數（提前定義，確保可以被 HTML onclick 調用） =====
-// 切換說明抽屜/彈跳視窗（根據螢幕寬度決定）
+// ===== 使用說明 Modal 相關函數（提前定義，確保可以被 HTML onclick 調用） =====
+// 切換說明 Modal（彈跳視窗）
 function toggleMode1InstructionsDrawer() {
   const overlay = document.getElementById('mode1InstructionsOverlay');
-  const drawer = document.getElementById('mode1InstructionsDrawer');
+  const modal = document.getElementById('mode1InstructionsModal');
   
-  if (overlay && drawer) {
+  if (overlay && modal) {
     const isOpen = overlay.classList.contains('open');
     
     if (isOpen) {
@@ -83,7 +49,7 @@ function toggleMode1InstructionsDrawer() {
 
 function openMode1InstructionsDrawer() {
   const overlay = document.getElementById('mode1InstructionsOverlay');
-  const drawer = document.getElementById('mode1InstructionsDrawer');
+  const modal = document.getElementById('mode1InstructionsModal');
   
   // 確保舊的抽屜不會被打開
   const oldResultsOverlay = document.getElementById('mode1ResultsOverlay');
@@ -97,33 +63,21 @@ function openMode1InstructionsDrawer() {
     oldResultsDrawer.classList.remove('open');
   }
   
-  if (overlay && drawer) {
+  if (overlay && modal) {
     overlay.classList.add('open');
-    drawer.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    
-    // 手機版：防止背景滾動（iOS Safari）
-    if (window.innerWidth <= 768) {
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-    }
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden'; // 禁止背景滾動
   }
 }
 
 function closeMode1InstructionsDrawer() {
   const overlay = document.getElementById('mode1InstructionsOverlay');
-  const drawer = document.getElementById('mode1InstructionsDrawer');
+  const modal = document.getElementById('mode1InstructionsModal');
   
-  if (overlay && drawer) {
+  if (overlay && modal) {
     overlay.classList.remove('open');
-    drawer.classList.remove('open');
-    document.body.style.overflow = '';
-    
-    // 手機版：恢復背景滾動
-    if (window.innerWidth <= 768) {
-      document.body.style.position = '';
-      document.body.style.width = '';
-    }
+    modal.classList.remove('open');
+    document.body.style.overflow = ''; // 恢復背景滾動
   }
 }
 
@@ -746,6 +700,35 @@ function closeMode1ExpandModal() {
 window.closeMode1ExpandModal = closeMode1ExpandModal;
 
 
+// ===== 快速按鈕處理函數 =====
+
+// 處理快速按鈕點擊
+async function handleQuickButton(type) {
+  const chatMessages = document.getElementById('mode1-chatMessages');
+  if (!chatMessages) return;
+  
+  switch(type) {
+    case 'ip-profile':
+      sendMode1Message('請幫我建立 IP Profile（個人品牌定位）。', 'ip_planning');
+      break;
+    case '14day-plan':
+      sendMode1Message('請幫我規劃 14 天的短影音內容計劃。', 'ip_planning');
+      break;
+    case 'today-script':
+      sendMode1Message('請幫我生成今日的短影音腳本。', 'ip_planning');
+      break;
+    case 'change-script-structure':
+      sendMode1Message('請幫我調整短影音腳本的結構。', 'ip_planning');
+      break;
+    case 'reposition':
+      sendMode1Message('【重要：完全重新開始】請完全忽略之前所有的對話內容、帳號定位結果和長期記憶。這是一個全新的帳號定位需求，請從頭開始。請先詢問我以下問題：1. 我的目標受眾是誰？2. 我想要達成的目標是什麼？3. 我主要使用的平台是什麼？4. 我偏好的內容風格是什麼？請根據我的新回答，生成一個全新的、獨立的帳號定位，不要參考任何之前的內容。', 'ip_planning');
+      break;
+    default:
+      console.warn('未知的快速按鈕類型:', type);
+  }
+}
+window.handleQuickButton = handleQuickButton; // 立即導出到全局，以便 HTML onclick 使用
+
 // ===== 聊天訊息相關函數 =====
 
 // 發送 Mode1 訊息
@@ -1246,6 +1229,71 @@ async function saveMode1Result(resultType) {
   }
 }
 window.saveMode1Result = saveMode1Result; // 導出到全局作用域
+
+// ===== 全局函數導出（確保在 DOMContentLoaded 之前可用，所有函數已定義） =====
+if (typeof window !== 'undefined') {
+  // 使用說明抽屜相關函數
+  window.toggleMode1InstructionsDrawer = toggleMode1InstructionsDrawer;
+  window.openMode1InstructionsDrawer = openMode1InstructionsDrawer;
+  window.closeMode1InstructionsDrawer = closeMode1InstructionsDrawer;
+
+  // 快速按鈕處理函數（如果存在）
+  if (typeof handleQuickButton === 'function') {
+    window.handleQuickButton = handleQuickButton;
+  }
+
+  // 生成結果 Modal 相關函數（部分已在定義後立即導出，這裡確保完整性）
+  if (typeof openMode1OneClickModal === 'function') {
+    window.openMode1OneClickModal = openMode1OneClickModal;
+  }
+  if (typeof closeMode1OneClickModal === 'function') {
+    window.closeMode1OneClickModal = closeMode1OneClickModal;
+  }
+  if (typeof switchMode1HistoryType === 'function') {
+    window.switchMode1HistoryType = switchMode1HistoryType;
+  }
+  if (typeof deleteMode1HistoryResult === 'function') {
+    window.deleteMode1HistoryResult = deleteMode1HistoryResult;
+  }
+  // exportHistoryResult 已直接定義為 window.exportHistoryResult，無需重複導出
+  if (typeof selectHistoryResult === 'function') {
+    window.selectHistoryResult = selectHistoryResult;
+  }
+  if (typeof removeSelectedSetting === 'function') {
+    window.removeSelectedSetting = removeSelectedSetting;
+  }
+  if (typeof useSelectedSettingsToChat === 'function') {
+    window.useSelectedSettingsToChat = useSelectedSettingsToChat;
+  }
+  if (typeof editMode1HistoryTitle === 'function') {
+    window.editMode1HistoryTitle = editMode1HistoryTitle;
+  }
+  if (typeof saveMode1HistoryTitle === 'function') {
+    window.saveMode1HistoryTitle = saveMode1HistoryTitle;
+  }
+  if (typeof cancelMode1HistoryTitleEdit === 'function') {
+    window.cancelMode1HistoryTitleEdit = cancelMode1HistoryTitleEdit;
+  }
+
+  // 展開內容 Modal 相關函數（部分已在定義後立即導出）
+  if (typeof openMode1ExpandModal === 'function') {
+    window.openMode1ExpandModal = openMode1ExpandModal;
+  }
+  if (typeof closeMode1ExpandModal === 'function') {
+    window.closeMode1ExpandModal = closeMode1ExpandModal;
+  }
+  if (typeof toggleHistoryContentExpanded === 'function') {
+    window.toggleHistoryContentExpanded = toggleHistoryContentExpanded;
+  }
+
+  // 其他可能被 HTML onclick 直接調用的函數（從 common.js 來的，但防止其他頁面沒有引入 common.js 時出錯）
+  if (typeof handleModeNavigation === 'function') {
+    window.handleModeNavigation = handleModeNavigation;
+  }
+  if (typeof goToLogin === 'function') {
+    window.goToLogin = goToLogin;
+  }
+}
 
 // 頁面初始化
 document.addEventListener('DOMContentLoaded', async function() {
