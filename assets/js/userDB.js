@@ -1272,19 +1272,72 @@ function updateUserInfo() {
     return;
   }
   
-  // 降級處理：只更新用戶名和頭像
-  if (!ipPlanningUser) return;
+  // 降級處理：直接更新元素
+  const userInfo = document.getElementById('userInfo');
+  const authButtons = document.getElementById('authButtons');
+  const userAvatar = document.getElementById('userAvatar');
+  const userName = document.getElementById('userName');
+  const userDBTab = document.getElementById('userDBTab');
+  const userDBMobileTab = document.getElementById('userDBMobileTab');
   
-  const userNameEl = document.getElementById('userName');
-  const userAvatarEl = document.getElementById('userAvatar');
+  // 確保用戶資訊已載入
+  let currentUser = ipPlanningUser;
+  let currentToken = ipPlanningToken;
   
-  if (userNameEl) {
-    userNameEl.textContent = ipPlanningUser.name || ipPlanningUser.email || '用戶';
+  if (!currentUser) {
+    const userStr = localStorage.getItem('ipPlanningUser');
+    if (userStr) {
+      try {
+        currentUser = JSON.parse(userStr);
+      } catch (e) {
+        console.warn('無法解析用戶資料:', e);
+      }
+    }
   }
   
-  if (userAvatarEl && ipPlanningUser.picture) {
-    userAvatarEl.src = ipPlanningUser.picture;
-    userAvatarEl.alt = ipPlanningUser.name || '用戶頭像';
+  if (!currentToken) {
+    currentToken = localStorage.getItem('ipPlanningToken');
+  }
+  
+  if (currentUser && currentToken) {
+    if (userInfo) {
+      userInfo.style.display = 'flex';
+      if (userAvatar) {
+        // 支援多種頭像欄位名稱
+        const avatarUrl = currentUser.picture || currentUser.avatar || currentUser.photoURL || '';
+        if (avatarUrl) {
+          userAvatar.src = avatarUrl;
+          userAvatar.style.display = 'block';
+        } else {
+          userAvatar.style.display = 'none';
+        }
+      }
+      if (userName) {
+        userName.textContent = currentUser.name || currentUser.displayName || currentUser.email || '用戶';
+      }
+    }
+    if (authButtons) {
+      authButtons.style.display = 'none';
+    }
+    if (userDBTab) {
+      userDBTab.style.display = 'block';
+    }
+    if (userDBMobileTab) {
+      userDBMobileTab.style.display = 'block';
+    }
+  } else {
+    if (userInfo) {
+      userInfo.style.display = 'none';
+    }
+    if (authButtons) {
+      authButtons.style.display = 'flex';
+    }
+    if (userDBTab) {
+      userDBTab.style.display = 'none';
+    }
+    if (userDBMobileTab) {
+      userDBMobileTab.style.display = 'none';
+    }
   }
 }
 

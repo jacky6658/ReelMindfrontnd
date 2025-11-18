@@ -1853,10 +1853,19 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
       window.handleModeNavigation = handleModeNavigation;
       
-      // 更新用戶資訊
+      // 更新用戶資訊（使用 common.js 的統一函數）
       async function updateUserInfo() {
+        // 優先使用 common.js 的統一函數
+        if (window.ReelMindCommon && window.ReelMindCommon.updateUserInfo) {
+          window.ReelMindCommon.updateUserInfo();
+          return;
+        }
+        
+        // 降級處理：如果 common.js 不可用，直接更新元素
         const userInfo = document.getElementById('userInfo');
         const authButtons = document.getElementById('authButtons');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
         const userDBTab = document.getElementById('userDBTab');
         const userDBMobileTab = document.getElementById('userDBMobileTab');
         
@@ -1866,18 +1875,23 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (loggedIn) {
             if (userInfo) {
               userInfo.style.display = 'flex';
-              const userAvatar = document.getElementById('userAvatar');
-              const userName = document.getElementById('userName');
-              
-              if (window.ReelMindCommon && window.ReelMindCommon.getUser) {
-                const user = window.ReelMindCommon.getUser();
+              if (userAvatar) {
+                // 支援多種頭像欄位名稱
+                const user = window.ReelMindCommon && window.ReelMindCommon.getUser ? window.ReelMindCommon.getUser() : null;
                 if (user) {
-                  if (userAvatar && user.picture) {
-                    userAvatar.src = user.picture;
+                  const avatarUrl = user.picture || user.avatar || user.photoURL || '';
+                  if (avatarUrl) {
+                    userAvatar.src = avatarUrl;
+                    userAvatar.style.display = 'block';
+                  } else {
+                    userAvatar.style.display = 'none';
                   }
-                  if (userName && user.name) {
-                    userName.textContent = user.name;
-                  }
+                }
+              }
+              if (userName) {
+                const user = window.ReelMindCommon && window.ReelMindCommon.getUser ? window.ReelMindCommon.getUser() : null;
+                if (user) {
+                  userName.textContent = user.name || user.displayName || user.email || '用戶';
                 }
               }
             }

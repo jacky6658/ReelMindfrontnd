@@ -199,11 +199,79 @@ async function loadUserMemory() {
 // 更新用戶資訊顯示
 // 使用 common.js 中的統一函數
 function updateUserInfo() {
-  // 直接調用 common.js 中的函數，避免無限遞迴
+  // 優先使用 common.js 的統一函數
   if (window.ReelMindCommon && window.ReelMindCommon.updateUserInfo) {
     window.ReelMindCommon.updateUserInfo();
+    return;
   }
-  // 不再調用 window.updateUserInfo()，因為它可能指向自己，導致無限遞迴
+  
+  // 降級處理：如果 common.js 不可用，直接更新元素
+  const userInfo = document.getElementById('userInfo');
+  const authButtons = document.getElementById('authButtons');
+  const userAvatar = document.getElementById('userAvatar');
+  const userName = document.getElementById('userName');
+  const userDBTab = document.getElementById('userDBTab');
+  const userDBMobileTab = document.getElementById('userDBMobileTab');
+  
+  // 確保用戶資訊已載入
+  let currentUser = ipPlanningUser;
+  let currentToken = ipPlanningToken;
+  
+  if (!currentUser) {
+    const userStr = localStorage.getItem('ipPlanningUser');
+    if (userStr) {
+      try {
+        currentUser = JSON.parse(userStr);
+      } catch (e) {
+        console.warn('無法解析用戶資料:', e);
+      }
+    }
+  }
+  
+  if (!currentToken) {
+    currentToken = localStorage.getItem('ipPlanningToken');
+  }
+  
+  if (currentUser && currentToken) {
+    if (userInfo) {
+      userInfo.style.display = 'flex';
+      if (userAvatar) {
+        // 支援多種頭像欄位名稱
+        const avatarUrl = currentUser.picture || currentUser.avatar || currentUser.photoURL || '';
+        if (avatarUrl) {
+          userAvatar.src = avatarUrl;
+          userAvatar.style.display = 'block';
+        } else {
+          userAvatar.style.display = 'none';
+        }
+      }
+      if (userName) {
+        userName.textContent = currentUser.name || currentUser.displayName || currentUser.email || '用戶';
+      }
+    }
+    if (authButtons) {
+      authButtons.style.display = 'none';
+    }
+    if (userDBTab) {
+      userDBTab.style.display = 'block';
+    }
+    if (userDBMobileTab) {
+      userDBMobileTab.style.display = 'block';
+    }
+  } else {
+    if (userInfo) {
+      userInfo.style.display = 'none';
+    }
+    if (authButtons) {
+      authButtons.style.display = 'flex';
+    }
+    if (userDBTab) {
+      userDBTab.style.display = 'none';
+    }
+    if (userDBMobileTab) {
+      userDBMobileTab.style.display = 'none';
+    }
+  }
 }
 
 // 初始化設定區塊
