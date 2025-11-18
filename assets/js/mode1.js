@@ -1934,6 +1934,8 @@ async function saveMode1Result() {
       }
       
       if (savedCount > 0) {
+        // 清除快取，強制重新載入
+        clearHistoryCache();
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast(`✅ 已儲存 ${savedCount} 個結果到創作者資料庫的「IP人設規劃結果」`, 5000);
         }
@@ -2039,6 +2041,8 @@ async function saveMode1Result() {
     
     const data = await response.json();
     if (data.success) {
+      // 清除快取，強制重新載入
+      clearHistoryCache();
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('✅ 儲存成功！請在創作者資料庫的「IP人設規劃結果」查看', 5000);
       }
@@ -2219,7 +2223,29 @@ async function openMode1OneClickModal() {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     
-    // 預設顯示帳號定位標籤
+    // 預先載入數據（如果快取不存在或過期）
+    // 這樣可以讓用戶在打開 Modal 時就看到內容，而不是等待載入
+    if (!cachedHistoryData || !cachedHistoryTimestamp || (Date.now() - cachedHistoryTimestamp > CACHE_DURATION)) {
+      // 在背景載入數據，不阻塞 UI
+      fetchHistoryData(true).then(() => {
+        // 數據載入完成後，載入當前標籤頁
+        const activeTab = document.querySelector('.mode1-oneclick-tab.active');
+        if (activeTab) {
+          const tabId = activeTab.id;
+          if (tabId === 'mode1HistoryTabProfile') {
+            loadMode1OneClickHistory('profile', false);
+          } else if (tabId === 'mode1HistoryTabPlan') {
+            loadMode1OneClickHistory('plan', false);
+          } else if (tabId === 'mode1HistoryTabScripts') {
+            loadMode1OneClickHistory('scripts', false);
+          }
+        }
+      }).catch(error => {
+        console.error('預載入數據失敗:', error);
+      });
+    }
+    
+    // 預設顯示帳號定位標籤（如果快取存在，會立即顯示）
     switchMode1HistoryType('profile');
   } else {
     console.error('❌ 找不到 mode1OneClickModalOverlay 元素');
@@ -2230,7 +2256,7 @@ if (typeof window !== 'undefined') {
   window.openMode1OneClickModal = openMode1OneClickModal;
 }
 
-// 切換過往紀錄類型標籤
+// 切換過往紀錄類型標籤（使用快取，快速切換）
 async function switchMode1HistoryType(type) {
   // 更新標籤狀態
   const profileTab = document.getElementById('mode1HistoryTabProfile');
@@ -2249,8 +2275,10 @@ async function switchMode1HistoryType(type) {
     scriptsTab.classList.add('active');
   }
   
-  // 載入對應類型的過往紀錄
-  await loadMode1OneClickHistory(type);
+  // 載入對應類型的過往紀錄（使用快取，快速切換）
+  // 如果快取存在且未過期，直接使用快取數據，不顯示載入中
+  const useCache = cachedHistoryData && cachedHistoryTimestamp && (Date.now() - cachedHistoryTimestamp < CACHE_DURATION);
+  await loadMode1OneClickHistory(type, !useCache);
 }
 
 // 導出到全局作用域
@@ -2263,19 +2291,27 @@ let selectedSettings = {
   scripts: null
 };
 
-// 載入過往紀錄（只顯示指定類型）
-async function loadMode1OneClickHistory(type = 'profile') {
-  const container = document.getElementById('mode1OneClickHistoryContainer');
-  if (!container) return;
+// 全局變量：快取過往紀錄數據
+let cachedHistoryData = null;
+let cachedHistoryTimestamp = null;
+const CACHE_DURATION = 30000; // 快取30秒
+
+// 獲取過往紀錄數據（帶快取）
+async function fetchHistoryData(forceRefresh = false) {
+  // 檢查快取是否有效
+  if (!forceRefresh && cachedHistoryData && cachedHistoryTimestamp) {
+    const now = Date.now();
+    if (now - cachedHistoryTimestamp < CACHE_DURATION) {
+      console.log('使用快取的過往紀錄數據');
+      return cachedHistoryData;
+    }
+  }
   
   if (!ipPlanningUser?.user_id || !ipPlanningToken) {
-    container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>請先登入以查看過往紀錄</p></div>';
-    return;
+    return null;
   }
   
   try {
-    container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>載入中...</p></div>';
-    
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
     const response = await fetch(`${API_URL}/api/ip-planning/my`, {
       headers: {
@@ -2289,7 +2325,49 @@ async function loadMode1OneClickHistory(type = 'profile') {
     }
     
     const data = await response.json();
-    if (!data.success || !data.results || data.results.length === 0) {
+    
+    // 更新快取
+    cachedHistoryData = data;
+    cachedHistoryTimestamp = Date.now();
+    
+    return data;
+  } catch (error) {
+    console.error('獲取過往紀錄數據失敗:', error);
+    // 如果請求失敗，嘗試使用快取數據
+    if (cachedHistoryData) {
+      console.log('請求失敗，使用快取數據');
+      return cachedHistoryData;
+    }
+    throw error;
+  }
+}
+
+// 清除快取（當刪除或新增記錄時調用）
+function clearHistoryCache() {
+  cachedHistoryData = null;
+  cachedHistoryTimestamp = null;
+}
+
+// 載入過往紀錄（只顯示指定類型，使用快取）
+async function loadMode1OneClickHistory(type = 'profile', forceRefresh = false) {
+  const container = document.getElementById('mode1OneClickHistoryContainer');
+  if (!container) return;
+  
+  if (!ipPlanningUser?.user_id || !ipPlanningToken) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>請先登入以查看過往紀錄</p></div>';
+    return;
+  }
+  
+  try {
+    // 顯示載入中（只在首次載入或強制刷新時顯示）
+    if (forceRefresh || !cachedHistoryData) {
+      container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>載入中...</p></div>';
+    }
+    
+    // 獲取數據（使用快取）
+    const data = await fetchHistoryData(forceRefresh);
+    
+    if (!data || !data.success || !data.results || data.results.length === 0) {
       container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>尚無過往紀錄</p></div>';
       return;
     }
@@ -2322,7 +2400,9 @@ async function loadMode1OneClickHistory(type = 'profile') {
       scripts: '一週腳本'
     };
     
-    let html = '';
+    // 使用文檔片段優化渲染性能
+    const fragment = document.createDocumentFragment();
+    const tempDiv = document.createElement('div');
     
     results.forEach((result, index) => {
       const date = new Date(result.created_at).toLocaleString('zh-TW', {
@@ -2339,10 +2419,27 @@ async function loadMode1OneClickHistory(type = 'profile') {
       // 檢查是否已選擇
       const isSelected = selectedSettings[targetType]?.id === result.id;
       
-      html += `
+      // 獲取保存的標題（如果有的話）
+      const titleKey = `mode1-history-title-${result.id}`;
+      const savedTitle = localStorage.getItem(titleKey);
+      const displayTitle = savedTitle || result.title || typeNames[targetType];
+      
+      // 使用統一的 escapeHtml 函數
+      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
+        if (text == null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+      });
+      
+      const itemHTML = `
         <div class="mode1-oneclick-history-item" data-result-id="${result.id}" data-result-type="${targetType}">
           <div class="mode1-oneclick-history-item-header">
-            <div class="mode1-oneclick-history-item-title">${result.title || typeNames[targetType]}</div>
+            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+              <div class="mode1-oneclick-history-item-title" id="mode1HistoryTitle${result.id}" data-result-id="${result.id}" style="cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; flex: 1; min-width: 0;" onclick="editMode1HistoryTitle(${result.id})" title="點擊編輯標題" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='transparent'">${escapeHtml(displayTitle)}</div>
+              <input type="text" class="mode1-oneclick-history-item-title-input" id="mode1HistoryTitleInput${result.id}" data-result-id="${result.id}" value="${escapeHtml(displayTitle)}" style="display: none; flex: 1; min-width: 0; padding: 4px 8px; border: 1px solid #3b82f6; border-radius: 4px; font-size: 16px; font-weight: 600; color: #1f2937;" onblur="saveMode1HistoryTitle(${result.id})" onkeydown="if(event.key === 'Enter') { event.preventDefault(); saveMode1HistoryTitle(${result.id}); } else if(event.key === 'Escape') { cancelMode1HistoryTitleEdit(${result.id}); }">
+              <i class="fas fa-edit" style="cursor: pointer; color: #6b7280; font-size: 14px; opacity: 0.6; transition: opacity 0.2s;" onclick="editMode1HistoryTitle(${result.id})" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></i>
+            </div>
             <div class="mode1-oneclick-history-item-date">${date}</div>
           </div>
           <div class="mode1-oneclick-history-item-content" id="historyContent${result.id}">
@@ -2364,9 +2461,16 @@ async function loadMode1OneClickHistory(type = 'profile') {
           </div>
         </div>
       `;
+      
+      tempDiv.innerHTML = itemHTML;
+      while (tempDiv.firstChild) {
+        fragment.appendChild(tempDiv.firstChild);
+      }
     });
     
-    container.innerHTML = html;
+    // 一次性更新 DOM
+    container.innerHTML = '';
+    container.appendChild(fragment);
     updateSelectedSettingsDisplay();
   } catch (error) {
     console.error('載入過往紀錄失敗:', error);
@@ -2399,29 +2503,25 @@ window.expandHistoryContent = function(resultId) {
   }
 };
 
-// 載入完整歷史內容
+// 載入完整歷史內容（使用快取）
 async function loadFullHistoryContent(resultId, resultType, contentEl) {
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    // 使用 /api/ip-planning/my 端點獲取所有結果，然後篩選
-    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
-      headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    // 優先使用快取數據
+    let data = cachedHistoryData;
     
-    if (response.ok) {
-      const data = await response.json();
-      if (data.success && data.results) {
-        // 從結果中找出對應的 resultId
-        const result = data.results.find(r => r.id === resultId);
-        if (result) {
-          contentEl.innerHTML = renderMode1Markdown(result.content);
-          contentEl.classList.add('expanded');
-          const btn = contentEl.nextElementSibling?.querySelector('button');
-          if (btn) btn.innerHTML = '<span>收起</span>';
-        }
+    // 如果快取不存在或過期，重新獲取
+    if (!data || !cachedHistoryTimestamp || (Date.now() - cachedHistoryTimestamp > CACHE_DURATION)) {
+      data = await fetchHistoryData(false);
+    }
+    
+    if (data && data.success && data.results) {
+      // 從結果中找出對應的 resultId
+      const result = data.results.find(r => r.id === resultId);
+      if (result) {
+        contentEl.innerHTML = renderMode1Markdown(result.content);
+        contentEl.classList.add('expanded');
+        const btn = contentEl.nextElementSibling?.querySelector('button');
+        if (btn) btn.innerHTML = '<span>收起</span>';
       }
     }
   } catch (error) {
@@ -2429,27 +2529,24 @@ async function loadFullHistoryContent(resultId, resultType, contentEl) {
   }
 }
 
-// 載入歷史內容預覽
+// 載入歷史內容預覽（使用快取）
 async function loadHistoryContentPreview(resultId, resultType, contentEl) {
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    // 使用 /api/ip-planning/my 端點獲取所有結果，然後篩選
-    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
-      headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    // 優先使用快取數據
+    let data = cachedHistoryData;
     
-    if (response.ok) {
-      const data = await response.json();
-      if (data.success && data.results) {
-        // 從結果中找出對應的 resultId
-        const result = data.results.find(r => r.id === resultId);
-        if (result) {
-          const preview = result.content.replace(/<[^>]*>/g, '').substring(0, 150);
-          contentEl.innerHTML = renderMode1Markdown(preview) + '...';
-        }
+    // 如果快取不存在或過期，重新獲取
+    if (!data || !cachedHistoryTimestamp || (Date.now() - cachedHistoryTimestamp > CACHE_DURATION)) {
+      data = await fetchHistoryData(false);
+    }
+    
+    if (data && data.success && data.results) {
+      // 從結果中找出對應的 resultId
+      const result = data.results.find(r => r.id === resultId);
+      if (result) {
+        const preview = result.content.replace(/<[^>]*>/g, '').substring(0, 150);
+        contentEl.innerHTML = renderMode1Markdown(preview) + '...';
+        contentEl.classList.remove('expanded');
       }
     }
   } catch (error) {
@@ -2466,35 +2563,31 @@ window.loadHistoryResultToGenerate = function(type, resultId) {
   });
 };
 
-// 載入歷史結果到卡片
+// 載入歷史結果到卡片（使用快取，此函數已不再使用，保留作為備用）
 async function loadHistoryResultToCard(type, resultId) {
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    // 使用 /api/ip-planning/my 端點獲取所有結果，然後篩選
-    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
-      headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    // 優先使用快取數據
+    let data = cachedHistoryData;
     
-    if (response.ok) {
-      const data = await response.json();
-      if (data.success && data.results) {
-        // 從結果中找出對應的 resultId
-        const result = data.results.find(r => r.id === resultId);
-        if (result) {
-          const typeMap = {
-            'profile': 'positioning',
-            'plan': 'topics',
-            'scripts': 'weekly'
-          };
-          const cardType = typeMap[type] || type;
-          updateMode1OneClickStatus(cardType, 'completed', result.content);
-          
-          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast('已載入歷史結果', 2000);
-          }
+    // 如果快取不存在或過期，重新獲取
+    if (!data || !cachedHistoryTimestamp || (Date.now() - cachedHistoryTimestamp > CACHE_DURATION)) {
+      data = await fetchHistoryData(false);
+    }
+    
+    if (data && data.success && data.results) {
+      // 從結果中找出對應的 resultId
+      const result = data.results.find(r => r.id === resultId);
+      if (result) {
+        const typeMap = {
+          'profile': 'positioning',
+          'plan': 'topics',
+          'scripts': 'weekly'
+        };
+        const cardType = typeMap[type] || type;
+        updateMode1OneClickStatus(cardType, 'completed', result.content);
+        
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('已載入歷史結果', 2000);
         }
       }
     }
@@ -2506,48 +2599,45 @@ async function loadHistoryResultToCard(type, resultId) {
   }
 }
 
-// 選擇歷史結果
+// 選擇歷史結果（使用快取）
 window.selectHistoryResult = async function(type, resultId) {
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
-      headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    // 優先使用快取數據
+    let data = cachedHistoryData;
     
-    if (response.ok) {
-      const data = await response.json();
-      if (data.success && data.results) {
-        const result = data.results.find(r => r.id === resultId);
-        if (result) {
-          // 更新選擇設定
-          selectedSettings[type] = {
-            id: result.id,
-            title: result.title || (type === 'profile' ? '帳號定位' : type === 'plan' ? '選題方向' : '一週腳本'),
-            content: result.content
-          };
-          
-          // 更新顯示
-          updateSelectedSettingsDisplay();
-          
-          // 重新載入當前標籤頁以更新按鈕狀態
-          const activeTab = document.querySelector('.mode1-oneclick-tab.active');
-          if (activeTab) {
-            const tabId = activeTab.id;
-            if (tabId === 'mode1HistoryTabProfile') {
-              await loadMode1OneClickHistory('profile');
-            } else if (tabId === 'mode1HistoryTabPlan') {
-              await loadMode1OneClickHistory('plan');
-            } else if (tabId === 'mode1HistoryTabScripts') {
-              await loadMode1OneClickHistory('scripts');
-            }
+    // 如果快取不存在或過期，重新獲取
+    if (!data || !cachedHistoryTimestamp || (Date.now() - cachedHistoryTimestamp > CACHE_DURATION)) {
+      data = await fetchHistoryData(false);
+    }
+    
+    if (data && data.success && data.results) {
+      const result = data.results.find(r => r.id === resultId);
+      if (result) {
+        // 更新選擇設定
+        selectedSettings[type] = {
+          id: result.id,
+          title: result.title || (type === 'profile' ? '帳號定位' : type === 'plan' ? '選題方向' : '一週腳本'),
+          content: result.content
+        };
+        
+        // 更新顯示
+        updateSelectedSettingsDisplay();
+        
+        // 重新載入當前標籤頁以更新按鈕狀態（使用快取，不重新請求）
+        const activeTab = document.querySelector('.mode1-oneclick-tab.active');
+        if (activeTab) {
+          const tabId = activeTab.id;
+          if (tabId === 'mode1HistoryTabProfile') {
+            await loadMode1OneClickHistory('profile', false); // 使用快取
+          } else if (tabId === 'mode1HistoryTabPlan') {
+            await loadMode1OneClickHistory('plan', false); // 使用快取
+          } else if (tabId === 'mode1HistoryTabScripts') {
+            await loadMode1OneClickHistory('scripts', false); // 使用快取
           }
-          
-          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast('✅ 已選擇', 2000);
-          }
+        }
+        
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('✅ 已選擇', 2000);
         }
       }
     }
@@ -2718,24 +2808,21 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
   }
 }
 
-// 匯出歷史結果
+// 匯出歷史結果（使用快取）
 window.exportHistoryResult = async function(resultId, resultType) {
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    // 使用 /api/ip-planning/my 端點獲取所有結果，然後篩選
-    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
-      headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    // 優先使用快取數據
+    let data = cachedHistoryData;
     
-    if (response.ok) {
-      const data = await response.json();
-      if (data.success && data.results) {
-        // 從結果中找出對應的 resultId
-        const result = data.results.find(r => r.id === resultId);
-        if (result) {
+    // 如果快取不存在或過期，重新獲取
+    if (!data || !cachedHistoryTimestamp || (Date.now() - cachedHistoryTimestamp > CACHE_DURATION)) {
+      data = await fetchHistoryData(false);
+    }
+    
+    if (data && data.success && data.results) {
+      // 從結果中找出對應的 resultId
+      const result = data.results.find(r => r.id === resultId);
+      if (result) {
           const typeNames = {
             'profile': '帳號定位',
             'plan': '選題方向',
@@ -3403,6 +3490,9 @@ async function saveMode1OneClickResult(type) {
     
     const result = await response.json();
     
+    // 清除快取，強制重新載入
+    clearHistoryCache();
+    
     // 顯示成功通知
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('✅ 儲存成功！請在創作者資料庫的「IP人設規劃結果」查看', 5000);
@@ -3638,6 +3728,70 @@ async function handleModeNavigation(event, targetMode) {
   // 已登入且已訂閱，允許跳轉
   window.location.href = targetMode === 'mode1' ? 'mode1.html' : 'mode3.html';
   return false;
+}
+
+// 編輯 Mode1 歷史記錄標題
+window.editMode1HistoryTitle = function(resultId) {
+  const titleElement = document.getElementById(`mode1HistoryTitle${resultId}`);
+  const inputElement = document.getElementById(`mode1HistoryTitleInput${resultId}`);
+  
+  if (titleElement && inputElement) {
+    const currentTitle = titleElement.textContent.trim();
+    inputElement.value = currentTitle;
+    titleElement.style.display = 'none';
+    inputElement.style.display = 'block';
+    inputElement.focus();
+    inputElement.select();
+  }
+}
+
+// 保存 Mode1 歷史記錄標題
+window.saveMode1HistoryTitle = function(resultId) {
+  const titleElement = document.getElementById(`mode1HistoryTitle${resultId}`);
+  const inputElement = document.getElementById(`mode1HistoryTitleInput${resultId}`);
+  
+  if (titleElement && inputElement) {
+    const newTitle = inputElement.value.trim();
+    const titleKey = `mode1-history-title-${resultId}`;
+    
+    // 獲取默認標題
+    const item = document.querySelector(`.mode1-oneclick-history-item[data-result-id="${resultId}"]`);
+    let defaultTitle = '帳號定位';
+    if (item) {
+      const resultType = item.dataset.resultType;
+      if (resultType === 'plan') {
+        defaultTitle = '選題方向';
+      } else if (resultType === 'scripts') {
+        defaultTitle = '一週腳本';
+      }
+    }
+    
+    const finalTitle = newTitle || defaultTitle;
+    titleElement.textContent = finalTitle;
+    
+    // 保存到 localStorage
+    localStorage.setItem(titleKey, finalTitle);
+    
+    if (newTitle) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('✅ 標題已更新', 2000);
+      }
+    }
+    
+    titleElement.style.display = '';
+    inputElement.style.display = 'none';
+  }
+}
+
+// 取消編輯 Mode1 歷史記錄標題
+window.cancelMode1HistoryTitleEdit = function(resultId) {
+  const titleElement = document.getElementById(`mode1HistoryTitle${resultId}`);
+  const inputElement = document.getElementById(`mode1HistoryTitleInput${resultId}`);
+  
+  if (titleElement && inputElement) {
+    titleElement.style.display = '';
+    inputElement.style.display = 'none';
+  }
 }
 
 // 登入函數

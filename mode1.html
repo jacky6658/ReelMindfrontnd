@@ -356,7 +356,8 @@
           overflow-y: auto !important;
           overflow-x: hidden !important;
           -webkit-overflow-scrolling: touch;
-          overscroll-behavior: contain;
+          overscroll-behavior-y: auto; /* 電腦版允許正常滾動到頂部 */
+          overscroll-behavior-x: none;
           min-height: 0 !important;
           max-height: none !important;
           padding: 16px 12px !important; /* 手機版減少左右內邊距，讓對話框更居中 */
@@ -364,6 +365,15 @@
           /* 動態計算底部 padding，為輸入欄位留出空間（考慮 safe-area-inset-bottom） */
           padding-bottom: calc(200px + env(safe-area-inset-bottom, 0px)) !important;
           margin-bottom: 0 !important;
+          scroll-behavior: smooth; /* 平滑滾動 */
+        }
+        
+        /* 確保可以滾動到最頂部 */
+        .mode1-page #mode1-chatMessages::before {
+          content: '';
+          display: block;
+          height: 1px;
+          margin-top: -1px;
         }
         
         /* 輸入區域固定在底部，使用 safe-area-inset-bottom 避免被 iOS Safari 網址欄擋到 */
@@ -460,6 +470,11 @@
           overflow: hidden;
           text-overflow: ellipsis;
           text-align: center;
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          width: auto;
+          max-width: 200px;
         }
         
         .navbar-tabs {
@@ -521,9 +536,19 @@
           overflow-y: overlay !important; /* iOS Safari 優化 */
           overflow-x: hidden !important;
           -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
-          overscroll-behavior: contain; /* 防止滾動穿透 */
+          overscroll-behavior-y: contain; /* 防止滾動穿透，但允許向上滾動到頂部 */
+          overscroll-behavior-x: none; /* 禁止橫向滾動穿透 */
           padding-top: 16px !important; /* 為頁首留出空間，避免對話泡泡被擋到 */
           padding-bottom: calc(200px + env(safe-area-inset-bottom, 0px)) !important; /* 為輸入欄位留出空間 */
+          scroll-behavior: smooth; /* 平滑滾動 */
+        }
+        
+        /* 確保可以滾動到最頂部 */
+        #mode1-chatMessages::before {
+          content: '';
+          display: block;
+          height: 1px;
+          margin-top: -1px;
         }
         
         /* 用戶對話泡泡樣式，確保不被頁首擋到 */
@@ -921,13 +946,14 @@
         justify-content: flex-start; /* 確保按鈕從左對齊，不會因為內容變化而移動 */
         width: 100%; /* 固定寬度，防止觸發視窗調整 */
         box-sizing: border-box; /* 包含 padding 和 border */
+        flex-wrap: wrap; /* 手機版允許換行 */
       }
       
       .mode1-oneclick-history-item-btn {
         flex: 1 1 0; /* 平均分配空間，允許縮小和放大 */
-        min-width: 80px; /* 設定最小寬度，確保按鈕不會太小 */
-        max-width: 150px; /* 設定最大寬度，防止按鈕過大 */
-        padding: 8px 16px;
+        min-width: 0; /* 允許縮小到0，配合 flex: 1 使用 */
+        max-width: none; /* 移除最大寬度限制 */
+        padding: 8px 12px; /* 減少 padding，讓按鈕更緊湊 */
         border: 1px solid #d1d5db;
         border-radius: 6px;
         background: white;
@@ -945,6 +971,31 @@
         display: flex;
         align-items: center;
         justify-content: center;
+      }
+      
+      /* 手機版：調整按鈕大小和間距 */
+      @media (max-width: 768px) {
+        .mode1-oneclick-history-item-actions {
+          gap: 6px; /* 減少間距 */
+          padding-top: 10px;
+          margin-top: 10px;
+        }
+        
+        .mode1-oneclick-history-item-btn {
+          flex: 1 1 calc(50% - 3px); /* 每行兩個按鈕，考慮 gap */
+          min-width: calc(50% - 3px); /* 確保每行兩個按鈕 */
+          max-width: calc(50% - 3px); /* 確保每行兩個按鈕 */
+          padding: 10px 8px; /* 增加垂直 padding，減少水平 padding */
+          font-size: 13px; /* 稍微減小字體 */
+          min-height: 40px; /* 增加最小高度，確保觸控目標足夠大 */
+        }
+        
+        /* 刪除按鈕特殊處理 */
+        .mode1-oneclick-history-item-btn.danger {
+          flex: 1 1 calc(50% - 3px);
+          min-width: calc(50% - 3px);
+          max-width: calc(50% - 3px);
+        }
       }
       
       .mode1-oneclick-history-item-btn:hover {
@@ -3301,38 +3352,39 @@
         <p><strong>IP人設規劃模式</strong></p>
         <p>透過與AI深度對話，記錄您的人生曲線和個人特色，讓AI協助您建立完整的IP人設，並生成帳號定位、選題方向和一週腳本。</p>
         
-        <p><strong>兩種生成方式</strong></p>
-        <div class="mode1-method-guide">
-          <div class="mode1-method-item">
-            <div class="mode1-method-badge">方式一</div>
-            <div class="mode1-method-content">
-              <strong>一鍵生成全部</strong>
-              <p>點擊右上角「生成結果」按鈕，開啟彈出視窗，切換到「一鍵生成」標籤，點擊「一鍵生成全部」按鈕，可同時生成帳號定位、選題方向、一週腳本三個內容。適合快速取得完整規劃。</p>
-            </div>
-          </div>
-          <div class="mode1-method-item">
-            <div class="mode1-method-badge">方式二</div>
-            <div class="mode1-method-content">
-              <strong>個別生成</strong>
-              <p>先與AI對話建立基礎，再點擊右上角「生成結果」按鈕，開啟彈出視窗，切換到「一鍵生成」標籤，可依序生成帳號定位、選題方向、一週腳本。適合需要逐步調整的用戶。</p>
-            </div>
-          </div>
-        </div>
-        
         <p><strong>生成結果功能說明</strong></p>
         <div class="mode1-method-guide">
           <div class="mode1-method-item">
             <div class="mode1-method-badge">過往紀錄</div>
             <div class="mode1-method-content">
-              <strong>查看歷史生成結果</strong>
-              <p>點擊「生成結果」按鈕後，預設會顯示「過往紀錄」標籤，您可以查看所有已保存的生成結果。每個結果都可以展開查看完整內容、使用此結果到生成區域、或匯出為CSV檔案。</p>
+              <strong>查看和管理歷史生成結果</strong>
+              <p>點擊右上角「生成結果」按鈕，開啟彈出視窗，您可以透過頂部的標籤頁切換查看不同類型的過往紀錄：</p>
+              <ul style="margin-top: 8px; padding-left: 20px;">
+                <li><strong>帳號定位</strong>：查看所有已保存的帳號定位記錄</li>
+                <li><strong>選題方向</strong>：查看所有已保存的選題方向記錄</li>
+                <li><strong>一週腳本</strong>：查看所有已保存的一週腳本記錄</li>
+              </ul>
+              <p style="margin-top: 8px;">每個結果都可以：</p>
+              <ul style="margin-top: 8px; padding-left: 20px;">
+                <li><strong>展開</strong>：查看完整內容</li>
+                <li><strong>選擇</strong>：選擇要使用的設定（可同時選擇帳號定位、選題方向、一週腳本）</li>
+                <li><strong>匯出</strong>：匯出為CSV檔案</li>
+                <li><strong>刪除</strong>：刪除不需要的記錄</li>
+              </ul>
             </div>
           </div>
           <div class="mode1-method-item">
-            <div class="mode1-method-badge">一鍵生成</div>
+            <div class="mode1-method-badge">使用此設定與AI對話</div>
             <div class="mode1-method-content">
-              <strong>生成新內容或載入已保存結果</strong>
-              <p>切換到「一鍵生成」標籤，系統會自動載入已保存的結果（如果有的話）。您可以點擊「一鍵生成全部」按鈕生成新內容，或對每個結果進行儲存、匯出、重新生成等操作。</p>
+              <strong>自由搭配已保存的設定進行討論</strong>
+              <p>在「過往紀錄」中選擇您想要使用的帳號定位、選題方向或一週腳本後，上方會顯示「已選擇的設定」區域。您可以：</p>
+              <ul style="margin-top: 8px; padding-left: 20px;">
+                <li>同時選擇多個不同類型的設定（例如：選擇一個帳號定位 + 一個選題方向 + 一個一週腳本）</li>
+                <li>點擊「使用此設定與AI對話」按鈕，系統會自動將選擇的設定內容填入對話框</li>
+                <li>AI會根據您選擇的設定，協助您討論和優化短影音內容</li>
+                <li>可以隨時移除已選擇的設定，重新選擇其他記錄</li>
+              </ul>
+              <p style="margin-top: 8px;"><strong>使用場景</strong>：當您想要基於之前的生成結果進行調整、優化或討論時，可以使用此功能快速載入相關設定，讓AI更精準地協助您。</p>
             </div>
           </div>
         </div>
@@ -3356,8 +3408,15 @@
           <div class="mode1-step">
             <div class="mode1-step-number">3</div>
             <div class="mode1-step-content">
-              <strong>生成內容</strong>
-              <p>點擊右上角「生成結果」按鈕，開啟彈出視窗。在「過往紀錄」標籤查看歷史結果，或在「一鍵生成」標籤生成新內容。生成後可儲存、匯出或重新生成</p>
+              <strong>查看和管理生成結果</strong>
+              <p>點擊右上角「生成結果」按鈕，開啟彈出視窗。您可以透過標籤頁切換查看不同類型的過往紀錄（帳號定位、選題方向、一週腳本）。選擇需要的設定後，點擊「使用此設定與AI對話」繼續討論和優化。</p>
+            </div>
+          </div>
+          <div class="mode1-step">
+            <div class="mode1-step-number">4</div>
+            <div class="mode1-step-content">
+              <strong>儲存生成內容</strong>
+              <p>在對話中說「儲存」或「幫我儲存」，系統會自動將生成的內容儲存到「創作者資料庫」→「IP人設規劃結果」中。您也可以在「生成結果」→「過往紀錄」中查看所有已保存的記錄。</p>
             </div>
           </div>
         </div>
@@ -3389,22 +3448,26 @@
         
         <p><strong>功能特色</strong></p>
         <ul>
-          <li><strong>一鍵生成全部</strong>：可同時生成三個內容，節省時間</li>
-          <li><strong>個別生成</strong>：可依序生成，逐步調整和優化</li>
-          <li><strong>隨時生成</strong>：不需要等AI提醒，隨時可以點擊生成</li>
-          <li><strong>重新生成</strong>：不滿意可隨時重新生成，直到滿意為止</li>
+          <li><strong>智能對話生成</strong>：透過與AI深度對話，讓AI根據您的背景和需求生成帳號定位、選題方向和一週腳本</li>
+          <li><strong>自由搭配設定</strong>：可以從過往紀錄中選擇不同類型的設定（帳號定位、選題方向、一週腳本），自由組合後與AI討論</li>
+          <li><strong>標籤頁分類瀏覽</strong>：過往紀錄按類型分類顯示，方便快速找到需要的記錄</li>
+          <li><strong>自動儲存</strong>：在對話中說「儲存」即可自動保存生成內容，無需手動操作</li>
           <li><strong>長期記憶</strong>：AI會記住您之前說過的內容，生成結果會越來越精準</li>
           <li><strong>儲存與匯出</strong>：生成結果可儲存到個人資料庫，或匯出為CSV檔案</li>
           <li><strong>快速按鈕</strong>：使用快速按鈕可快速詢問特定主題，加速對話流程</li>
+          <li><strong>歷史記錄管理</strong>：可以查看、選擇、匯出或刪除所有歷史生成記錄</li>
         </ul>
         
         <p><strong>使用技巧</strong></p>
         <ul>
-          <li>首次使用建議先進行5-10輪對話，讓AI充分了解您的背景</li>
-          <li>生成後可繼續對話調整，AI會根據新對話更新理解</li>
-          <li>一鍵生成適合快速取得完整規劃，個別生成適合需要精細調整的情況</li>
+          <li>首次使用建議先進行5-10輪對話，讓AI充分了解您的背景、專長和目標</li>
+          <li>生成後可繼續對話調整，AI會根據新對話更新理解，並在後續生成中應用</li>
+          <li>在對話中說「儲存」或「幫我儲存」，系統會自動保存生成的內容</li>
+          <li>可以從「過往紀錄」中選擇之前保存的設定，與AI討論如何優化和調整</li>
           <li>所有生成內容都會自動記錄到長期記憶，後續對話會更精準</li>
-          <li>可在「創作者資料庫」中查看所有歷史生成記錄</li>
+          <li>可在「創作者資料庫」→「IP人設規劃結果」中查看所有歷史生成記錄</li>
+          <li>使用「IP Profile」快速按鈕可快速查看最新的帳號定位</li>
+          <li>使用「重新定位」快速按鈕可完全重新開始，生成全新的帳號定位</li>
         </ul>
         
         <p><strong>如何更新帳號定位</strong></p>
@@ -3419,15 +3482,15 @@
           <div class="mode1-step">
             <div class="mode1-step-number">方法二</div>
             <div class="mode1-step-content">
-              <strong>在「一鍵生成」中重新生成</strong>
-              <p>點擊右上角「生成結果」按鈕，切換到「一鍵生成」標籤，找到「帳號定位」卡片，點擊「重新生成」按鈕。系統會根據您最新的對話內容生成新的定位。</p>
+              <strong>繼續對話後生成新定位</strong>
+              <p>繼續與AI對話，分享您的新想法、變化或需求調整。AI會根據最新的對話內容更新理解，然後您可以透過對話讓AI生成新的帳號定位。生成後記得說「儲存」來保存新定位。</p>
             </div>
           </div>
           <div class="mode1-step">
             <div class="mode1-step-number">方法三</div>
             <div class="mode1-step-content">
-              <strong>繼續對話後重新生成</strong>
-              <p>繼續與AI對話，分享您的新想法或變化，然後使用「一鍵生成」功能重新生成帳號定位。AI會根據最新的對話內容生成更新的定位。</p>
+              <strong>選擇過往紀錄進行調整</strong>
+              <p>在「生成結果」→「過往紀錄」→「帳號定位」標籤中，選擇一個之前的定位記錄，點擊「選擇」按鈕，然後點擊「使用此設定與AI對話」。您可以基於這個定位與AI討論如何調整和優化。</p>
             </div>
           </div>
         </div>
@@ -3435,8 +3498,9 @@
         <p><strong>重要提示</strong></p>
         <ul>
           <li>系統會自動使用<strong>最新生成並保存的帳號定位</strong>，當您點擊「IP Profile」快速按鈕時，會顯示最新的定位結果</li>
-          <li>如果您想要使用最新的定位，請確保在「一鍵生成」中生成後點擊「儲存」按鈕</li>
+          <li>如果您想要使用最新的定位，請確保在對話中生成後說「儲存」來保存</li>
           <li>如果系統顯示的是舊的定位，請使用上述方法重新生成並儲存新的定位</li>
+          <li>所有保存的定位記錄都可以在「生成結果」→「過往紀錄」→「帳號定位」中查看和管理</li>
         </ul>
       </div>
     </div>
