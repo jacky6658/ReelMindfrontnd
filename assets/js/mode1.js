@@ -238,14 +238,17 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
     const titleText = result.title || `未命名${typeNames[result.type] || ''}`;
     const formattedDate = new Date(result.created_at).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
+    // 使用 escapeHtml 轉義 HTML，而不是 safeSetText（safeSetText 需要 DOM 元素）
+    const escapedTitle = window.escapeHtml ? window.escapeHtml(titleText) : titleText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    
     historyItem.innerHTML = `
       <div class="mode1-oneclick-history-item-header">
         <div class="mode1-oneclick-history-item-title-wrapper">
-          <span class="mode1-oneclick-history-item-title" id="historyTitle-${result.id}">${safeSetText(titleText)}</span>
-          <input type="text" class="mode1-oneclick-history-item-title-input" id="historyTitleInput-${result.id}" value="${safeSetText(titleText)}" style="display: none;">
+          <span class="mode1-oneclick-history-item-title" id="historyTitle-${result.id}">${escapedTitle}</span>
+          <input type="text" class="mode1-oneclick-history-item-title-input" id="historyTitleInput-${result.id}" value="${escapedTitle}" style="display: none;">
           <i class="fas fa-edit edit-title-icon" onclick="editMode1HistoryTitle('${result.id}')"></i>
           <i class="fas fa-check save-title-icon" onclick="saveMode1HistoryTitle('${result.id}')" style="display: none;"></i>
-          <i class="fas fa-times cancel-title-icon" onclick="cancelMode1HistoryTitleEdit('${result.id}', '${safeSetText(titleText)}')" style="display: none;"></i>
+          <i class="fas fa-times cancel-title-icon" onclick="cancelMode1HistoryTitleEdit('${result.id}', '${escapedTitle}')" style="display: none;"></i>
         </div>
         <span class="mode1-oneclick-history-item-date">${formattedDate}</span>
       </div>
@@ -575,8 +578,12 @@ async function saveMode1HistoryTitle(resultId) {
       }
 
       // 注意：後端目前沒有標題更新端點，暫時只更新本地顯示
-      // 更新本地顯示
-      titleSpan.textContent = safeSetText(newTitle);
+      // 更新本地顯示（textContent 會自動轉義，不需要 safeSetText）
+      if (window.safeSetText && titleSpan) {
+        window.safeSetText(titleSpan, newTitle);
+      } else {
+        titleSpan.textContent = newTitle;
+      }
       titleSpan.style.display = 'inline-block';
       titleInput.style.display = 'none';
       editIcon.style.display = 'inline-block';
@@ -870,15 +877,26 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       }
     }
     
+    // 確保傳遞 user_id 和 conversation_type 給後端，以便載入記憶和 RAG
+    const requestBody = {
+      message: message,
+      conversation_type: conversationType  // 後端需要這個來過濾記憶
+    };
+    
+    // 如果用戶已登入，添加 user_id（後端會從 token 驗證，但也可以從 body 獲取）
+    if (ipPlanningUser && ipPlanningUser.user_id) {
+      requestBody.user_id = ipPlanningUser.user_id;
+    }
+    
     const response = await fetch(`${API_URL}/api/chat/stream`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'X-Conversation-Type': conversationType, // 傳遞會話類型
+        'X-Conversation-Type': conversationType, // 保留 header 以備後端需要
         'X-CSRF-Token': csrfToken
       },
-      body: JSON.stringify({ message: message })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
@@ -903,7 +921,8 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       }
       
       // 添加一個 AI 錯誤訊息
-      const aiErrorMessage = createMode1Message('assistant', `<span style="color: #ef4444;">❌ ${safeSetText(errorMessage)}</span>`);
+      const escapedErrorMessage = window.escapeHtml ? window.escapeHtml(errorMessage) : errorMessage.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      const aiErrorMessage = createMode1Message('assistant', `<span style="color: #ef4444;">❌ ${escapedErrorMessage}</span>`);
       chatMessages.appendChild(aiErrorMessage);
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -1087,7 +1106,12 @@ function renderMode1Markdown(text) {
     });
     return cleanHtml;
   }
-  return safeSetText(text); // 降級處理
+  // 降級處理：如果沒有 marked.js，直接轉義 HTML
+  if (window.escapeHtml) {
+    return window.escapeHtml(text);
+  }
+  // 手動轉義
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
 
 // 記錄會話訊息到記憶（短期記憶和長期記憶）
