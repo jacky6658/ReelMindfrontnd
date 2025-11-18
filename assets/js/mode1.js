@@ -426,58 +426,57 @@ async function loadUserMemory() {
 // 更新用戶資訊顯示
 // 使用 common.js 中的統一函數
 function updateUserInfo() {
-  // 確保用戶資訊已更新到 common.js 的變數中
-  if (window.ReelMindCommon) {
-    // 如果 common.js 有 getUser 函數，確保它返回最新的用戶資訊
-    if (typeof window.ReelMindCommon.getUser === 'function') {
-      const latestUser = window.ReelMindCommon.getUser();
-      if (latestUser && !window.ReelMindCommon.ipPlanningUser) {
-        // 如果 common.js 中的變數為空，嘗試設置
-        if (typeof window.ReelMindCommon.setUser === 'function') {
-          window.ReelMindCommon.setUser(latestUser);
-        }
-      }
-    }
-    
-    // 直接調用 common.js 中的函數，避免無限遞迴
-    if (window.ReelMindCommon.updateUserInfo) {
-      window.ReelMindCommon.updateUserInfo();
-    }
+  // 優先使用 common.js 的統一函數
+  if (window.ReelMindCommon && window.ReelMindCommon.updateUserInfo) {
+    window.ReelMindCommon.updateUserInfo();
+    return;
   }
   
   // 降級處理：如果 common.js 不可用，直接更新元素
-  if (!window.ReelMindCommon || !window.ReelMindCommon.updateUserInfo) {
-    const userInfo = document.getElementById('userInfo');
-    const authButtons = document.getElementById('authButtons');
-    const userAvatar = document.getElementById('userAvatar');
-    const userName = document.getElementById('userName');
-    
-    if (ipPlanningUser && ipPlanningToken) {
-      if (userInfo) {
-        userInfo.style.display = 'flex';
-        if (userAvatar) {
-          const avatarUrl = ipPlanningUser.picture || ipPlanningUser.avatar || ipPlanningUser.photoURL || '';
-          if (avatarUrl) {
-            userAvatar.src = avatarUrl;
-            userAvatar.style.display = 'block';
-          } else {
-            userAvatar.style.display = 'none';
-          }
-        }
-        if (userName) {
-          userName.textContent = ipPlanningUser.name || ipPlanningUser.displayName || ipPlanningUser.email || '用戶';
+  const userInfo = document.getElementById('userInfo');
+  const authButtons = document.getElementById('authButtons');
+  const userAvatar = document.getElementById('userAvatar');
+  const userName = document.getElementById('userName');
+  const userDBTab = document.getElementById('userDBTab');
+  const userDBMobileTab = document.getElementById('userDBMobileTab');
+  
+  if (ipPlanningUser && ipPlanningToken) {
+    if (userInfo) {
+      userInfo.style.display = 'flex';
+      if (userAvatar) {
+        const avatarUrl = ipPlanningUser.picture || ipPlanningUser.avatar || ipPlanningUser.photoURL || '';
+        if (avatarUrl) {
+          userAvatar.src = avatarUrl;
+          userAvatar.style.display = 'block';
+        } else {
+          userAvatar.style.display = 'none';
         }
       }
-      if (authButtons) {
-        authButtons.style.display = 'none';
+      if (userName) {
+        userName.textContent = ipPlanningUser.name || ipPlanningUser.displayName || ipPlanningUser.email || '用戶';
       }
-    } else {
-      if (userInfo) {
-        userInfo.style.display = 'none';
-      }
-      if (authButtons) {
-        authButtons.style.display = 'flex';
-      }
+    }
+    if (authButtons) {
+      authButtons.style.display = 'none';
+    }
+    if (userDBTab) {
+      userDBTab.style.display = 'block';
+    }
+    if (userDBMobileTab) {
+      userDBMobileTab.style.display = 'block';
+    }
+  } else {
+    if (userInfo) {
+      userInfo.style.display = 'none';
+    }
+    if (authButtons) {
+      authButtons.style.display = 'flex';
+    }
+    if (userDBTab) {
+      userDBTab.style.display = 'none';
+    }
+    if (userDBMobileTab) {
+      userDBMobileTab.style.display = 'none';
     }
   }
 }
