@@ -257,22 +257,22 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
           ${renderMode1Markdown(result.content)}
         </div>
         <div class="mode1-oneclick-result-expand">
-          <button class="mode1-oneclick-expand-btn" onclick="toggleHistoryContentExpanded('${result.id}')">
+          <button class="mode1-oneclick-expand-btn" onclick="if(window.toggleHistoryContentExpanded) window.toggleHistoryContentExpanded('${result.id}'); else console.error('toggleHistoryContentExpanded 未定義');">
             <span>展開</span> <i class="fas fa-chevron-down"></i>
           </button>
         </div>
       </div>
       <div class="mode1-oneclick-history-item-actions">
-        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" onclick="selectHistoryResult('${result.type}', '${result.id}')">
+        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" onclick="if(window.selectHistoryResult) window.selectHistoryResult('${result.type}', '${result.id}'); else console.error('selectHistoryResult 未定義');">
           <i class="fas fa-check"></i> <span>${isSelected ? '已選擇' : '選擇'}</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn" onclick="openMode1ExpandModal('${result.id}', '${result.type}')">
+        <button class="mode1-oneclick-history-item-btn" onclick="if(window.openMode1ExpandModal) window.openMode1ExpandModal('${result.id}', '${result.type}'); else console.error('openMode1ExpandModal 未定義');">
           <i class="fas fa-expand"></i> <span>查看完整</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn" onclick="exportHistoryResult('${result.id}', '${result.type}')">
+        <button class="mode1-oneclick-history-item-btn" onclick="if(window.exportHistoryResult) window.exportHistoryResult('${result.id}', '${result.type}'); else console.error('exportHistoryResult 未定義');">
           <i class="fas fa-download"></i> <span>匯出</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn danger" onclick="deleteMode1HistoryResult('${result.id}', '${result.type}')">
+        <button class="mode1-oneclick-history-item-btn danger" onclick="if(window.deleteMode1HistoryResult) window.deleteMode1HistoryResult('${result.id}', '${result.type}'); else console.error('deleteMode1HistoryResult 未定義');">
           <i class="fas fa-trash-alt"></i> <span>刪除</span>
         </button>
       </div>
@@ -759,7 +759,25 @@ async function handleQuickButton(type) {
   
   switch(type) {
     case 'ip-profile':
-      sendMode1Message('請幫我建立 IP Profile（個人品牌定位）。', 'ip_planning');
+      // 先打開生成結果彈跳視窗，顯示過往的帳號定位記錄（不消耗 LLM token）
+      // 切換到「帳號定位」標籤頁
+      if (window.openMode1OneClickModal) {
+        window.openMode1OneClickModal();
+        // 等待彈跳視窗打開後，切換到「帳號定位」標籤頁
+        setTimeout(() => {
+          if (window.switchMode1HistoryType) {
+            window.switchMode1HistoryType('profile');
+          }
+        }, 100);
+        
+        // 顯示提示訊息
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('📋 已顯示過往的帳號定位記錄，您可以選擇使用或直接與 AI 對話生成新的', 4000);
+        }
+      } else {
+        // 如果彈跳視窗函數不存在，降級為直接發送訊息
+        sendMode1Message('請幫我建立 IP Profile（個人品牌定位）。', 'ip_planning');
+      }
       break;
     case '14day-plan':
       sendMode1Message('請幫我規劃 14 天的短影音內容計劃。', 'ip_planning');
@@ -1093,19 +1111,51 @@ function createMode1Message(role, content, avatarUrl = '') {
   return messageEl;
 }
 
-// 渲染 Markdown
+// 渲染 Markdown（支援 HTML 和 Markdown 混合內容）
 function renderMode1Markdown(text) {
-  if (window.marked && window.DOMPurify && window.hljs) {
-    // 使用 marked.js 將 Markdown 轉換為 HTML
-    const rawHtml = marked.parse(text, { breaks: true, gfm: true });
-    // 使用 DOMPurify 清理 HTML，防止 XSS 攻擊
-    const cleanHtml = window.DOMPurify.sanitize(rawHtml, {
-      USE_PROFILES: { html: true },
-      FORBID_TAGS: ['style'], // 禁止 style 標籤，以防止內容破壞樣式
-      ADD_ATTR: ['target'], // 允許 target 屬性用於連結
-    });
-    return cleanHtml;
+  if (!text || typeof text !== 'string') {
+    return '';
   }
+  
+  // 檢查內容是否已經是 HTML（包含 HTML 標籤）
+  const hasHtmlTags = /<[a-z][\s\S]*>/i.test(text);
+  
+  if (hasHtmlTags) {
+    // 如果內容已經是 HTML，直接清理並返回（不進行 Markdown 解析）
+    if (window.DOMPurify) {
+      return window.DOMPurify.sanitize(text, {
+        USE_PROFILES: { html: true },
+        FORBID_TAGS: ['style', 'script'], // 禁止 style 和 script 標籤
+        ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'], // 允許表格標籤
+        ADD_ATTR: ['target', 'colspan', 'rowspan'], // 允許表格屬性和連結 target
+      });
+    }
+    // 如果沒有 DOMPurify，直接返回（風險較高，但至少能顯示）
+    return text;
+  }
+  
+  // 如果內容是 Markdown，使用 marked.js 解析
+  if (window.marked && window.DOMPurify) {
+    try {
+      // 使用 marked.js 將 Markdown 轉換為 HTML
+      const rawHtml = marked.parse(text, { breaks: true, gfm: true, tables: true });
+      // 使用 DOMPurify 清理 HTML，防止 XSS 攻擊
+      const cleanHtml = window.DOMPurify.sanitize(rawHtml, {
+        USE_PROFILES: { html: true },
+        FORBID_TAGS: ['style', 'script'], // 禁止 style 和 script 標籤
+        ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'], // 允許表格標籤
+        ADD_ATTR: ['target', 'colspan', 'rowspan'], // 允許表格屬性和連結 target
+      });
+      return cleanHtml;
+    } catch (e) {
+      console.error('Markdown 渲染錯誤:', e);
+      // 降級處理：如果渲染失敗，轉義 HTML
+      if (window.escapeHtml) {
+        return window.escapeHtml(text);
+      }
+    }
+  }
+  
   // 降級處理：如果沒有 marked.js，直接轉義 HTML
   if (window.escapeHtml) {
     return window.escapeHtml(text);
