@@ -257,7 +257,7 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
           ${renderMode1Markdown(result.content)}
         </div>
         <div class="mode1-oneclick-result-expand">
-          <button class="mode1-oneclick-expand-btn" onclick="if(window.toggleHistoryContentExpanded) window.toggleHistoryContentExpanded('${result.id}'); else console.error('toggleHistoryContentExpanded 未定義');">
+          <button class="mode1-oneclick-expand-btn" data-action="toggle-expand" data-id="${result.id}">
             <span>展開</span> <i class="fas fa-chevron-down"></i>
           </button>
         </div>
@@ -661,20 +661,40 @@ window.cancelMode1HistoryTitleEdit = cancelMode1HistoryTitleEdit;
 
 // 展開/收起歷史記錄內容
 function toggleHistoryContentExpanded(resultId) {
+  if (!resultId) {
+    console.error('toggleHistoryContentExpanded: 缺少 resultId');
+    return;
+  }
+  
   const contentWrapper = document.getElementById(`contentWrapper-${resultId}`);
+  if (!contentWrapper) {
+    console.error('toggleHistoryContentExpanded: 找不到 contentWrapper，resultId:', resultId);
+    return;
+  }
+  
   const expandBtn = contentWrapper.querySelector('.mode1-oneclick-expand-btn');
+  if (!expandBtn) {
+    console.error('toggleHistoryContentExpanded: 找不到 expandBtn');
+    return;
+  }
+  
   const expandIcon = expandBtn.querySelector('i');
-
+  const expandSpan = expandBtn.querySelector('span');
+  
   if (contentWrapper.classList.contains('expanded')) {
     contentWrapper.classList.remove('expanded');
-    expandBtn.querySelector('span').textContent = '展開';
-    expandIcon.classList.remove('fa-chevron-up');
-    expandIcon.classList.add('fa-chevron-down');
+    if (expandSpan) expandSpan.textContent = '展開';
+    if (expandIcon) {
+      expandIcon.classList.remove('fa-chevron-up');
+      expandIcon.classList.add('fa-chevron-down');
+    }
   } else {
     contentWrapper.classList.add('expanded');
-    expandBtn.querySelector('span').textContent = '收起';
-    expandIcon.classList.remove('fa-chevron-down');
-    expandIcon.classList.add('fa-chevron-up');
+    if (expandSpan) expandSpan.textContent = '收起';
+    if (expandIcon) {
+      expandIcon.classList.remove('fa-chevron-down');
+      expandIcon.classList.add('fa-chevron-up');
+    }
   }
 }
 window.toggleHistoryContentExpanded = toggleHistoryContentExpanded;
@@ -1684,6 +1704,20 @@ document.addEventListener('DOMContentLoaded', async function() {
   const historyContainer = document.getElementById('mode1OneClickHistoryContainer');
   if (historyContainer) {
     historyContainer.addEventListener('click', function(e) {
+      // 處理展開/收起按鈕（在內容區域內）
+      const expandBtn = e.target.closest('.mode1-oneclick-expand-btn');
+      if (expandBtn) {
+        const resultId = expandBtn.getAttribute('data-id');
+        if (resultId && window.toggleHistoryContentExpanded) {
+          window.toggleHistoryContentExpanded(resultId);
+          return;
+        } else {
+          console.error('toggleHistoryContentExpanded 未定義或缺少 resultId');
+          return;
+        }
+      }
+      
+      // 處理其他操作按鈕（選擇、查看完整、匯出、刪除）
       const button = e.target.closest('.mode1-oneclick-history-item-btn');
       if (!button) return;
       
@@ -1691,7 +1725,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       const resultId = button.getAttribute('data-id');
       const resultType = button.getAttribute('data-type');
       
-      if (!action || !resultId || !resultType) return;
+      if (!action || !resultId || !resultType) {
+        console.warn('按鈕缺少必要屬性:', { action, resultId, resultType });
+        return;
+      }
+      
+      console.log('按鈕點擊:', { action, resultId, resultType }); // 調試用
       
       switch (action) {
         case 'select':
@@ -1722,8 +1761,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.error('deleteMode1HistoryResult 未定義');
           }
           break;
+        default:
+          console.warn('未知的操作類型:', action);
       }
     });
+  } else {
+    console.warn('⚠️ 找不到 mode1OneClickHistoryContainer，事件委派未綁定');
   }
 
   // 更新用戶資訊
