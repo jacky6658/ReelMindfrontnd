@@ -263,16 +263,16 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
         </div>
       </div>
       <div class="mode1-oneclick-history-item-actions">
-        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" onclick="if(window.selectHistoryResult) window.selectHistoryResult('${result.type}', '${result.id}'); else console.error('selectHistoryResult 未定義');">
+        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" data-action="select" data-type="${result.type}" data-id="${result.id}">
           <i class="fas fa-check"></i> <span>${isSelected ? '已選擇' : '選擇'}</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn" onclick="if(window.openMode1ExpandModal) window.openMode1ExpandModal('${result.id}', '${result.type}'); else console.error('openMode1ExpandModal 未定義');">
+        <button class="mode1-oneclick-history-item-btn" data-action="expand" data-type="${result.type}" data-id="${result.id}">
           <i class="fas fa-expand"></i> <span>查看完整</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn" onclick="if(window.exportHistoryResult) window.exportHistoryResult('${result.id}', '${result.type}'); else console.error('exportHistoryResult 未定義');">
+        <button class="mode1-oneclick-history-item-btn" data-action="export" data-type="${result.type}" data-id="${result.id}">
           <i class="fas fa-download"></i> <span>匯出</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn danger" onclick="if(window.deleteMode1HistoryResult) window.deleteMode1HistoryResult('${result.id}', '${result.type}'); else console.error('deleteMode1HistoryResult 未定義');">
+        <button class="mode1-oneclick-history-item-btn danger" data-action="delete" data-type="${result.type}" data-id="${result.id}">
           <i class="fas fa-trash-alt"></i> <span>刪除</span>
         </button>
       </div>
@@ -294,8 +294,8 @@ window.exportHistoryResult = async function(resultId, resultType) {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('找不到要匯出的數據', 3000);
       }
-      return;
-    }
+        return;
+      }
 
     const result = data.results.find(r => r.id === resultId);
     if (!result) {
@@ -460,7 +460,7 @@ async function useSelectedSettingsToChat() {
   if (hasContent) {
     sendMode1Message(messageContent, 'ip_planning');
     closeMode1OneClickModal(); // 發送後關閉 Modal
-  } else {
+      } else {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('請至少選擇一項設定', 3000);
     }
@@ -566,9 +566,9 @@ async function saveMode1HistoryTitle(resultId) {
         window.ReelMindCommon.showToast('標題不能為空', 3000);
       }
       return;
-    }
-
-    try {
+          }
+          
+          try {
       const token = localStorage.getItem('ipPlanningToken');
       if (!token) {
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -619,8 +619,8 @@ async function saveMode1HistoryTitle(resultId) {
         clearHistoryCache(); // 清除快取以強制重新載入
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast('✅ 標題已更新', 3000);
-        }
-      } else {
+      }
+    } else {
         const errorData = await response.json();
         console.error('更新標題失敗:', errorData);
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -697,9 +697,9 @@ async function openMode1ExpandModal(resultId, resultType) {
   const data = await fetchHistoryData();
   if (!data || !data.success || !data.results) {
     modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">載入失敗，請稍後再試。</p>';
-    return;
-  }
-
+      return;
+    }
+    
   const result = data.results.find(r => r.id === resultId);
 
   if (result) {
@@ -732,7 +732,7 @@ async function openMode1ExpandModal(resultId, resultType) {
       modalContentDiv.scrollTop = 0;
     }, 50);
 
-  } else {
+    } else {
     modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">找不到對應的內容。</p>';
   }
 }
@@ -774,7 +774,7 @@ async function handleQuickButton(type) {
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast('📋 已顯示過往的帳號定位記錄，您可以選擇使用或直接與 AI 對話生成新的', 4000);
         }
-      } else {
+    } else {
         // 如果彈跳視窗函數不存在，降級為直接發送訊息
         sendMode1Message('請幫我建立 IP Profile（個人品牌定位）。', 'ip_planning');
       }
@@ -799,6 +799,32 @@ window.handleQuickButton = handleQuickButton; // 立即導出到全局，以便 
 
 // ===== 聊天訊息相關函數 =====
 
+// 檢查用戶是否已綁定 LLM 金鑰
+async function checkUserLlmKey() {
+  if (!ipPlanningToken || !ipPlanningUser || !ipPlanningUser.user_id) {
+    return false;
+  }
+  
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/user/llm-keys/check`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      return data.has_key === true;
+    }
+    return false;
+  } catch (error) {
+    console.error('檢查 LLM 金鑰失敗:', error);
+    return false;
+  }
+}
+
 // 發送 Mode1 訊息
 async function sendMode1Message(message, conversationType = 'ip_planning') {
   if (isMode1Sending) {
@@ -806,6 +832,19 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('訊息發送中，請稍候...', 2000);
     }
+    return;
+  }
+  
+  // 檢查用戶是否已綁定 LLM 金鑰
+  const hasLlmKey = await checkUserLlmKey();
+  if (!hasLlmKey) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('⚠️ 請先綁定您的 LLM API 金鑰才能與 AI 對談。點擊「立即綁定」前往設定。', 5000);
+    }
+    // 延遲後跳轉到設定頁面
+    setTimeout(() => {
+      window.location.href = 'userDB.html#settings';
+    }, 2000);
     return;
   }
   
@@ -864,8 +903,8 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       if (typingIndicatorEl.parentNode) {
         typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
       }
-      return;
-    }
+    return;
+  }
 
     // 獲取 CSRF Token
     let csrfToken = '';
@@ -898,7 +937,7 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       },
       body: JSON.stringify(requestBody)
     });
-
+    
     if (!response.ok) {
       // 移除打字指示器
       if (typingIndicatorEl.parentNode) {
@@ -935,7 +974,7 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
 
       return;
     }
-
+    
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let aiResponseContent = '';
@@ -954,14 +993,14 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
     
     // 清除快取，因為有新的 AI 回應
     clearHistoryCache();
-
+    
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
-
+      
       const chunk = decoder.decode(value, { stream: true });
       const lines = chunk.split('\n');
-
+      
       for (const line of lines) {
         if (line.startsWith('data: ')) {
           const data = line.substring(6);
@@ -1145,59 +1184,108 @@ function createMode1Message(role, content, avatarUrl = '') {
   return messageEl;
 }
 
-// 渲染 Markdown（支援 HTML 和 Markdown 混合內容）
+// 渲染 Markdown（支援 HTML 和 Markdown 混合內容，完全自然語言顯示）
 function renderMode1Markdown(text) {
   if (!text || typeof text !== 'string') {
     return '';
   }
   
-  // 檢查內容是否已經是 HTML（包含 HTML 標籤）
-  const hasHtmlTags = /<[a-z][\s\S]*>/i.test(text);
+  // 1. 先清理可能的編碼問題（HTML 實體解碼）
+  let cleanedText = text
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+  
+  // 2. 檢查是否包含 HTML 標籤
+  const hasHtmlTags = /<[a-z][\s\S]*>/i.test(cleanedText);
   
   if (hasHtmlTags) {
-    // 如果內容已經是 HTML，直接清理並返回（不進行 Markdown 解析）
+    // 3. 如果包含 HTML，使用 DOMPurify 清理並保留所有格式標籤
     if (window.DOMPurify) {
-      const sanitized = window.DOMPurify.sanitize(text, {
+      const sanitized = window.DOMPurify.sanitize(cleanedText, {
         USE_PROFILES: { html: true },
-        FORBID_TAGS: ['style', 'script'], // 禁止 style 和 script 標籤
-        ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'strong', 'em', 'ul', 'ol', 'li', 'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'], // 允許表格標籤和其他常用標籤
-        ADD_ATTR: ['target', 'colspan', 'rowspan', 'class'], // 允許表格屬性和連結 target
+        FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed'], // 只禁止危險標籤
+        ADD_TAGS: [
+          // 表格相關
+          'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col',
+          // 文字格式
+          'strong', 'em', 'b', 'i', 'u', 's', 'strike', 'del', 'ins', 'mark', 'small', 'sub', 'sup',
+          // 列表
+          'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+          // 段落和換行
+          'p', 'br', 'div', 'span', 'hr',
+          // 標題
+          'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+          // 引用和程式碼
+          'blockquote', 'pre', 'code', 'kbd', 'samp',
+          // 連結和圖片
+          'a', 'img',
+          // 其他
+          'abbr', 'address', 'cite', 'q', 'time'
+        ],
+        ADD_ATTR: ['target', 'colspan', 'rowspan', 'class', 'style', 'href', 'src', 'alt', 'title', 'width', 'height'],
         KEEP_CONTENT: true, // 保留內容，即使標籤被移除
+        ALLOW_DATA_ATTR: false // 禁止 data-* 屬性
       });
       return sanitized;
     }
     // 如果沒有 DOMPurify，直接返回（風險較高，但至少能顯示）
-    return text;
+    return cleanedText;
   }
   
-  // 如果內容是 Markdown，使用 marked.js 解析
+  // 4. 如果沒有 HTML 標籤，嘗試 Markdown 解析
   if (window.marked && window.DOMPurify) {
     try {
-      // 使用 marked.js 將 Markdown 轉換為 HTML
-      const rawHtml = marked.parse(text, { breaks: true, gfm: true, tables: true });
-      // 使用 DOMPurify 清理 HTML，防止 XSS 攻擊
+      // 確保 marked 支援所有需要的功能
+      const rawHtml = marked.parse(cleanedText, {
+        breaks: true,  // 單個換行符轉換為 <br>
+        gfm: true,     // GitHub Flavored Markdown
+        tables: true,  // 表格支援
+        headerIds: false, // 不生成標題 ID
+        mangle: false  // 不混淆 email
+      });
+      
+      // 使用 DOMPurify 清理 Markdown 轉換後的 HTML
       const cleanHtml = window.DOMPurify.sanitize(rawHtml, {
         USE_PROFILES: { html: true },
-        FORBID_TAGS: ['style', 'script'], // 禁止 style 和 script 標籤
-        ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'], // 允許表格標籤
-        ADD_ATTR: ['target', 'colspan', 'rowspan'], // 允許表格屬性和連結 target
+        FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed'],
+        ADD_TAGS: [
+          'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption',
+          'strong', 'em', 'b', 'i', 'u', 'ul', 'ol', 'li',
+          'p', 'br', 'div', 'span', 'hr',
+          'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+          'blockquote', 'pre', 'code', 'a', 'img'
+        ],
+        ADD_ATTR: ['target', 'colspan', 'rowspan', 'class', 'href', 'src', 'alt', 'title'],
+        KEEP_CONTENT: true
       });
+      
       return cleanHtml;
     } catch (e) {
       console.error('Markdown 渲染錯誤:', e);
-      // 降級處理：如果渲染失敗，轉義 HTML
+      // 降級處理：如果渲染失敗，轉義並保留換行
       if (window.escapeHtml) {
-        return window.escapeHtml(text);
+        return window.escapeHtml(cleanedText).replace(/\n/g, '<br>');
       }
     }
   }
   
-  // 降級處理：如果沒有 marked.js，直接轉義 HTML
+  // 5. 最終降級處理：轉義 HTML 並保留換行
   if (window.escapeHtml) {
-    return window.escapeHtml(text);
+    return window.escapeHtml(cleanedText).replace(/\n/g, '<br>');
   }
-  // 手動轉義
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  
+  // 6. 手動轉義（最基礎的降級處理）
+  return cleanedText
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+    .replace(/\n/g, '<br>');
 }
 
 // 記錄會話訊息到記憶（短期記憶和長期記憶）
@@ -1251,7 +1339,7 @@ async function recordMode1ConversationMessage(conversationType, role, content, t
       },
       body: JSON.stringify(requestBody)
     });
-
+    
     if (!response.ok) {
       let errorData;
       try {
@@ -1318,7 +1406,7 @@ function updateUserInfo() {
     if (userStr) {
       try {
         currentUser = JSON.parse(userStr);
-      } catch (e) {
+          } catch (e) {
         console.warn('無法解析用戶資料:', e);
       }
     }
@@ -1353,8 +1441,8 @@ function updateUserInfo() {
     }
     if (userDBMobileTab) {
       userDBMobileTab.style.display = 'block';
-    }
-  } else {
+      }
+    } else {
     if (userInfo) {
       userInfo.style.display = 'none';
     }
@@ -1379,26 +1467,26 @@ async function saveMode1Result(resultType) {
     }
     return;
   }
-
+  
   // 找到最新的 AI 回應
   const chatMessages = document.getElementById('mode1-chatMessages');
   const aiMessages = chatMessages.querySelectorAll('.message.assistant .message-content');
   if (aiMessages.length === 0) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('沒有可儲存的 AI 回應內容。', 3000);
+      }
+      return;
     }
-    return;
-  }
-
+    
   const latestAiMessageContent = aiMessages[aiMessages.length - 1].innerHTML;
 
   if (!latestAiMessageContent || latestAiMessageContent.includes('AI 正在生成')) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('AI 仍在生成內容，請等待完成。', 3000);
+      }
+      return;
     }
-    return;
-  }
-
+    
   // 從 HTML 內容中提取純文本標題（假設第一個 h1/h2/h3 或 p 作為標題）
   let extractedTitle = '';
   const tempDiv = document.createElement('div');
@@ -1459,7 +1547,7 @@ async function saveMode1Result(resultType) {
         metadata: {}
       })
     });
-
+    
     if (response.ok) {
       // 儲存成功後清除快取，強制重新載入
       clearHistoryCache();
@@ -1591,6 +1679,52 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // 初始化 Mode1 聊天功能
   initMode1Chat();
+
+  // 添加事件委派處理生成結果按鈕點擊
+  const historyContainer = document.getElementById('mode1OneClickHistoryContainer');
+  if (historyContainer) {
+    historyContainer.addEventListener('click', function(e) {
+      const button = e.target.closest('.mode1-oneclick-history-item-btn');
+      if (!button) return;
+      
+      const action = button.getAttribute('data-action');
+      const resultId = button.getAttribute('data-id');
+      const resultType = button.getAttribute('data-type');
+      
+      if (!action || !resultId || !resultType) return;
+      
+      switch (action) {
+        case 'select':
+          if (window.selectHistoryResult) {
+            window.selectHistoryResult(resultType, resultId);
+          } else {
+            console.error('selectHistoryResult 未定義');
+          }
+          break;
+        case 'expand':
+          if (window.openMode1ExpandModal) {
+            window.openMode1ExpandModal(resultId, resultType);
+          } else {
+            console.error('openMode1ExpandModal 未定義');
+          }
+          break;
+        case 'export':
+          if (window.exportHistoryResult) {
+            window.exportHistoryResult(resultId, resultType);
+          } else {
+            console.error('exportHistoryResult 未定義');
+          }
+          break;
+        case 'delete':
+          if (window.deleteMode1HistoryResult) {
+            window.deleteMode1HistoryResult(resultId, resultType);
+          } else {
+            console.error('deleteMode1HistoryResult 未定義');
+          }
+          break;
+      }
+    });
+  }
 
   // 更新用戶資訊
   updateUserInfo();
