@@ -90,6 +90,12 @@ function openMode1OneClickModal() {
   if (overlay) {
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden'; // 禁止背景滾動
+    
+    // 確保事件委派已綁定（document 級別只需要綁定一次，但確保已綁定）
+    if (window.setupHistoryContainerEventDelegation && !document._mode1HistoryClickHandler) {
+      window.setupHistoryContainerEventDelegation();
+    }
+    
     // 預設顯示帳號定位
     switchMode1HistoryType('profile');
     // 強制更新一次選取狀態
@@ -283,11 +289,13 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
   historyContainer.innerHTML = ''; // 清空載入中提示
   historyContainer.appendChild(fragment);
   
-  // 歷史記錄載入完成後，確保事件委派已綁定
-  if (window.setupHistoryContainerEventDelegation) {
+  // 歷史記錄載入完成後，確保事件委派已綁定（document 級別只需要綁定一次）
+  // 這裡不需要重新綁定，因為 document 級別的事件委派已經在頁面載入時綁定了
+  // 但為了確保，可以檢查一下
+  if (window.setupHistoryContainerEventDelegation && !document._mode1HistoryClickHandler) {
     setTimeout(() => {
       window.setupHistoryContainerEventDelegation();
-    }, 50);
+    }, 100);
   }
 }
 window.loadMode1OneClickHistory = loadMode1OneClickHistory;
@@ -1760,14 +1768,19 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // 添加事件委派處理生成結果按鈕點擊（使用 document 級別，確保即使容器是動態創建的也能工作）
   function setupHistoryContainerEventDelegation() {
-    // 移除舊的事件監聽器（如果有的話）
-    let historyContainer = document.getElementById('mode1OneClickHistoryContainer');
-    if (historyContainer && historyContainer._historyClickHandler) {
-      historyContainer.removeEventListener('click', historyContainer._historyClickHandler);
+    // 如果已經綁定過，先移除
+    if (document._mode1HistoryClickHandler) {
+      document.removeEventListener('click', document._mode1HistoryClickHandler, true);
     }
     
     // 創建新的事件處理器
     const clickHandler = function(e) {
+      // 只處理在 Modal 內的點擊
+      const modal = document.getElementById('mode1OneClickModalOverlay');
+      if (!modal || !modal.classList.contains('open')) {
+        return; // Modal 未打開，不處理
+      }
+      
       // 確保點擊目標在歷史記錄容器內
       const container = document.getElementById('mode1OneClickHistoryContainer');
       if (!container || !container.contains(e.target)) {
@@ -1782,7 +1795,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         const resultId = expandBtn.getAttribute('data-id');
         if (resultId && window.toggleHistoryContentExpanded) {
           window.toggleHistoryContentExpanded(resultId);
-          return;
         }
         return;
       }
@@ -1804,6 +1816,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
       }
       
+      // 執行對應的操作
       switch (action) {
         case 'select':
           if (window.selectHistoryResult) {
@@ -1828,33 +1841,16 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
     };
     
-    // 綁定事件監聽器（重新獲取容器，因為可能在函數執行期間被重新創建）
-    historyContainer = document.getElementById('mode1OneClickHistoryContainer');
-    if (historyContainer) {
-      historyContainer._historyClickHandler = clickHandler;
-      historyContainer.addEventListener('click', clickHandler);
-    }
+    // 綁定到 document，使用捕獲階段確保能捕獲到所有點擊
+    document._mode1HistoryClickHandler = clickHandler;
+    document.addEventListener('click', clickHandler, true);
   }
   
   // 導出到全局，以便在歷史記錄載入後可以重新綁定
   window.setupHistoryContainerEventDelegation = setupHistoryContainerEventDelegation;
   
-  // 立即設置事件委派
+  // 立即設置事件委派（只設置一次，因為是 document 級別）
   setupHistoryContainerEventDelegation();
-  
-  // 在 Modal 打開時也重新設置事件委派（確保事件監聽器正確綁定）
-  const originalOpenModal = window.openMode1OneClickModal;
-  if (originalOpenModal) {
-    window.openMode1OneClickModal = function() {
-      originalOpenModal();
-      // 延遲一點確保 DOM 已更新
-      setTimeout(() => {
-        if (window.setupHistoryContainerEventDelegation) {
-          window.setupHistoryContainerEventDelegation();
-        }
-      }, 100);
-    };
-  }
 
   // 更新用戶資訊
   updateUserInfo();
