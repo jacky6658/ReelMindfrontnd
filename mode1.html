@@ -963,6 +963,123 @@
         border-color: #2563eb;
       }
       
+      /* 選擇按鈕樣式 */
+      .mode1-oneclick-history-item-btn.select {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+      }
+      
+      .mode1-oneclick-history-item-btn.select:hover {
+        background: #2563eb;
+        border-color: #2563eb;
+      }
+      
+      .mode1-oneclick-history-item-btn.select.selected {
+        background: #10b981;
+        border-color: #10b981;
+      }
+      
+      .mode1-oneclick-history-item-btn.select.selected:hover {
+        background: #059669;
+        border-color: #059669;
+      }
+      
+      /* 選擇設定區域樣式 */
+      .mode1-selected-settings {
+        background: #f8fafc;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 20px 24px;
+        margin-bottom: 0;
+      }
+      
+      .mode1-selected-settings-header h3 {
+        margin: 0 0 16px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+      
+      .mode1-selected-settings-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      
+      .mode1-selected-setting-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+      }
+      
+      .mode1-selected-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #6b7280;
+        min-width: 80px;
+      }
+      
+      .mode1-selected-value {
+        flex: 1;
+        font-size: 14px;
+        color: #1f2937;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      
+      .mode1-selected-remove {
+        width: 24px;
+        height: 24px;
+        border: none;
+        background: #ef4444;
+        color: white;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease;
+        flex-shrink: 0;
+      }
+      
+      .mode1-selected-remove:hover {
+        background: #dc2626;
+      }
+      
+      .mode1-use-settings-btn {
+        width: 100%;
+        padding: 14px 24px;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+      
+      .mode1-use-settings-btn:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      }
+      
+      .mode1-use-settings-btn:active {
+        transform: translateY(0);
+      }
+      
       .mode1-oneclick-modal-close {
         background: rgba(255, 255, 255, 0.2);
         border: none;
@@ -3334,123 +3451,53 @@
           <button class="mode1-oneclick-modal-close" onclick="closeMode1OneClickModal()">✕</button>
         </div>
 
-        <!-- 切換標籤 -->
+        <!-- 過往紀錄類型切換標籤 -->
         <div class="mode1-oneclick-tabs">
-          <button class="mode1-oneclick-tab active" id="mode1OneClickTabHistory" onclick="switchMode1OneClickTab('history')">
-            <span>過往紀錄</span>
+          <button class="mode1-oneclick-tab active" id="mode1HistoryTabProfile" onclick="switchMode1HistoryType('profile')">
+            <span>帳號定位</span>
           </button>
-          <button class="mode1-oneclick-tab" id="mode1OneClickTabGenerate" onclick="switchMode1OneClickTab('generate')">
-            <span>一鍵生成</span>
-              </button>
+          <button class="mode1-oneclick-tab" id="mode1HistoryTabPlan" onclick="switchMode1HistoryType('plan')">
+            <span>選題方向</span>
+          </button>
+          <button class="mode1-oneclick-tab" id="mode1HistoryTabScripts" onclick="switchMode1HistoryType('scripts')">
+            <span>一週腳本</span>
+          </button>
         </div>
         
         <div class="mode1-oneclick-modal-content">
           <!-- 過往紀錄區域 -->
           <div class="mode1-oneclick-tab-content active" id="mode1OneClickHistoryContent">
+            <!-- 選擇設定區域 -->
+            <div class="mode1-selected-settings" id="mode1SelectedSettings" style="display: none;">
+              <div class="mode1-selected-settings-header">
+                <h3>已選擇的設定</h3>
+              </div>
+              <div class="mode1-selected-settings-content">
+                <div class="mode1-selected-setting-item" id="mode1SelectedProfile" style="display: none;">
+                  <span class="mode1-selected-label">帳號定位：</span>
+                  <span class="mode1-selected-value" id="mode1SelectedProfileValue"></span>
+                  <button class="mode1-selected-remove" onclick="removeSelectedSetting('profile')">×</button>
+                </div>
+                <div class="mode1-selected-setting-item" id="mode1SelectedPlan" style="display: none;">
+                  <span class="mode1-selected-label">選題方向：</span>
+                  <span class="mode1-selected-value" id="mode1SelectedPlanValue"></span>
+                  <button class="mode1-selected-remove" onclick="removeSelectedSetting('plan')">×</button>
+                </div>
+                <div class="mode1-selected-setting-item" id="mode1SelectedScripts" style="display: none;">
+                  <span class="mode1-selected-label">一週腳本：</span>
+                  <span class="mode1-selected-value" id="mode1SelectedScriptsValue"></span>
+                  <button class="mode1-selected-remove" onclick="removeSelectedSetting('scripts')">×</button>
+                </div>
+              </div>
+              <button class="mode1-use-settings-btn" id="mode1UseSettingsBtn" onclick="useSelectedSettingsToChat()">
+                <span>使用此設定與AI對話</span>
+              </button>
+            </div>
+            
+            <!-- 過往紀錄列表 -->
             <div class="mode1-oneclick-history-container" id="mode1OneClickHistoryContainer">
               <div style="text-align: center; padding: 40px 20px; color: #9ca3af;">
                 <p>載入中...</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- 一鍵生成區域 -->
-          <div class="mode1-oneclick-tab-content" id="mode1OneClickGenerateContent">
-            <button class="mode1-oneclick-generate-all-btn" id="mode1OneClickGenerateAllBtn" onclick="generateMode1All()">
-              <span>一鍵生成全部（帳號定位 + 選題方向 + 一週腳本）</span>
-              </button>
-            
-            <div class="mode1-oneclick-results-grid">
-            <!-- 帳號定位卡片 -->
-            <div class="mode1-oneclick-result-card" id="mode1OneClickPositioningCard">
-              <div class="mode1-oneclick-result-card-header">
-                <div class="mode1-oneclick-result-card-title">
-                  <span>帳號定位</span>
-                </div>
-                <span class="mode1-oneclick-result-status pending" id="mode1OneClickPositioningStatus">待生成</span>
-              </div>
-              <div class="mode1-oneclick-result-content-wrapper">
-                <div class="mode1-oneclick-result-content" id="mode1OneClickPositioningContent">
-                  <p style="text-align: center; color: #9ca3af; padding: 40px 0;">點擊上方按鈕開始生成</p>
-                </div>
-              </div>
-              <div class="mode1-oneclick-result-expand" id="mode1OneClickPositioningExpand" style="display: none;">
-                <button class="mode1-oneclick-expand-btn" onclick="toggleMode1OneClickExpand('positioning')">
-                  <span>展開</span>
-                </button>
-              </div>
-              <div class="mode1-oneclick-result-actions" id="mode1OneClickPositioningActions" style="display: none;">
-                <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('positioning')">
-                  <span>儲存</span>
-                </button>
-                <button class="mode1-oneclick-action-btn" onclick="exportMode1OneClickResult('positioning')">
-                  <span>匯出</span>
-                </button>
-                <button class="mode1-oneclick-action-btn" onclick="regenerateMode1OneClickResult('positioning')">
-                  <span>重新生成</span>
-                </button>
-            </div>
-          </div>
-
-            <!-- 選題方向卡片 -->
-            <div class="mode1-oneclick-result-card" id="mode1OneClickTopicsCard">
-              <div class="mode1-oneclick-result-card-header">
-                <div class="mode1-oneclick-result-card-title">
-                  <span>選題方向（影片類型配比）</span>
-                </div>
-                <span class="mode1-oneclick-result-status pending" id="mode1OneClickTopicsStatus">待生成</span>
-              </div>
-              <div class="mode1-oneclick-result-content-wrapper">
-                <div class="mode1-oneclick-result-content" id="mode1OneClickTopicsContent">
-                  <p style="text-align: center; color: #9ca3af; padding: 40px 0;">點擊上方按鈕開始生成</p>
-                </div>
-              </div>
-              <div class="mode1-oneclick-result-expand" id="mode1OneClickTopicsExpand" style="display: none;">
-                <button class="mode1-oneclick-expand-btn" onclick="toggleMode1OneClickExpand('topics')">
-                  <span>展開</span>
-              </button>
-            </div>
-              <div class="mode1-oneclick-result-actions" id="mode1OneClickTopicsActions" style="display: none;">
-                <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('topics')">
-                  <span>儲存</span>
-                </button>
-                <button class="mode1-oneclick-action-btn" onclick="exportMode1OneClickResult('topics')">
-                  <span>匯出</span>
-                </button>
-                <button class="mode1-oneclick-action-btn" onclick="regenerateMode1OneClickResult('topics')">
-                  <span>重新生成</span>
-                </button>
-          </div>
-        </div>
-        
-            <!-- 一週腳本卡片 -->
-            <div class="mode1-oneclick-result-card" id="mode1OneClickWeeklyCard">
-              <div class="mode1-oneclick-result-card-header">
-                <div class="mode1-oneclick-result-card-title">
-                  <span>一週腳本</span>
-                </div>
-                <span class="mode1-oneclick-result-status pending" id="mode1OneClickWeeklyStatus">待生成</span>
-              </div>
-              <div class="mode1-oneclick-result-content-wrapper">
-                <div class="mode1-oneclick-result-content" id="mode1OneClickWeeklyContent">
-                  <p style="text-align: center; color: #9ca3af; padding: 40px 0;">點擊上方按鈕開始生成</p>
-                </div>
-              </div>
-              <div class="mode1-oneclick-result-expand" id="mode1OneClickWeeklyExpand" style="display: none;">
-                <button class="mode1-oneclick-expand-btn" onclick="toggleMode1OneClickExpand('weekly')">
-                  <span>展開</span>
-          </button>
-              </div>
-              <div class="mode1-oneclick-result-actions" id="mode1OneClickWeeklyActions" style="display: none;">
-                <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('weekly')">
-                  <span>儲存</span>
-          </button>
-                <button class="mode1-oneclick-action-btn" onclick="exportMode1OneClickResult('weekly')">
-                  <span>匯出</span>
-                </button>
-                <button class="mode1-oneclick-action-btn" onclick="regenerateMode1OneClickResult('weekly')">
-                  <span>重新生成</span>
-          </button>
               </div>
             </div>
           </div>

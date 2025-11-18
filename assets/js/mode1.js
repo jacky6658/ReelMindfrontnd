@@ -628,7 +628,7 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
   if (!message || !message.trim()) return;
   
   // 檢測用戶是否說"儲存"或"保存"
-  const saveKeywords = ['儲存', '保存', 'save', '儲存腳本', '保存腳本', '儲存結果', '保存結果'];
+  const saveKeywords = ['儲存', '保存', 'save', '儲存腳本', '保存腳本', '儲存結果', '保存結果', '幫我儲存', '幫我保存'];
   const messageLower = message.toLowerCase().trim();
   const shouldSave = saveKeywords.some(keyword => 
     messageLower.includes(keyword.toLowerCase()) || 
@@ -637,9 +637,26 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
   );
   
   if (shouldSave) {
+    // 顯示用戶消息
+    const chatMessages = document.getElementById('mode1-chatMessages');
+    if (chatMessages) {
+      const userMessage = createMode1Message('user', message);
+      chatMessages.appendChild(userMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // 清空輸入框
+    const messageInput = document.getElementById('mode1-messageInput');
+    if (messageInput) {
+      messageInput.value = '';
+      messageInput.style.height = 'auto';
+    }
+    
     // 檢查是否在一鍵生成模式（有生成結果 Modal）
     const overlay = document.getElementById('mode1OneClickModalOverlay');
     const isOneClickMode = overlay && overlay.classList.contains('open');
+    
+    let savedCount = 0;
     
     if (isOneClickMode) {
       // 一鍵生成模式：檢查當前顯示的標籤頁
@@ -667,47 +684,54 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
         }
         
         if (resultType) {
-          // 顯示用戶消息
-          const chatMessages = document.getElementById('mode1-chatMessages');
-          if (chatMessages) {
-            const userMessage = createMode1Message('user', message);
-            chatMessages.appendChild(userMessage);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-          }
-          
-          // 清空輸入框
-          const messageInput = document.getElementById('mode1-messageInput');
-          if (messageInput) {
-            messageInput.value = '';
-            messageInput.style.height = 'auto';
-          }
-          
           // 調用儲存函數
           await saveMode1OneClickResult(resultType);
-          return;
+          savedCount = 1;
         }
       }
     } else {
       // 一般聊天模式：儲存當前結果
-      // 顯示用戶消息
-      const chatMessages = document.getElementById('mode1-chatMessages');
-      if (chatMessages) {
-        const userMessage = createMode1Message('user', message);
-        chatMessages.appendChild(userMessage);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
-      
-      // 清空輸入框
-      const messageInput = document.getElementById('mode1-messageInput');
-      if (messageInput) {
-        messageInput.value = '';
-        messageInput.style.height = 'auto';
-      }
-      
-      // 調用儲存函數
       await saveMode1Result();
-      return;
+      savedCount = 1;
     }
+    
+    // 獲取 token 和 user（用於記錄長期記憶）
+    const token = localStorage.getItem('ipPlanningToken') || 
+                 (window.Auth && window.Auth.getToken ? window.Auth.getToken() : null);
+    const userStr = localStorage.getItem('ipPlanningUser');
+    const user = userStr ? JSON.parse(userStr) : null;
+    
+    // 讓 AI 回覆確認訊息
+    if (savedCount > 0) {
+      const aiMessage = createMode1Message('assistant', '');
+      const contentDiv = aiMessage.querySelector('.message-content');
+      contentDiv.innerHTML = renderMode1Markdown('✅ 已為您儲存！您可以在「生成結果」→「過往紀錄」中查看已儲存的內容，或在「創作者資料庫」→「IP人設規劃結果」中管理所有記錄。');
+      chatMessages.appendChild(aiMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+      // 記錄到長期記憶
+      try {
+        await recordMode1ConversationMessage(conversationType, 'assistant', '已為您儲存！您可以在「生成結果」→「過往紀錄」中查看已儲存的內容，或在「創作者資料庫」→「IP人設規劃結果」中管理所有記錄。', token, user);
+      } catch (error) {
+        console.error('記錄長期記憶錯誤:', error);
+      }
+    } else {
+      // 如果沒有可儲存的內容，讓 AI 回覆提示
+      const aiMessage = createMode1Message('assistant', '');
+      const contentDiv = aiMessage.querySelector('.message-content');
+      contentDiv.innerHTML = renderMode1Markdown('目前沒有可儲存的內容。請先在「生成結果」→「一鍵生成」中生成內容，或繼續與我對話生成內容後再儲存。');
+      chatMessages.appendChild(aiMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+      // 記錄到長期記憶
+      try {
+        await recordMode1ConversationMessage(conversationType, 'assistant', '目前沒有可儲存的內容。請先在「生成結果」→「一鍵生成」中生成內容，或繼續與我對話生成內容後再儲存。', token, user);
+      } catch (error) {
+        console.error('記錄長期記憶錯誤:', error);
+      }
+    }
+    
+    return;
   }
   
   isMode1Sending = true;
@@ -2195,8 +2219,8 @@ async function openMode1OneClickModal() {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     
-    // 預設顯示過往紀錄標籤
-    switchMode1OneClickTab('history');
+    // 預設顯示帳號定位標籤
+    switchMode1HistoryType('profile');
   } else {
     console.error('❌ 找不到 mode1OneClickModalOverlay 元素');
   }
@@ -2206,47 +2230,41 @@ if (typeof window !== 'undefined') {
   window.openMode1OneClickModal = openMode1OneClickModal;
 }
 
-// 切換生成結果模態框標籤
-async function switchMode1OneClickTab(tab) {
+// 切換過往紀錄類型標籤
+async function switchMode1HistoryType(type) {
   // 更新標籤狀態
-  const historyTab = document.getElementById('mode1OneClickTabHistory');
-  const generateTab = document.getElementById('mode1OneClickTabGenerate');
-  const historyContent = document.getElementById('mode1OneClickHistoryContent');
-  const generateContent = document.getElementById('mode1OneClickGenerateContent');
+  const profileTab = document.getElementById('mode1HistoryTabProfile');
+  const planTab = document.getElementById('mode1HistoryTabPlan');
+  const scriptsTab = document.getElementById('mode1HistoryTabScripts');
   
-  if (tab === 'history') {
-    if (historyTab) historyTab.classList.add('active');
-    if (generateTab) generateTab.classList.remove('active');
-    if (historyContent) historyContent.classList.add('active');
-    if (generateContent) generateContent.classList.remove('active');
-    
-    // 載入過往紀錄
-    await loadMode1OneClickHistory();
-  } else if (tab === 'generate') {
-    if (historyTab) historyTab.classList.remove('active');
-    if (generateTab) generateTab.classList.add('active');
-    if (historyContent) historyContent.classList.remove('active');
-    if (generateContent) generateContent.classList.add('active');
-    
-    // 載入一鍵生成的已保存結果（只在內容為空時才重新載入，避免覆蓋現有內容）
-    const positioningContent = document.getElementById('mode1OneClickPositioningContent');
-    const topicsContent = document.getElementById('mode1OneClickTopicsContent');
-    const weeklyContent = document.getElementById('mode1OneClickWeeklyContent');
-    
-    // 檢查是否有現有內容，如果沒有才重新載入
-    const hasContent = (positioningContent && positioningContent.innerHTML.trim() && !positioningContent.innerHTML.includes('點擊上方按鈕開始生成')) ||
-                       (topicsContent && topicsContent.innerHTML.trim() && !topicsContent.innerHTML.includes('點擊上方按鈕開始生成')) ||
-                       (weeklyContent && weeklyContent.innerHTML.trim() && !weeklyContent.innerHTML.includes('點擊上方按鈕開始生成'));
-    
-    if (!hasContent) {
-      // 載入一鍵生成的已保存結果
-      await loadMode1OneClickSavedResults();
-    }
+  if (profileTab) profileTab.classList.remove('active');
+  if (planTab) planTab.classList.remove('active');
+  if (scriptsTab) scriptsTab.classList.remove('active');
+  
+  if (type === 'profile' && profileTab) {
+    profileTab.classList.add('active');
+  } else if (type === 'plan' && planTab) {
+    planTab.classList.add('active');
+  } else if (type === 'scripts' && scriptsTab) {
+    scriptsTab.classList.add('active');
   }
+  
+  // 載入對應類型的過往紀錄
+  await loadMode1OneClickHistory(type);
 }
 
-// 載入過往紀錄
-async function loadMode1OneClickHistory() {
+// 導出到全局作用域
+window.switchMode1HistoryType = switchMode1HistoryType;
+
+// 全局變量：存儲已選擇的設定
+let selectedSettings = {
+  profile: null,
+  plan: null,
+  scripts: null
+};
+
+// 載入過往紀錄（只顯示指定類型）
+async function loadMode1OneClickHistory(type = 'profile') {
   const container = document.getElementById('mode1OneClickHistoryContainer');
   if (!container) return;
   
@@ -2276,12 +2294,27 @@ async function loadMode1OneClickHistory() {
       return;
     }
     
-    // 按類型分組
-    const groupedResults = {
-      profile: data.results.filter(r => r.result_type === 'profile').sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
-      plan: data.results.filter(r => r.result_type === 'plan').sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
-      scripts: data.results.filter(r => r.result_type === 'scripts').sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    // 過濾出指定類型的結果
+    const typeMap = {
+      'profile': 'profile',
+      'plan': 'plan',
+      'scripts': 'scripts'
     };
+    
+    const targetType = typeMap[type] || 'profile';
+    const results = data.results
+      .filter(r => r.result_type === targetType)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    if (results.length === 0) {
+      const typeNames = {
+        profile: '帳號定位',
+        plan: '選題方向',
+        scripts: '一週腳本'
+      };
+      container.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>尚無${typeNames[targetType]}記錄</p></div>`;
+      return;
+    }
     
     const typeNames = {
       profile: '帳號定位',
@@ -2291,58 +2324,50 @@ async function loadMode1OneClickHistory() {
     
     let html = '';
     
-    // 顯示每個類型的結果
-    ['profile', 'plan', 'scripts'].forEach(type => {
-      const results = groupedResults[type];
-      if (results.length === 0) return;
-      
-      html += `<div class="mode1-oneclick-history-section">
-        <div class="mode1-oneclick-history-section-title">${typeNames[type]}</div>`;
-      
-      results.forEach((result, index) => {
-        const date = new Date(result.created_at).toLocaleString('zh-TW', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-        
-        const contentPreview = result.content ? result.content.replace(/<[^>]*>/g, '').substring(0, 150) : '';
-        const fullContent = result.content || '';
-        
-        html += `
-          <div class="mode1-oneclick-history-item" data-result-id="${result.id}" data-result-type="${type}">
-            <div class="mode1-oneclick-history-item-header">
-              <div class="mode1-oneclick-history-item-title">${result.title || typeNames[type]}</div>
-              <div class="mode1-oneclick-history-item-date">${date}</div>
-            </div>
-            <div class="mode1-oneclick-history-item-content" id="historyContent${result.id}">
-              ${renderMode1Markdown(contentPreview)}${fullContent.length > 150 ? '...' : ''}
-            </div>
-            <div class="mode1-oneclick-history-item-actions">
-              <button class="mode1-oneclick-history-item-btn" onclick="expandHistoryContent(${result.id})">
-                <span>展開</span>
-              </button>
-              <button class="mode1-oneclick-history-item-btn primary" onclick="loadHistoryResultToGenerate('${type}', ${result.id})">
-                <span>使用此結果</span>
-              </button>
-              <button class="mode1-oneclick-history-item-btn" onclick="exportHistoryResult(${result.id}, '${type}')">
-                <span>匯出</span>
-              </button>
-            </div>
-          </div>
-        `;
+    results.forEach((result, index) => {
+      const date = new Date(result.created_at).toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
       });
       
-      html += '</div>';
+      const contentPreview = result.content ? result.content.replace(/<[^>]*>/g, '').substring(0, 150) : '';
+      const fullContent = result.content || '';
+      
+      // 檢查是否已選擇
+      const isSelected = selectedSettings[targetType]?.id === result.id;
+      
+      html += `
+        <div class="mode1-oneclick-history-item" data-result-id="${result.id}" data-result-type="${targetType}">
+          <div class="mode1-oneclick-history-item-header">
+            <div class="mode1-oneclick-history-item-title">${result.title || typeNames[targetType]}</div>
+            <div class="mode1-oneclick-history-item-date">${date}</div>
+          </div>
+          <div class="mode1-oneclick-history-item-content" id="historyContent${result.id}">
+            ${renderMode1Markdown(contentPreview)}${fullContent.length > 150 ? '...' : ''}
+          </div>
+          <div class="mode1-oneclick-history-item-actions">
+            <button class="mode1-oneclick-history-item-btn" onclick="expandHistoryContent(${result.id})">
+              <span>展開</span>
+            </button>
+            <button class="mode1-oneclick-history-item-btn select ${isSelected ? 'selected' : ''}" onclick="selectHistoryResult('${targetType}', ${result.id})">
+              <span>${isSelected ? '已選擇' : '選擇'}</span>
+            </button>
+            <button class="mode1-oneclick-history-item-btn" onclick="exportHistoryResult(${result.id}, '${targetType}')">
+              <span>匯出</span>
+            </button>
+            <button class="mode1-oneclick-history-item-btn danger" onclick="deleteMode1HistoryResult(${result.id}, '${targetType}')" style="background: #ef4444; color: white;">
+              <span>刪除</span>
+            </button>
+          </div>
+        </div>
+      `;
     });
     
-    if (html === '') {
-      container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>尚無過往紀錄</p></div>';
-    } else {
-      container.innerHTML = html;
-    }
+    container.innerHTML = html;
+    updateSelectedSettingsDisplay();
   } catch (error) {
     console.error('載入過往紀錄失敗:', error);
     container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #dc2626;"><p>載入失敗，請稍後再試</p></div>';
@@ -2477,6 +2502,218 @@ async function loadHistoryResultToCard(type, resultId) {
     console.error('載入歷史結果失敗:', error);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('載入失敗', 2000);
+    }
+  }
+}
+
+// 選擇歷史結果
+window.selectHistoryResult = async function(type, resultId) {
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.results) {
+        const result = data.results.find(r => r.id === resultId);
+        if (result) {
+          // 更新選擇設定
+          selectedSettings[type] = {
+            id: result.id,
+            title: result.title || (type === 'profile' ? '帳號定位' : type === 'plan' ? '選題方向' : '一週腳本'),
+            content: result.content
+          };
+          
+          // 更新顯示
+          updateSelectedSettingsDisplay();
+          
+          // 重新載入當前標籤頁以更新按鈕狀態
+          const activeTab = document.querySelector('.mode1-oneclick-tab.active');
+          if (activeTab) {
+            const tabId = activeTab.id;
+            if (tabId === 'mode1HistoryTabProfile') {
+              await loadMode1OneClickHistory('profile');
+            } else if (tabId === 'mode1HistoryTabPlan') {
+              await loadMode1OneClickHistory('plan');
+            } else if (tabId === 'mode1HistoryTabScripts') {
+              await loadMode1OneClickHistory('scripts');
+            }
+          }
+          
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('✅ 已選擇', 2000);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('選擇歷史結果失敗:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('選擇失敗，請稍後再試', 3000);
+    }
+  }
+}
+
+// 更新選擇設定顯示
+function updateSelectedSettingsDisplay() {
+  const settingsContainer = document.getElementById('mode1SelectedSettings');
+  const profileItem = document.getElementById('mode1SelectedProfile');
+  const planItem = document.getElementById('mode1SelectedPlan');
+  const scriptsItem = document.getElementById('mode1SelectedScripts');
+  const profileValue = document.getElementById('mode1SelectedProfileValue');
+  const planValue = document.getElementById('mode1SelectedPlanValue');
+  const scriptsValue = document.getElementById('mode1SelectedScriptsValue');
+  
+  if (!settingsContainer) return;
+  
+  // 檢查是否有任何選擇
+  const hasSelection = selectedSettings.profile || selectedSettings.plan || selectedSettings.scripts;
+  
+  if (hasSelection) {
+    settingsContainer.style.display = 'block';
+    
+    // 更新帳號定位
+    if (selectedSettings.profile && profileItem && profileValue) {
+      profileItem.style.display = 'flex';
+      profileValue.textContent = selectedSettings.profile.title;
+    } else if (profileItem) {
+      profileItem.style.display = 'none';
+    }
+    
+    // 更新選題方向
+    if (selectedSettings.plan && planItem && planValue) {
+      planItem.style.display = 'flex';
+      planValue.textContent = selectedSettings.plan.title;
+    } else if (planItem) {
+      planItem.style.display = 'none';
+    }
+    
+    // 更新一週腳本
+    if (selectedSettings.scripts && scriptsItem && scriptsValue) {
+      scriptsItem.style.display = 'flex';
+      scriptsValue.textContent = selectedSettings.scripts.title;
+    } else if (scriptsItem) {
+      scriptsItem.style.display = 'none';
+    }
+  } else {
+    settingsContainer.style.display = 'none';
+  }
+}
+
+// 移除選擇設定
+window.removeSelectedSetting = function(type) {
+  selectedSettings[type] = null;
+  updateSelectedSettingsDisplay();
+  
+  // 重新載入當前標籤頁以更新按鈕狀態
+  const activeTab = document.querySelector('.mode1-oneclick-tab.active');
+  if (activeTab) {
+    const tabId = activeTab.id;
+    if (tabId === 'mode1HistoryTabProfile') {
+      loadMode1OneClickHistory('profile');
+    } else if (tabId === 'mode1HistoryTabPlan') {
+      loadMode1OneClickHistory('plan');
+    } else if (tabId === 'mode1HistoryTabScripts') {
+      loadMode1OneClickHistory('scripts');
+    }
+  }
+  
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast('已移除選擇', 2000);
+  }
+}
+
+// 使用選擇的設定與AI對話
+window.useSelectedSettingsToChat = function() {
+  // 檢查是否有選擇任何設定
+  const hasSelection = selectedSettings.profile || selectedSettings.plan || selectedSettings.scripts;
+  
+  if (!hasSelection) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先選擇要使用的設定', 3000);
+    }
+    return;
+  }
+  
+  // 關閉 Modal
+  closeMode1OneClickModal();
+  
+  // 構建提示訊息
+  let message = '我已經選擇了以下設定，讓我們開始討論短影音相關內容：\n\n';
+  
+  if (selectedSettings.profile) {
+    message += `**帳號定位：**\n${selectedSettings.profile.content.substring(0, 200)}...\n\n`;
+  }
+  
+  if (selectedSettings.plan) {
+    message += `**選題方向：**\n${selectedSettings.plan.content.substring(0, 200)}...\n\n`;
+  }
+  
+  if (selectedSettings.scripts) {
+    message += `**一週腳本：**\n${selectedSettings.scripts.content.substring(0, 200)}...\n\n`;
+  }
+  
+  message += '請根據這些設定，幫我討論和優化短影音內容。';
+  
+  // 將訊息填入輸入框並發送
+  const messageInput = document.getElementById('mode1-messageInput');
+  if (messageInput) {
+    messageInput.value = message;
+    // 觸發輸入框高度調整
+    messageInput.style.height = 'auto';
+    messageInput.style.height = messageInput.scrollHeight + 'px';
+  }
+  
+  // 發送訊息
+  setTimeout(() => {
+    sendMode1Message(message, 'ip_planning');
+  }, 100);
+}
+
+// 刪除歷史結果
+window.deleteMode1HistoryResult = async function(resultId, resultType) {
+  if (!confirm('確定要刪除此記錄嗎？此操作無法復原。')) {
+    return;
+  }
+  
+  if (!ipPlanningUser?.user_id || !ipPlanningToken) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入', 3000);
+    }
+    return;
+  }
+  
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('✅ 記錄已刪除', 3000);
+      }
+      // 重新載入歷史記錄
+      await loadMode1OneClickHistory();
+    } else {
+      const errorData = await response.json().catch(() => ({ error: '刪除失敗' }));
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(`刪除失敗: ${errorData.error || '請稍後再試'}`, 3000);
+      }
+    }
+  } catch (error) {
+    console.error('刪除歷史結果失敗:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('刪除失敗，請稍後再試', 3000);
     }
   }
 }
