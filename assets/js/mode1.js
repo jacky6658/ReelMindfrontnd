@@ -43,8 +43,12 @@ if (typeof window !== 'undefined') {
   window.closeMode1ExpandModal = closeMode1ExpandModal;
 
   // 其他可能被 HTML onclick 直接調用的函數
-  window.handleModeNavigation = handleModeNavigation; // 從 common.js 來的，但防止其他頁面沒有引入 common.js 時出錯
-  window.goToLogin = goToLogin; // 從 common.js 來的，但防止其他頁面沒有引入 common.js 時出錯
+  if (typeof handleModeNavigation === 'function') {
+    window.handleModeNavigation = handleModeNavigation;
+  }
+  if (typeof goToLogin === 'function') {
+    window.goToLogin = goToLogin;
+  }
 }
 
 // iOS Safari 視窗高度處理（解決 100vh 問題）
@@ -313,6 +317,52 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
   historyContainer.appendChild(fragment);
 }
 window.loadMode1OneClickHistory = loadMode1OneClickHistory;
+
+// 匯出歷史結果
+window.exportHistoryResult = async function(resultId, resultType) {
+  try {
+    const token = localStorage.getItem('ipPlanningToken');
+    if (!token) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入', 3000);
+      }
+      return;
+    }
+
+    const response = await fetch(`${API_URL}/api/user/generations/${resultId}/export`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const blob = await response.blob();
+      const csvUrl = URL.createObjectURL(blob);
+      const csvLink = document.createElement('a');
+      csvLink.href = csvUrl;
+      csvLink.download = `ip-${resultType}-${resultId}-${Date.now()}.csv`;
+      csvLink.click();
+      URL.revokeObjectURL(csvUrl);
+
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('✅ 匯出成功', 3000);
+      }
+    } else {
+      const errorData = await response.json();
+      console.error('匯出失敗:', errorData);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(`匯出失敗: ${errorData.message || '未知錯誤'}`, 3000);
+      }
+    }
+  } catch (error) {
+    console.error('匯出時出錯:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('匯出失敗，請稍後再試', 3000);
+    }
+  }
+};
 
 // 儲存已選擇的設定
 let selectedSettings = {
