@@ -1380,11 +1380,11 @@ async function generateScript() {
         duration: durationInput ? (durationInput.value || '30').replace('秒', '') : '30',
         style: styleInstruction,
         profile: positioning,
-          script_structure: selectedScriptStructure, // 傳遞選中的結構
-          history: [],
+        script_structure: selectedScriptStructure, // 傳遞選中的結構
+        history: [],
           user_id: ipPlanningUser?.user_id || null,
           conversation_type: 'one_click'  // 指定對話類型
-        })
+      })
     });
     
     if (!response.ok) {
@@ -1542,39 +1542,6 @@ async function saveResult(type) {
         
         if (response.ok) {
           const data = await response.json();
-          // 顯示通知（確保一定會顯示）
-          const showNotification = (message, duration = 3000) => {
-            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-              window.ReelMindCommon.showToast(message, duration);
-            } else {
-              const toastEl = document.getElementById('toast');
-              if (toastEl) {
-                toastEl.textContent = message;
-                toastEl.style.display = 'block';
-                toastEl.style.opacity = '1';
-                setTimeout(() => {
-                  toastEl.style.opacity = '0';
-                  setTimeout(() => {
-                    toastEl.style.display = 'none';
-                  }, 300);
-                }, duration);
-              } else {
-                alert(message);
-              }
-            }
-          };
-          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast(`✅ 選題已儲存${data.generation_id ? `（ID：${data.generation_id}）` : ''}`, 3000);
-          } else {
-            showToastNotification(`✅ 選題已儲存${data.generation_id ? `（ID：${data.generation_id}）` : ''}`, 3000);
-          }
-        } else {
-          throw new Error('儲存失敗');
-        }
-      } catch (error) {
-        console.error('儲存選題錯誤:', error);
-        // 降級處理：儲存到 localStorage
-        localStorage.setItem(`saved_topics_${Date.now()}`, content);
         // 顯示通知（確保一定會顯示）
         const showNotification = (message, duration = 3000) => {
           if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1596,6 +1563,39 @@ async function saveResult(type) {
             }
           }
         };
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast(`✅ 選題已儲存${data.generation_id ? `（ID：${data.generation_id}）` : ''}`, 3000);
+          } else {
+            showToastNotification(`✅ 選題已儲存${data.generation_id ? `（ID：${data.generation_id}）` : ''}`, 3000);
+      }
+    } else {
+          throw new Error('儲存失敗');
+        }
+      } catch (error) {
+        console.error('儲存選題錯誤:', error);
+        // 降級處理：儲存到 localStorage
+        localStorage.setItem(`saved_topics_${Date.now()}`, content);
+      // 顯示通知（確保一定會顯示）
+      const showNotification = (message, duration = 3000) => {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast(message, duration);
+        } else {
+          const toastEl = document.getElementById('toast');
+          if (toastEl) {
+            toastEl.textContent = message;
+            toastEl.style.display = 'block';
+            toastEl.style.opacity = '1';
+            setTimeout(() => {
+              toastEl.style.opacity = '0';
+              setTimeout(() => {
+                toastEl.style.display = 'none';
+              }, 300);
+            }, duration);
+          } else {
+            alert(message);
+          }
+        }
+      };
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast('⚠️ 選題已儲存到本地（伺服器儲存失敗）', 3000);
         } else {

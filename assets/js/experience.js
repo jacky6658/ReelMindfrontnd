@@ -815,8 +815,8 @@ async function generateAll() {
       }
     } else {
       // 已訂閱用戶
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('✅ 生成完成！', 3000);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('✅ 生成完成！', 3000);
       }
     }
     

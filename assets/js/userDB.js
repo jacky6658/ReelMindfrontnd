@@ -3013,6 +3013,8 @@ async function testApiKey() {
   
   const apiKey = apiKeyInput.value.trim();
   const provider = providerSelect.value;
+  const modelSelect = document.getElementById('llmModel');
+  const modelName = modelSelect ? modelSelect.value.trim() : '';
   
   if (!apiKey) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -3043,7 +3045,8 @@ async function testApiKey() {
       },
       body: JSON.stringify({
         provider: provider,
-        api_key: apiKey
+        api_key: apiKey,
+        model_name: modelName || null  // 發送用戶選擇的模型，如果沒有選擇則為 null
       })
     });
     
