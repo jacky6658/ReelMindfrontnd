@@ -147,7 +147,7 @@ async function fetchHistoryData(forceRefresh = false) {
     const token = localStorage.getItem('ipPlanningToken');
     if (!token) return null;
 
-    const response = await fetch(`${API_URL}/api/user/generations`, {
+    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -160,6 +160,15 @@ async function fetchHistoryData(forceRefresh = false) {
     }
 
     const data = await response.json();
+    
+    // 後端返回的字段是 result_type，需要映射為 type 以符合前端代碼
+    if (data && data.success && data.results) {
+      data.results = data.results.map(result => ({
+        ...result,
+        type: result.result_type || result.type  // 將 result_type 映射為 type
+      }));
+    }
+    
     cachedHistoryData = data;
     cachedHistoryTimestamp = Date.now();
     console.log('✅ 成功從 API 獲取歷史數據並快取');
@@ -273,43 +282,59 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
 }
 window.loadMode1OneClickHistory = loadMode1OneClickHistory;
 
-// 匯出歷史結果
+// 匯出歷史結果（客戶端生成 CSV）
 window.exportHistoryResult = async function(resultId, resultType) {
   try {
-    const token = localStorage.getItem('ipPlanningToken');
-    if (!token) {
+    // 從快取或 API 獲取數據
+    const data = await fetchHistoryData();
+    if (!data || !data.success || !data.results) {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('請先登入', 3000);
+        window.ReelMindCommon.showToast('找不到要匯出的數據', 3000);
       }
       return;
     }
 
-    const response = await fetch(`${API_URL}/api/user/generations/${resultId}/export`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+    const result = data.results.find(r => r.id === resultId);
+    if (!result) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('找不到要匯出的記錄', 3000);
       }
+      return;
+    }
+
+    // 生成 CSV 內容
+    const typeNames = {
+      'profile': '帳號定位',
+      'plan': '選題方向',
+      'scripts': '短影音腳本'
+    };
+    const typeName = typeNames[resultType] || resultType;
+    const title = result.title || `未命名${typeName}`;
+    
+    // 移除 HTML 標籤，只保留純文本
+    const textContent = result.content.replace(/<[^>]*>/g, '').replace(/\n/g, ' ').replace(/"/g, '""');
+    const formattedDate = new Date(result.created_at).toLocaleString('zh-TW', {
+      timeZone: 'Asia/Taipei',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
     });
 
-    if (response.ok) {
-      const blob = await response.blob();
-      const csvUrl = URL.createObjectURL(blob);
-      const csvLink = document.createElement('a');
-      csvLink.href = csvUrl;
-      csvLink.download = `ip-${resultType}-${resultId}-${Date.now()}.csv`;
-      csvLink.click();
-      URL.revokeObjectURL(csvUrl);
+    const csvContent = `類型,標題,內容,建立時間\n"${resultType}","${title}","${textContent}","${formattedDate}"`;
+    
+    // 創建 Blob 並下載
+    const csvBlob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvUrl = URL.createObjectURL(csvBlob);
+    const csvLink = document.createElement('a');
+    csvLink.href = csvUrl;
+    csvLink.download = `ip-${resultType}-${resultId}-${Date.now()}.csv`;
+    csvLink.click();
+    URL.revokeObjectURL(csvUrl);
 
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('✅ 匯出成功', 3000);
-      }
-    } else {
-      const errorData = await response.json();
-      console.error('匯出失敗:', errorData);
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast(`匯出失敗: ${errorData.message || '未知錯誤'}`, 3000);
-      }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('✅ 匯出成功', 3000);
     }
   } catch (error) {
     console.error('匯出時出錯:', error);
@@ -455,7 +480,7 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/user/generations/${resultId}`, {
+    const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -549,7 +574,32 @@ async function saveMode1HistoryTitle(resultId) {
         return;
       }
 
-      const response = await fetch(`${API_URL}/api/user/generations/${resultId}/title`, {
+      // 注意：後端目前沒有標題更新端點，暫時只更新本地顯示
+      // 更新本地顯示
+      titleSpan.textContent = safeSetText(newTitle);
+      titleSpan.style.display = 'inline-block';
+      titleInput.style.display = 'none';
+      editIcon.style.display = 'inline-block';
+      saveIcon.style.display = 'none';
+      cancelIcon.style.display = 'none';
+      
+      // 更新快取中的標題（如果存在）
+      if (cachedHistoryData && cachedHistoryData.results) {
+        const cachedResult = cachedHistoryData.results.find(r => r.id === resultId);
+        if (cachedResult) {
+          cachedResult.title = newTitle;
+        }
+      }
+      
+      updateSelectedSettingsDisplay(); // 更新已選擇設定中的標題
+
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('✅ 標題已更新（僅本地顯示，重新載入後會恢復）', 3000);
+      }
+      
+      // TODO: 當後端添加標題更新端點時，可以使用以下代碼：
+      /*
+      const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}/title`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -559,16 +609,7 @@ async function saveMode1HistoryTitle(resultId) {
       });
 
       if (response.ok) {
-        titleSpan.textContent = safeSetText(newTitle);
-        titleSpan.style.display = 'inline-block';
-        titleInput.style.display = 'none';
-        editIcon.style.display = 'inline-block';
-        saveIcon.style.display = 'none';
-        cancelIcon.style.display = 'none';
-        
         clearHistoryCache(); // 清除快取以強制重新載入
-        updateSelectedSettingsDisplay(); // 更新已選擇設定中的標題
-
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast('✅ 標題已更新', 3000);
         }
@@ -579,6 +620,7 @@ async function saveMode1HistoryTitle(resultId) {
           window.ReelMindCommon.showToast(`更新標題失敗: ${errorData.message || '未知錯誤'}`, 3000);
         }
       }
+      */
     } catch (error) {
       console.error('更新標題時出錯:', error);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -909,8 +951,27 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
           }
           try {
             const json = JSON.parse(data);
-            const content = json.message.content;
-            if (content) {
+            
+            // 忽略非內容事件（如 start, end）
+            if (json.type === 'start' || json.type === 'end') {
+              continue;
+            }
+            
+            // 後端 SSE 格式可能是 {type: "token", content: "..."} 或 {message: {content: "..."}}
+            let content = null;
+            if (json.type === 'token' && json.content !== undefined) {
+              // 新格式：{type: "token", content: "..."}
+              content = json.content;
+            } else if (json.message && json.message.content !== undefined) {
+              // 舊格式：{message: {content: "..."}}
+              content = json.message.content;
+            } else if (json.content !== undefined) {
+              // 直接 content 格式
+              content = json.content;
+            }
+            
+            // 只有當 content 存在且不為空時才處理
+            if (content !== null && content !== undefined && content !== '') {
               aiResponseContent += content;
               fullContent.push(content);
 
@@ -944,7 +1005,10 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
               chatMessages.scrollTop = chatMessages.scrollHeight;
             }
           } catch (e) {
-            console.error('解析 SSE 數據失敗:', e, '數據:', data);
+            // 只記錄真正的錯誤，忽略無法解析的數據（可能是空行或其他格式）
+            if (data && data.trim() && data !== '[DONE]') {
+              console.warn('解析 SSE 數據失敗:', e, '數據:', data);
+            }
           }
         }
       }
@@ -1044,24 +1108,53 @@ async function recordMode1ConversationMessage(conversationType, role, content, t
       }
     }
     
+    // 生成或獲取 session_id（使用當前會話類型 + 時間戳作為唯一標識）
+    // 可以從 localStorage 獲取或生成新的 session_id
+    let sessionId = localStorage.getItem(`mode1_session_${conversationType}`) || `session_${conversationType}_${Date.now()}`;
+    if (!localStorage.getItem(`mode1_session_${conversationType}`)) {
+      localStorage.setItem(`mode1_session_${conversationType}`, sessionId);
+    }
+    
+    // 確保所有必填字段都有值
+    if (!conversationType || !sessionId || !role || !content) {
+      console.warn('記錄長期記憶失敗：缺少必填字段', { conversationType, sessionId, role, content: content ? '有內容' : '無內容' });
+      return;
+    }
+    
+    const requestBody = {
+      conversation_type: conversationType,
+      session_id: sessionId,
+      message_role: role,
+      message_content: content
+    };
+    
+    // 只有在 metadata 不為 null 時才添加（後端 Optional[str] 可以接受 null）
+    // 但為了避免驗證問題，我們不發送 metadata 字段
+    // requestBody.metadata = null;
+    
     const response = await fetch(`${API_URL}/api/memory/long-term`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'X-Conversation-Type': conversationType,
         'X-CSRF-Token': csrfToken
       },
-      body: JSON.stringify({
-        user_id: user.user_id,
-        role: role,
-        content: content
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        errorData = { detail: `HTTP ${response.status}: ${response.statusText}` };
+      }
       console.error('記錄長期記憶失敗:', errorData);
+      
+      // 如果是 422 錯誤，可能是驗證失敗，記錄詳細信息
+      if (response.status === 422 && errorData.detail) {
+        console.error('驗證失敗詳情:', errorData.detail);
+      }
     } else {
       console.log('✅ 記憶已記錄:', role);
     }
@@ -1225,18 +1318,35 @@ async function saveMode1Result(resultType) {
       }
     }
     
-    const response = await fetch(`${API_URL}/api/generations`, {
+    // 獲取用戶 ID
+    const user = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
+    if (!user || !user.user_id) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('無法獲取用戶資訊', 3000);
+      }
+      return;
+    }
+    
+    // 映射 resultType 到後端期望的格式
+    // ip_planning -> profile, plan -> plan, scripts -> scripts
+    let resultTypeForBackend = resultType;
+    if (resultType === 'ip_planning') {
+      resultTypeForBackend = 'profile';  // 預設為 profile，或者可以讓用戶選擇
+    }
+    
+    const response = await fetch(`${API_URL}/api/ip-planning/save`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'X-Conversation-Type': resultType, // 傳遞類型
         'X-CSRF-Token': csrfToken
       },
       body: JSON.stringify({
-        type: resultType,
+        user_id: user.user_id,
+        result_type: resultTypeForBackend,
         title: extractedTitle,
         content: latestAiMessageContent,
+        metadata: {}
       })
     });
 
@@ -1384,24 +1494,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   // 處理 SSE 事件
-  // 注意：SSE 連線應在用戶登入後才建立
-  if (ipPlanningToken && ipPlanningUser?.user_id) {
-    const eventSource = new EventSource(`${API_URL}/api/events?token=${ipPlanningToken}&user_id=${ipPlanningUser.user_id}`);
-
-    eventSource.onmessage = function(event) {
-      const data = JSON.parse(event.data);
-      console.log('SSE Event:', data);
-      if (data.type === 'save_request') {
-        saveMode1Result(data.conversation_type);
-      }
-    };
-
-    eventSource.onerror = function(err) {
-      console.error('EventSource failed:', err);
-      eventSource.close();
-      // 可以在這裡嘗試重新連線
-    };
-  }
+  // 注意：後端目前沒有 /api/events 端點，SSE 事件已整合在 /api/chat/stream 中
+  // 儲存請求會通過聊天串流中的 save_request 事件處理，無需單獨的 SSE 連接
+  // 如果需要實時通知功能，可以在後端添加 /api/events 端點
 });
 
 // 初始化 Mode1 聊天功能
