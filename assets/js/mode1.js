@@ -261,7 +261,7 @@ function displaySavedIpPlanningResult(resultBlock, result, resultType) {
   const typeNames = {
     'profile': '帳號定位',
     'plan': '選題方向',
-    'scripts': '一週腳本'
+    'scripts': '短影音腳本'
   };
   const typeName = typeNames[resultType] || '內容';
   
@@ -1184,7 +1184,7 @@ function switchMode1Tab(tabName, event) {
         tab.classList.add('active');
       } else if (tabName === 'topics' && tabText.includes('選題方向')) {
         tab.classList.add('active');
-      } else if (tabName === 'weekly' && tabText.includes('一週腳本')) {
+      } else if (tabName === 'weekly' && tabText.includes('短影音腳本')) {
         tab.classList.add('active');
       }
       // 保留舊的匹配邏輯作為備用
@@ -1654,7 +1654,7 @@ async function generateMode114DayPlan() {
   return generateMode1TopicsWithRatio();
 }
 
-// 生成一週腳本
+// 生成短影音腳本
 async function generateMode1WeeklyScripts(forceRegenerate = false) {
   const resultBlock = document.getElementById('mode1-weekly-result') || document.getElementById('mode1-scripts-result');
   if (!resultBlock) {
@@ -1682,7 +1682,7 @@ async function generateMode1WeeklyScripts(forceRegenerate = false) {
   
   // 顯示開始生成通知
   if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-    window.ReelMindCommon.showToast('正在生成一週腳本...', 2000);
+    window.ReelMindCommon.showToast('正在生成短影音腳本...', 2000);
   }
   
   // 清空之前的內容，但保留按鈕結構
@@ -1699,7 +1699,7 @@ async function generateMode1WeeklyScripts(forceRegenerate = false) {
     resultBlock.appendChild(contentDiv);
   }
   // 顯示生成中動畫（類似 mode3）
-  const safeMessage = window.escapeHtml ? window.escapeHtml('正在生成一週腳本') : '正在生成一週腳本';
+  const safeMessage = window.escapeHtml ? window.escapeHtml('正在生成短影音腳本') : '正在生成短影音腳本';
   contentDiv.innerHTML = `
     <div class="generating-container">
       <div class="generating-spinner"></div>
@@ -1715,12 +1715,12 @@ async function generateMode1WeeklyScripts(forceRegenerate = false) {
         'Authorization': `Bearer ${ipPlanningToken}`
       },
       body: JSON.stringify({
-        message: '請根據我們的對話內容、帳號定位和選題方向，生成一週的短影音腳本。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現一週腳本**，表格欄位包含：日期、主題、時間、段落、台詞、畫面描述、字幕文字、音效與轉場。每支腳本請包含：1.**主題標題**：用一句話清楚說明這支影片的主題 2.**開場鉤子**：用自然語言寫出吸引人的開場，讓觀眾想繼續看下去 3.**核心內容**：用2-3句自然語言說明影片要傳達的價值 4.**行動呼籲**：用一句話引導觀眾採取行動 5.**畫面描述**：用簡短易懂的句子描述畫面應該呈現什麼 6.**發佈文案**：寫一段適合社群媒體的文案。請確保表格格式正確，使用 Markdown 表格語法（| 欄位1 | 欄位2 | ... |）。',
+        message: '請根據我們的對話內容、帳號定位和選題方向，生成短影音腳本。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現短影音腳本**，表格欄位包含：日期、主題、時間、段落、台詞、畫面描述、字幕文字、音效與轉場。每支腳本請包含：1.**主題標題**：用一句話清楚說明這支影片的主題 2.**開場鉤子**：用自然語言寫出吸引人的開場，讓觀眾想繼續看下去 3.**核心內容**：用2-3句自然語言說明影片要傳達的價值 4.**行動呼籲**：用一句話引導觀眾採取行動 5.**畫面描述**：用簡短易懂的句子描述畫面應該呈現什麼 6.**發佈文案**：寫一段適合社群媒體的文案。請確保表格格式正確，使用 Markdown 表格語法（| 欄位1 | 欄位2 | ... |）。',
         user_id: ipPlanningUser?.user_id || 'anonymous',
         platform: '短影音平台',
         profile: 'IP人設規劃專家',
-        topic: '一週腳本生成',
-        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現一週腳本',
+        topic: '短影音腳本生成',
+        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現短影音腳本',
         duration: '30',
         conversation_type: 'ip_planning'  // 指定對話類型
       })
@@ -1811,10 +1811,10 @@ async function generateMode1WeeklyScripts(forceRegenerate = false) {
     
     // 顯示成功通知
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('一週腳本生成完成！', 3000);
+      window.ReelMindCommon.showToast('短影音腳本生成完成！', 3000);
     }
   } catch (error) {
-    console.error('❌ 生成一週腳本失敗:', error);
+    console.error('❌ 生成短影音腳本失敗:', error);
     
     // 檢查是否為配額錯誤
     const quotaInfo = error.quotaInfo || parseQuotaError(error.message);
@@ -1961,9 +1961,9 @@ async function saveMode1Result() {
     } else if (tabText.includes('選題方向')) {
       resultType = 'plan';
       title = '選題方向（影片類型配比）';
-    } else if (tabText.includes('一週腳本')) {
+    } else if (tabText.includes('短影音腳本')) {
       resultType = 'scripts';
-      title = '一週腳本';
+      title = '短影音腳本';
     } else if (tabText.includes('Profile')) {
       resultType = 'profile';
       title = 'IP Profile';
@@ -2080,9 +2080,9 @@ function regenerateMode1Result() {
       window.ReelMindCommon.showToast('正在重新生成選題方向...', 2000);
     }
     generateMode1TopicsWithRatio(true); // 強制重新生成
-  } else if (tabText.includes('一週腳本')) {
+  } else if (tabText.includes('短影音腳本')) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('正在重新生成一週腳本...', 2000);
+      window.ReelMindCommon.showToast('正在重新生成短影音腳本...', 2000);
     }
     generateMode1WeeklyScripts(true); // 強制重新生成
   }
@@ -2099,7 +2099,7 @@ function regenerateMode1Result() {
     generateMode1TopicsWithRatio(true); // 強制重新生成
   } else if (tabText.includes('腳本')) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('正在重新生成一週腳本...', 2000);
+      window.ReelMindCommon.showToast('正在重新生成短影音腳本...', 2000);
     }
     generateMode1WeeklyScripts(true); // 強制重新生成
   } else {
@@ -2128,9 +2128,9 @@ function exportMode1Result() {
   } else if (tabText.includes('選題方向')) {
     tabName = 'topics';
     title = '選題方向（影片類型配比）';
-  } else if (tabText.includes('一週腳本')) {
+  } else if (tabText.includes('短影音腳本')) {
     tabName = 'weekly';
-    title = '一週腳本';
+    title = '短影音腳本';
   }
   // 保留舊的匹配邏輯作為備用
   else if (tabText.includes('Profile')) {
@@ -2171,7 +2171,7 @@ function exportMode1Result() {
   try {
     const textContent = content.innerText || content.textContent || '';
     
-    const csvContent = `類型,標題,內容,匯出時間\n"${tabName}","${title || (tabName === 'positioning' ? '帳號定位' : tabName === 'topics' ? '選題方向' : '一週腳本')}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW', {
+    const csvContent = `類型,標題,內容,匯出時間\n"${tabName}","${title || (tabName === 'positioning' ? '帳號定位' : tabName === 'topics' ? '選題方向' : '短影音腳本')}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW', {
       timeZone: 'Asia/Taipei',
       year: 'numeric',
       month: '2-digit',
@@ -2388,7 +2388,7 @@ async function loadMode1OneClickHistory(type = 'profile', forceRefresh = false) 
       const typeNames = {
         profile: '帳號定位',
         plan: '選題方向',
-        scripts: '一週腳本'
+        scripts: '短影音腳本'
       };
       container.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>尚無${typeNames[targetType]}記錄</p></div>`;
       return;
@@ -2397,7 +2397,7 @@ async function loadMode1OneClickHistory(type = 'profile', forceRefresh = false) 
     const typeNames = {
       profile: '帳號定位',
       plan: '選題方向',
-      scripts: '一週腳本'
+      scripts: '短影音腳本'
     };
     
     // 使用文檔片段優化渲染性能
@@ -2616,7 +2616,7 @@ window.selectHistoryResult = async function(type, resultId) {
         // 更新選擇設定
         selectedSettings[type] = {
           id: result.id,
-          title: result.title || (type === 'profile' ? '帳號定位' : type === 'plan' ? '選題方向' : '一週腳本'),
+          title: result.title || (type === 'profile' ? '帳號定位' : type === 'plan' ? '選題方向' : '短影音腳本'),
           content: result.content
         };
         
@@ -2683,7 +2683,7 @@ function updateSelectedSettingsDisplay() {
       planItem.style.display = 'none';
     }
     
-    // 更新一週腳本
+    // 更新短影音腳本
     if (selectedSettings.scripts && scriptsItem && scriptsValue) {
       scriptsItem.style.display = 'flex';
       scriptsValue.textContent = selectedSettings.scripts.title;
@@ -2745,7 +2745,7 @@ window.useSelectedSettingsToChat = function() {
   }
   
   if (selectedSettings.scripts) {
-    message += `**一週腳本：**\n${selectedSettings.scripts.content.substring(0, 200)}...\n\n`;
+    message += `**短影音腳本：**\n${selectedSettings.scripts.content.substring(0, 200)}...\n\n`;
   }
   
   message += '請根據這些設定，幫我討論和優化短影音內容。';
@@ -2789,11 +2789,31 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
     });
     
     if (response.ok) {
+      // 清除快取，強制重新載入
+      clearHistoryCache();
+      
+      // 如果刪除的是已選擇的設定，清除選擇
+      if (selectedSettings[resultType]?.id === resultId) {
+        selectedSettings[resultType] = null;
+        updateSelectedSettingsDisplay();
+      }
+      
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('✅ 記錄已刪除', 3000);
       }
-      // 重新載入歷史記錄
-      await loadMode1OneClickHistory();
+      
+      // 根據刪除的類型，重新載入對應標籤頁的歷史記錄（強制刷新）
+      // 確保刪除後保持在當前標籤頁，而不是跳到帳號定位
+      const typeMap = {
+        'profile': 'profile',
+        'plan': 'plan',
+        'scripts': 'scripts'
+      };
+      const targetType = typeMap[resultType] || resultType;
+      
+      // 切換到對應的標籤頁並重新載入
+      await switchMode1HistoryType(targetType);
+      await loadMode1OneClickHistory(targetType, true); // 強制刷新
     } else {
       const errorData = await response.json().catch(() => ({ error: '刪除失敗' }));
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -2826,7 +2846,7 @@ window.exportHistoryResult = async function(resultId, resultType) {
           const typeNames = {
             'profile': '帳號定位',
             'plan': '選題方向',
-            'scripts': '一週腳本'
+            'scripts': '短影音腳本'
           };
           const typeName = typeNames[resultType] || resultType;
           const textContent = result.content.replace(/<[^>]*>/g, '');
@@ -2890,7 +2910,7 @@ async function loadMode1OneClickSavedResults() {
       updateMode1OneClickStatus('topics', 'pending', '');
     }
     
-    // 更新一週腳本
+    // 更新短影音腳本
     if (savedWeekly) {
       updateMode1OneClickStatus('weekly', 'completed', savedWeekly.content);
     } else {
@@ -2985,7 +3005,7 @@ function updateMode1OneClickStatus(type, status, message = '') {
       elements.contentEl.innerHTML = renderMode1Markdown(message);
       elements.contentEl.classList.add('has-content');
       
-      // 確保表格在滾動容器中（一週腳本表格需要橫向滾動）
+      // 確保表格在滾動容器中（短影音腳本表格需要橫向滾動）
       setTimeout(() => {
         const tables = elements.contentEl.querySelectorAll('table');
         tables.forEach(table => {
@@ -3131,7 +3151,7 @@ async function generateMode1All(forceRegenerate = false) {
     if (weeklyContent && !forceRegenerate) {
       updateMode1OneClickStatus('weekly', 'completed', weeklyContent);
     } else {
-      updateMode1OneClickStatus('weekly', 'generating', '正在生成一週腳本');
+      updateMode1OneClickStatus('weekly', 'generating', '正在生成短影音腳本');
     }
     
     // 只生成沒有已保存結果的內容
@@ -3173,7 +3193,7 @@ async function generateMode1All(forceRegenerate = false) {
         } else if (type === 'weekly') {
           updateMode1OneClickStatus('weekly', 'completed', content);
           if (fromCache && window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast('已載入之前的一週腳本記錄', 2000);
+            window.ReelMindCommon.showToast('已載入之前的短影音腳本記錄', 2000);
           }
         }
       } else {
@@ -3200,7 +3220,7 @@ async function generateMode1All(forceRegenerate = false) {
     }
   } finally {
     generateBtn.disabled = false;
-    generateBtn.innerHTML = '<span>一鍵生成全部（帳號定位 + 選題方向 + 一週腳本）</span>';
+    generateBtn.innerHTML = '<span>一鍵生成全部（帳號定位 + 選題方向 + 短影音腳本）</span>';
   }
 }
 
@@ -3347,12 +3367,12 @@ async function generateMode1WeeklyForOneClick() {
           'Authorization': `Bearer ${ipPlanningToken}`
         },
         body: JSON.stringify({
-          message: '請根據我們的對話內容、帳號定位和選題方向，生成一週的短影音腳本。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現一週腳本**，表格欄位包含：日期、主題、時間、段落、台詞、畫面描述、字幕文字、音效與轉場。每支腳本請包含：1.**主題標題**：用一句話清楚說明這支影片的主題 2.**開場鉤子**：用自然語言寫出吸引人的開場，讓觀眾想繼續看下去 3.**核心內容**：用2-3句自然語言說明影片要傳達的價值 4.**行動呼籲**：用一句話引導觀眾採取行動 5.**畫面描述**：用簡短易懂的句子描述畫面應該呈現什麼 6.**發佈文案**：寫一段適合社群媒體的文案。請確保表格格式正確，使用 Markdown 表格語法（| 欄位1 | 欄位2 | ... |）。',
+          message: '請根據我們的對話內容、帳號定位和選題方向，生成短影音腳本。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現短影音腳本**，表格欄位包含：日期、主題、時間、段落、台詞、畫面描述、字幕文字、音效與轉場。每支腳本請包含：1.**主題標題**：用一句話清楚說明這支影片的主題 2.**開場鉤子**：用自然語言寫出吸引人的開場，讓觀眾想繼續看下去 3.**核心內容**：用2-3句自然語言說明影片要傳達的價值 4.**行動呼籲**：用一句話引導觀眾採取行動 5.**畫面描述**：用簡短易懂的句子描述畫面應該呈現什麼 6.**發佈文案**：寫一段適合社群媒體的文案。請確保表格格式正確，使用 Markdown 表格語法（| 欄位1 | 欄位2 | ... |）。',
           user_id: ipPlanningUser?.user_id || 'anonymous',
           platform: '短影音平台',
           profile: 'IP人設規劃專家',
-          topic: '一週腳本生成',
-          style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現一週腳本',
+          topic: '短影音腳本生成',
+          style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現短影音腳本',
           duration: '30',
           conversation_type: 'ip_planning'
         })
@@ -3455,7 +3475,7 @@ async function saveMode1OneClickResult(type) {
     const titleMap = {
       'positioning': '帳號定位',
       'topics': '選題方向（影片類型配比）',
-      'weekly': '一週腳本'
+      'weekly': '短影音腳本'
     };
     const title = titleMap[type] || 'IP 人設規劃結果';
     
@@ -3517,7 +3537,7 @@ async function saveMode1OneClickResult(type) {
 
 // 重新生成生成結果
 async function regenerateMode1OneClickResult(type, forceRegenerate = true) {
-  updateMode1OneClickStatus(type, 'generating', `正在重新生成${type === 'positioning' ? '帳號定位' : type === 'topics' ? '選題方向' : '一週腳本'}`);
+  updateMode1OneClickStatus(type, 'generating', `正在重新生成${type === 'positioning' ? '帳號定位' : type === 'topics' ? '選題方向' : '短影音腳本'}`);
   
   try {
     let result;
@@ -3532,7 +3552,7 @@ async function regenerateMode1OneClickResult(type, forceRegenerate = true) {
     updateMode1OneClickStatus(type, 'completed', result);
     
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast(`${type === 'positioning' ? '帳號定位' : type === 'topics' ? '選題方向' : '一週腳本'}已重新生成`, 3000);
+      window.ReelMindCommon.showToast(`${type === 'positioning' ? '帳號定位' : type === 'topics' ? '選題方向' : '短影音腳本'}已重新生成`, 3000);
     }
   } catch (error) {
     updateMode1OneClickStatus(type, 'error', error.message || '生成失敗');
@@ -3547,7 +3567,7 @@ window.toggleMode1OneClickExpand = function(type) {
   const typeMap = {
     'positioning': { name: 'Positioning', title: '帳號定位' },
     'topics': { name: 'Topics', title: '選題方向（影片類型配比）' },
-    'weekly': { name: 'Weekly', title: '一週腳本' }
+    'weekly': { name: 'Weekly', title: '短影音腳本' }
   };
   const typeInfo = typeMap[type] || { name: type, title: '內容' };
   const contentEl = document.getElementById(`mode1OneClick${typeInfo.name}Content`);
@@ -3625,7 +3645,7 @@ function exportMode1OneClickResult(type) {
     const typeNames = {
       'positioning': '帳號定位',
       'topics': '選題方向',
-      'weekly': '一週腳本'
+      'weekly': '短影音腳本'
     };
     const typeName = typeNames[type] || type;
     
@@ -3762,7 +3782,7 @@ window.saveMode1HistoryTitle = function(resultId) {
       if (resultType === 'plan') {
         defaultTitle = '選題方向';
       } else if (resultType === 'scripts') {
-        defaultTitle = '一週腳本';
+        defaultTitle = '短影音腳本';
       }
     }
     

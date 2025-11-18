@@ -11893,7 +11893,7 @@
                         <p style="font-size: 1rem; color: #64748B; line-height: 1.7; margin-bottom: 20px;">
                           在「創作者資料庫」中儲存你的 LLM API 金鑰（支援 Gemini、GPT 等），讓 AI 使用你的金鑰進行生成，節省成本並提升使用體驗。
                         </p>
-                        <a href="#" onclick="window.location.href='guide.html'; setTimeout(() => { if (typeof showGuideArticle === 'function') showGuideArticle('article5'); }, 100); return false;" style="display: inline-block; padding: 10px 20px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.3s; box-shadow: 0 2px 8px rgba(245,158,11,0.3);">
+                        <a href="#" onclick="handleLlmKeyGuideButton(); return false;" style="display: inline-block; padding: 10px 20px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.3s; box-shadow: 0 2px 8px rgba(245,158,11,0.3);">
                           如何拿到自己的LLM金鑰？
                         </a>
                       </div>
@@ -13309,6 +13309,67 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 智能處理實戰指南的「登入解鎖AI生成」按鈕
       // articleType: 'article1' (一鍵生成) | 'article2' (IP人設規劃) | 'article3' (一鍵生成)
+      // 處理首頁"如何拿到自己的LLM金鑰？"按鈕
+      async function handleLlmKeyGuideButton() {
+        try {
+          // 檢查是否已登入
+          let isLoggedIn = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.isLoggedIn === 'function') {
+            isLoggedIn = window.ReelMindCommon.isLoggedIn();
+          } else if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+            isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
+          } else {
+            const token = localStorage.getItem('ipPlanningToken');
+            isLoggedIn = !!token;
+          }
+          
+          // 檢查是否已訂閱
+          let isSubscribed = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+            isSubscribed = window.ReelMindCommon.isSubscribed();
+          } else {
+            const backendSubscribed = document.body.dataset.subscribed === 'true';
+            const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
+            const localSubscribed = localSubscriptionStatus === 'active';
+            const userStr = localStorage.getItem('ipPlanningUser');
+            let userSubscribed = false;
+            if (userStr) {
+              try {
+                const user = JSON.parse(userStr);
+                userSubscribed = !!(user && (user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1'));
+              } catch (e) {
+                // 忽略解析錯誤
+              }
+            }
+            isSubscribed = backendSubscribed || localSubscribed || userSubscribed;
+          }
+          
+          // 如果已登入且已訂閱，直接導向實戰指南的"如何拿到自己的LLM金鑰"文章
+          if (isLoggedIn && isSubscribed) {
+            window.location.href = 'guide.html?article=article5';
+            return;
+          }
+          
+          // 否則使用原有邏輯（導向 guide.html）
+          window.location.href = 'guide.html';
+          setTimeout(() => { 
+            if (typeof showGuideArticle === 'function') {
+              showGuideArticle('article5');
+            }
+          }, 100);
+        } catch (error) {
+          console.error('處理 LLM 金鑰指南按鈕時出錯:', error);
+          // 出錯時使用原有邏輯
+          window.location.href = 'guide.html';
+          setTimeout(() => { 
+            if (typeof showGuideArticle === 'function') {
+              showGuideArticle('article5');
+            }
+          }, 100);
+        }
+      }
+      window.handleLlmKeyGuideButton = handleLlmKeyGuideButton;
+      
       async function handleGuideUnlockButton(articleType = 'article1') {
         try {
           // 檢查登入狀態

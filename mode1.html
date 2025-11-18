@@ -1574,7 +1574,7 @@
         vertical-align: top;
       }
       
-      /* 一週腳本表格特殊處理：手機版改為自動換行，避免橫向滾動 */
+      /* 短影音腳本表格特殊處理：手機版改為自動換行，避免橫向滾動 */
       .mode1-oneclick-result-content-wrapper:has(table) {
         overflow-x: visible; /* 手機版改為可見，允許內容自動換行 */
         -webkit-overflow-scrolling: touch;
@@ -3349,47 +3349,12 @@
         <button class="mode1-instructions-drawer-close" onclick="closeMode1InstructionsDrawer()">✕</button>
       </div>
       <div class="mode1-instructions-drawer-content">
+        <!-- 第一部分：模式簡介（讓用戶知道這是什麼） -->
         <p><strong>IP人設規劃模式</strong></p>
-        <p>透過與AI深度對話，記錄您的人生曲線和個人特色，讓AI協助您建立完整的IP人設，並生成帳號定位、選題方向和一週腳本。</p>
+        <p>透過與AI深度對話，記錄您的人生曲線和個人特色，讓AI協助您建立完整的IP人設，並生成帳號定位、選題方向和短影音腳本。</p>
         
-        <p><strong>生成結果功能說明</strong></p>
-        <div class="mode1-method-guide">
-          <div class="mode1-method-item">
-            <div class="mode1-method-badge">過往紀錄</div>
-            <div class="mode1-method-content">
-              <strong>查看和管理歷史生成結果</strong>
-              <p>點擊右上角「生成結果」按鈕，開啟彈出視窗，您可以透過頂部的標籤頁切換查看不同類型的過往紀錄：</p>
-              <ul style="margin-top: 8px; padding-left: 20px;">
-                <li><strong>帳號定位</strong>：查看所有已保存的帳號定位記錄</li>
-                <li><strong>選題方向</strong>：查看所有已保存的選題方向記錄</li>
-                <li><strong>一週腳本</strong>：查看所有已保存的一週腳本記錄</li>
-              </ul>
-              <p style="margin-top: 8px;">每個結果都可以：</p>
-              <ul style="margin-top: 8px; padding-left: 20px;">
-                <li><strong>展開</strong>：查看完整內容</li>
-                <li><strong>選擇</strong>：選擇要使用的設定（可同時選擇帳號定位、選題方向、一週腳本）</li>
-                <li><strong>匯出</strong>：匯出為CSV檔案</li>
-                <li><strong>刪除</strong>：刪除不需要的記錄</li>
-              </ul>
-            </div>
-          </div>
-          <div class="mode1-method-item">
-            <div class="mode1-method-badge">使用此設定與AI對話</div>
-            <div class="mode1-method-content">
-              <strong>自由搭配已保存的設定進行討論</strong>
-              <p>在「過往紀錄」中選擇您想要使用的帳號定位、選題方向或一週腳本後，上方會顯示「已選擇的設定」區域。您可以：</p>
-              <ul style="margin-top: 8px; padding-left: 20px;">
-                <li>同時選擇多個不同類型的設定（例如：選擇一個帳號定位 + 一個選題方向 + 一個一週腳本）</li>
-                <li>點擊「使用此設定與AI對話」按鈕，系統會自動將選擇的設定內容填入對話框</li>
-                <li>AI會根據您選擇的設定，協助您討論和優化短影音內容</li>
-                <li>可以隨時移除已選擇的設定，重新選擇其他記錄</li>
-              </ul>
-              <p style="margin-top: 8px;"><strong>使用場景</strong>：當您想要基於之前的生成結果進行調整、優化或討論時，可以使用此功能快速載入相關設定，讓AI更精準地協助您。</p>
-            </div>
-          </div>
-        </div>
-        
-        <p><strong>操作流程</strong></p>
+        <!-- 第二部分：操作流程（第一次使用的步驟） -->
+        <p><strong>第一次使用流程</strong></p>
         <div class="mode1-step-guide">
           <div class="mode1-step">
             <div class="mode1-step-number">1</div>
@@ -3402,62 +3367,90 @@
             <div class="mode1-step-number">2</div>
             <div class="mode1-step-content">
               <strong>深度交流</strong>
-              <p>建議進行5-10輪對話，讓AI充分了解您的個人特色、專業領域、內容方向和目標受眾</p>
+              <p>建議進行5-10輪對話，讓AI充分了解您的個人特色、專業領域、內容方向和目標受眾。您可以分享：</p>
+              <ul style="margin-top: 8px; padding-left: 20px;">
+                <li>您的專業經驗、成就和獨特見解</li>
+                <li>您的價值觀、人生目標和想傳達的訊息</li>
+                <li>您的個性、溝通風格和內容調性</li>
+                <li>您的目標受眾和想解決的問題</li>
+                <li>您想分享的內容方向和主題領域</li>
+              </ul>
             </div>
           </div>
           <div class="mode1-step">
             <div class="mode1-step-number">3</div>
             <div class="mode1-step-content">
-              <strong>查看和管理生成結果</strong>
-              <p>點擊右上角「生成結果」按鈕，開啟彈出視窗。您可以透過標籤頁切換查看不同類型的過往紀錄（帳號定位、選題方向、一週腳本）。選擇需要的設定後，點擊「使用此設定與AI對話」繼續討論和優化。</p>
+              <strong>AI 生成內容</strong>
+              <p>透過對話，AI會根據您的背景和需求生成以下內容：</p>
+              <ul style="margin-top: 8px; padding-left: 20px;">
+                <li><strong>帳號定位</strong>：包含目標受眾、傳達目標、帳號定位、內容方向、風格調性、差異化優勢等完整分析</li>
+                <li><strong>選題方向（影片類型配比）</strong>：根據帳號定位生成適合的影片類型、佔比、目的和內容方向建議，以表格形式呈現</li>
+                <li><strong>短影音腳本</strong>：生成短影音腳本，包含主題、開場鉤子、核心內容、行動呼籲、畫面描述和發佈文案</li>
+              </ul>
             </div>
           </div>
           <div class="mode1-step">
             <div class="mode1-step-number">4</div>
             <div class="mode1-step-content">
               <strong>儲存生成內容</strong>
-              <p>在對話中說「儲存」或「幫我儲存」，系統會自動將生成的內容儲存到「創作者資料庫」→「IP人設規劃結果」中。您也可以在「生成結果」→「過往紀錄」中查看所有已保存的記錄。</p>
+              <p>在對話中說「儲存」或「幫我儲存」，系統會自動將生成的內容儲存到「創作者資料庫」→「IP人設規劃結果」中。儲存後，您就可以在「生成結果」→「過往紀錄」中查看所有已保存的記錄。</p>
             </div>
           </div>
         </div>
         
-        <p><strong>對話建議</strong></p>
-        <ul>
-          <li>分享您的專業經驗、成就和獨特見解</li>
-          <li>討論您的價值觀、人生目標和想傳達的訊息</li>
-          <li>描述您的個性、溝通風格和內容調性</li>
-          <li>說明您的目標受眾和想解決的問題</li>
-          <li>探索您想分享的內容方向和主題領域</li>
-        </ul>
-        
-        <p><strong>生成內容說明</strong></p>
-        <div class="mode1-result-types">
-          <div class="mode1-result-type">
-            <strong>帳號定位</strong>
-            <p>包含目標受眾、傳達目標、帳號定位、內容方向、風格調性、差異化優勢等完整分析</p>
+        <!-- 第三部分：查看和管理生成結果（告訴用戶如何使用已生成的結果） -->
+        <p><strong>查看和管理生成結果</strong></p>
+        <div class="mode1-method-guide">
+          <div class="mode1-method-item">
+            <div class="mode1-method-badge">過往紀錄</div>
+            <div class="mode1-method-content">
+              <strong>查看歷史生成結果</strong>
+              <p>點擊右上角「生成結果」按鈕，開啟彈出視窗，您可以透過頂部的標籤頁切換查看不同類型的過往紀錄：</p>
+              <ul style="margin-top: 8px; padding-left: 20px;">
+                <li><strong>帳號定位</strong>：查看所有已保存的帳號定位記錄</li>
+                <li><strong>選題方向</strong>：查看所有已保存的選題方向記錄</li>
+                <li><strong>短影音腳本</strong>：查看所有已保存的短影音腳本記錄</li>
+              </ul>
+              <p style="margin-top: 8px;">每個結果都可以：</p>
+              <ul style="margin-top: 8px; padding-left: 20px;">
+                <li><strong>編輯標題</strong>：點擊標題或編輯圖標可以修改標題</li>
+                <li><strong>展開</strong>：查看完整內容</li>
+                <li><strong>選擇</strong>：選擇要使用的設定（可同時選擇帳號定位、選題方向、短影音腳本）</li>
+                <li><strong>匯出</strong>：匯出為CSV檔案</li>
+                <li><strong>刪除</strong>：刪除不需要的記錄</li>
+              </ul>
+            </div>
           </div>
-          <div class="mode3-result-type">
-            <strong>選題方向（影片類型配比）</strong>
-            <p>根據帳號定位生成適合的影片類型、佔比、目的和內容方向建議，以表格形式呈現</p>
-          </div>
-          <div class="mode3-result-type">
-            <strong>一週腳本</strong>
-            <p>生成一週7天的短影音腳本，包含主題、開場鉤子、核心內容、行動呼籲、畫面描述和發佈文案</p>
+          <div class="mode1-method-item">
+            <div class="mode1-method-badge">使用此設定與AI對話</div>
+            <div class="mode1-method-content">
+              <strong>自由搭配已保存的設定進行討論</strong>
+              <p>在「過往紀錄」中選擇您想要使用的帳號定位、選題方向或短影音腳本後，上方會顯示「已選擇的設定」區域。您可以：</p>
+              <ul style="margin-top: 8px; padding-left: 20px;">
+                <li>同時選擇多個不同類型的設定（例如：選擇一個帳號定位 + 一個選題方向 + 一個短影音腳本）</li>
+                <li>點擊「使用此設定與AI對話」按鈕，系統會自動將選擇的設定內容填入對話框</li>
+                <li>AI會根據您選擇的設定，協助您討論和優化短影音內容</li>
+                <li>可以隨時移除已選擇的設定，重新選擇其他記錄</li>
+              </ul>
+              <p style="margin-top: 8px;"><strong>使用場景</strong>：當您想要基於之前的生成結果進行調整、優化或討論時，可以使用此功能快速載入相關設定，讓AI更精準地協助您。</p>
+            </div>
           </div>
         </div>
         
+        <!-- 第四部分：功能特色（告訴用戶有哪些特色功能） -->
         <p><strong>功能特色</strong></p>
         <ul>
-          <li><strong>智能對話生成</strong>：透過與AI深度對話，讓AI根據您的背景和需求生成帳號定位、選題方向和一週腳本</li>
-          <li><strong>自由搭配設定</strong>：可以從過往紀錄中選擇不同類型的設定（帳號定位、選題方向、一週腳本），自由組合後與AI討論</li>
-          <li><strong>標籤頁分類瀏覽</strong>：過往紀錄按類型分類顯示，方便快速找到需要的記錄</li>
-          <li><strong>自動儲存</strong>：在對話中說「儲存」即可自動保存生成內容，無需手動操作</li>
+          <li><strong>智能對話生成</strong>：透過與AI深度對話，讓AI根據您的背景和需求生成帳號定位、選題方向和短影音腳本</li>
           <li><strong>長期記憶</strong>：AI會記住您之前說過的內容，生成結果會越來越精準</li>
+          <li><strong>自動儲存</strong>：在對話中說「儲存」即可自動保存生成內容，無需手動操作</li>
+          <li><strong>快速按鈕</strong>：使用快速按鈕（IP Profile、14天規劃、今日腳本、換腳本結構、重新定位）可快速詢問特定主題，加速對話流程</li>
+          <li><strong>自由搭配設定</strong>：可以從過往紀錄中選擇不同類型的設定（帳號定位、選題方向、短影音腳本），自由組合後與AI討論</li>
+          <li><strong>標籤頁分類瀏覽</strong>：過往紀錄按類型分類顯示，方便快速找到需要的記錄</li>
           <li><strong>儲存與匯出</strong>：生成結果可儲存到個人資料庫，或匯出為CSV檔案</li>
-          <li><strong>快速按鈕</strong>：使用快速按鈕可快速詢問特定主題，加速對話流程</li>
           <li><strong>歷史記錄管理</strong>：可以查看、選擇、匯出或刪除所有歷史生成記錄</li>
         </ul>
         
+        <!-- 第五部分：使用技巧（進階技巧） -->
         <p><strong>使用技巧</strong></p>
         <ul>
           <li>首次使用建議先進行5-10輪對話，讓AI充分了解您的背景、專長和目標</li>
@@ -3470,6 +3463,7 @@
           <li>使用「重新定位」快速按鈕可完全重新開始，生成全新的帳號定位</li>
         </ul>
         
+        <!-- 第六部分：如何更新帳號定位（進階功能） -->
         <p><strong>如何更新帳號定位</strong></p>
         <div class="mode1-step-guide">
           <div class="mode1-step">
@@ -3495,6 +3489,7 @@
           </div>
         </div>
         
+        <!-- 第七部分：重要提示（重要資訊） -->
         <p><strong>重要提示</strong></p>
         <ul>
           <li>系統會自動使用<strong>最新生成並保存的帳號定位</strong>，當您點擊「IP Profile」快速按鈕時，會顯示最新的定位結果</li>
@@ -3524,7 +3519,7 @@
             <span>選題方向</span>
           </button>
           <button class="mode1-oneclick-tab" id="mode1HistoryTabScripts" onclick="switchMode1HistoryType('scripts')">
-            <span>一週腳本</span>
+            <span>短影音腳本</span>
           </button>
         </div>
         
@@ -3548,7 +3543,7 @@
                   <button class="mode1-selected-remove" onclick="removeSelectedSetting('plan')">×</button>
                 </div>
                 <div class="mode1-selected-setting-item" id="mode1SelectedScripts" style="display: none;">
-                  <span class="mode1-selected-label">一週腳本：</span>
+                  <span class="mode1-selected-label">短影音腳本：</span>
                   <span class="mode1-selected-value" id="mode1SelectedScriptsValue"></span>
                   <button class="mode1-selected-remove" onclick="removeSelectedSetting('scripts')">×</button>
                 </div>
