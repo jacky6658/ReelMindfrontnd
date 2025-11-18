@@ -843,33 +843,15 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
     message.trim() === keyword
   );
   
-  // 如果是儲存請求，直接觸發儲存函數
+  // 如果是儲存請求，讓後端處理（後端會發送 save_request 事件）
+  // 不在此處直接儲存，而是等待後端的 save_request 事件觸發儲存流程
   if (shouldSave) {
-    try {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('💡 偵測到儲存指令，AI 將自動保存最新生成內容', 3000);
-      }
-      await saveMode1Result(currentMode1ConversationType); // 觸發儲存，預設保存當前會話類型最新結果
-      
-      // 移除打字指示器
-      if (typingIndicatorEl.parentNode) {
-        typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
-      }
-      
-      const aiConfirmMessage = createMode1Message('assistant', '✅ 好的，我已將最新的生成內容保存到您的創作者資料庫。');
-      chatMessages.appendChild(aiConfirmMessage);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    } catch (error) {
-      console.error('處理儲存指令時出錯:', error);
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('儲存失敗，請稍後再試', 3000);
-      }
-    } finally {
-      isMode1Sending = false;
-      sendBtn.disabled = false; // 啟用發送按鈕
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('💡 偵測到儲存指令，正在處理...', 3000);
     }
-    return;
+    // 繼續發送訊息給後端，後端會檢測並發送 save_request 事件
+    // 儲存流程將在 SSE 的 save_request 事件處理中完成
+    // 不在此處 return，讓訊息繼續發送給後端
   }
 
   try {
@@ -988,6 +970,58 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
           }
           try {
             const json = JSON.parse(data);
+            
+            // 處理 save_request 事件（後端發送的儲存請求）
+            if (json.type === 'save_request') {
+              // 後端檢測到儲存指令，觸發儲存流程
+              // 流程：儲存 → 先到生成結果 → 再存到創作者資料庫 → LLM 回覆（不消耗 token）
+              const saveResultType = json.conversation_type === 'ip_planning' ? 'ip_planning' : conversationType;
+              
+              // 先儲存到生成結果（流程：儲存 → 先到生成結果 → 再存到創作者資料庫 → LLM 回覆）
+              saveMode1Result(saveResultType).then(() => {
+                // 儲存成功後，打開生成結果彈跳視窗並切換到對應標籤頁
+                if (window.openMode1OneClickModal) {
+                  window.openMode1OneClickModal();
+                  setTimeout(() => {
+                    // 根據 resultType 切換到對應標籤頁
+                    const typeMap = {
+                      'ip_planning': 'profile',
+                      'plan': 'plan',
+                      'scripts': 'scripts'
+                    };
+                    const targetType = typeMap[saveResultType] || 'profile';
+                    if (window.switchMode1HistoryType) {
+                      window.switchMode1HistoryType(targetType);
+                    }
+                    
+                    // 強制重新載入歷史記錄，確保新儲存的內容顯示出來
+                    setTimeout(() => {
+                      if (window.loadMode1OneClickHistory) {
+                        window.loadMode1OneClickHistory(targetType, true);
+                      }
+                    }, 200);
+                  }, 100);
+                }
+                
+                // 顯示 AI 確認訊息（不消耗 token，直接在前端顯示）
+                const aiConfirmMessage = createMode1Message('assistant', '✅ 好的，我已將最新的生成內容保存到您的創作者資料庫。');
+                chatMessages.appendChild(aiConfirmMessage);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // 顯示成功提示
+                if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+                  window.ReelMindCommon.showToast('✅ 內容已儲存並顯示在生成結果中', 3000);
+                }
+              }).catch(error => {
+                console.error('儲存失敗:', error);
+                if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+                  window.ReelMindCommon.showToast('儲存失敗，請稍後再試', 3000);
+                }
+              });
+              
+              // 跳過後續的 AI 回應（因為已經處理了儲存）
+              continue;
+            }
             
             // 忽略非內容事件（如 start, end）
             if (json.type === 'start' || json.type === 'end') {
@@ -1123,12 +1157,14 @@ function renderMode1Markdown(text) {
   if (hasHtmlTags) {
     // 如果內容已經是 HTML，直接清理並返回（不進行 Markdown 解析）
     if (window.DOMPurify) {
-      return window.DOMPurify.sanitize(text, {
+      const sanitized = window.DOMPurify.sanitize(text, {
         USE_PROFILES: { html: true },
         FORBID_TAGS: ['style', 'script'], // 禁止 style 和 script 標籤
-        ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'], // 允許表格標籤
-        ADD_ATTR: ['target', 'colspan', 'rowspan'], // 允許表格屬性和連結 target
+        ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'strong', 'em', 'ul', 'ol', 'li', 'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'], // 允許表格標籤和其他常用標籤
+        ADD_ATTR: ['target', 'colspan', 'rowspan', 'class'], // 允許表格屬性和連結 target
+        KEEP_CONTENT: true, // 保留內容，即使標籤被移除
       });
+      return sanitized;
     }
     // 如果沒有 DOMPurify，直接返回（風險較高，但至少能顯示）
     return text;
@@ -1425,10 +1461,25 @@ async function saveMode1Result(resultType) {
     });
 
     if (response.ok) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('✅ 最新內容已儲存至創作者資料庫！', 3000);
+      // 儲存成功後清除快取，強制重新載入
+      clearHistoryCache();
+      
+      // 如果生成結果彈跳視窗已打開，重新載入當前標籤頁的歷史記錄
+      const modal = document.getElementById('mode1OneClickModal');
+      if (modal && modal.classList.contains('open')) {
+        // 獲取當前活動的標籤頁
+        const activeTab = document.querySelector('.mode1-oneclick-history-tab.active');
+        if (activeTab) {
+          const currentType = activeTab.dataset.type || 'profile';
+          // 強制重新載入當前標籤頁的歷史記錄
+          setTimeout(() => {
+            loadMode1OneClickHistory(currentType, true);
+          }, 300);
+        }
       }
-      clearHistoryCache(); // 儲存成功後清除快取
+      
+      // 不在此處顯示 toast，因為會在 save_request 事件處理中顯示
+      console.log('✅ 內容已儲存到生成結果');
     } else {
       const errorData = await response.json();
       console.error('保存失敗:', errorData);
