@@ -10,8 +10,57 @@ let isMode1Sending = false;
 let mode1ChatInitialized = false;
 let currentMode1ConversationType = 'ip_planning';
 
-// ===== 使用說明抽屜相關函數（提前定義，確保可以被 HTML onclick 調用） =====
+// 快取相關變數
+let cachedHistoryData = null;
+let cachedHistoryTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 分鐘快取
 
+// ===== 全局函數導出（確保在 DOMContentLoaded 之前可用） =====
+if (typeof window !== 'undefined') {
+  // 使用說明抽屜相關函數
+  window.toggleMode1InstructionsDrawer = toggleMode1InstructionsDrawer;
+  window.openMode1InstructionsDrawer = openMode1InstructionsDrawer;
+  window.closeMode1InstructionsDrawer = closeMode1InstructionsDrawer;
+
+  // 快速按鈕處理函數
+  window.handleQuickButton = handleQuickButton;
+
+  // 生成結果 Modal 相關函數
+  window.openMode1OneClickModal = openMode1OneClickModal;
+  window.closeMode1OneClickModal = closeMode1OneClickModal;
+  window.switchMode1HistoryType = switchMode1HistoryType;
+  window.deleteMode1HistoryResult = deleteMode1HistoryResult;
+  // window.exportHistoryResult = exportHistoryResult; // 由於已直接定義為 window.exportHistoryResult，這裡可以省略
+  window.selectHistoryResult = selectHistoryResult;
+  window.removeSelectedSetting = removeSelectedSetting;
+  window.useSelectedSettingsToChat = useSelectedSettingsToChat;
+  window.editMode1HistoryTitle = editMode1HistoryTitle;
+  window.saveMode1HistoryTitle = saveMode1HistoryTitle;
+  window.cancelMode1HistoryTitleEdit = cancelMode1HistoryTitleEdit;
+
+  // 展開內容 Modal 相關函數
+  window.openMode1ExpandModal = openMode1ExpandModal;
+  window.closeMode1ExpandModal = closeMode1ExpandModal;
+
+  // 其他可能被 HTML onclick 直接調用的函數
+  window.handleModeNavigation = handleModeNavigation; // 從 common.js 來的，但防止其他頁面沒有引入 common.js 時出錯
+  window.goToLogin = goToLogin; // 從 common.js 來的，但防止其他頁面沒有引入 common.js 時出錯
+}
+
+// iOS Safari 視窗高度處理（解決 100vh 問題）
+function setIOSViewportHeight() {
+  // 設置 CSS 變數來處理 iOS Safari 的動態視窗高度
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+  
+  // 為 Modal 設置動態高度
+  const modalOverlay = document.getElementById('mode1OneClickModalOverlay');
+  if (modalOverlay) {
+    modalOverlay.style.height = `${window.innerHeight}px`;
+  }
+}
+
+// ===== 使用說明抽屜相關函數（提前定義，確保可以被 HTML onclick 調用） =====
 // 切換說明抽屜/彈跳視窗（根據螢幕寬度決定）
 function toggleMode1InstructionsDrawer() {
   const overlay = document.getElementById('mode1InstructionsOverlay');
@@ -74,357 +123,920 @@ function closeMode1InstructionsDrawer() {
   }
 }
 
-// 立即導出使用說明抽屜相關函數到全局作用域，供 HTML onclick 使用
-if (typeof window !== 'undefined') {
-  window.toggleMode1InstructionsDrawer = toggleMode1InstructionsDrawer;
-  window.openMode1InstructionsDrawer = openMode1InstructionsDrawer;
-  window.closeMode1InstructionsDrawer = closeMode1InstructionsDrawer;
-}
+// ===== 生成結果 Modal 相關函數 =====
 
-// iOS Safari 視窗高度處理（解決 100vh 問題）
-function setIOSViewportHeight() {
-  // 設置 CSS 變數來處理 iOS Safari 的動態視窗高度
-  const vh = window.innerHeight * 0.01;
-  document.documentElement.style.setProperty('--vh', `${vh}px`);
-  
-  // 為 Modal 設置動態高度
-  const modalOverlay = document.getElementById('mode1OneClickModalOverlay');
-  if (modalOverlay) {
-    modalOverlay.style.height = `${window.innerHeight}px`;
+// 開啟生成結果 Modal
+function openMode1OneClickModal() {
+  const overlay = document.getElementById('mode1OneClickModalOverlay');
+  if (overlay) {
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden'; // 禁止背景滾動
+    // 預設顯示帳號定位
+    switchMode1HistoryType('profile');
+    // 強制更新一次選取狀態
+    updateSelectedSettingsDisplay();
+    // 載入歷史記錄（強制刷新）
+    loadMode1OneClickHistory('profile', true); 
   }
 }
+window.openMode1OneClickModal = openMode1OneClickModal; // 導出到全局，以便 HTML 可以直接調用
 
-// 頁面初始化
-document.addEventListener('DOMContentLoaded', async function() {
-  console.log('🚀 ========== Mode1 (IP人設規劃) 頁面初始化 ==========');
-  
-  // 立即強制隱藏舊的抽屜（最高優先級）
-  const oldResultsOverlay = document.getElementById('mode1ResultsOverlay');
-  const oldResultsDrawer = document.getElementById('mode1ResultsDrawer');
-  if (oldResultsOverlay) {
-    oldResultsOverlay.style.display = 'none';
-    oldResultsOverlay.style.visibility = 'hidden';
-    oldResultsOverlay.style.opacity = '0';
-    oldResultsOverlay.classList.remove('open');
-    oldResultsOverlay.style.pointerEvents = 'none';
-    oldResultsOverlay.style.zIndex = '-1';
+
+// 關閉生成結果 Modal
+function closeMode1OneClickModal() {
+  const overlay = document.getElementById('mode1OneClickModalOverlay');
+  if (overlay) {
+    overlay.classList.remove('open');
+    document.body.style.overflow = ''; // 恢復背景滾動
   }
-  if (oldResultsDrawer) {
-    oldResultsDrawer.style.display = 'none';
-    oldResultsDrawer.style.visibility = 'hidden';
-    oldResultsDrawer.style.opacity = '0';
-    oldResultsDrawer.classList.remove('open');
-    oldResultsDrawer.style.pointerEvents = 'none';
-    oldResultsDrawer.style.zIndex = '-1';
-  }
-  
-  // 確保函數已導出到全局作用域（在綁定事件之前）
-  if (typeof window !== 'undefined') {
-    // 確保所有函數都已定義並導出
-    if (typeof openMode1OneClickModal === 'function') {
-      window.openMode1OneClickModal = openMode1OneClickModal;
+}
+window.closeMode1OneClickModal = closeMode1OneClickModal; // 導出到全局，以便 HTML 可以直接調用
+
+// 切換過往紀錄類型
+async function switchMode1HistoryType(type) {
+  const tabs = document.querySelectorAll('.mode1-oneclick-tab');
+  const contents = document.querySelectorAll('.mode1-oneclick-tab-content');
+
+  tabs.forEach(tab => {
+    if (tab.id === `mode1HistoryTab${type.charAt(0).toUpperCase() + type.slice(1)}`) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
     }
-    if (typeof closeMode1OneClickModal === 'function') {
-      window.closeMode1OneClickModal = closeMode1OneClickModal;
+  });
+
+  contents.forEach(content => {
+    if (content.id === `mode1OneClickHistoryContent`) { // 只有一個內容區，內部動態載入
+      content.classList.add('active');
+    } else {
+      content.classList.remove('active');
     }
-    if (typeof handleQuickButton === 'function') {
-      window.handleQuickButton = handleQuickButton;
-    }
-    if (typeof saveMode1Result === 'function') {
-      window.saveMode1Result = saveMode1Result;
-    }
-    if (typeof saveMode1OneClickResult === 'function') {
-      window.saveMode1OneClickResult = saveMode1OneClickResult;
-    }
-    if (typeof toggleMode1InstructionsDrawer === 'function') {
-      window.toggleMode1InstructionsDrawer = toggleMode1InstructionsDrawer;
-    }
-    if (typeof openMode1InstructionsDrawer === 'function') {
-      window.openMode1InstructionsDrawer = openMode1InstructionsDrawer;
-    }
-    if (typeof closeMode1InstructionsDrawer === 'function') {
-      window.closeMode1InstructionsDrawer = closeMode1InstructionsDrawer;
-    }
-  }
-  
-  // 綁定生成結果按鈕事件（確保使用新的彈跳視窗）
-  const resultsBtn = document.getElementById('mode1ResultsBtn');
-  if (resultsBtn) {
-    // 移除所有現有的事件監聽器（避免重複綁定）
-    const newBtn = resultsBtn.cloneNode(true);
-    resultsBtn.parentNode.replaceChild(newBtn, resultsBtn);
-    
-    // 綁定新的事件監聽器
-    newBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      console.log('🔘 生成結果按鈕被點擊，打開彈跳視窗');
-      // 使用 window 上的函數，確保可以訪問
-      if (typeof window.openMode1OneClickModal === 'function') {
-        window.openMode1OneClickModal();
-      } else if (typeof openMode1OneClickModal === 'function') {
-        openMode1OneClickModal();
-      } else {
-        console.error('❌ openMode1OneClickModal 函數未定義');
-      }
-    });
-    
-    // 確保舊的抽屜不會被打開
-    const oldOverlay = document.getElementById('mode1ResultsOverlay');
-    const oldDrawer = document.getElementById('mode1ResultsDrawer');
-    if (oldOverlay) {
-      oldOverlay.style.display = 'none';
-      oldOverlay.classList.remove('open');
-    }
-    if (oldDrawer) {
-      oldDrawer.style.display = 'none';
-      oldDrawer.classList.remove('open');
-    }
-  }
-  
-  // iOS Safari 視窗高度處理
-  setIOSViewportHeight();
-  window.addEventListener('resize', setIOSViewportHeight);
-  window.addEventListener('orientationchange', () => {
-    setTimeout(setIOSViewportHeight, 100); // 延遲執行以確保方向改變完成
   });
   
-  // 載入用戶資訊
-  if (window.Auth && window.Auth.getToken()) {
-    ipPlanningToken = window.Auth.getToken();
-  }
-  // 從 localStorage 或 common.js 獲取用戶資訊
-  if (window.ReelMindCommon && window.ReelMindCommon.getUser) {
-    ipPlanningUser = window.ReelMindCommon.getUser();
-  } else {
-    const userStr = localStorage.getItem('ipPlanningUser');
-    ipPlanningUser = userStr ? JSON.parse(userStr) : null;
-  }
-  
-  // 檢查並顯示用戶狀態
-  const isLoggedIn = !!(ipPlanningToken && ipPlanningUser);
-  console.log('🔐 登入狀態:', isLoggedIn ? '✅ 已登入' : '❌ 未登入');
-  
-  if (isLoggedIn) {
-    console.log('👤 用戶資訊:', {
-      user_id: ipPlanningUser?.user_id || 'N/A',
-      name: ipPlanningUser?.name || ipPlanningUser?.displayName || 'N/A',
-      email: ipPlanningUser?.email || 'N/A',
-      picture: ipPlanningUser?.picture || ipPlanningUser?.avatar || 'N/A'
-    });
-    
-    // 檢查訂閱狀態
-    let isSubscribed = false;
-    if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
-      isSubscribed = window.ReelMindCommon.isSubscribed();
-    } else {
-      // 降級處理：檢查多個來源
-      const backendSubscribed = document.body.dataset.subscribed === 'true';
-      const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
-      const localSubscribed = localSubscriptionStatus === 'active';
-      const userSubscribed = !!(ipPlanningUser && (
-        ipPlanningUser.is_subscribed === true || 
-        ipPlanningUser.is_subscribed === 1 || 
-        ipPlanningUser.is_subscribed === '1' ||
-        ipPlanningUser.is_subscribed === 'true'
-      ));
-      isSubscribed = backendSubscribed || localSubscribed || userSubscribed;
-    }
-    
-    console.log('💳 訂閱狀態:', isSubscribed ? '✅ 已訂閱' : '❌ 未訂閱');
-    console.log('📊 訂閱狀態詳情:', {
-      'document.body.dataset.subscribed': document.body.dataset.subscribed,
-      'localStorage.subscriptionStatus': localStorage.getItem('subscriptionStatus'),
-      'user.is_subscribed': ipPlanningUser?.is_subscribed
-    });
-  }
-  
-  // 檢查權限（需要登入和訂閱）- 使用 checkPagePermission 會直接重定向
-  if (window.ReelMindCommon && typeof window.ReelMindCommon.checkPagePermission === 'function') {
-    const hasPermission = await window.ReelMindCommon.checkPagePermission();
-    if (!hasPermission) {
-      // checkPagePermission 會自動重定向，這裡不需要額外處理
-      return;
-    }
-    console.log('✅ 權限檢查通過，可以訪問此功能');
-  } else {
-    // 降級處理：如果 common.js 未載入，手動檢查
-    if (!isLoggedIn) {
-      console.warn('⚠️ 未登入，導向首頁');
-      window.location.href = '/';
-      return;
-    }
-    // 檢查訂閱狀態
-    let isSubscribed = false;
-    if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
-      isSubscribed = window.ReelMindCommon.isSubscribed();
-    } else {
-      const backendSubscribed = document.body.dataset.subscribed === 'true';
-      const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
-      const localSubscribed = localSubscriptionStatus === 'active';
-      const userSubscribed = !!(ipPlanningUser && (
-        ipPlanningUser.is_subscribed === true || 
-        ipPlanningUser.is_subscribed === 1 || 
-        ipPlanningUser.is_subscribed === '1' ||
-        ipPlanningUser.is_subscribed === 'true'
-      ));
-      isSubscribed = backendSubscribed || localSubscribed || userSubscribed;
-    }
-    if (!isSubscribed) {
-      console.warn('⚠️ 未訂閱，導向訂閱頁');
-      window.location.href = '/subscription.html';
-      return;
-    }
+  await loadMode1OneClickHistory(type, true); // 強制刷新
+}
+window.switchMode1HistoryType = switchMode1HistoryType;
+
+// 從後端獲取歷史數據
+async function fetchHistoryData(forceRefresh = false) {
+  if (!forceRefresh && cachedHistoryData && cachedHistoryTimestamp && (Date.now() - cachedHistoryTimestamp < CACHE_DURATION)) {
+    console.log('✅ 從快取載入歷史數據');
+    return cachedHistoryData;
   }
 
-  // 更新用戶資訊顯示
-  updateUserInfo();
-  
-  // 載入用戶記憶（長期記憶和短期記憶）
-  if (isLoggedIn && ipPlanningUser?.user_id) {
-    await loadUserMemory();
-  }
-  
-  // 初始化聊天功能
-  initMode1Chat();
-  
-  console.log('✅ ========== Mode1 頁面初始化完成 ==========');
-});
-
-// 檢查是否有已保存的 IP 規劃結果
-async function checkSavedIpPlanningResult(resultType, forceRegenerate = false) {
-  // forceRegenerate: true 表示強制重新生成（用於重新定位或重新生成按鈕）
-  if (forceRegenerate || !ipPlanningUser?.user_id || !ipPlanningToken) {
-    return null;
-  }
-  
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    const response = await fetch(`${API_URL}/api/ip-planning/my?result_type=${resultType}`, {
+    const token = localStorage.getItem('ipPlanningToken');
+    if (!token) return null;
+
+    const response = await fetch(`${API_URL}/api/user/generations`, {
       headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`,
-        'Content-Type': 'application/json'
+        'Authorization': `Bearer ${token}`
       }
     });
-    
-    if (response.ok) {
-      const data = await response.json();
-      if (data.success && data.results && data.results.length > 0) {
-        // 返回最新的結果（第一個，因為後端按 created_at DESC 排序）
-        return data.results[0];
-      }
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('獲取歷史數據失敗:', errorData);
+      return null;
     }
-    return null;
+
+    const data = await response.json();
+    cachedHistoryData = data;
+    cachedHistoryTimestamp = Date.now();
+    console.log('✅ 成功從 API 獲取歷史數據並快取');
+    return data;
   } catch (error) {
-    console.error('檢查已保存的 IP 規劃結果失敗:', error);
+    console.error('獲取歷史數據時出錯:', error);
     return null;
   }
 }
 
-// 顯示已保存的 IP 規劃結果
-function displaySavedIpPlanningResult(resultBlock, result, resultType) {
-  if (!resultBlock || !result || !result.content) {
-    return false;
+// 清除歷史快取
+function clearHistoryCache() {
+  cachedHistoryData = null;
+  cachedHistoryTimestamp = null;
+  console.log('快取已清除');
+}
+
+// 載入過往紀錄
+async function loadMode1OneClickHistory(type, forceRefresh = false) {
+  const historyContainer = document.getElementById('mode1OneClickHistoryContainer');
+  if (!historyContainer) return;
+
+  historyContainer.innerHTML = `
+    <div style="text-align: center; padding: 40px 20px; color: #9ca3af;">
+      <p>載入中...</p>
+    </div>
+  `;
+
+  const data = await fetchHistoryData(forceRefresh);
+  if (!data || !data.success || !data.results) {
+    historyContainer.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; color: #9ca3af;">
+        <p>目前沒有歷史紀錄。</p>
+        <p style="margin-top: 10px;">請先與AI對話並儲存生成的內容。</p>
+      </div>
+    `;
+    return;
   }
+
+  const filteredResults = data.results.filter(r => r.type === type).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   
-  // 隱藏 placeholder
-  const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
-  if (placeholder) {
-    placeholder.style.display = 'none';
+  if (filteredResults.length === 0) {
+    historyContainer.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; color: #9ca3af;">
+        <p>目前沒有此類型的歷史紀錄。</p>
+        <p style="margin-top: 10px;">請先與AI對話並儲存生成的內容。</p>
+      </div>
+    `;
+    return;
   }
-  
-  // 創建或獲取內容容器
-  let contentDiv = resultBlock.querySelector('.mode1-result-content');
-  if (!contentDiv) {
-    contentDiv = document.createElement('div');
-    contentDiv.className = 'mode1-result-content';
-    resultBlock.appendChild(contentDiv);
-  }
-  
-  // 渲染 Markdown 內容
-  contentDiv.innerHTML = renderMode1Markdown(result.content);
-  
-  // 更新按鈕
-  const button = resultBlock.querySelector('.mode1-generate-btn');
-  if (button) {
-    button.innerHTML = '<span>重新生成</span>';
-    button.disabled = false;
-  }
-  
-  // 顯示通知
+
+  const fragment = document.createDocumentFragment();
+
   const typeNames = {
     'profile': '帳號定位',
     'plan': '選題方向',
     'scripts': '短影音腳本'
   };
-  const typeName = typeNames[resultType] || '內容';
-  
-  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-    window.ReelMindCommon.showToast(`已載入之前的${typeName}記錄`, 2000);
-  }
-  
-  return true;
-}
 
-// 載入用戶記憶（長期記憶和短期記憶）
-async function loadUserMemory() {
-  if (!ipPlanningUser?.user_id || !ipPlanningToken) {
-    console.warn('⚠️ 無法載入記憶：缺少用戶ID或Token');
+  filteredResults.forEach(result => {
+    const isSelected = selectedSettings[type] && selectedSettings[type].id === result.id;
+    const historyItem = document.createElement('div');
+    historyItem.className = 'mode1-oneclick-history-item';
+    historyItem.dataset.id = result.id;
+    historyItem.dataset.type = result.type;
+
+    const titleText = result.title || `未命名${typeNames[result.type] || ''}`;
+    const formattedDate = new Date(result.created_at).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+    historyItem.innerHTML = `
+      <div class="mode1-oneclick-history-item-header">
+        <div class="mode1-oneclick-history-item-title-wrapper">
+          <span class="mode1-oneclick-history-item-title" id="historyTitle-${result.id}">${safeSetText(titleText)}</span>
+          <input type="text" class="mode1-oneclick-history-item-title-input" id="historyTitleInput-${result.id}" value="${safeSetText(titleText)}" style="display: none;">
+          <i class="fas fa-edit edit-title-icon" onclick="editMode1HistoryTitle('${result.id}')"></i>
+          <i class="fas fa-check save-title-icon" onclick="saveMode1HistoryTitle('${result.id}')" style="display: none;"></i>
+          <i class="fas fa-times cancel-title-icon" onclick="cancelMode1HistoryTitleEdit('${result.id}', '${safeSetText(titleText)}')" style="display: none;"></i>
+        </div>
+        <span class="mode1-oneclick-history-item-date">${formattedDate}</span>
+      </div>
+      <div class="mode1-oneclick-history-item-content-wrapper collapsed" id="contentWrapper-${result.id}">
+        <div class="mode1-oneclick-history-item-content" id="content-${result.id}">
+          ${renderMode1Markdown(result.content)}
+        </div>
+        <div class="mode1-oneclick-result-expand">
+          <button class="mode1-oneclick-expand-btn" onclick="toggleHistoryContentExpanded('${result.id}')">
+            <span>展開</span> <i class="fas fa-chevron-down"></i>
+          </button>
+        </div>
+      </div>
+      <div class="mode1-oneclick-history-item-actions">
+        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" onclick="selectHistoryResult('${result.type}', '${result.id}')">
+          <i class="fas fa-check"></i> <span>${isSelected ? '已選擇' : '選擇'}</span>
+        </button>
+        <button class="mode1-oneclick-history-item-btn" onclick="openMode1ExpandModal('${result.id}', '${result.type}')">
+          <i class="fas fa-expand"></i> <span>查看完整</span>
+        </button>
+        <button class="mode1-oneclick-history-item-btn" onclick="exportHistoryResult('${result.id}', '${result.type}')">
+          <i class="fas fa-download"></i> <span>匯出</span>
+        </button>
+        <button class="mode1-oneclick-history-item-btn danger" onclick="deleteMode1HistoryResult('${result.id}', '${result.type}')">
+          <i class="fas fa-trash-alt"></i> <span>刪除</span>
+        </button>
+      </div>
+    `;
+    fragment.appendChild(historyItem);
+  });
+
+  historyContainer.innerHTML = ''; // 清空載入中提示
+  historyContainer.appendChild(fragment);
+}
+window.loadMode1OneClickHistory = loadMode1OneClickHistory;
+
+// 儲存已選擇的設定
+let selectedSettings = {
+  profile: null,
+  plan: null,
+  scripts: null,
+};
+
+// 更新已選擇設定的顯示
+function updateSelectedSettingsDisplay() {
+  const selectedSettingsDiv = document.getElementById('mode1SelectedSettings');
+  const profileItem = document.getElementById('mode1SelectedProfile');
+  const planItem = document.getElementById('mode1SelectedPlan');
+  const scriptsItem = document.getElementById('mode1SelectedScripts');
+  const profileValue = document.getElementById('mode1SelectedProfileValue');
+  const planValue = document.getElementById('mode1SelectedPlanValue');
+  const scriptsValue = document.getElementById('mode1SelectedScriptsValue');
+
+  let hasSelected = false;
+
+  if (selectedSettings.profile) {
+    profileValue.textContent = selectedSettings.profile.title;
+    profileItem.style.display = 'flex';
+    hasSelected = true;
+  } else {
+    profileItem.style.display = 'none';
+  }
+
+  if (selectedSettings.plan) {
+    planValue.textContent = selectedSettings.plan.title;
+    planItem.style.display = 'flex';
+    hasSelected = true;
+  } else {
+    planItem.style.display = 'none';
+  }
+
+  if (selectedSettings.scripts) {
+    scriptsValue.textContent = selectedSettings.scripts.title;
+    scriptsItem.style.display = 'flex';
+    hasSelected = true;
+  } else {
+    scriptsItem.style.display = 'none';
+  }
+
+  if (selectedSettingsDiv) {
+    selectedSettingsDiv.style.display = hasSelected ? 'block' : 'none';
+  }
+
+  // 更新選擇按鈕的狀態
+  document.querySelectorAll('.mode1-oneclick-history-item-btn.primary').forEach(btn => {
+    const type = btn.closest('.mode1-oneclick-history-item').dataset.type;
+    const id = btn.closest('.mode1-oneclick-history-item').dataset.id;
+    if (selectedSettings[type] && selectedSettings[type].id === id) {
+      btn.classList.add('selected');
+      btn.querySelector('span').textContent = '已選擇';
+    } else {
+      btn.classList.remove('selected');
+      btn.querySelector('span').textContent = '選擇';
+    }
+  });
+}
+window.updateSelectedSettingsDisplay = updateSelectedSettingsDisplay;
+
+// 選擇歷史結果
+async function selectHistoryResult(type, resultId) {
+  const data = await fetchHistoryData();
+  if (!data || !data.success || !data.results) return;
+
+  const result = data.results.find(r => r.id === resultId);
+  if (result) {
+    if (selectedSettings[type] && selectedSettings[type].id === resultId) {
+      // 如果已經選擇，則取消選擇
+      selectedSettings[type] = null;
+    } else {
+      // 否則選擇
+      selectedSettings[type] = {
+        id: result.id,
+        title: result.title || `未命名${type.charAt(0).toUpperCase() + type.slice(1)}`,
+        content: result.content,
+      };
+    }
+    updateSelectedSettingsDisplay();
+  }
+}
+window.selectHistoryResult = selectHistoryResult;
+
+// 移除選擇的設定
+function removeSelectedSetting(type) {
+  selectedSettings[type] = null;
+  updateSelectedSettingsDisplay();
+}
+window.removeSelectedSetting = removeSelectedSetting;
+
+// 使用選擇的設定與 AI 對話
+async function useSelectedSettingsToChat() {
+  let messageContent = '請根據以下內容與我討論：\n\n';
+  let hasContent = false;
+
+  if (selectedSettings.profile) {
+    messageContent += `【帳號定位】\n${selectedSettings.profile.content}\n\n`;
+    hasContent = true;
+  }
+  if (selectedSettings.plan) {
+    messageContent += `【選題方向】\n${selectedSettings.plan.content}\n\n`;
+    hasContent = true;
+  }
+  if (selectedSettings.scripts) {
+    messageContent += `【短影音腳本】\n${selectedSettings.scripts.content}\n\n`;
+    hasContent = true;
+  }
+
+  if (hasContent) {
+    sendMode1Message(messageContent, 'ip_planning');
+    closeMode1OneClickModal(); // 發送後關閉 Modal
+  } else {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請至少選擇一項設定', 3000);
+    }
+  }
+}
+window.useSelectedSettingsToChat = useSelectedSettingsToChat;
+
+// 刪除歷史結果
+window.deleteMode1HistoryResult = async function(resultId, resultType) {
+  if (!confirm('確定要刪除這條記錄嗎？')) {
     return;
   }
   
+  const token = localStorage.getItem('ipPlanningToken');
+  if (!token) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入', 3000);
+    }
+    return;
+  }
+
   try {
-    console.log('🧠 ========== 開始載入用戶記憶 ==========');
-    console.log('👤 用戶ID:', ipPlanningUser.user_id);
-    console.log('💬 對話類型: ip_planning');
-    
-    // 使用完整記憶端點（包含 STM + LTM），指定 conversation_type 為 ip_planning
-    const memoryResponse = await fetch(`${API_URL}/api/user/memory/full/${ipPlanningUser.user_id}?conversation_type=ip_planning`, {
+    const response = await fetch(`${API_URL}/api/user/generations/${resultId}`, {
+      method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`
+        'Authorization': `Bearer ${token}`
       }
     });
-    
-    console.log('🧠 記憶響應狀態:', memoryResponse.status);
-    
-    if (memoryResponse.ok) {
-      const memoryData = await memoryResponse.json();
-      console.log('✅ 用戶記憶數據:', memoryData);
+
+    if (response.ok) {
+      clearHistoryCache(); // 清除快取，強制重新載入
       
-      // 顯示短期記憶（STM）
-      if (memoryData.stm) {
-        console.log('📝 短期記憶 (STM):', {
-          '最近對話輪數': memoryData.stm.recent_turns_count || 0,
-          '有摘要': memoryData.stm.has_summary ? '是' : '否',
-          '更新時間': memoryData.stm.updated_at ? new Date(memoryData.stm.updated_at * 1000).toLocaleString('zh-TW') : 'N/A'
-        });
+      // 如果刪除的是已選擇的設定，清除選擇
+      if (selectedSettings[resultType]?.id === resultId) {
+        selectedSettings[resultType] = null;
+        updateSelectedSettingsDisplay();
       }
       
-      // 顯示長期記憶（LTM）
-      if (memoryData.ltm && memoryData.ltm.memory_text) {
-        const ltmPreview = memoryData.ltm.memory_text.length > 200 
-          ? memoryData.ltm.memory_text.substring(0, 200) + '...' 
-          : memoryData.ltm.memory_text;
-        console.log('📚 長期記憶 (LTM) 預覽:', ltmPreview);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('✅ 記錄已刪除', 3000);
       }
       
-      // 顯示記憶摘要
-      if (memoryData.summary) {
-        console.log('📋 記憶摘要:', memoryData.summary);
-      }
+      // 根據刪除的類型，重新載入對應標籤頁的歷史記錄（強制刷新）
+      // 確保刪除後保持在當前標籤頁，而不是跳到帳號定位
+      const typeMap = {
+        'profile': 'profile',
+        'plan': 'plan',
+        'scripts': 'scripts'
+      };
+      const targetType = typeMap[resultType] || resultType;
       
-      console.log('✅ ========== 用戶記憶載入完成 ==========');
+      // 切換到對應的標籤頁並重新載入
+      await switchMode1HistoryType(targetType);
+      await loadMode1OneClickHistory(targetType, true); // 強制刷新
     } else {
-      const errorText = await memoryResponse.text();
-      console.error('❌ 載入用戶記憶失敗:', memoryResponse.status, errorText);
+      const errorData = await response.json();
+      console.error('刪除失敗:', errorData);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(`刪除失敗: ${errorData.message || '未知錯誤'}`, 3000);
+      }
     }
   } catch (error) {
-    console.error('❌ 載入用戶記憶時出錯:', error);
+    console.error('刪除時出錯:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('刪除失敗，請稍後再試', 3000);
+    }
+  }
+};
+
+
+// 編輯歷史記錄標題
+function editMode1HistoryTitle(resultId) {
+  const titleSpan = document.getElementById(`historyTitle-${resultId}`);
+  const titleInput = document.getElementById(`historyTitleInput-${resultId}`);
+  const editIcon = titleSpan.nextElementSibling; // i.fas.fa-edit
+  const saveIcon = editIcon.nextElementSibling; // i.fas.fa-check
+  const cancelIcon = saveIcon.nextElementSibling; // i.fas.fa-times
+
+  if (titleSpan && titleInput && editIcon && saveIcon && cancelIcon) {
+    titleSpan.style.display = 'none';
+    titleInput.style.display = 'inline-block';
+    titleInput.focus();
+    editIcon.style.display = 'none';
+    saveIcon.style.display = 'inline-block';
+    cancelIcon.style.display = 'inline-block';
+  }
+}
+window.editMode1HistoryTitle = editMode1HistoryTitle;
+
+
+// 保存歷史記錄標題
+async function saveMode1HistoryTitle(resultId) {
+  const titleSpan = document.getElementById(`historyTitle-${resultId}`);
+  const titleInput = document.getElementById(`historyTitleInput-${resultId}`);
+  const editIcon = titleSpan.nextElementSibling;
+  const saveIcon = editIcon.nextElementSibling;
+  const cancelIcon = saveIcon.nextElementSibling;
+
+  if (titleSpan && titleInput && editIcon && saveIcon && cancelIcon) {
+    const newTitle = titleInput.value.trim();
+    if (newTitle === '') {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('標題不能為空', 3000);
+      }
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('ipPlanningToken');
+      if (!token) {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('請先登入', 3000);
+        }
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/api/user/generations/${resultId}/title`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ title: newTitle })
+      });
+
+      if (response.ok) {
+        titleSpan.textContent = safeSetText(newTitle);
+        titleSpan.style.display = 'inline-block';
+        titleInput.style.display = 'none';
+        editIcon.style.display = 'inline-block';
+        saveIcon.style.display = 'none';
+        cancelIcon.style.display = 'none';
+        
+        clearHistoryCache(); // 清除快取以強制重新載入
+        updateSelectedSettingsDisplay(); // 更新已選擇設定中的標題
+
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('✅ 標題已更新', 3000);
+        }
+      } else {
+        const errorData = await response.json();
+        console.error('更新標題失敗:', errorData);
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast(`更新標題失敗: ${errorData.message || '未知錯誤'}`, 3000);
+        }
+      }
+    } catch (error) {
+      console.error('更新標題時出錯:', error);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('更新標題失敗，請稍後再試', 3000);
+      }
+    }
+  }
+}
+window.saveMode1HistoryTitle = saveMode1HistoryTitle;
+
+
+// 取消編輯歷史記錄標題
+function cancelMode1HistoryTitleEdit(resultId, originalTitle) {
+  const titleSpan = document.getElementById(`historyTitle-${resultId}`);
+  const titleInput = document.getElementById(`historyTitleInput-${resultId}`);
+  const editIcon = titleSpan.nextElementSibling;
+  const saveIcon = editIcon.nextElementSibling;
+  const cancelIcon = saveIcon.nextElementSibling;
+
+  if (titleSpan && titleInput && editIcon && saveIcon && cancelIcon) {
+    titleInput.value = originalTitle; // 恢復原始標題
+    titleSpan.style.display = 'inline-block';
+    titleInput.style.display = 'none';
+    editIcon.style.display = 'inline-block';
+    saveIcon.style.display = 'none';
+    cancelIcon.style.display = 'none';
+  }
+}
+window.cancelMode1HistoryTitleEdit = cancelMode1HistoryTitleEdit;
+
+
+// 展開/收起歷史記錄內容
+function toggleHistoryContentExpanded(resultId) {
+  const contentWrapper = document.getElementById(`contentWrapper-${resultId}`);
+  const expandBtn = contentWrapper.querySelector('.mode1-oneclick-expand-btn');
+  const expandIcon = expandBtn.querySelector('i');
+
+  if (contentWrapper.classList.contains('expanded')) {
+    contentWrapper.classList.remove('expanded');
+    expandBtn.querySelector('span').textContent = '展開';
+    expandIcon.classList.remove('fa-chevron-up');
+    expandIcon.classList.add('fa-chevron-down');
+  } else {
+    contentWrapper.classList.add('expanded');
+    expandBtn.querySelector('span').textContent = '收起';
+    expandIcon.classList.remove('fa-chevron-down');
+    expandIcon.classList.add('fa-chevron-up');
+  }
+}
+window.toggleHistoryContentExpanded = toggleHistoryContentExpanded;
+
+
+// ===== 展開內容 Modal 相關函數 =====
+let currentExpandModalContent = null; // 用於保存當前展開的內容，防止重新渲染
+
+// 開啟展開內容 Modal
+async function openMode1ExpandModal(resultId, resultType) {
+  const overlay = document.getElementById('mode1ExpandModalOverlay');
+  const modal = document.getElementById('mode1ExpandModal');
+  const modalTitle = document.getElementById('mode1ExpandModalTitle');
+  const modalContentDiv = document.getElementById('mode1ExpandModalContent');
+  
+  if (!overlay || !modal || !modalTitle || !modalContentDiv) return;
+
+  modalContentDiv.innerHTML = '<p style="text-align: center; color: #9ca3af;">載入中...</p>'; // 顯示載入中
+
+  const data = await fetchHistoryData();
+  if (!data || !data.success || !data.results) {
+    modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">載入失敗，請稍後再試。</p>';
+    return;
+  }
+
+  const result = data.results.find(r => r.id === resultId);
+
+  if (result) {
+    const typeNames = {
+      'profile': '帳號定位',
+      'plan': '選題方向',
+      'scripts': '短影音腳本'
+    };
+    modalTitle.textContent = result.title || `查看完整${typeNames[result.type] || ''}內容`;
+    modalContentDiv.innerHTML = renderMode1Markdown(result.content);
+    currentExpandModalContent = result.content; // 快取內容
+    
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden'; // 禁止背景滾動
+
+    // 手機版：處理表格溢出
+    if (window.innerWidth <= 768) {
+      const tables = modalContentDiv.querySelectorAll('table');
+      tables.forEach(table => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mode1-oneclick-result-content-wrapper in-expand-modal'; // 添加類名以便 CSS 處理
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      });
+    }
+    
+    // 強制重繪，確保滾動條正確顯示
+    modalContentDiv.scrollTop = 0;
+    setTimeout(() => {
+      modalContentDiv.scrollTop = 0;
+    }, 50);
+
+  } else {
+    modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">找不到對應的內容。</p>';
+  }
+}
+window.openMode1ExpandModal = openMode1ExpandModal;
+
+// 關閉展開內容 Modal
+function closeMode1ExpandModal() {
+  const overlay = document.getElementById('mode1ExpandModalOverlay');
+  if (overlay) {
+    overlay.classList.remove('open');
+    document.body.style.overflow = ''; // 恢復背景滾動
+    currentExpandModalContent = null; // 清除快取
+  }
+}
+window.closeMode1ExpandModal = closeMode1ExpandModal;
+
+
+// ===== 聊天訊息相關函數 =====
+
+// 發送 Mode1 訊息
+async function sendMode1Message(message, conversationType = 'ip_planning') {
+  if (isMode1Sending) {
+    console.log('訊息發送中，請稍候...');
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('訊息發送中，請稍候...', 2000);
+    }
+    return;
+  }
+  
+  currentMode1ConversationType = conversationType;
+  if (!message || !message.trim()) return;
+  
+  const messageInput = document.getElementById('mode1-messageInput');
+  const chatMessages = document.getElementById('mode1-chatMessages');
+  const sendBtn = document.getElementById('mode1-sendBtn');
+  const userAvatarUrl = ipPlanningUser?.picture || ipPlanningUser?.avatar || ipPlanningUser?.photoURL || '';
+
+  // 顯示用戶訊息
+  const userMessageEl = createMode1Message('user', message, userAvatarUrl);
+  chatMessages.appendChild(userMessageEl);
+  messageInput.value = ''; // 清空輸入框
+  messageInput.style.height = 'auto'; // 重置輸入框高度
+  chatMessages.scrollTop = chatMessages.scrollHeight; // 滾動到底部
+
+  isMode1Sending = true;
+  sendBtn.disabled = true; // 禁用發送按鈕
+
+  // 顯示打字指示器
+  const typingIndicatorEl = createMode1Message('assistant', '<div class="typing-indicator">AI 正在生成 <span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span></div>');
+  typingIndicatorEl.classList.add('typing-message'); // 添加類名以便後續移除
+  chatMessages.appendChild(typingIndicatorEl);
+  chatMessages.scrollTop = chatMessages.scrollHeight; // 滾動到底部
+
+
+  // 檢測用戶是否說"儲存"或"保存"
+  const saveKeywords = ['儲存', '保存', 'save', '儲存腳本', '保存腳本', '儲存結果', '保存結果', '幫我儲存', '幫我保存'];
+  const messageLower = message.toLowerCase().trim();
+  const shouldSave = saveKeywords.some(keyword => 
+    messageLower.includes(keyword.toLowerCase()) || 
+    message === keyword || 
+    message.trim() === keyword
+  );
+  
+  // 如果是儲存請求，直接觸發儲存函數
+  if (shouldSave) {
+    try {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('💡 偵測到儲存指令，AI 將自動保存最新生成內容', 3000);
+      }
+      await saveMode1Result(currentMode1ConversationType); // 觸發儲存，預設保存當前會話類型最新結果
+      
+      // 移除打字指示器
+      if (typingIndicatorEl.parentNode) {
+        typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
+      }
+      
+      const aiConfirmMessage = createMode1Message('assistant', '✅ 好的，我已將最新的生成內容保存到您的創作者資料庫。');
+      chatMessages.appendChild(aiConfirmMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    } catch (error) {
+      console.error('處理儲存指令時出錯:', error);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('儲存失敗，請稍後再試', 3000);
+      }
+    } finally {
+      isMode1Sending = false;
+      sendBtn.disabled = false; // 啟用發送按鈕
+    }
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('ipPlanningToken');
+    if (!token) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入', 3000);
+      }
+      // 移除打字指示器
+      if (typingIndicatorEl.parentNode) {
+        typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
+      }
+      return;
+    }
+
+    const response = await fetch(`${API_URL}/api/chat/stream`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-Conversation-Type': conversationType, // 傳遞會話類型
+        'X-CSRF-Token': getCSRFToken()
+      },
+      body: JSON.stringify({ message: message })
+    });
+
+    if (!response.ok) {
+      // 移除打字指示器
+      if (typingIndicatorEl.parentNode) {
+        typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
+      }
+      
+      const errorData = await response.json();
+      console.error('API 錯誤:', errorData);
+      
+      let errorMessage = 'AI 回應失敗，請稍後再試。';
+      if (errorData.message) {
+        errorMessage = errorData.message;
+        const quotaErrorMatch = errorMessage.match(/quota limits for API key|overloaded/i);
+        if (quotaErrorMatch) {
+          const parsedError = parseQuotaError(errorMessage);
+          errorMessage = parsedError.message;
+        } else if (errorMessage.includes('Invalid API key')) {
+            errorMessage = '您提供的 LLM 金鑰無效，請至「創作者資料庫」檢查或重新綁定金鑰。';
+        }
+      }
+      
+      // 添加一個 AI 錯誤訊息
+      const aiErrorMessage = createMode1Message('assistant', `<span style="color: #ef4444;">❌ ${safeSetText(errorMessage)}</span>`);
+      chatMessages.appendChild(aiErrorMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      // 即使 API 失敗，也嘗試記錄用戶訊息到記憶
+      try {
+        await recordMode1ConversationMessage(conversationType, 'user', message, token, ipPlanningUser);
+      } catch (memError) {
+        console.error('記錄用戶訊息到記憶錯誤:', memError);
+      }
+
+      return;
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let aiResponseContent = '';
+    const aiMessageEl = createMode1Message('assistant', '');
+    chatMessages.appendChild(aiMessageEl);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    const contentDiv = aiMessageEl.querySelector('.message-content');
+    const fullContent = [];
+    let isCodeBlock = false;
+
+    // 移除打字指示器
+    if (typingIndicatorEl.parentNode) {
+      typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
+    }
+    
+    // 清除快取，因為有新的 AI 回應
+    clearHistoryCache();
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.substring(6);
+          if (data === '[DONE]') {
+            break;
+          }
+          try {
+            const json = JSON.parse(data);
+            const content = json.message.content;
+            if (content) {
+              aiResponseContent += content;
+              fullContent.push(content);
+
+              // 這裡進行更細緻的渲染，以避免在程式碼塊中提前結束
+              let renderedHtml = '';
+              const tempContent = aiResponseContent;
+
+              // 偵測程式碼區塊的開頭和結尾
+              if (tempContent.includes('```')) {
+                  const parts = tempContent.split('```');
+                  renderedHtml = parts.map((part, index) => {
+                      if (index % 2 === 1) { // 這是程式碼塊內部
+                          isCodeBlock = true;
+                          return `<pre><code class="language-javascript">${DOMPurify.sanitize(part, { USE_PROFILES: { html: false } })}</code></pre>`;
+                      } else { // 這是普通文本
+                          isCodeBlock = false;
+                          return safeRenderMarkdown(part);
+                      }
+                  }).join('');
+              } else {
+                  renderedHtml = safeRenderMarkdown(tempContent);
+              }
+              
+              contentDiv.innerHTML = renderedHtml;
+
+              // 處理程式碼高亮
+              contentDiv.querySelectorAll('pre code').forEach(block => {
+                hljs.highlightElement(block);
+              });
+
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+          } catch (e) {
+            console.error('解析 SSE 數據失敗:', e, '數據:', data);
+          }
+        }
+      }
+    }
+
+    // 將完整的 AI 回應內容記錄到長期記憶
+    try {
+      await recordMode1ConversationMessage(conversationType, 'user', message, token, ipPlanningUser);
+      await recordMode1ConversationMessage(conversationType, 'assistant', aiResponseContent, token, ipPlanningUser);
+    } catch (error) {
+      console.error('記錄長期記憶錯誤:', error);
+    }
+
+  } catch (error) {
+    console.error('發送訊息時出錯:', error);
+    // 移除打字指示器
+    if (typingIndicatorEl.parentNode) {
+      typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
+    }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('發送訊息失敗，請檢查網絡或稍後再試。', 3000);
+    }
+    // 嘗試記錄用戶訊息到記憶
+    try {
+      await recordMode1ConversationMessage(conversationType, 'user', message, ipPlanningToken, ipPlanningUser);
+    } catch (memError) {
+      console.error('記錄用戶訊息到記憶錯誤:', memError);
+    }
+
+  } finally {
+    isMode1Sending = false;
+    sendBtn.disabled = false; // 啟用發送按鈕
+    chatMessages.scrollTop = chatMessages.scrollHeight; // 確保最後滾動到底部
   }
 }
 
-// 更新用戶資訊顯示
-// 使用 common.js 中的統一函數
+// 根據角色創建聊天訊息元素
+function createMode1Message(role, content, avatarUrl = '') {
+  const messageEl = document.createElement('div');
+  messageEl.className = `message ${role}`;
+
+  const avatarEl = document.createElement('div');
+  avatarEl.className = 'message-avatar';
+  if (role === 'user') {
+    if (avatarUrl) {
+      const imgEl = document.createElement('img');
+      imgEl.src = avatarUrl;
+      imgEl.alt = '用戶頭像';
+      avatarEl.appendChild(imgEl);
+    } else {
+      avatarEl.textContent = '👤';
+    }
+  } else {
+    avatarEl.textContent = 'AI';
+  }
+
+  const contentEl = document.createElement('div');
+  contentEl.className = 'message-content';
+  contentEl.innerHTML = content; // 這裡直接使用 innerHTML，因為內容可能是 HTML 或 Markdown 渲染結果
+
+  messageEl.appendChild(avatarEl);
+  messageEl.appendChild(contentEl);
+  return messageEl;
+}
+
+// 渲染 Markdown
+function renderMode1Markdown(text) {
+  if (window.marked && window.DOMPurify && window.hljs) {
+    // 使用 marked.js 將 Markdown 轉換為 HTML
+    const rawHtml = marked.parse(text, { breaks: true, gfm: true });
+    // 使用 DOMPurify 清理 HTML，防止 XSS 攻擊
+    const cleanHtml = window.DOMPurify.sanitize(rawHtml, {
+      USE_PROFILES: { html: true },
+      FORBID_TAGS: ['style'], // 禁止 style 標籤，以防止內容破壞樣式
+      ADD_ATTR: ['target'], // 允許 target 屬性用於連結
+    });
+    return cleanHtml;
+  }
+  return safeSetText(text); // 降級處理
+}
+
+// 記錄會話訊息到記憶（短期記憶和長期記憶）
+async function recordMode1ConversationMessage(conversationType, role, content, token, user) {
+  if (!token || !user || !user.user_id) {
+    console.warn('未登入，無法記錄記憶。');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/api/memory/long-term`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-Conversation-Type': conversationType,
+        'X-CSRF-Token': getCSRFToken()
+      },
+      body: JSON.stringify({
+        user_id: user.user_id,
+        role: role,
+        content: content
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('記錄長期記憶失敗:', errorData);
+    } else {
+      console.log('✅ 記憶已記錄:', role);
+    }
+  } catch (error) {
+    console.error('記錄長期記憶錯誤:', error);
+  }
+}
+
+// 解析 429 配額錯誤並提取重試時間
+function parseQuotaError(errorMessage) {
+  if (!errorMessage || typeof errorMessage !== 'string') {
+    return null;
+  }
+
+  const retryAfterMatch = errorMessage.match(/Retry-After: (\d+)/);
+  let retryAfterSeconds = 60; // 預設 60 秒
+
+  if (retryAfterMatch && retryAfterMatch[1]) {
+    retryAfterSeconds = parseInt(retryAfterMatch[1], 10);
+  }
+
+  return {
+    retryAfter: retryAfterSeconds,
+    message: `API 請求次數過多，請等待 ${retryAfterSeconds} 秒後再試。`,
+  };
+}
+
+
+// 更新用戶資訊顯示（與 common.js 中的統一函數保持一致，但在此處作為降級處理）
 function updateUserInfo() {
   // 優先使用 common.js 的統一函數
   if (window.ReelMindCommon && window.ReelMindCommon.updateUserInfo) {
@@ -440,11 +1052,31 @@ function updateUserInfo() {
   const userDBTab = document.getElementById('userDBTab');
   const userDBMobileTab = document.getElementById('userDBMobileTab');
   
-  if (ipPlanningUser && ipPlanningToken) {
+  // 確保用戶資訊已載入
+  let currentUser = ipPlanningUser;
+  let currentToken = ipPlanningToken;
+  
+  if (!currentUser) {
+    const userStr = localStorage.getItem('ipPlanningUser');
+    if (userStr) {
+      try {
+        currentUser = JSON.parse(userStr);
+      } catch (e) {
+        console.warn('無法解析用戶資料:', e);
+      }
+    }
+  }
+  
+  if (!currentToken) {
+    currentToken = localStorage.getItem('ipPlanningToken');
+  }
+  
+  if (currentUser && currentToken) {
     if (userInfo) {
       userInfo.style.display = 'flex';
       if (userAvatar) {
-        const avatarUrl = ipPlanningUser.picture || ipPlanningUser.avatar || ipPlanningUser.photoURL || '';
+        // 支援多種頭像欄位名稱
+        const avatarUrl = currentUser.picture || currentUser.avatar || currentUser.photoURL || '';
         if (avatarUrl) {
           userAvatar.src = avatarUrl;
           userAvatar.style.display = 'block';
@@ -453,7 +1085,7 @@ function updateUserInfo() {
         }
       }
       if (userName) {
-        userName.textContent = ipPlanningUser.name || ipPlanningUser.displayName || ipPlanningUser.email || '用戶';
+        userName.textContent = currentUser.name || currentUser.displayName || currentUser.email || '用戶';
       }
     }
     if (authButtons) {
@@ -481,75 +1113,173 @@ function updateUserInfo() {
   }
 }
 
+// 保存 Mode1 生成結果
+async function saveMode1Result(resultType) {
+  const token = localStorage.getItem('ipPlanningToken');
+  if (!token) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入', 3000);
+    }
+    return;
+  }
+
+  // 找到最新的 AI 回應
+  const chatMessages = document.getElementById('mode1-chatMessages');
+  const aiMessages = chatMessages.querySelectorAll('.message.assistant .message-content');
+  if (aiMessages.length === 0) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('沒有可儲存的 AI 回應內容。', 3000);
+    }
+    return;
+  }
+
+  const latestAiMessageContent = aiMessages[aiMessages.length - 1].innerHTML;
+
+  if (!latestAiMessageContent || latestAiMessageContent.includes('AI 正在生成')) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('AI 仍在生成內容，請等待完成。', 3000);
+    }
+    return;
+  }
+
+  // 從 HTML 內容中提取純文本標題（假設第一個 h1/h2/h3 或 p 作為標題）
+  let extractedTitle = '';
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = latestAiMessageContent;
+  
+  const titleEl = tempDiv.querySelector('h1, h2, h3, p');
+  if (titleEl) {
+    extractedTitle = titleEl.textContent.trim().substring(0, 50); // 截斷標題
+  }
+  if (!extractedTitle) {
+    const typeNames = {
+      'ip_planning': 'IP人設規劃',
+      'plan': '選題方向',
+      'scripts': '短影音腳本'
+    };
+    extractedTitle = `${typeNames[resultType] || 'AI 生成內容'} - ${new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false })}`;
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/api/generations`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-Conversation-Type': resultType, // 傳遞類型
+        'X-CSRF-Token': getCSRFToken()
+      },
+      body: JSON.stringify({
+        type: resultType,
+        title: extractedTitle,
+        content: latestAiMessageContent,
+      })
+    });
+
+    if (response.ok) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('✅ 最新內容已儲存至創作者資料庫！', 3000);
+      }
+      clearHistoryCache(); // 儲存成功後清除快取
+    } else {
+      const errorData = await response.json();
+      console.error('保存失敗:', errorData);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(`保存失敗: ${errorData.message || '未知錯誤'}`, 3000);
+      }
+    }
+  } catch (error) {
+    console.error('保存時出錯:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('保存失敗，請稍後再試', 3000);
+    }
+  }
+}
+window.saveMode1Result = saveMode1Result; // 導出到全局作用域
+
+// 頁面初始化
+document.addEventListener('DOMContentLoaded', async function() {
+  console.log('🚀 ========== Mode1 (IP人設規劃) 頁面初始化 ==========');
+  
+  // 立即強制隱藏舊的抽屜（最高優先級）
+  const oldResultsOverlay = document.getElementById('mode1ResultsOverlay');
+  const oldResultsDrawer = document.getElementById('mode1ResultsDrawer');
+  if (oldResultsOverlay) {
+    oldResultsOverlay.style.display = 'none';
+    oldResultsOverlay.style.visibility = 'hidden';
+    oldResultsOverlay.style.opacity = '0';
+    oldResultsOverlay.classList.remove('open');
+    oldResultsOverlay.style.pointerEvents = 'none';
+    oldResultsOverlay.style.zIndex = '-1';
+  }
+  if (oldResultsDrawer) {
+    oldResultsDrawer.style.display = 'none';
+    oldResultsDrawer.style.visibility = 'hidden';
+    oldResultsDrawer.style.opacity = '0';
+    oldResultsDrawer.classList.remove('open');
+    oldResultsDrawer.style.pointerEvents = 'none';
+    oldResultsDrawer.style.zIndex = '-1';
+  }
+  
+  // iOS Safari 視窗高度處理
+  setIOSViewportHeight();
+  window.addEventListener('resize', setIOSViewportHeight);
+
+  // 初始化 Mode1 聊天功能
+  initMode1Chat();
+
+  // 更新用戶資訊
+  updateUserInfo();
+
+  // 檢查登入狀態並更新 UI
+  await checkLoginStatus();
+  await checkSubscriptionStatus();
+
+  // 綁定生成結果按鈕事件（確保使用新的彈跳視窗）
+  const resultsBtn = document.getElementById('mode1ResultsBtn');
+  if (resultsBtn) {
+    resultsBtn.addEventListener('click', openMode1OneClickModal);
+  }
+
+  // 處理 SSE 事件
+  // 注意：SSE 連線應在用戶登入後才建立
+  if (ipPlanningToken && ipPlanningUser?.user_id) {
+    const eventSource = new EventSource(`${API_URL}/api/events?token=${ipPlanningToken}&user_id=${ipPlanningUser.user_id}`);
+
+    eventSource.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      console.log('SSE Event:', data);
+      if (data.type === 'save_request') {
+        saveMode1Result(data.conversation_type);
+      }
+    };
+
+    eventSource.onerror = function(err) {
+      console.error('EventSource failed:', err);
+      eventSource.close();
+      // 可以在這裡嘗試重新連線
+    };
+  }
+});
+
 // 初始化 Mode1 聊天功能
 function initMode1Chat() {
   const messageInput = document.getElementById('mode1-messageInput');
   const sendBtn = document.getElementById('mode1-sendBtn');
+  const chatMessages = document.getElementById('mode1-chatMessages');
   const quickButtons = document.getElementById('mode1-quickButtons');
-  
-  if (!messageInput || !sendBtn || !quickButtons) return;
-  
-  if (mode1ChatInitialized) {
-    sendBtn.disabled = !messageInput.value.trim();
-    return;
-  }
-  mode1ChatInitialized = true;
-  
-  // 輸入框自動調整高度
-  messageInput.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-    sendBtn.disabled = !this.value.trim();
-  });
-  
-  // iOS Safari 鍵盤處理：當輸入框獲得焦點時，確保輸入框可見並避免下方空白
-  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-    const inputRow = messageInput.closest('.input-row');
-    const chatMessages = document.getElementById('mode1-chatMessages');
-    const body = document.body;
-    const html = document.documentElement;
-    
-    messageInput.addEventListener('focus', function() {
-      // 延遲執行，等待鍵盤彈出
-      setTimeout(() => {
-        if (inputRow) {
-          // 移除 body 的固定定位，避免下方空白
-          if (body.style.position === 'fixed') {
-            body.style.position = 'relative';
-            body.style.height = 'auto';
-            body.style.overflow = 'visible';
-          }
-          
-          // 計算輸入框的位置
-          const inputRect = inputRow.getBoundingClientRect();
-          const viewportHeight = window.innerHeight;
-          const keyboardHeight = viewportHeight - inputRect.bottom;
-          
-          // 如果輸入框被鍵盤遮擋，滾動聊天訊息區域
-          if (keyboardHeight < 0 || inputRect.bottom > viewportHeight - 100) {
-            // 滾動聊天訊息區域，確保輸入框可見
-            if (chatMessages) {
-              chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-          }
-        }
-      }, 300); // 等待鍵盤動畫完成
-    });
-    
-    messageInput.addEventListener('blur', function() {
-      // 鍵盤收起時，恢復 body 的固定定位
-      setTimeout(() => {
-        if (body) {
-          body.style.position = 'fixed';
-          body.style.height = '100dvh';
-          body.style.overflow = 'hidden';
-        }
-        
-        // 恢復正常滾動
-        if (chatMessages) {
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-      }, 300);
+  const body = document.body;
+
+  if (messageInput && sendBtn && chatMessages && quickButtons) {
+    // 啟用輸入框和按鈕
+    sendBtn.disabled = false;
+
+    // 自動調整輸入框高度
+    messageInput.addEventListener('input', () => {
+      messageInput.style.height = 'auto';
+      messageInput.style.height = (messageInput.scrollHeight) + 'px';
+      // 滾動到最新訊息
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     });
     
     // 監聽視窗大小變化（鍵盤彈出/收起會觸發）
@@ -578,3328 +1308,24 @@ function initMode1Chat() {
       }
       lastViewportHeight = currentHeight;
     });
-  }
-  
-  // 發送按鈕
-  sendBtn.addEventListener('click', () => {
-    const message = messageInput.value.trim();
-    if (message) {
-      sendMode1Message(message);
-    }
-  });
-  
-  // Enter 發送
-  messageInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+
+    // 發送按鈕
+    sendBtn.addEventListener('click', () => {
       const message = messageInput.value.trim();
       if (message) {
         sendMode1Message(message);
       }
-    }
-  });
-  
-  // 快速按鈕事件處理（保留作為備用，主要使用 onclick）
-  quickButtons.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const btn = e.target.closest('.quick-btn');
-    if (btn && btn.closest('.mode1-page') && quickButtons.id === 'mode1-quickButtons') {
-      e.preventDefault();
-      // 如果按鈕有 onclick，不處理（由 onclick 處理）
-      if (btn.onclick) {
-        return;
-      }
-      // 降級處理：如果有 data-text，使用舊方式
-      const text = btn.getAttribute('data-text');
-      if (text) {
-        sendMode1Message(text, 'ip_planning');
-      }
-    }
-  });
-}
-
-// 解析 429 配額錯誤並提取重試時間
-function parseQuotaError(errorMessage) {
-  if (!errorMessage || typeof errorMessage !== 'string') {
-    return null;
-  }
-  
-  // 檢查是否為 429 錯誤
-  if (!errorMessage.includes('429') && !errorMessage.includes('quota') && !errorMessage.includes('exceeded')) {
-    return null;
-  }
-  
-  // 提取 retry_delay 資訊
-  let retrySeconds = null;
-  
-  // 方法1: 從 "Please retry in X.XXs" 提取
-  const retryMatch = errorMessage.match(/Please retry in ([\d.]+)s/i);
-  if (retryMatch) {
-    retrySeconds = Math.ceil(parseFloat(retryMatch[1]));
-  }
-  
-  // 方法2: 從 "retry_delay { seconds: X }" 提取
-  if (!retrySeconds) {
-    const delayMatch = errorMessage.match(/retry_delay\s*\{[^}]*seconds:\s*(\d+)/i);
-    if (delayMatch) {
-      retrySeconds = parseInt(delayMatch[1], 10);
-    }
-  }
-  
-  // 方法3: 從 "seconds: X" 提取（更寬鬆的匹配）
-  if (!retrySeconds) {
-    const secondsMatch = errorMessage.match(/seconds:\s*(\d+)/i);
-    if (secondsMatch) {
-      retrySeconds = parseInt(secondsMatch[1], 10);
-    }
-  }
-  
-  return retrySeconds ? {
-    isQuotaError: true,
-    retrySeconds: retrySeconds,
-    retryMinutes: Math.ceil(retrySeconds / 60),
-    message: `API 配額已用盡，請等待約 ${retrySeconds} 秒（約 ${Math.ceil(retrySeconds / 60)} 分鐘）後再試。`
-  } : {
-    isQuotaError: true,
-    retrySeconds: null,
-    message: 'API 配額已用盡，請稍後再試。'
-  };
-}
-
-// 處理快速按鈕點擊
-async function handleQuickButton(type) {
-  const chatMessages = document.getElementById('mode1-chatMessages');
-  if (!chatMessages) return;
-  
-  switch(type) {
-    case 'ip-profile':
-      // 先檢查是否有已保存的結果
-      const savedProfile = await checkSavedIpPlanningResult('profile', false);
-      if (savedProfile && savedProfile.content) {
-        // 如果有已保存的結果，直接在對話框中顯示
-        const userMessage = createMode1Message('user', '請告知我目前的 IP Profile');
-        chatMessages.appendChild(userMessage);
-        
-        const aiMessage = createMode1Message('assistant', '');
-        const contentDiv = aiMessage.querySelector('.message-content');
-        contentDiv.innerHTML = renderMode1Markdown(savedProfile.content);
-        chatMessages.appendChild(aiMessage);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-        
-        // 記錄到長期記憶
-        try {
-          await recordMode1ConversationMessage('ip_planning', 'user', '請告知我目前的 IP Profile', ipPlanningToken, ipPlanningUser);
-          await recordMode1ConversationMessage('ip_planning', 'assistant', savedProfile.content, ipPlanningToken, ipPlanningUser);
-        } catch (error) {
-          console.error('記錄長期記憶錯誤:', error);
-        }
-      } else {
-        // 如果沒有已保存的結果，發送訊息給 LLM 生成
-        sendMode1Message('請告知我目前的 IP Profile，基於我們之前的對話內容。', 'ip_planning');
-      }
-      break;
-    case '14day-plan':
-      // 先檢查是否有已保存的結果
-      const savedPlan = await checkSavedIpPlanningResult('plan', false);
-      // 同時檢查是否有最新的 IP Profile，用於驗證14天規劃是否匹配
-      const currentProfile = await checkSavedIpPlanningResult('profile', false);
-      
-      // 如果14天規劃存在，但IP Profile已更新，則應該重新生成14天規劃
-      // 簡單判斷：如果14天規劃的創建時間早於IP Profile，則不匹配
-      let shouldRegenerate = false;
-      if (savedPlan && currentProfile) {
-        const planTime = new Date(savedPlan.created_at || 0).getTime();
-        const profileTime = new Date(currentProfile.created_at || 0).getTime();
-        // 如果IP Profile比14天規劃新，則應該重新生成
-        if (profileTime > planTime) {
-          shouldRegenerate = true;
-        }
-      }
-      
-      if (savedPlan && savedPlan.content && !shouldRegenerate) {
-        // 如果有已保存的結果且與當前IP Profile匹配，直接在對話框中顯示
-        const userMessage = createMode1Message('user', '請告知我的14天規劃');
-        chatMessages.appendChild(userMessage);
-        
-        const aiMessage = createMode1Message('assistant', '');
-        const contentDiv = aiMessage.querySelector('.message-content');
-        contentDiv.innerHTML = renderMode1Markdown(savedPlan.content);
-        chatMessages.appendChild(aiMessage);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-        
-        // 記錄到長期記憶
-        try {
-          await recordMode1ConversationMessage('ip_planning', 'user', '請告知我的14天規劃', ipPlanningToken, ipPlanningUser);
-          await recordMode1ConversationMessage('ip_planning', 'assistant', savedPlan.content, ipPlanningToken, ipPlanningUser);
-        } catch (error) {
-          console.error('記錄長期記憶錯誤:', error);
-        }
-      } else {
-        // 如果沒有已保存的結果，或結果與當前IP Profile不匹配，發送訊息給 LLM 重新生成
-        sendMode1Message('請根據我們目前最新的帳號定位和對話內容，重新生成我的14天規劃。', 'ip_planning');
-      }
-      break;
-    case 'today-script':
-      // 今日腳本需要 LLM 詢問用戶選擇腳本結構，所以直接發送
-      sendMode1Message('請根據目前資料庫的5個腳本結構（A/B/C/D/E），詢問我要使用哪一個腳本結構來產出今日的腳本。', 'ip_planning');
-      break;
-    case 'change-script-structure':
-      // 換腳本結構：讓 LLM 列出腳本結構讓用戶選擇
-      sendMode1Message('請列出目前資料庫中的所有腳本結構（A/B/C/D/E），並說明每個結構的特點，讓我選擇要使用哪一個腳本結構。', 'ip_planning');
-      break;
-    case 'reposition':
-      // 重新定位：完全重新開始，不要參考之前的對話內容
-      // 使用明確的指示，告訴 LLM 要忽略所有之前的對話和記憶
-      sendMode1Message('【重要：完全重新開始】請完全忽略之前所有的對話內容、帳號定位結果和長期記憶。這是一個全新的帳號定位需求，請從頭開始。請先詢問我以下問題：1. 我的目標受眾是誰？2. 我想要達成的目標是什麼？3. 我主要使用的平台是什麼？4. 我偏好的內容風格是什麼？請根據我的新回答，生成一個全新的、獨立的帳號定位，不要參考任何之前的內容。', 'ip_planning');
-      break;
-    default:
-      console.warn('未知的快速按鈕類型:', type);
-  }
-}
-
-// 立即導出到全局作用域，供 HTML onclick 使用（在函數定義後立即導出）
-if (typeof window !== 'undefined') {
-  window.handleQuickButton = handleQuickButton;
-}
-
-// 發送 Mode1 訊息
-async function sendMode1Message(message, conversationType = 'ip_planning') {
-  if (isMode1Sending) {
-    console.log('訊息發送中，請稍候...');
-    return;
-  }
-  
-  currentMode1ConversationType = conversationType;
-  if (!message || !message.trim()) return;
-  
-  // 檢測用戶是否說"儲存"或"保存"
-  const saveKeywords = ['儲存', '保存', 'save', '儲存腳本', '保存腳本', '儲存結果', '保存結果', '幫我儲存', '幫我保存'];
-  const messageLower = message.toLowerCase().trim();
-  const shouldSave = saveKeywords.some(keyword => 
-    messageLower.includes(keyword.toLowerCase()) || 
-    message === keyword || 
-    message.trim() === keyword
-  );
-  
-  if (shouldSave) {
-    // 顯示用戶消息
-    const chatMessages = document.getElementById('mode1-chatMessages');
-    if (chatMessages) {
-      const userMessage = createMode1Message('user', message);
-      chatMessages.appendChild(userMessage);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-    
-    // 清空輸入框
-    const messageInput = document.getElementById('mode1-messageInput');
-    if (messageInput) {
-      messageInput.value = '';
-      messageInput.style.height = 'auto';
-    }
-    
-    // 檢查是否在一鍵生成模式（有生成結果 Modal）
-    const overlay = document.getElementById('mode1OneClickModalOverlay');
-    const isOneClickMode = overlay && overlay.classList.contains('open');
-    
-    let savedCount = 0;
-    
-    if (isOneClickMode) {
-      // 一鍵生成模式：檢查當前顯示的標籤頁
-      const activeTab = document.querySelector('.mode1-oneclick-tab.active');
-      if (activeTab) {
-        const tabId = activeTab.id || activeTab.getAttribute('data-tab');
-        let resultType = null;
-        
-        if (tabId && tabId.includes('positioning')) {
-          resultType = 'positioning';
-        } else if (tabId && tabId.includes('topics')) {
-          resultType = 'topics';
-        } else if (tabId && tabId.includes('weekly')) {
-          resultType = 'weekly';
-        } else {
-          // 根據標籤文字判斷
-          const tabText = activeTab.textContent || '';
-          if (tabText.includes('定位') || tabText.includes('Positioning')) {
-            resultType = 'positioning';
-          } else if (tabText.includes('選題') || tabText.includes('Topics')) {
-            resultType = 'topics';
-          } else if (tabText.includes('腳本') || tabText.includes('Weekly') || tabText.includes('週')) {
-            resultType = 'weekly';
-          }
-        }
-        
-        if (resultType) {
-          // 調用儲存函數
-          await saveMode1OneClickResult(resultType);
-          savedCount = 1;
-        }
-      }
-    } else {
-      // 一般聊天模式：儲存當前結果
-      await saveMode1Result();
-      savedCount = 1;
-    }
-    
-    // 獲取 token 和 user（用於記錄長期記憶）
-    const token = localStorage.getItem('ipPlanningToken') || 
-                 (window.Auth && window.Auth.getToken ? window.Auth.getToken() : null);
-    const userStr = localStorage.getItem('ipPlanningUser');
-    const user = userStr ? JSON.parse(userStr) : null;
-    
-    // 讓 AI 回覆確認訊息
-    if (savedCount > 0) {
-      const aiMessage = createMode1Message('assistant', '');
-      const contentDiv = aiMessage.querySelector('.message-content');
-      contentDiv.innerHTML = renderMode1Markdown('✅ 已為您儲存！您可以在「生成結果」→「過往紀錄」中查看已儲存的內容，或在「創作者資料庫」→「IP人設規劃結果」中管理所有記錄。');
-      chatMessages.appendChild(aiMessage);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      
-      // 記錄到長期記憶
-      try {
-        await recordMode1ConversationMessage(conversationType, 'assistant', '已為您儲存！您可以在「生成結果」→「過往紀錄」中查看已儲存的內容，或在「創作者資料庫」→「IP人設規劃結果」中管理所有記錄。', token, user);
-      } catch (error) {
-        console.error('記錄長期記憶錯誤:', error);
-      }
-    } else {
-      // 如果沒有可儲存的內容，讓 AI 回覆提示
-      const aiMessage = createMode1Message('assistant', '');
-      const contentDiv = aiMessage.querySelector('.message-content');
-      contentDiv.innerHTML = renderMode1Markdown('目前沒有可儲存的內容。請先在「生成結果」→「一鍵生成」中生成內容，或繼續與我對話生成內容後再儲存。');
-      chatMessages.appendChild(aiMessage);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      
-      // 記錄到長期記憶
-      try {
-        await recordMode1ConversationMessage(conversationType, 'assistant', '目前沒有可儲存的內容。請先在「生成結果」→「一鍵生成」中生成內容，或繼續與我對話生成內容後再儲存。', token, user);
-      } catch (error) {
-        console.error('記錄長期記憶錯誤:', error);
-      }
-    }
-    
-    return;
-  }
-  
-  isMode1Sending = true;
-  
-  const chatMessages = document.getElementById('mode1-chatMessages');
-  const messageInput = document.getElementById('mode1-messageInput');
-  const sendBtn = document.getElementById('mode1-sendBtn');
-  const quickButtons = document.getElementById('mode1-quickButtons');
-  
-  if (!chatMessages || !messageInput || !sendBtn) return;
-  
-  const token = localStorage.getItem('ipPlanningToken') || 
-               (window.Auth && window.Auth.getToken ? window.Auth.getToken() : null);
-  const userStr = localStorage.getItem('ipPlanningUser');
-  const user = userStr ? JSON.parse(userStr) : null;
-  
-  // 添加用戶訊息
-  const userMessage = createMode1Message('user', message);
-  chatMessages.appendChild(userMessage);
-  
-  // 隱藏快速按鈕
-  if (quickButtons) {
-    quickButtons.style.display = 'none';
-  }
-  
-  // 清空輸入框並禁用
-  messageInput.value = '';
-  messageInput.disabled = true;
-  sendBtn.disabled = true;
-  messageInput.style.height = 'auto';
-  
-  // 記錄長期記憶
-  try {
-    await recordMode1ConversationMessage(conversationType, 'user', message, token, user);
-  } catch (error) {
-    console.error('記錄長期記憶錯誤:', error);
-  }
-  
-  // 添加載入動畫
-  const aiMessage = createMode1Message('assistant', '');
-  const contentDiv = aiMessage.querySelector('.message-content');
-  contentDiv.innerHTML = `
-    <div class="typing-indicator">
-      <span>AI思考中...</span>
-      <div class="typing-dots">
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-      </div>
-    </div>
-  `;
-  chatMessages.appendChild(aiMessage);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  
-  try {
-    const response = await fetch(`${API_URL}/api/chat/stream`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` })
-      },
-      body: JSON.stringify({
-        message: message,
-        history: [],
-        user_id: user?.user_id || null,
-        conversation_type: 'ip_planning'  // 指定對話類型
-      })
     });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    // 處理串流回應
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let fullContent = '';
-    
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
-      
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6);
-          if (data === '[DONE]') {
-            try {
-              await recordMode1ConversationMessage(currentMode1ConversationType, 'assistant', fullContent, token, user);
-            } catch (error) {
-              console.error('記錄長期記憶錯誤:', error);
-            }
-            
-            // 檢測是否生成了帳號定位、選題方向或腳本，並詢問用戶是否要儲存
-            const contentLower = fullContent.toLowerCase();
-            const isPositioning = contentLower.includes('帳號定位') || 
-                                 contentLower.includes('目標受眾') || 
-                                 contentLower.includes('內容方向') ||
-                                 contentLower.includes('風格調性') ||
-                                 (contentLower.includes('受眾') && contentLower.includes('產品'));
-            const isTopics = contentLower.includes('選題') || 
-                            contentLower.includes('影片類型配比') ||
-                            contentLower.includes('內容支柱') ||
-                            (contentLower.includes('推薦') && contentLower.includes('方向'));
-            const isScript = contentLower.includes('腳本') || 
-                           contentLower.includes('hook') ||
-                           contentLower.includes('台詞') ||
-                           contentLower.includes('畫面描述') ||
-                           contentLower.includes('字幕建議');
-            
-            // 如果檢測到生成了相關內容，添加提示訊息詢問是否要儲存
-            if (isPositioning || isTopics || isScript) {
-              setTimeout(() => {
-                const savePromptMessage = createMode1Message('assistant', '');
-                const savePromptContent = savePromptMessage.querySelector('.message-content');
-                let promptText = '';
-                if (isPositioning) {
-                  promptText = '💾 帳號定位已生成完成！\n\n如果您滿意這個定位，可以說「儲存」或點擊下方的「儲存結果」按鈕，將內容儲存到創作者資料庫的「IP人設規劃結果」中。';
-                } else if (isTopics) {
-                  promptText = '💾 選題方向已生成完成！\n\n如果您滿意這個選題方向，可以說「儲存」或點擊下方的「儲存結果」按鈕，將內容儲存到創作者資料庫的「IP人設規劃結果」中。';
-                } else if (isScript) {
-                  promptText = '💾 腳本已生成完成！\n\n如果您滿意這個腳本，可以說「儲存」或點擊下方的「儲存結果」按鈕，將內容儲存到創作者資料庫的「IP人設規劃結果」中。';
-                }
-                
-                if (promptText) {
-                  savePromptContent.innerHTML = renderMode1Markdown(promptText);
-                  chatMessages.appendChild(savePromptMessage);
-                  chatMessages.scrollTop = chatMessages.scrollHeight;
-                }
-              }, 500); // 延遲 500ms 顯示，確保內容已完全渲染
-            }
-            
-            break;
-          }
-          
-          try {
-            const parsed = JSON.parse(data);
-            
-            // 處理儲存請求事件
-            if (parsed.type === 'save_request') {
-              console.log('收到後端儲存請求，自動保存中...');
-              // 延遲一下確保內容已渲染，然後自動保存
-              setTimeout(async () => {
-                await saveMode1Result();
-              }, 500);
-              continue; // 繼續處理其他事件
-            }
-            
-            if (parsed.content) {
-              fullContent += parsed.content;
-              contentDiv.innerHTML = renderMode1Markdown(fullContent);
-              
-              // 語法高亮
-              if (typeof hljs !== 'undefined') {
-                contentDiv.querySelectorAll('pre code').forEach((block) => {
-                  if (!block.classList.contains('hljs')) {
-                    hljs.highlightElement(block);
-                  }
-                });
-              }
-              
-              chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-          } catch (e) {
-            // 忽略解析錯誤
-          }
+
+    // Enter 發送
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (message) {
+          sendMode1Message(message);
         }
-      }
-    }
-  } catch (error) {
-    console.error('發送訊息錯誤:', error);
-    
-    // 檢查是否為配額錯誤
-    const quotaInfo = error.quotaInfo || parseQuotaError(error.message);
-    let errorMessage = error.message || '未知錯誤';
-    
-    if (quotaInfo && quotaInfo.isQuotaError) {
-      errorMessage = quotaInfo.message;
-      
-      // 顯示配額錯誤通知
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast(`⚠️ ${errorMessage}`, 5000);
-      }
-    }
-    
-    if (contentDiv) {
-      // 使用統一的 escapeHtml 函數
-      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
-        if (text == null || text === undefined) return '';
-        const div = document.createElement('div');
-        div.textContent = String(text);
-        return div.innerHTML;
-      });
-      const safeErrorMsg = escapeHtml(errorMessage);
-      
-      if (quotaInfo && quotaInfo.isQuotaError) {
-        contentDiv.innerHTML = `
-          <div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
-            <p style="font-weight: 600; margin-bottom: 8px;">⚠️ ${safeErrorMsg}</p>
-            ${quotaInfo.retrySeconds ? `
-              <p style="color: #991b1b; font-size: 14px; margin-top: 8px;">
-                <i class="fas fa-clock"></i> 建議等待時間：約 ${quotaInfo.retrySeconds} 秒（${quotaInfo.retryMinutes} 分鐘）後再試
-              </p>
-            ` : '<p style="color: #991b1b; font-size: 14px; margin-top: 8px;">請稍後再試，或聯繫客服處理。</p>'}
-          </div>
-        `;
-      } else {
-        contentDiv.innerHTML = `抱歉，發生了錯誤：${safeErrorMsg}`;
-      }
-    } else {
-      const errorMessage = createMode1Message('assistant', `抱歉，發生了錯誤：${errorMessage}`);
-      chatMessages.appendChild(errorMessage);
-    }
-  } finally {
-    messageInput.disabled = false;
-    sendBtn.disabled = false;
-    if (quickButtons) {
-      quickButtons.style.display = 'flex';
-    }
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    isMode1Sending = false;
-  }
-}
-
-// 創建 Mode1 訊息元素
-function createMode1Message(role, content) {
-  const messageDiv = document.createElement('div');
-  messageDiv.className = `message ${role}`;
-  
-  const avatar = document.createElement('div');
-  avatar.className = 'message-avatar';
-  
-  if (role === 'user') {
-    const userStr = localStorage.getItem('ipPlanningUser');
-    const user = userStr ? JSON.parse(userStr) : null;
-    if (user && user.picture) {
-      const img = document.createElement('img');
-      img.src = user.picture;
-      img.style.width = '100%';
-      img.style.height = '100%';
-      img.style.borderRadius = '50%';
-      img.style.objectFit = 'cover';
-      avatar.appendChild(img);
-    } else {
-      const userName = user?.name || 'U';
-      avatar.textContent = userName.charAt(0).toUpperCase();
-    }
-  } else {
-    avatar.textContent = '🤖';
-  }
-  
-  const contentDiv = document.createElement('div');
-  contentDiv.className = 'message-content';
-  if (content) {
-    contentDiv.innerHTML = renderMode1Markdown(content);
-  }
-  
-  if (role === 'user') {
-    messageDiv.appendChild(contentDiv);
-    messageDiv.appendChild(avatar);
-  } else {
-    messageDiv.appendChild(avatar);
-    messageDiv.appendChild(contentDiv);
-  }
-  
-  return messageDiv;
-}
-
-// Markdown 渲染
-function renderMode1Markdown(text) {
-  // 優先使用安全的 Markdown 渲染函數
-  if (window.safeRenderMarkdown) {
-    return window.safeRenderMarkdown(text);
-  }
-  // 其次使用 marked（如果可用）
-  if (typeof marked !== 'undefined') {
-    // 確保 marked 支援表格和換行
-    if (!marked.getDefaults || !marked.getDefaults().gfm) {
-      marked.setOptions({ 
-        gfm: true,  // GitHub Flavored Markdown（支援表格）
-        breaks: true,  // 支援換行
-        tables: true  // 明確啟用表格支援
-      });
-    }
-    const html = marked.parse(text);
-    // 使用 DOMPurify 清理（如果可用）
-    if (typeof DOMPurify !== 'undefined') {
-      return DOMPurify.sanitize(html, {
-        ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],  // 允許表格標籤
-        ADD_ATTR: ['colspan', 'rowspan']  // 允許表格屬性
-      });
-    }
-    return html;
-  }
-  // 最後使用轉義的純文字模式
-  const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
-    if (text == null || text === undefined) return '';
-    const div = document.createElement('div');
-    div.textContent = String(text);
-    return div.innerHTML;
-  });
-  return escapeHtml(text).replace(/\n/g, '<br>');
-}
-
-// 記錄 Mode3 長期記憶
-async function recordMode1ConversationMessage(conversationType, role, content, token, user) {
-  if (!token || !content) return;
-  
-  try {
-    const user_id = user?.user_id || 
-      (token ? JSON.parse(atob(token.split('.')[1])).user_id : null);
-    
-    if (!user_id) {
-      console.warn('無法獲取 user_id，跳過長期記憶記錄');
-      return;
-    }
-    
-    const session_id = `${conversationType}_${user_id}_${Date.now()}`;
-    
-    await fetch(`${API_URL}/api/memory/long-term`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        conversation_type: conversationType,
-        session_id: session_id,
-        message_role: role,
-        message_content: content,
-        metadata: JSON.stringify({ user_id: user_id })
-      })
-    });
-  } catch (error) {
-    console.error('記錄長期記憶錯誤:', error);
-  }
-}
-
-// 使用說明抽屜相關函數已在文件頂部定義並導出
-
-// 舊的抽屜函數已刪除，改用新的彈跳視窗
-// 保留這些函數以避免錯誤，但重定向到新的彈跳視窗
-function toggleMode1ResultsDrawer() {
-  // 重定向到新的彈跳視窗
-  if (typeof openMode1OneClickModal === 'function') {
-    openMode1OneClickModal();
-  }
-}
-
-function openMode1ResultsDrawer() {
-  // 重定向到新的彈跳視窗
-  if (typeof openMode1OneClickModal === 'function') {
-    openMode1OneClickModal();
-  }
-}
-
-function closeMode1ResultsDrawer() {
-  // 重定向到新的彈跳視窗關閉函數
-  if (typeof closeMode1OneClickModal === 'function') {
-    closeMode1OneClickModal();
-  }
-}
-
-// 導出到全局作用域（為了兼容舊代碼，但會重定向到新系統）
-window.toggleMode1ResultsDrawer = toggleMode1ResultsDrawer;
-window.openMode1ResultsDrawer = openMode1ResultsDrawer;
-window.closeMode1ResultsDrawer = closeMode1ResultsDrawer;
-
-// 切換結果標籤
-function switchMode1Tab(tabName, event) {
-  document.querySelectorAll('.mode1-tab').forEach(tab => {
-    tab.classList.remove('active');
-  });
-  
-  document.querySelectorAll('.mode1-result-block').forEach(block => {
-    block.classList.remove('active');
-  });
-  
-  if (event && event.target) {
-    event.target.classList.add('active');
-  } else {
-    const tabs = document.querySelectorAll('.mode1-tab');
-    tabs.forEach(tab => {
-      const tabText = tab.textContent;
-      if (tabName === 'positioning' && tabText.includes('帳號定位')) {
-        tab.classList.add('active');
-      } else if (tabName === 'topics' && tabText.includes('選題方向')) {
-        tab.classList.add('active');
-      } else if (tabName === 'weekly' && tabText.includes('短影音腳本')) {
-        tab.classList.add('active');
-      }
-      // 保留舊的匹配邏輯作為備用
-      else if (tabName === 'profile' && tabText.includes('IP Profile')) {
-        tab.classList.add('active');
-      } else if (tabName === 'plan' && tabText.includes('14天')) {
-        tab.classList.add('active');
-      } else if (tabName === 'scripts' && tabText.includes('今日')) {
-        tab.classList.add('active');
       }
     });
   }
-  
-  // 優先使用新的 ID，如果不存在則使用舊的 ID
-  let resultBlock = document.getElementById(`mode1-${tabName}-result`);
-  if (!resultBlock) {
-    // 映射舊的標籤名稱到新的 ID
-    if (tabName === 'profile') {
-      resultBlock = document.getElementById('mode1-positioning-result');
-    } else if (tabName === 'plan') {
-      resultBlock = document.getElementById('mode1-topics-result');
-    } else if (tabName === 'scripts') {
-      resultBlock = document.getElementById('mode1-weekly-result');
-    }
-  }
-  
-  if (resultBlock) {
-    resultBlock.classList.add('active');
-  }
 }
-
-// 生成帳號定位
-async function generateMode1Positioning(forceRegenerate = false) {
-  const resultBlock = document.getElementById('mode1-positioning-result') || document.getElementById('mode1-profile-result');
-  if (!resultBlock) {
-    console.error('找不到結果區塊');
-    return;
-  }
-  const button = resultBlock.querySelector('.mode1-generate-btn');
-  if (!button) {
-    console.error('找不到生成按鈕');
-    return;
-  }
-  
-  // 如果不是強制重新生成，先檢查是否有已保存的結果
-  if (!forceRegenerate) {
-    const savedResult = await checkSavedIpPlanningResult('profile', false);
-    if (savedResult) {
-      // 如果有已保存的結果，直接顯示
-      displaySavedIpPlanningResult(resultBlock, savedResult, 'profile');
-      return;
-    }
-  }
-  
-  button.disabled = true;
-  button.innerHTML = '<span>生成中...</span>';
-  
-  // 顯示開始生成通知
-  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-    window.ReelMindCommon.showToast('正在生成帳號定位...', 2000);
-  }
-  
-  // 清空之前的內容，但保留按鈕結構
-  const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
-  if (placeholder) {
-    placeholder.style.display = 'none';
-  }
-  
-  // 創建或獲取內容容器
-  let contentDiv = resultBlock.querySelector('.mode1-result-content');
-  if (!contentDiv) {
-    contentDiv = document.createElement('div');
-    contentDiv.className = 'mode1-result-content';
-    resultBlock.appendChild(contentDiv);
-  }
-  // 顯示生成中動畫（類似 mode3）
-  const safeMessage = window.escapeHtml ? window.escapeHtml('正在生成帳號定位') : '正在生成帳號定位';
-  contentDiv.innerHTML = `
-    <div class="generating-container">
-      <div class="generating-spinner"></div>
-      <div class="generating-text">${safeMessage}<span class="generating-dots"></span></div>
-    </div>
-  `;
-  
-  try {
-    const response = await fetch(`${API_URL}/api/chat/stream`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ipPlanningToken}`
-      },
-      body: JSON.stringify({
-        message: '請根據我們的對話內容，生成帳號定位分析。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。內容包含：1.**目標受眾**：清楚說明目標受眾是誰 2.**傳達目標**：說明想要達成的目標（例如：進群、portally、建立品牌等） 3.**帳號定位**：用一句話清楚說明帳號定位 4.**內容方向**：描述主要內容方向 5.**風格調性**：說明帳號的風格和調性 6.**差異化優勢**：說明與其他帳號的差異化優勢',
-        user_id: ipPlanningUser?.user_id || 'anonymous',
-        platform: '短影音平台',
-        profile: 'IP人設規劃專家',
-        topic: '帳號定位生成',
-        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，不要程式碼或技術格式',
-        duration: '30',
-        conversation_type: 'ip_planning'  // 指定對話類型
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let content = '';
-    let hasReceivedContent = false;
-    
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
-      
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6);
-          if (data === '[DONE]') continue;
-          
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.type === 'token' && parsed.content) {
-              content += parsed.content;
-              hasReceivedContent = true;
-              const renderedContent = renderMode1Markdown(content);
-              contentDiv.innerHTML = renderedContent;
-            } else if (parsed.type === 'error') {
-              const errorMsg = parsed.message || parsed.content || '生成失敗';
-              // 檢查是否為 429 配額錯誤
-              const quotaInfo = parseQuotaError(errorMsg);
-              if (quotaInfo) {
-                const quotaError = new Error(quotaInfo.message);
-                quotaError.quotaInfo = quotaInfo;
-                throw quotaError;
-              }
-              throw new Error(errorMsg);
-            } else if (parsed.content) {
-              content += parsed.content;
-              hasReceivedContent = true;
-              const renderedContent = renderMode1Markdown(content);
-              contentDiv.innerHTML = renderedContent;
-            }
-          } catch (e) {
-            if (e.message && e.message.includes('生成失敗')) {
-              throw e;
-            }
-            console.warn('解析 JSON 錯誤:', e, '原始數據:', data);
-          }
-        }
-      }
-    }
-    
-    if (!hasReceivedContent) {
-      throw new Error('未收到任何內容，請重試');
-    }
-    
-    // 確保按鈕存在才更新
-    const finalButton = resultBlock.querySelector('.mode1-generate-btn');
-    if (finalButton) {
-      finalButton.innerHTML = '<span>重新生成</span>';
-      finalButton.disabled = false;
-      // 更新按鈕點擊事件，使其強制重新生成
-      finalButton.onclick = () => generateMode1Positioning(true);
-    }
-    
-    // 顯示成功通知
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('帳號定位生成完成！', 3000);
-    }
-  } catch (error) {
-    console.error('生成帳號定位失敗:', error);
-    
-    // 檢查是否為配額錯誤
-    const quotaInfo = error.quotaInfo || parseQuotaError(error.message);
-    let errorMessage = error.message || '未知錯誤';
-    let errorDetail = '請檢查網路連線或稍後再試。';
-    
-    if (quotaInfo && quotaInfo.isQuotaError) {
-      errorMessage = quotaInfo.message;
-      errorDetail = quotaInfo.retrySeconds 
-        ? `系統將在約 ${quotaInfo.retrySeconds} 秒後自動恢復。您也可以稍後手動重試。`
-        : '請稍後再試，或聯繫客服處理。';
-      
-      // 顯示配額錯誤通知
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast(`⚠️ ${errorMessage}`, 5000);
-      }
-    }
-    
-    if (contentDiv) {
-      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
-        if (text == null || text === undefined) return '';
-        const div = document.createElement('div');
-        div.textContent = String(text);
-        return div.innerHTML;
-      });
-      contentDiv.innerHTML = `
-        <div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
-          <p style="font-weight: 600; margin-bottom: 8px;">生成失敗：${escapeHtml(errorMessage)}</p>
-          <p style="color: #991b1b; font-size: 14px;">${escapeHtml(errorDetail)}</p>
-          ${quotaInfo && quotaInfo.retrySeconds ? `
-            <p style="color: #991b1b; font-size: 12px; margin-top: 8px;">
-              <i class="fas fa-clock"></i> 建議等待時間：約 ${quotaInfo.retrySeconds} 秒（${quotaInfo.retryMinutes} 分鐘）
-            </p>
-          ` : ''}
-        </div>
-      `;
-    }
-    const errorButton = resultBlock.querySelector('.mode1-generate-btn');
-    if (errorButton) {
-      if (quotaInfo && quotaInfo.retrySeconds) {
-        errorButton.innerHTML = `<span>⏳</span> 等待 ${quotaInfo.retrySeconds} 秒後重試`;
-        errorButton.disabled = true;
-        // 設置倒計時
-        let countdown = quotaInfo.retrySeconds;
-        const countdownInterval = setInterval(() => {
-          countdown--;
-          if (countdown > 0) {
-            errorButton.innerHTML = `<span>⏳</span> 等待 ${countdown} 秒後重試`;
-          } else {
-            errorButton.innerHTML = '<span>🔄</span> 可以重試了';
-            errorButton.disabled = false;
-            clearInterval(countdownInterval);
-          }
-        }, 1000);
-      } else {
-        errorButton.innerHTML = '<span>❌</span> 生成失敗，請重試';
-        errorButton.disabled = false;
-      }
-    } else {
-      const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
-      if (placeholder) {
-        placeholder.style.display = 'block';
-      }
-    }
-  }
-}
-
-// 保留舊函數作為備用（向後兼容）
-async function generateMode1IPProfile() {
-  return generateMode1Positioning();
-}
-
-// 生成選題方向（影片類型配比）
-async function generateMode1TopicsWithRatio(forceRegenerate = false) {
-  const resultBlock = document.getElementById('mode1-topics-result') || document.getElementById('mode1-plan-result');
-  if (!resultBlock) {
-    console.error('找不到結果區塊');
-    return;
-  }
-  const button = resultBlock.querySelector('.mode1-generate-btn');
-  if (!button) {
-    console.error('找不到生成按鈕');
-    return;
-  }
-  
-  // 如果不是強制重新生成，先檢查是否有已保存的結果
-  if (!forceRegenerate) {
-    const savedResult = await checkSavedIpPlanningResult('plan', false);
-    if (savedResult) {
-      // 如果有已保存的結果，直接顯示
-      displaySavedIpPlanningResult(resultBlock, savedResult, 'plan');
-      return;
-    }
-  }
-  
-  button.disabled = true;
-  button.innerHTML = '<span>生成中...</span>';
-  
-  // 顯示開始生成通知
-  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-    window.ReelMindCommon.showToast('正在生成選題方向...', 2000);
-  }
-  
-  // 清空之前的內容，但保留按鈕結構
-  const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
-  if (placeholder) {
-    placeholder.style.display = 'none';
-  }
-  
-  // 創建或獲取內容容器
-  let contentDiv = resultBlock.querySelector('.mode1-result-content');
-  if (!contentDiv) {
-    contentDiv = document.createElement('div');
-    contentDiv.className = 'mode1-result-content';
-    resultBlock.appendChild(contentDiv);
-  }
-  // 顯示生成中動畫（類似 mode3）
-  const safeMessage = window.escapeHtml ? window.escapeHtml('正在生成選題方向') : '正在生成選題方向';
-  contentDiv.innerHTML = `
-    <div class="generating-container">
-      <div class="generating-spinner"></div>
-      <div class="generating-text">${safeMessage}<span class="generating-dots"></span></div>
-    </div>
-  `;
-  
-  try {
-    const response = await fetch(`${API_URL}/api/chat/stream`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ipPlanningToken}`
-      },
-      body: JSON.stringify({
-        message: '請根據我們的對話內容和帳號定位，生成選題方向和影片類型配比建議。請參考知識庫中的「內容策略矩陣」，理解其邏輯而非記憶範例。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現選題方向和配比**，表格欄位包含：影片類型、佔比、目的、內容方向。請根據用戶的帳號定位、目標受眾、傳達目標來判斷適合的內容類型和配比，不要使用固定配比。如果用戶的主題不符合範例類別，請根據邏輯自創新類型並合理配置比例。',
-        user_id: ipPlanningUser?.user_id || 'anonymous',
-        platform: '短影音平台',
-        profile: 'IP人設規劃專家',
-        topic: '選題方向生成',
-        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現選題方向和配比',
-        duration: '30',
-        conversation_type: 'ip_planning'  // 指定對話類型
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let content = '';
-    let hasReceivedContent = false;
-    
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
-      
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6);
-          if (data === '[DONE]') continue;
-          
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.type === 'token' && parsed.content) {
-              content += parsed.content;
-              hasReceivedContent = true;
-              const renderedContent = renderMode1Markdown(content);
-              contentDiv.innerHTML = renderedContent;
-            } else if (parsed.type === 'error') {
-              const errorMsg = parsed.message || parsed.content || '生成失敗';
-              // 檢查是否為 429 配額錯誤
-              const quotaInfo = parseQuotaError(errorMsg);
-              if (quotaInfo) {
-                const quotaError = new Error(quotaInfo.message);
-                quotaError.quotaInfo = quotaInfo;
-                throw quotaError;
-              }
-              throw new Error(errorMsg);
-            } else if (parsed.content) {
-              content += parsed.content;
-              hasReceivedContent = true;
-              const renderedContent = renderMode1Markdown(content);
-              contentDiv.innerHTML = renderedContent;
-            }
-          } catch (e) {
-            if (e.message && e.message.includes('生成失敗')) {
-              throw e;
-            }
-            console.warn('解析 JSON 錯誤:', e, '原始數據:', data);
-          }
-        }
-      }
-    }
-    
-    if (!hasReceivedContent) {
-      throw new Error('未收到任何內容，請重試');
-    }
-    
-    // 確保按鈕存在才更新
-    const finalButton = resultBlock.querySelector('.mode1-generate-btn');
-    if (finalButton) {
-      finalButton.innerHTML = '<span>重新生成</span>';
-      finalButton.disabled = false;
-      // 更新按鈕點擊事件，使其強制重新生成
-      finalButton.onclick = () => generateMode1TopicsWithRatio(true);
-    }
-    
-    // 顯示成功通知
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('選題方向生成完成！', 3000);
-    }
-  } catch (error) {
-    console.error('生成選題方向失敗:', error);
-    
-    // 檢查是否為配額錯誤
-    const quotaInfo = error.quotaInfo || parseQuotaError(error.message);
-    let errorMessage = error.message || '未知錯誤';
-    let errorDetail = '請檢查網路連線或稍後再試。';
-    
-    if (quotaInfo && quotaInfo.isQuotaError) {
-      errorMessage = quotaInfo.message;
-      errorDetail = quotaInfo.retrySeconds 
-        ? `系統將在約 ${quotaInfo.retrySeconds} 秒後自動恢復。您也可以稍後手動重試。`
-        : '請稍後再試，或聯繫客服處理。';
-      
-      // 顯示配額錯誤通知
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast(`⚠️ ${errorMessage}`, 5000);
-      }
-    }
-    
-    if (contentDiv) {
-      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
-        if (text == null || text === undefined) return '';
-        const div = document.createElement('div');
-        div.textContent = String(text);
-        return div.innerHTML;
-      });
-      contentDiv.innerHTML = `
-        <div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
-          <p style="font-weight: 600; margin-bottom: 8px;">生成失敗：${escapeHtml(errorMessage)}</p>
-          <p style="color: #991b1b; font-size: 14px;">${escapeHtml(errorDetail)}</p>
-          ${quotaInfo && quotaInfo.retrySeconds ? `
-            <p style="color: #991b1b; font-size: 12px; margin-top: 8px;">
-              <i class="fas fa-clock"></i> 建議等待時間：約 ${quotaInfo.retrySeconds} 秒（${quotaInfo.retryMinutes} 分鐘）
-            </p>
-          ` : ''}
-        </div>
-      `;
-    }
-    const errorButton = resultBlock.querySelector('.mode1-generate-btn');
-    if (errorButton) {
-      if (quotaInfo && quotaInfo.retrySeconds) {
-        errorButton.innerHTML = `<span>⏳</span> 等待 ${quotaInfo.retrySeconds} 秒後重試`;
-        errorButton.disabled = true;
-        // 設置倒計時
-        let countdown = quotaInfo.retrySeconds;
-        const countdownInterval = setInterval(() => {
-          countdown--;
-          if (countdown > 0) {
-            errorButton.innerHTML = `<span>⏳</span> 等待 ${countdown} 秒後重試`;
-          } else {
-            errorButton.innerHTML = '<span>🔄</span> 可以重試了';
-            errorButton.disabled = false;
-            clearInterval(countdownInterval);
-          }
-        }, 1000);
-      } else {
-        errorButton.innerHTML = '<span>❌</span> 生成失敗，請重試';
-        errorButton.disabled = false;
-      }
-    } else {
-      const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
-      if (placeholder) {
-        placeholder.style.display = 'block';
-      }
-    }
-  }
-}
-
-// 保留舊函數作為備用（向後兼容）
-async function generateMode114DayPlan() {
-  return generateMode1TopicsWithRatio();
-}
-
-// 生成短影音腳本
-async function generateMode1WeeklyScripts(forceRegenerate = false) {
-  const resultBlock = document.getElementById('mode1-weekly-result') || document.getElementById('mode1-scripts-result');
-  if (!resultBlock) {
-    console.error('找不到結果區塊');
-    return;
-  }
-  const button = resultBlock.querySelector('.mode1-generate-btn');
-  if (!button) {
-    console.error('找不到生成按鈕');
-    return;
-  }
-  
-  // 如果不是強制重新生成，先檢查是否有已保存的結果
-  if (!forceRegenerate) {
-    const savedResult = await checkSavedIpPlanningResult('scripts', false);
-    if (savedResult) {
-      // 如果有已保存的結果，直接顯示
-      displaySavedIpPlanningResult(resultBlock, savedResult, 'scripts');
-      return;
-    }
-  }
-  
-  button.disabled = true;
-  button.innerHTML = '<span>生成中...</span>';
-  
-  // 顯示開始生成通知
-  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-    window.ReelMindCommon.showToast('正在生成短影音腳本...', 2000);
-  }
-  
-  // 清空之前的內容，但保留按鈕結構
-  const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
-  if (placeholder) {
-    placeholder.style.display = 'none';
-  }
-  
-  // 創建或獲取內容容器
-  let contentDiv = resultBlock.querySelector('.mode1-result-content');
-  if (!contentDiv) {
-    contentDiv = document.createElement('div');
-    contentDiv.className = 'mode1-result-content';
-    resultBlock.appendChild(contentDiv);
-  }
-  // 顯示生成中動畫（類似 mode3）
-  const safeMessage = window.escapeHtml ? window.escapeHtml('正在生成短影音腳本') : '正在生成短影音腳本';
-  contentDiv.innerHTML = `
-    <div class="generating-container">
-      <div class="generating-spinner"></div>
-      <div class="generating-text">${safeMessage}<span class="generating-dots"></span></div>
-    </div>
-  `;
-  
-  try {
-    const response = await fetch(`${API_URL}/api/chat/stream`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ipPlanningToken}`
-      },
-      body: JSON.stringify({
-        message: '請根據我們的對話內容、帳號定位和選題方向，生成短影音腳本。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現短影音腳本**，表格欄位包含：日期、主題、時間、段落、台詞、畫面描述、字幕文字、音效與轉場。每支腳本請包含：1.**主題標題**：用一句話清楚說明這支影片的主題 2.**開場鉤子**：用自然語言寫出吸引人的開場，讓觀眾想繼續看下去 3.**核心內容**：用2-3句自然語言說明影片要傳達的價值 4.**行動呼籲**：用一句話引導觀眾採取行動 5.**畫面描述**：用簡短易懂的句子描述畫面應該呈現什麼 6.**發佈文案**：寫一段適合社群媒體的文案。請確保表格格式正確，使用 Markdown 表格語法（| 欄位1 | 欄位2 | ... |）。',
-        user_id: ipPlanningUser?.user_id || 'anonymous',
-        platform: '短影音平台',
-        profile: 'IP人設規劃專家',
-        topic: '短影音腳本生成',
-        style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現短影音腳本',
-        duration: '30',
-        conversation_type: 'ip_planning'  // 指定對話類型
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let fullContent = '';
-    let hasReceivedContent = false;
-    
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        console.log('✅ 流式回應完成，總內容長度:', fullContent.length);
-        break;
-      }
-      
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
-      
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6);
-          if (data === '[DONE]') {
-            console.log('✅ 收到 [DONE] 標記');
-            continue;
-          }
-          
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.type === 'token' && parsed.content) {
-              fullContent += parsed.content;
-              hasReceivedContent = true;
-              // 實時更新顯示
-              const renderedContent = renderMode1Markdown(fullContent);
-              contentDiv.innerHTML = renderedContent;
-            } else if (parsed.type === 'end') {
-              console.log('✅ 收到 end 標記');
-              break;
-            } else if (parsed.type === 'error') {
-              const errorMsg = parsed.message || parsed.content || '生成失敗';
-              // 檢查是否為 429 配額錯誤
-              const quotaInfo = parseQuotaError(errorMsg);
-              if (quotaInfo) {
-                const quotaError = new Error(quotaInfo.message);
-                quotaError.quotaInfo = quotaInfo;
-                throw quotaError;
-              }
-              throw new Error(errorMsg);
-            } else if (parsed.content) {
-              // 兼容舊格式
-              fullContent += parsed.content;
-              hasReceivedContent = true;
-              const renderedContent = renderMode1Markdown(fullContent);
-              contentDiv.innerHTML = renderedContent;
-            }
-          } catch (e) {
-            console.warn('解析 JSON 錯誤:', e, '原始數據:', data);
-            // 繼續處理，不中斷流程
-          }
-        }
-      }
-    }
-    
-    // 最終更新顯示
-    if (fullContent) {
-      const renderedContent = renderMode1Markdown(fullContent);
-      contentDiv.innerHTML = renderedContent;
-      console.log('✅ 腳本生成完成，最終內容長度:', fullContent.length);
-    } else if (!hasReceivedContent) {
-      throw new Error('未收到任何內容，請重試');
-    }
-    
-    // 確保按鈕存在才更新
-    const finalButton = resultBlock.querySelector('.mode1-generate-btn');
-    if (finalButton) {
-      finalButton.innerHTML = '<span>重新生成</span>';
-      finalButton.disabled = false;
-      // 更新按鈕點擊事件，使其強制重新生成
-      finalButton.onclick = () => generateMode1WeeklyScripts(true);
-    }
-    
-    // 顯示成功通知
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('短影音腳本生成完成！', 3000);
-    }
-  } catch (error) {
-    console.error('❌ 生成短影音腳本失敗:', error);
-    
-    // 檢查是否為配額錯誤
-    const quotaInfo = error.quotaInfo || parseQuotaError(error.message);
-    let errorMessage = error.message || '未知錯誤';
-    let errorDetail = '請檢查網路連線或稍後再試。';
-    
-    if (quotaInfo && quotaInfo.isQuotaError) {
-      errorMessage = quotaInfo.message;
-      errorDetail = quotaInfo.retrySeconds 
-        ? `系統將在約 ${quotaInfo.retrySeconds} 秒後自動恢復。您也可以稍後手動重試。`
-        : '請稍後再試，或聯繫客服處理。';
-      
-      // 顯示配額錯誤通知
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast(`⚠️ ${errorMessage}`, 5000);
-      }
-    }
-    
-    if (contentDiv) {
-      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
-        if (text == null || text === undefined) return '';
-        const div = document.createElement('div');
-        div.textContent = String(text);
-        return div.innerHTML;
-      });
-      contentDiv.innerHTML = `
-        <div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
-          <p style="font-weight: 600; margin-bottom: 8px;">生成失敗：${escapeHtml(errorMessage)}</p>
-          <p style="color: #991b1b; font-size: 14px;">${escapeHtml(errorDetail)}</p>
-          ${quotaInfo && quotaInfo.retrySeconds ? `
-            <p style="color: #991b1b; font-size: 12px; margin-top: 8px;">
-              <i class="fas fa-clock"></i> 建議等待時間：約 ${quotaInfo.retrySeconds} 秒（${quotaInfo.retryMinutes} 分鐘）
-            </p>
-          ` : ''}
-        </div>
-      `;
-    }
-    // 確保按鈕存在才更新
-    const errorButton = resultBlock.querySelector('.mode1-generate-btn');
-    if (errorButton) {
-      if (quotaInfo && quotaInfo.retrySeconds) {
-        errorButton.innerHTML = `<span>⏳</span> 等待 ${quotaInfo.retrySeconds} 秒後重試`;
-        errorButton.disabled = true;
-        // 設置倒計時
-        let countdown = quotaInfo.retrySeconds;
-        const countdownInterval = setInterval(() => {
-          countdown--;
-          if (countdown > 0) {
-            errorButton.innerHTML = `<span>⏳</span> 等待 ${countdown} 秒後重試`;
-          } else {
-            errorButton.innerHTML = '<span>🔄</span> 可以重試了';
-            errorButton.disabled = false;
-            clearInterval(countdownInterval);
-          }
-        }, 1000);
-      } else {
-        errorButton.innerHTML = '<span>❌</span> 生成失敗，請重試';
-        errorButton.disabled = false;
-      }
-    } else {
-      // 如果按鈕不存在，重新顯示 placeholder
-      const placeholder = resultBlock.querySelector('.mode1-result-placeholder');
-      if (placeholder) {
-        placeholder.style.display = 'block';
-      }
-    }
-  }
-}
-
-// 保留舊函數作為備用（向後兼容）
-async function generateMode1TodayScripts() {
-  return generateMode1WeeklyScripts();
-}
-
-// 儲存結果（支援 Modal 系統）
-async function saveMode1Result() {
-  const token = localStorage.getItem('ipPlanningToken');
-  const userStr = localStorage.getItem('ipPlanningUser');
-  
-  if (!token || !userStr) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('請先登入', 3000);
-    }
-    return;
-  }
-  
-  try {
-    const user = JSON.parse(userStr);
-    
-    // 檢查是否在 Modal 的「一鍵生成」標籤頁中
-    const overlay = document.getElementById('mode1OneClickModalOverlay');
-    const isModalOpen = overlay && overlay.classList.contains('open');
-    const generateTab = document.getElementById('mode1OneClickTabGenerate');
-    const isGenerateTabActive = generateTab && generateTab.classList.contains('active');
-    
-    if (isModalOpen && isGenerateTabActive) {
-      // 在 Modal 的「一鍵生成」標籤頁中，檢查哪個結果有內容
-      const types = ['positioning', 'topics', 'weekly'];
-      let savedCount = 0;
-      let hasContent = false;
-      
-      for (const type of types) {
-        const contentEl = document.getElementById(`mode1OneClick${type === 'positioning' ? 'Positioning' : type === 'topics' ? 'Topics' : 'Weekly'}Content`);
-        if (contentEl && contentEl.innerHTML.trim() && !contentEl.innerHTML.includes('點擊上方按鈕開始生成')) {
-          hasContent = true;
-          // 調用一鍵生成的儲存函數
-          await saveMode1OneClickResult(type);
-          savedCount++;
-        }
-      }
-      
-      if (!hasContent) {
-        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast('沒有可儲存的內容，請先生成結果', 3000);
-        }
-        return;
-      }
-      
-      if (savedCount > 0) {
-        // 清除快取，強制重新載入
-        clearHistoryCache();
-        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast(`✅ 已儲存 ${savedCount} 個結果到創作者資料庫的「IP人設規劃結果」`, 5000);
-        }
-      }
-      return;
-    }
-    
-    // 舊的 drawer 系統（保留作為備用）
-    const activeTab = document.querySelector('.mode1-tab.active');
-    if (!activeTab) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('請先選擇要儲存的結果，或在「一鍵生成」標籤頁中生成內容', 3000);
-      }
-      return;
-    }
-    
-    let resultType = '';
-    let title = '';
-    const tabText = activeTab.textContent;
-    if (tabText.includes('帳號定位')) {
-      resultType = 'profile';
-      title = '帳號定位';
-    } else if (tabText.includes('選題方向')) {
-      resultType = 'plan';
-      title = '選題方向（影片類型配比）';
-    } else if (tabText.includes('短影音腳本')) {
-      resultType = 'scripts';
-      title = '短影音腳本';
-    } else if (tabText.includes('Profile')) {
-      resultType = 'profile';
-      title = 'IP Profile';
-    } else if (tabText.includes('規劃')) {
-      resultType = 'plan';
-      title = '14天短影音規劃';
-    } else if (tabText.includes('腳本')) {
-      resultType = 'scripts';
-      title = '今日腳本';
-    }
-    
-    if (!resultType) {
-      console.error('無法識別結果類型，tabText:', tabText, 'activeTab:', activeTab);
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('無法識別結果類型，請重新選擇標籤', 3000);
-      }
-      return;
-    }
-    
-    // 映射結果類型到 HTML ID
-    const frontendResultType = resultType === 'profile' ? 'positioning' : 
-                               resultType === 'plan' ? 'topics' : 
-                               resultType === 'scripts' ? 'weekly' : resultType;
-    const resultBlock = document.getElementById(`mode1-${frontendResultType}-result`) || 
-                       document.getElementById(`mode1-${resultType === 'profile' ? 'profile' : resultType === 'plan' ? 'plan' : 'scripts'}-result`);
-    if (!resultBlock) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('找不到結果區塊', 3000);
-      }
-      return;
-    }
-    const content = resultBlock.querySelector('.mode1-result-content');
-    
-    if (!content || !content.innerHTML.trim()) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('沒有可儲存的內容', 3000);
-      }
-      return;
-    }
-    
-    const defaultTitle = '請在此編輯你的標題';
-    
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('正在儲存...', 2000);
-    }
-    
-    const response = await fetch(`${API_URL}/api/ip-planning/save`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        user_id: user.user_id,
-        result_type: resultType,
-        title: defaultTitle,
-        content: content.innerHTML,
-        metadata: {
-          timestamp: new Date().toISOString(),
-          source: 'mode1'
-        }
-      })
-    });
-    
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}`;
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.error || errorData.message || errorMessage;
-      } catch (e) {
-        errorMessage = `HTTP ${response.status}: ${response.statusText || '請求失敗'}`;
-      }
-      throw new Error(errorMessage);
-    }
-    
-    const data = await response.json();
-    if (data.success) {
-      // 清除快取，強制重新載入
-      clearHistoryCache();
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('✅ 儲存成功！請在創作者資料庫的「IP人設規劃結果」查看', 5000);
-      }
-    } else {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('❌ ' + (data.error || '儲存失敗'), 3000);
-      }
-    }
-  } catch (error) {
-    console.error('儲存結果失敗:', error);
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('❌ 儲存失敗：' + (error.message || '請稍後再試'), 3000);
-    }
-  }
-}
-
-// 重新生成結果
-function regenerateMode1Result() {
-  const activeTab = document.querySelector('.mode1-tab.active');
-  if (!activeTab) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('請先選擇要重新生成的結果', 3000);
-    }
-    return;
-  }
-  
-  const tabText = activeTab.textContent;
-  if (tabText.includes('帳號定位')) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('正在重新生成帳號定位...', 2000);
-    }
-    generateMode1Positioning(true); // 強制重新生成
-  } else if (tabText.includes('選題方向')) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('正在重新生成選題方向...', 2000);
-    }
-    generateMode1TopicsWithRatio(true); // 強制重新生成
-  } else if (tabText.includes('短影音腳本')) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('正在重新生成短影音腳本...', 2000);
-    }
-    generateMode1WeeklyScripts(true); // 強制重新生成
-  }
-  // 保留舊的匹配邏輯作為備用
-  else if (tabText.includes('Profile')) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('正在重新生成帳號定位...', 2000);
-    }
-    generateMode1Positioning(true); // 強制重新生成
-  } else if (tabText.includes('規劃')) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('正在重新生成選題方向...', 2000);
-    }
-    generateMode1TopicsWithRatio(true); // 強制重新生成
-  } else if (tabText.includes('腳本')) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('正在重新生成短影音腳本...', 2000);
-    }
-    generateMode1WeeklyScripts(true); // 強制重新生成
-  } else {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('無法識別結果類型，請重新選擇標籤', 3000);
-    }
-  }
-}
-
-// 匯出結果
-function exportMode1Result() {
-  const activeTab = document.querySelector('.mode1-tab.active');
-  if (!activeTab) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('請先選擇要匯出的結果', 3000);
-    }
-    return;
-  }
-  
-  const tabText = activeTab.textContent;
-  let tabName = '';
-  let title = '';
-  if (tabText.includes('帳號定位')) {
-    tabName = 'positioning';
-    title = '帳號定位';
-  } else if (tabText.includes('選題方向')) {
-    tabName = 'topics';
-    title = '選題方向（影片類型配比）';
-  } else if (tabText.includes('短影音腳本')) {
-    tabName = 'weekly';
-    title = '短影音腳本';
-  }
-  // 保留舊的匹配邏輯作為備用
-  else if (tabText.includes('Profile')) {
-    tabName = 'positioning';
-    title = 'IP Profile';
-  } else if (tabText.includes('規劃')) {
-    tabName = 'topics';
-    title = '14天規劃';
-  } else if (tabText.includes('腳本')) {
-    tabName = 'weekly';
-    title = '今日腳本';
-  }
-  
-  if (!tabName) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('無法識別結果類型', 3000);
-    }
-    return;
-  }
-  
-    const resultBlock = document.getElementById(`mode1-${tabName}-result`) ||
-                     document.getElementById(`mode1-${tabName === 'positioning' ? 'profile' : tabName === 'topics' ? 'plan' : 'scripts'}-result`);
-  if (!resultBlock) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('找不到結果區塊', 3000);
-    }
-    return;
-  }
-  const content = resultBlock.querySelector('.mode1-result-content');
-  
-  if (!content || !content.innerHTML.trim()) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('沒有可匯出的內容', 3000);
-    }
-    return;
-  }
-  
-  try {
-    const textContent = content.innerText || content.textContent || '';
-    
-    const csvContent = `類型,標題,內容,匯出時間\n"${tabName}","${title || (tabName === 'positioning' ? '帳號定位' : tabName === 'topics' ? '選題方向' : '短影音腳本')}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW', {
-      timeZone: 'Asia/Taipei',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    })}"`;
-    
-    const csvBlob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const csvUrl = URL.createObjectURL(csvBlob);
-    const csvLink = document.createElement('a');
-    csvLink.href = csvUrl;
-    csvLink.download = `ip-${tabName}-${Date.now()}.csv`;
-    csvLink.click();
-    URL.revokeObjectURL(csvUrl);
-    
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('✅ 匯出成功', 3000);
-    }
-  } catch (error) {
-    console.error('匯出失敗:', error);
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('匯出失敗，請稍後再試', 3000);
-    }
-  }
-}
-
-// 生成結果 Modal 控制函數
-async function openMode1OneClickModal() {
-  // 確保舊的抽屜完全隱藏
-  const oldResultsOverlay = document.getElementById('mode1ResultsOverlay');
-  const oldResultsDrawer = document.getElementById('mode1ResultsDrawer');
-  if (oldResultsOverlay) {
-    oldResultsOverlay.style.display = 'none';
-    oldResultsOverlay.classList.remove('open');
-  }
-  if (oldResultsDrawer) {
-    oldResultsDrawer.style.display = 'none';
-    oldResultsDrawer.classList.remove('open');
-  }
-  
-  const overlay = document.getElementById('mode1OneClickModalOverlay');
-  if (overlay) {
-    // 更新視窗高度（處理 iOS Safari）
-    setIOSViewportHeight();
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    // 防止背景滾動（iOS Safari）
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
-    
-    // 預先載入數據（如果快取不存在或過期）
-    // 這樣可以讓用戶在打開 Modal 時就看到內容，而不是等待載入
-    if (!cachedHistoryData || !cachedHistoryTimestamp || (Date.now() - cachedHistoryTimestamp > CACHE_DURATION)) {
-      // 在背景載入數據，不阻塞 UI
-      fetchHistoryData(true).then(() => {
-        // 數據載入完成後，載入當前標籤頁
-        const activeTab = document.querySelector('.mode1-oneclick-tab.active');
-        if (activeTab) {
-          const tabId = activeTab.id;
-          if (tabId === 'mode1HistoryTabProfile') {
-            loadMode1OneClickHistory('profile', false);
-          } else if (tabId === 'mode1HistoryTabPlan') {
-            loadMode1OneClickHistory('plan', false);
-          } else if (tabId === 'mode1HistoryTabScripts') {
-            loadMode1OneClickHistory('scripts', false);
-          }
-        }
-      }).catch(error => {
-        console.error('預載入數據失敗:', error);
-      });
-    }
-    
-    // 預設顯示帳號定位標籤（如果快取存在，會立即顯示）
-    switchMode1HistoryType('profile');
-  } else {
-    console.error('❌ 找不到 mode1OneClickModalOverlay 元素');
-  }
-}
-// 立即導出到全局作用域，供 HTML onclick 使用
-if (typeof window !== 'undefined') {
-  window.openMode1OneClickModal = openMode1OneClickModal;
-}
-
-// 切換過往紀錄類型標籤（使用快取，快速切換）
-async function switchMode1HistoryType(type) {
-  // 更新標籤狀態
-  const profileTab = document.getElementById('mode1HistoryTabProfile');
-  const planTab = document.getElementById('mode1HistoryTabPlan');
-  const scriptsTab = document.getElementById('mode1HistoryTabScripts');
-  
-  if (profileTab) profileTab.classList.remove('active');
-  if (planTab) planTab.classList.remove('active');
-  if (scriptsTab) scriptsTab.classList.remove('active');
-  
-  if (type === 'profile' && profileTab) {
-    profileTab.classList.add('active');
-  } else if (type === 'plan' && planTab) {
-    planTab.classList.add('active');
-  } else if (type === 'scripts' && scriptsTab) {
-    scriptsTab.classList.add('active');
-  }
-  
-  // 載入對應類型的過往紀錄（使用快取，快速切換）
-  // 如果快取存在且未過期，直接使用快取數據，不顯示載入中
-  const useCache = cachedHistoryData && cachedHistoryTimestamp && (Date.now() - cachedHistoryTimestamp < CACHE_DURATION);
-  await loadMode1OneClickHistory(type, !useCache);
-}
-
-// 導出到全局作用域
-window.switchMode1HistoryType = switchMode1HistoryType;
-
-// 全局變量：存儲已選擇的設定
-let selectedSettings = {
-  profile: null,
-  plan: null,
-  scripts: null
-};
-
-// 全局變量：快取過往紀錄數據
-let cachedHistoryData = null;
-let cachedHistoryTimestamp = null;
-const CACHE_DURATION = 30000; // 快取30秒
-
-// 獲取過往紀錄數據（帶快取）
-async function fetchHistoryData(forceRefresh = false) {
-  // 檢查快取是否有效
-  if (!forceRefresh && cachedHistoryData && cachedHistoryTimestamp) {
-    const now = Date.now();
-    if (now - cachedHistoryTimestamp < CACHE_DURATION) {
-      console.log('使用快取的過往紀錄數據');
-      return cachedHistoryData;
-    }
-  }
-  
-  if (!ipPlanningUser?.user_id || !ipPlanningToken) {
-    return null;
-  }
-  
-  try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
-      headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('載入失敗');
-    }
-    
-    const data = await response.json();
-    
-    // 更新快取
-    cachedHistoryData = data;
-    cachedHistoryTimestamp = Date.now();
-    
-    return data;
-  } catch (error) {
-    console.error('獲取過往紀錄數據失敗:', error);
-    // 如果請求失敗，嘗試使用快取數據
-    if (cachedHistoryData) {
-      console.log('請求失敗，使用快取數據');
-      return cachedHistoryData;
-    }
-    throw error;
-  }
-}
-
-// 清除快取（當刪除或新增記錄時調用）
-function clearHistoryCache() {
-  cachedHistoryData = null;
-  cachedHistoryTimestamp = null;
-}
-
-// 載入過往紀錄（只顯示指定類型，使用快取）
-async function loadMode1OneClickHistory(type = 'profile', forceRefresh = false) {
-  const container = document.getElementById('mode1OneClickHistoryContainer');
-  if (!container) return;
-  
-  if (!ipPlanningUser?.user_id || !ipPlanningToken) {
-    container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>請先登入以查看過往紀錄</p></div>';
-    return;
-  }
-  
-  try {
-    // 顯示載入中（只在首次載入或強制刷新時顯示）
-    if (forceRefresh || !cachedHistoryData) {
-      container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>載入中...</p></div>';
-    }
-    
-    // 獲取數據（使用快取）
-    const data = await fetchHistoryData(forceRefresh);
-    
-    if (!data || !data.success || !data.results || data.results.length === 0) {
-      container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>尚無過往紀錄</p></div>';
-      return;
-    }
-    
-    // 過濾出指定類型的結果
-    const typeMap = {
-      'profile': 'profile',
-      'plan': 'plan',
-      'scripts': 'scripts'
-    };
-    
-    const targetType = typeMap[type] || 'profile';
-    const results = data.results
-      .filter(r => r.result_type === targetType)
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    
-    if (results.length === 0) {
-      const typeNames = {
-        profile: '帳號定位',
-        plan: '選題方向',
-        scripts: '短影音腳本'
-      };
-      container.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><p>尚無${typeNames[targetType]}記錄</p></div>`;
-      return;
-    }
-    
-    const typeNames = {
-      profile: '帳號定位',
-      plan: '選題方向',
-      scripts: '短影音腳本'
-    };
-    
-    // 使用文檔片段優化渲染性能
-    const fragment = document.createDocumentFragment();
-    const tempDiv = document.createElement('div');
-    
-    results.forEach((result, index) => {
-      const date = new Date(result.created_at).toLocaleString('zh-TW', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      
-      const contentPreview = result.content ? result.content.replace(/<[^>]*>/g, '').substring(0, 150) : '';
-      const fullContent = result.content || '';
-      
-      // 檢查是否已選擇
-      const isSelected = selectedSettings[targetType]?.id === result.id;
-      
-      // 獲取保存的標題（如果有的話）
-      const titleKey = `mode1-history-title-${result.id}`;
-      const savedTitle = localStorage.getItem(titleKey);
-      const displayTitle = savedTitle || result.title || typeNames[targetType];
-      
-      // 使用統一的 escapeHtml 函數
-      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
-        if (text == null || text === undefined) return '';
-        const div = document.createElement('div');
-        div.textContent = String(text);
-        return div.innerHTML;
-      });
-      
-      const itemHTML = `
-        <div class="mode1-oneclick-history-item" data-result-id="${result.id}" data-result-type="${targetType}">
-          <div class="mode1-oneclick-history-item-header">
-            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
-              <div class="mode1-oneclick-history-item-title" id="mode1HistoryTitle${result.id}" data-result-id="${result.id}" style="cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; flex: 1; min-width: 0;" onclick="editMode1HistoryTitle(${result.id})" title="點擊編輯標題" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='transparent'">${escapeHtml(displayTitle)}</div>
-              <input type="text" class="mode1-oneclick-history-item-title-input" id="mode1HistoryTitleInput${result.id}" data-result-id="${result.id}" value="${escapeHtml(displayTitle)}" style="display: none; flex: 1; min-width: 0; padding: 4px 8px; border: 1px solid #3b82f6; border-radius: 4px; font-size: 16px; font-weight: 600; color: #1f2937;" onblur="saveMode1HistoryTitle(${result.id})" onkeydown="if(event.key === 'Enter') { event.preventDefault(); saveMode1HistoryTitle(${result.id}); } else if(event.key === 'Escape') { cancelMode1HistoryTitleEdit(${result.id}); }">
-              <i class="fas fa-edit" style="cursor: pointer; color: #6b7280; font-size: 14px; opacity: 0.6; transition: opacity 0.2s;" onclick="editMode1HistoryTitle(${result.id})" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></i>
-            </div>
-            <div class="mode1-oneclick-history-item-date">${date}</div>
-          </div>
-          <div class="mode1-oneclick-history-item-content" id="historyContent${result.id}">
-            ${renderMode1Markdown(contentPreview)}${fullContent.length > 150 ? '...' : ''}
-          </div>
-          <div class="mode1-oneclick-history-item-actions">
-            <button class="mode1-oneclick-history-item-btn" onclick="expandHistoryContent(${result.id})">
-              <span>展開</span>
-            </button>
-            <button class="mode1-oneclick-history-item-btn select ${isSelected ? 'selected' : ''}" onclick="selectHistoryResult('${targetType}', ${result.id})">
-              <span>${isSelected ? '已選擇' : '選擇'}</span>
-            </button>
-            <button class="mode1-oneclick-history-item-btn" onclick="exportHistoryResult(${result.id}, '${targetType}')">
-              <span>匯出</span>
-            </button>
-            <button class="mode1-oneclick-history-item-btn danger" onclick="deleteMode1HistoryResult(${result.id}, '${targetType}')" style="background: #ef4444; color: white;">
-              <span>刪除</span>
-            </button>
-          </div>
-        </div>
-      `;
-      
-      tempDiv.innerHTML = itemHTML;
-      while (tempDiv.firstChild) {
-        fragment.appendChild(tempDiv.firstChild);
-      }
-    });
-    
-    // 一次性更新 DOM
-    container.innerHTML = '';
-    container.appendChild(fragment);
-    updateSelectedSettingsDisplay();
-  } catch (error) {
-    console.error('載入過往紀錄失敗:', error);
-    container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #dc2626;"><p>載入失敗，請稍後再試</p></div>';
-  }
-}
-
-// 展開/收起歷史內容
-window.expandHistoryContent = function(resultId) {
-  const contentEl = document.getElementById(`historyContent${resultId}`);
-  if (!contentEl) return;
-  
-  const item = contentEl.closest('.mode1-oneclick-history-item');
-  if (!item) return;
-  
-  const resultType = item.dataset.resultType;
-  const resultIdNum = parseInt(resultId);
-  
-  if (contentEl.classList.contains('expanded')) {
-    // 收起
-    contentEl.classList.remove('expanded');
-    const btn = contentEl.nextElementSibling?.querySelector('button');
-    if (btn) btn.innerHTML = '<span>展開</span>';
-    
-    // 重新載入簡短預覽
-    loadHistoryContentPreview(resultIdNum, resultType, contentEl);
-  } else {
-    // 展開
-    loadFullHistoryContent(resultIdNum, resultType, contentEl);
-  }
-};
-
-// 載入完整歷史內容（使用快取）
-async function loadFullHistoryContent(resultId, resultType, contentEl) {
-  try {
-    // 優先使用快取數據
-    let data = cachedHistoryData;
-    
-    // 如果快取不存在或過期，重新獲取
-    if (!data || !cachedHistoryTimestamp || (Date.now() - cachedHistoryTimestamp > CACHE_DURATION)) {
-      data = await fetchHistoryData(false);
-    }
-    
-    if (data && data.success && data.results) {
-      // 從結果中找出對應的 resultId
-      const result = data.results.find(r => r.id === resultId);
-      if (result) {
-        contentEl.innerHTML = renderMode1Markdown(result.content);
-        contentEl.classList.add('expanded');
-        const btn = contentEl.nextElementSibling?.querySelector('button');
-        if (btn) btn.innerHTML = '<span>收起</span>';
-      }
-    }
-  } catch (error) {
-    console.error('載入完整內容失敗:', error);
-  }
-}
-
-// 載入歷史內容預覽（使用快取）
-async function loadHistoryContentPreview(resultId, resultType, contentEl) {
-  try {
-    // 優先使用快取數據
-    let data = cachedHistoryData;
-    
-    // 如果快取不存在或過期，重新獲取
-    if (!data || !cachedHistoryTimestamp || (Date.now() - cachedHistoryTimestamp > CACHE_DURATION)) {
-      data = await fetchHistoryData(false);
-    }
-    
-    if (data && data.success && data.results) {
-      // 從結果中找出對應的 resultId
-      const result = data.results.find(r => r.id === resultId);
-      if (result) {
-        const preview = result.content.replace(/<[^>]*>/g, '').substring(0, 150);
-        contentEl.innerHTML = renderMode1Markdown(preview) + '...';
-        contentEl.classList.remove('expanded');
-      }
-    }
-  } catch (error) {
-    console.error('載入預覽失敗:', error);
-  }
-}
-
-// 使用歷史結果到生成區域
-window.loadHistoryResultToGenerate = function(type, resultId) {
-  // 切換到生成標籤
-  switchMode1OneClickTab('generate').then(() => {
-    // 載入結果到對應的卡片
-    loadHistoryResultToCard(type, resultId);
-  });
-};
-
-// 載入歷史結果到卡片（使用快取，此函數已不再使用，保留作為備用）
-async function loadHistoryResultToCard(type, resultId) {
-  try {
-    // 優先使用快取數據
-    let data = cachedHistoryData;
-    
-    // 如果快取不存在或過期，重新獲取
-    if (!data || !cachedHistoryTimestamp || (Date.now() - cachedHistoryTimestamp > CACHE_DURATION)) {
-      data = await fetchHistoryData(false);
-    }
-    
-    if (data && data.success && data.results) {
-      // 從結果中找出對應的 resultId
-      const result = data.results.find(r => r.id === resultId);
-      if (result) {
-        const typeMap = {
-          'profile': 'positioning',
-          'plan': 'topics',
-          'scripts': 'weekly'
-        };
-        const cardType = typeMap[type] || type;
-        updateMode1OneClickStatus(cardType, 'completed', result.content);
-        
-        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast('已載入歷史結果', 2000);
-        }
-      }
-    }
-  } catch (error) {
-    console.error('載入歷史結果失敗:', error);
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('載入失敗', 2000);
-    }
-  }
-}
-
-// 選擇歷史結果（使用快取）
-window.selectHistoryResult = async function(type, resultId) {
-  try {
-    // 優先使用快取數據
-    let data = cachedHistoryData;
-    
-    // 如果快取不存在或過期，重新獲取
-    if (!data || !cachedHistoryTimestamp || (Date.now() - cachedHistoryTimestamp > CACHE_DURATION)) {
-      data = await fetchHistoryData(false);
-    }
-    
-    if (data && data.success && data.results) {
-      const result = data.results.find(r => r.id === resultId);
-      if (result) {
-        // 更新選擇設定
-        selectedSettings[type] = {
-          id: result.id,
-          title: result.title || (type === 'profile' ? '帳號定位' : type === 'plan' ? '選題方向' : '短影音腳本'),
-          content: result.content
-        };
-        
-        // 更新顯示
-        updateSelectedSettingsDisplay();
-        
-        // 重新載入當前標籤頁以更新按鈕狀態（使用快取，不重新請求）
-        const activeTab = document.querySelector('.mode1-oneclick-tab.active');
-        if (activeTab) {
-          const tabId = activeTab.id;
-          if (tabId === 'mode1HistoryTabProfile') {
-            await loadMode1OneClickHistory('profile', false); // 使用快取
-          } else if (tabId === 'mode1HistoryTabPlan') {
-            await loadMode1OneClickHistory('plan', false); // 使用快取
-          } else if (tabId === 'mode1HistoryTabScripts') {
-            await loadMode1OneClickHistory('scripts', false); // 使用快取
-          }
-        }
-        
-        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast('✅ 已選擇', 2000);
-        }
-      }
-    }
-  } catch (error) {
-    console.error('選擇歷史結果失敗:', error);
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('選擇失敗，請稍後再試', 3000);
-    }
-  }
-}
-
-// 更新選擇設定顯示
-function updateSelectedSettingsDisplay() {
-  const settingsContainer = document.getElementById('mode1SelectedSettings');
-  const profileItem = document.getElementById('mode1SelectedProfile');
-  const planItem = document.getElementById('mode1SelectedPlan');
-  const scriptsItem = document.getElementById('mode1SelectedScripts');
-  const profileValue = document.getElementById('mode1SelectedProfileValue');
-  const planValue = document.getElementById('mode1SelectedPlanValue');
-  const scriptsValue = document.getElementById('mode1SelectedScriptsValue');
-  
-  if (!settingsContainer) return;
-  
-  // 檢查是否有任何選擇
-  const hasSelection = selectedSettings.profile || selectedSettings.plan || selectedSettings.scripts;
-  
-  if (hasSelection) {
-    settingsContainer.style.display = 'block';
-    
-    // 更新帳號定位
-    if (selectedSettings.profile && profileItem && profileValue) {
-      profileItem.style.display = 'flex';
-      profileValue.textContent = selectedSettings.profile.title;
-    } else if (profileItem) {
-      profileItem.style.display = 'none';
-    }
-    
-    // 更新選題方向
-    if (selectedSettings.plan && planItem && planValue) {
-      planItem.style.display = 'flex';
-      planValue.textContent = selectedSettings.plan.title;
-    } else if (planItem) {
-      planItem.style.display = 'none';
-    }
-    
-    // 更新短影音腳本
-    if (selectedSettings.scripts && scriptsItem && scriptsValue) {
-      scriptsItem.style.display = 'flex';
-      scriptsValue.textContent = selectedSettings.scripts.title;
-    } else if (scriptsItem) {
-      scriptsItem.style.display = 'none';
-    }
-  } else {
-    settingsContainer.style.display = 'none';
-  }
-}
-
-// 移除選擇設定
-window.removeSelectedSetting = function(type) {
-  selectedSettings[type] = null;
-  updateSelectedSettingsDisplay();
-  
-  // 重新載入當前標籤頁以更新按鈕狀態
-  const activeTab = document.querySelector('.mode1-oneclick-tab.active');
-  if (activeTab) {
-    const tabId = activeTab.id;
-    if (tabId === 'mode1HistoryTabProfile') {
-      loadMode1OneClickHistory('profile');
-    } else if (tabId === 'mode1HistoryTabPlan') {
-      loadMode1OneClickHistory('plan');
-    } else if (tabId === 'mode1HistoryTabScripts') {
-      loadMode1OneClickHistory('scripts');
-    }
-  }
-  
-  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-    window.ReelMindCommon.showToast('已移除選擇', 2000);
-  }
-}
-
-// 使用選擇的設定與AI對話
-window.useSelectedSettingsToChat = function() {
-  // 檢查是否有選擇任何設定
-  const hasSelection = selectedSettings.profile || selectedSettings.plan || selectedSettings.scripts;
-  
-  if (!hasSelection) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('請先選擇要使用的設定', 3000);
-    }
-    return;
-  }
-  
-  // 關閉 Modal
-  closeMode1OneClickModal();
-  
-  // 構建提示訊息
-  let message = '我已經選擇了以下設定，讓我們開始討論短影音相關內容：\n\n';
-  
-  if (selectedSettings.profile) {
-    message += `**帳號定位：**\n${selectedSettings.profile.content.substring(0, 200)}...\n\n`;
-  }
-  
-  if (selectedSettings.plan) {
-    message += `**選題方向：**\n${selectedSettings.plan.content.substring(0, 200)}...\n\n`;
-  }
-  
-  if (selectedSettings.scripts) {
-    message += `**短影音腳本：**\n${selectedSettings.scripts.content.substring(0, 200)}...\n\n`;
-  }
-  
-  message += '請根據這些設定，幫我討論和優化短影音內容。';
-  
-  // 將訊息填入輸入框並發送
-  const messageInput = document.getElementById('mode1-messageInput');
-  if (messageInput) {
-    messageInput.value = message;
-    // 觸發輸入框高度調整
-    messageInput.style.height = 'auto';
-    messageInput.style.height = messageInput.scrollHeight + 'px';
-  }
-  
-  // 發送訊息
-  setTimeout(() => {
-    sendMode1Message(message, 'ip_planning');
-  }, 100);
-}
-
-// 刪除歷史結果
-window.deleteMode1HistoryResult = async function(resultId, resultType) {
-  if (!confirm('確定要刪除此記錄嗎？此操作無法復原。')) {
-    return;
-  }
-  
-  if (!ipPlanningUser?.user_id || !ipPlanningToken) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('請先登入', 3000);
-    }
-    return;
-  }
-  
-  try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (response.ok) {
-      // 清除快取，強制重新載入
-      clearHistoryCache();
-      
-      // 如果刪除的是已選擇的設定，清除選擇
-      if (selectedSettings[resultType]?.id === resultId) {
-        selectedSettings[resultType] = null;
-        updateSelectedSettingsDisplay();
-      }
-      
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('✅ 記錄已刪除', 3000);
-      }
-      
-      // 根據刪除的類型，重新載入對應標籤頁的歷史記錄（強制刷新）
-      // 確保刪除後保持在當前標籤頁，而不是跳到帳號定位
-      const typeMap = {
-        'profile': 'profile',
-        'plan': 'plan',
-        'scripts': 'scripts'
-      };
-      const targetType = typeMap[resultType] || resultType;
-      
-      // 切換到對應的標籤頁並重新載入
-      await switchMode1HistoryType(targetType);
-      await loadMode1OneClickHistory(targetType, true); // 強制刷新
-    } else {
-      const errorData = await response.json().catch(() => ({ error: '刪除失敗' }));
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast(`刪除失敗: ${errorData.error || '請稍後再試'}`, 3000);
-      }
-    }
-  } catch (error) {
-    console.error('刪除歷史結果失敗:', error);
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('刪除失敗，請稍後再試', 3000);
-    }
-  }
-}
-
-// 匯出歷史結果（使用快取）
-window.exportHistoryResult = async function(resultId, resultType) {
-  try {
-    // 優先使用快取數據
-    let data = cachedHistoryData;
-    
-    // 如果快取不存在或過期，重新獲取
-    if (!data || !cachedHistoryTimestamp || (Date.now() - cachedHistoryTimestamp > CACHE_DURATION)) {
-      data = await fetchHistoryData(false);
-    }
-    
-    if (data && data.success && data.results) {
-      // 從結果中找出對應的 resultId
-      const result = data.results.find(r => r.id === resultId);
-      if (result) {
-          const typeNames = {
-            'profile': '帳號定位',
-            'plan': '選題方向',
-            'scripts': '短影音腳本'
-          };
-          const typeName = typeNames[resultType] || resultType;
-          const textContent = result.content.replace(/<[^>]*>/g, '');
-          
-          const csvContent = `類型,標題,內容,匯出時間\n"${resultType}","${result.title || typeName}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW', {
-            timeZone: 'Asia/Taipei',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-          })}"`;
-          
-          const csvBlob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-          const csvUrl = URL.createObjectURL(csvBlob);
-          const csvLink = document.createElement('a');
-          csvLink.href = csvUrl;
-          csvLink.download = `ip-${resultType}-${resultId}-${Date.now()}.csv`;
-          csvLink.click();
-          URL.revokeObjectURL(csvUrl);
-          
-          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast('✅ 匯出成功', 3000);
-          }
-        }
-      }
-    }
-  } catch (error) {
-    console.error('匯出失敗:', error);
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('匯出失敗，請稍後再試', 3000);
-    }
-  }
-};
-
-// 載入生成結果模態框的已保存結果
-async function loadMode1OneClickSavedResults() {
-  if (!ipPlanningUser?.user_id || !ipPlanningToken) {
-    return;
-  }
-  
-  try {
-    // 檢查已保存的結果
-    const [savedPositioning, savedTopics, savedWeekly] = await Promise.all([
-      checkSavedIpPlanningResult('profile', false),
-      checkSavedIpPlanningResult('plan', false),
-      checkSavedIpPlanningResult('scripts', false)
-    ]);
-    
-    // 更新帳號定位
-    if (savedPositioning) {
-      updateMode1OneClickStatus('positioning', 'completed', savedPositioning.content);
-    } else {
-      updateMode1OneClickStatus('positioning', 'pending', '');
-    }
-    
-    // 更新選題方向
-    if (savedTopics) {
-      updateMode1OneClickStatus('topics', 'completed', savedTopics.content);
-    } else {
-      updateMode1OneClickStatus('topics', 'pending', '');
-    }
-    
-    // 更新短影音腳本
-    if (savedWeekly) {
-      updateMode1OneClickStatus('weekly', 'completed', savedWeekly.content);
-    } else {
-      updateMode1OneClickStatus('weekly', 'pending', '');
-    }
-  } catch (error) {
-    console.error('載入已保存結果失敗:', error);
-  }
-}
-
-function closeMode1OneClickModal() {
-  const overlay = document.getElementById('mode1OneClickModalOverlay');
-  if (overlay) {
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-    // 恢復背景滾動（iOS Safari）
-    document.body.style.position = '';
-    document.body.style.width = '';
-  }
-}
-// 導出到全局作用域，供 HTML onclick 使用
-window.closeMode1OneClickModal = closeMode1OneClickModal;
-
-// 更新一鍵生成結果卡片狀態
-function updateMode1OneClickStatus(type, status, message = '') {
-  // 如果狀態為 pending 且沒有內容，顯示預設提示
-  if (status === 'pending' && !message) {
-    message = '點擊上方按鈕開始生成';
-  }
-  const statusMap = {
-    'positioning': {
-      statusEl: document.getElementById('mode1OneClickPositioningStatus'),
-      contentEl: document.getElementById('mode1OneClickPositioningContent'),
-      cardEl: document.getElementById('mode1OneClickPositioningCard'),
-      actionsEl: document.getElementById('mode1OneClickPositioningActions')
-    },
-    'topics': {
-      statusEl: document.getElementById('mode1OneClickTopicsStatus'),
-      contentEl: document.getElementById('mode1OneClickTopicsContent'),
-      cardEl: document.getElementById('mode1OneClickTopicsCard'),
-      actionsEl: document.getElementById('mode1OneClickTopicsActions')
-    },
-    'weekly': {
-      statusEl: document.getElementById('mode1OneClickWeeklyStatus'),
-      contentEl: document.getElementById('mode1OneClickWeeklyContent'),
-      cardEl: document.getElementById('mode1OneClickWeeklyCard'),
-      actionsEl: document.getElementById('mode1OneClickWeeklyActions')
-    }
-  };
-  
-  const elements = statusMap[type];
-  if (!elements) return;
-  
-  // 更新狀態標籤
-  if (elements.statusEl) {
-    elements.statusEl.className = 'mode1-oneclick-result-status ' + status;
-    const statusText = {
-      'pending': '待生成',
-      'generating': '生成中...',
-      'completed': '已完成',
-      'error': '生成失敗'
-    };
-    elements.statusEl.textContent = statusText[status] || status;
-  }
-  
-  // 更新卡片樣式
-  if (elements.cardEl) {
-    elements.cardEl.classList.remove('generating', 'completed');
-    if (status === 'generating') {
-      elements.cardEl.classList.add('generating');
-    } else if (status === 'completed') {
-      elements.cardEl.classList.add('completed');
-    }
-  }
-  
-  // 更新內容
-  if (elements.contentEl) {
-    const wrapperEl = elements.contentEl.parentElement;
-    const expandEl = wrapperEl?.nextElementSibling;
-    
-    if (status === 'generating') {
-      elements.contentEl.innerHTML = `
-        <div class="generating-container">
-          <div class="generating-spinner"></div>
-          <div class="generating-text">${message || '生成中...'}<span class="generating-dots"></span></div>
-        </div>
-      `;
-      if (expandEl && expandEl.classList.contains('mode1-oneclick-result-expand')) {
-        expandEl.style.display = 'none';
-      }
-    } else if (status === 'completed' && message) {
-      elements.contentEl.innerHTML = renderMode1Markdown(message);
-      elements.contentEl.classList.add('has-content');
-      
-      // 確保表格在滾動容器中（短影音腳本表格需要橫向滾動）
-      setTimeout(() => {
-        const tables = elements.contentEl.querySelectorAll('table');
-        tables.forEach(table => {
-          // 檢查表格是否已經在 wrapper 中
-          let currentParent = table.parentElement;
-          let isInWrapper = false;
-          while (currentParent && currentParent !== elements.contentEl) {
-            if (currentParent.classList.contains('mode1-oneclick-result-content-wrapper')) {
-              isInWrapper = true;
-              break;
-            }
-            currentParent = currentParent.parentElement;
-          }
-          
-          if (!isInWrapper) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'mode1-oneclick-result-content-wrapper';
-            table.parentElement.insertBefore(wrapper, table);
-            wrapper.appendChild(table);
-          }
-          
-          // 確保表格樣式正確（防止超出容器）
-          table.style.maxWidth = '100%';
-          table.style.boxSizing = 'border-box';
-          
-          // 手機版：確保表格列寬對齊
-          if (window.innerWidth <= 768) {
-            table.style.tableLayout = 'fixed';
-            table.style.width = '100%';
-            
-            // 確保所有單元格正確換行
-            const cells = table.querySelectorAll('th, td');
-            cells.forEach(cell => {
-              cell.style.whiteSpace = 'normal';
-              cell.style.wordWrap = 'break-word';
-              cell.style.wordBreak = 'break-word';
-              cell.style.overflowWrap = 'break-word';
-            });
-          }
-        });
-      }, 100);
-      
-      // 檢查內容高度，決定是否顯示展開按鈕（改為彈出模態視窗）
-      if (wrapperEl) {
-        const contentHeight = elements.contentEl.scrollHeight;
-        const maxHeight = window.innerWidth <= 768 ? 200 : 300;
-        if (contentHeight > maxHeight) {
-          // 內容超過限制，顯示展開按鈕（彈出模態視窗）
-          wrapperEl.classList.add('collapsed');
-          wrapperEl.classList.remove('expanded');
-          if (expandEl && expandEl.classList.contains('mode1-oneclick-result-expand')) {
-            expandEl.style.display = 'block';
-            const btn = expandEl.querySelector('button');
-            if (btn) btn.innerHTML = '<span>展開</span>';
-          }
-        } else {
-          // 內容未超過限制，仍然可以展開查看（但按鈕可選顯示）
-          wrapperEl.classList.remove('collapsed');
-          wrapperEl.classList.add('expanded');
-          // 即使內容不長，也顯示展開按鈕，讓用戶可以在模態視窗中查看
-          if (expandEl && expandEl.classList.contains('mode1-oneclick-result-expand')) {
-            expandEl.style.display = 'block';
-            const btn = expandEl.querySelector('button');
-            if (btn) btn.innerHTML = '<span>展開</span>';
-          }
-        }
-      }
-      
-      if (elements.actionsEl) {
-        elements.actionsEl.style.display = 'flex';
-      }
-    } else if (status === 'pending') {
-      elements.contentEl.innerHTML = `<p style="text-align: center; color: #9ca3af; padding: 40px 0;">${message || '點擊上方按鈕開始生成'}</p>`;
-      if (wrapperEl) {
-        wrapperEl.classList.remove('collapsed', 'expanded');
-      }
-      if (expandEl && expandEl.classList.contains('mode1-oneclick-result-expand')) {
-        expandEl.style.display = 'none';
-      }
-      if (elements.actionsEl) {
-        elements.actionsEl.style.display = 'none';
-      }
-    } else if (status === 'error') {
-      const escapeHtml = window.ReelMindSecurity?.escapeHtml || window.escapeHtml || ((text) => {
-        if (text == null || text === undefined) return '';
-        const div = document.createElement('div');
-        div.textContent = String(text);
-        return div.innerHTML;
-      });
-      elements.contentEl.innerHTML = `<div style="color: #dc2626; padding: 16px; background: #fef2f2; border-radius: 8px;">${escapeHtml(message || '生成失敗')}</div>`;
-      if (expandEl && expandEl.classList.contains('mode1-oneclick-result-expand')) {
-        expandEl.style.display = 'none';
-      }
-    }
-  }
-}
-
-// 一鍵生成全部內容
-async function generateMode1All(forceRegenerate = false) {
-  const generateBtn = document.getElementById('mode1OneClickGenerateAllBtn');
-  if (!generateBtn) return;
-  
-  generateBtn.disabled = true;
-  generateBtn.innerHTML = '<span>正在生成中，請稍候...</span>';
-  
-  // 顯示開始生成通知
-  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-    window.ReelMindCommon.showToast('正在一鍵生成全部內容...', 2000);
-  }
-  
-  try {
-    // 如果不是強制重新生成，先檢查是否有已保存的結果
-    let positioningContent = null;
-    let topicsContent = null;
-    let weeklyContent = null;
-    
-    if (!forceRegenerate) {
-      // 檢查已保存的結果
-      const [savedPositioning, savedTopics, savedWeekly] = await Promise.all([
-        checkSavedIpPlanningResult('profile', false),
-        checkSavedIpPlanningResult('plan', false),
-        checkSavedIpPlanningResult('scripts', false)
-      ]);
-      
-      positioningContent = savedPositioning?.content || null;
-      topicsContent = savedTopics?.content || null;
-      weeklyContent = savedWeekly?.content || null;
-    }
-    
-    // 更新卡片狀態
-    if (positioningContent && !forceRegenerate) {
-      updateMode1OneClickStatus('positioning', 'completed', positioningContent);
-    } else {
-      updateMode1OneClickStatus('positioning', 'generating', '正在生成帳號定位');
-    }
-    
-    if (topicsContent && !forceRegenerate) {
-      updateMode1OneClickStatus('topics', 'completed', topicsContent);
-    } else {
-      updateMode1OneClickStatus('topics', 'generating', '正在生成選題方向');
-    }
-    
-    if (weeklyContent && !forceRegenerate) {
-      updateMode1OneClickStatus('weekly', 'completed', weeklyContent);
-    } else {
-      updateMode1OneClickStatus('weekly', 'generating', '正在生成短影音腳本');
-    }
-    
-    // 只生成沒有已保存結果的內容
-    const promises = [];
-    if (!positioningContent || forceRegenerate) {
-      promises.push(generateMode1PositioningForOneClick().then(content => ({ type: 'positioning', content })));
-    } else {
-      promises.push(Promise.resolve({ type: 'positioning', content: positioningContent, fromCache: true }));
-    }
-    
-    if (!topicsContent || forceRegenerate) {
-      promises.push(generateMode1TopicsForOneClick().then(content => ({ type: 'topics', content })));
-    } else {
-      promises.push(Promise.resolve({ type: 'topics', content: topicsContent, fromCache: true }));
-    }
-    
-    if (!weeklyContent || forceRegenerate) {
-      promises.push(generateMode1WeeklyForOneClick().then(content => ({ type: 'weekly', content })));
-    } else {
-      promises.push(Promise.resolve({ type: 'weekly', content: weeklyContent, fromCache: true }));
-    }
-    
-    const results = await Promise.allSettled(promises);
-    
-    // 處理結果
-    results.forEach((result, index) => {
-      if (result.status === 'fulfilled') {
-        const { type, content, fromCache } = result.value;
-        if (type === 'positioning') {
-          updateMode1OneClickStatus('positioning', 'completed', content);
-          if (fromCache && window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast('已載入之前的帳號定位記錄', 2000);
-          }
-        } else if (type === 'topics') {
-          updateMode1OneClickStatus('topics', 'completed', content);
-          if (fromCache && window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast('已載入之前的選題方向記錄', 2000);
-          }
-        } else if (type === 'weekly') {
-          updateMode1OneClickStatus('weekly', 'completed', content);
-          if (fromCache && window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast('已載入之前的短影音腳本記錄', 2000);
-          }
-        }
-      } else {
-        // 根據索引判斷是哪個類型失敗
-        if (index === 0) {
-          updateMode1OneClickStatus('positioning', 'error', result.reason?.message || '生成失敗');
-        } else if (index === 1) {
-          updateMode1OneClickStatus('topics', 'error', result.reason?.message || '生成失敗');
-        } else if (index === 2) {
-          updateMode1OneClickStatus('weekly', 'error', result.reason?.message || '生成失敗');
-        }
-      }
-    });
-    
-    // 顯示完成通知
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('一鍵生成完成！', 3000);
-    }
-    
-  } catch (error) {
-    console.error('一鍵生成失敗:', error);
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('生成過程中發生錯誤', 3000);
-    }
-  } finally {
-    generateBtn.disabled = false;
-    generateBtn.innerHTML = '<span>一鍵生成全部（帳號定位 + 選題方向 + 短影音腳本）</span>';
-  }
-}
-
-// 為一鍵生成優化的生成函數（返回 Promise 和內容）
-async function generateMode1PositioningForOneClick() {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const response = await fetch(`${API_URL}/api/chat/stream`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${ipPlanningToken}`
-        },
-        body: JSON.stringify({
-          message: '請根據我們的對話內容，生成帳號定位分析。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。內容包含：1.**目標受眾**：清楚說明目標受眾是誰 2.**傳達目標**：說明想要達成的目標（例如：進群、portally、建立品牌等） 3.**帳號定位**：用一句話清楚說明帳號定位 4.**內容方向**：描述主要內容方向 5.**風格調性**：說明帳號的風格和調性 6.**差異化優勢**：說明與其他帳號的差異化優勢',
-          user_id: ipPlanningUser?.user_id || 'anonymous',
-          platform: '短影音平台',
-          profile: 'IP人設規劃專家',
-          topic: '帳號定位生成',
-          style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，不要程式碼或技術格式',
-          duration: '30',
-          conversation_type: 'ip_planning'
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let content = '';
-      
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') continue;
-            
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content) {
-                content += parsed.content;
-              }
-            } catch (e) {
-              // 忽略解析錯誤
-            }
-          }
-        }
-      }
-      
-      if (!content) {
-        throw new Error('未收到任何內容');
-      }
-      
-      resolve(content);
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
-async function generateMode1TopicsForOneClick() {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const response = await fetch(`${API_URL}/api/chat/stream`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${ipPlanningToken}`
-        },
-        body: JSON.stringify({
-          message: '請根據我們的對話內容和帳號定位，生成選題方向和影片類型配比建議。請參考知識庫中的「內容策略矩陣」，理解其邏輯而非記憶範例。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現選題方向和配比**，表格欄位包含：影片類型、佔比、目的、內容方向。請根據用戶的帳號定位、目標受眾、傳達目標來判斷適合的內容類型和配比，不要使用固定配比。如果用戶的主題不符合範例類別，請根據邏輯自創新類型並合理配置比例。',
-          user_id: ipPlanningUser?.user_id || 'anonymous',
-          platform: '短影音平台',
-          profile: 'IP人設規劃專家',
-          topic: '選題方向生成',
-          style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現選題方向和配比',
-          duration: '30',
-          conversation_type: 'ip_planning'
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let content = '';
-      
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') continue;
-            
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content) {
-                content += parsed.content;
-              }
-            } catch (e) {
-              // 忽略解析錯誤
-            }
-          }
-        }
-      }
-      
-      if (!content) {
-        throw new Error('未收到任何內容');
-      }
-      
-      resolve(content);
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
-async function generateMode1WeeklyForOneClick() {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const response = await fetch(`${API_URL}/api/chat/stream`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${ipPlanningToken}`
-        },
-        body: JSON.stringify({
-          message: '請根據我們的對話內容、帳號定位和選題方向，生成短影音腳本。請使用自然語言、友善的語氣，以清晰易懂的方式呈現。重要標題和關鍵詞請使用**粗體**標記（Markdown格式）。**請使用 Markdown 表格格式呈現短影音腳本**，表格欄位包含：日期、主題、時間、段落、台詞、畫面描述、字幕文字、音效與轉場。每支腳本請包含：1.**主題標題**：用一句話清楚說明這支影片的主題 2.**開場鉤子**：用自然語言寫出吸引人的開場，讓觀眾想繼續看下去 3.**核心內容**：用2-3句自然語言說明影片要傳達的價值 4.**行動呼籲**：用一句話引導觀眾採取行動 5.**畫面描述**：用簡短易懂的句子描述畫面應該呈現什麼 6.**發佈文案**：寫一段適合社群媒體的文案。請確保表格格式正確，使用 Markdown 表格語法（| 欄位1 | 欄位2 | ... |）。',
-          user_id: ipPlanningUser?.user_id || 'anonymous',
-          platform: '短影音平台',
-          profile: 'IP人設規劃專家',
-          topic: '短影音腳本生成',
-          style: '自然語言、用戶友好、易讀易懂，使用Markdown粗體標記重要內容，使用Markdown表格格式呈現短影音腳本',
-          duration: '30',
-          conversation_type: 'ip_planning'
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let content = '';
-      
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') continue;
-            
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content) {
-                content += parsed.content;
-              }
-            } catch (e) {
-              // 忽略解析錯誤
-            }
-          }
-        }
-      }
-      
-      if (!content) {
-        throw new Error('未收到任何內容');
-      }
-      
-      resolve(content);
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
-// 儲存一鍵生成結果
-async function saveMode1OneClickResult(type) {
-  // 防止模態窗口縮放動畫
-  const modal = document.querySelector('.mode1-oneclick-modal');
-  if (modal) {
-    modal.classList.add('saving');
-  }
-  
-  try {
-    const contentEl = document.getElementById(`mode1OneClick${type === 'positioning' ? 'Positioning' : type === 'topics' ? 'Topics' : 'Weekly'}Content`);
-    if (!contentEl || !contentEl.innerHTML.trim()) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('沒有可儲存的內容', 3000);
-      }
-      return;
-    }
-    
-    const token = localStorage.getItem('ipPlanningToken');
-    const userStr = localStorage.getItem('ipPlanningUser');
-    
-    if (!token || !userStr) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('請先登入', 3000);
-      }
-      return;
-    }
-    
-    const user = JSON.parse(userStr);
-    
-    // 映射類型到後端接受的格式
-    const resultTypeMap = {
-      'positioning': 'profile',
-      'topics': 'plan',
-      'weekly': 'scripts'
-    };
-    
-    const resultType = resultTypeMap[type];
-    if (!resultType) {
-      console.error('無效的結果類型:', type);
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('儲存失敗：無效的結果類型', 3000);
-      }
-      return;
-    }
-    
-    // 獲取內容（HTML）
-    let content = contentEl.innerHTML.trim();
-    
-    // 生成標題
-    const titleMap = {
-      'positioning': '帳號定位',
-      'topics': '選題方向（影片類型配比）',
-      'weekly': '短影音腳本'
-    };
-    const title = titleMap[type] || 'IP 人設規劃結果';
-    
-    // 顯示儲存中通知
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('正在儲存...', 2000);
-    }
-    
-    // 直接調用 API 儲存
-    const response = await fetch(`${API_URL}/api/ip-planning/save`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        user_id: user.user_id,
-        result_type: resultType,
-        title: title,
-        content: content,
-        metadata: {
-          timestamp: new Date().toISOString(),
-          source: 'mode1_oneclick'
-        }
-      })
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP ${response.status}`);
-    }
-    
-    const result = await response.json();
-    
-    // 清除快取，強制重新載入
-    clearHistoryCache();
-    
-    // 顯示成功通知
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('✅ 儲存成功！請在創作者資料庫的「IP人設規劃結果」查看', 5000);
-    }
-    
-    console.log('儲存成功:', result);
-    
-  } catch (error) {
-    console.error('儲存失敗:', error);
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast(`❌ 儲存失敗：${error.message}`, 5000);
-    }
-  } finally {
-    // 移除 saving class，恢復動畫
-    if (modal) {
-      setTimeout(() => {
-        modal.classList.remove('saving');
-      }, 100);
-    }
-  }
-}
-
-// 重新生成生成結果
-async function regenerateMode1OneClickResult(type, forceRegenerate = true) {
-  updateMode1OneClickStatus(type, 'generating', `正在重新生成${type === 'positioning' ? '帳號定位' : type === 'topics' ? '選題方向' : '短影音腳本'}`);
-  
-  try {
-    let result;
-    if (type === 'positioning') {
-      result = await generateMode1PositioningForOneClick();
-    } else if (type === 'topics') {
-      result = await generateMode1TopicsForOneClick();
-    } else if (type === 'weekly') {
-      result = await generateMode1WeeklyForOneClick();
-    }
-    
-    updateMode1OneClickStatus(type, 'completed', result);
-    
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast(`${type === 'positioning' ? '帳號定位' : type === 'topics' ? '選題方向' : '短影音腳本'}已重新生成`, 3000);
-    }
-  } catch (error) {
-    updateMode1OneClickStatus(type, 'error', error.message || '生成失敗');
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast(`重新生成失敗`, 3000);
-    }
-  }
-}
-
-// 展開一鍵生成結果（彈出模態視窗）
-window.toggleMode1OneClickExpand = function(type) {
-  const typeMap = {
-    'positioning': { name: 'Positioning', title: '帳號定位' },
-    'topics': { name: 'Topics', title: '選題方向（影片類型配比）' },
-    'weekly': { name: 'Weekly', title: '短影音腳本' }
-  };
-  const typeInfo = typeMap[type] || { name: type, title: '內容' };
-  const contentEl = document.getElementById(`mode1OneClick${typeInfo.name}Content`);
-  
-  if (!contentEl || !contentEl.innerHTML.trim()) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('沒有可查看的內容', 2000);
-    }
-    return;
-  }
-  
-  // 打開模態視窗
-  const overlay = document.getElementById('mode1ExpandModalOverlay');
-  const modal = overlay?.querySelector('.mode1-expand-modal');
-  const titleEl = document.getElementById('mode1ExpandModalTitle');
-  const contentElModal = document.getElementById('mode1ExpandModalContent');
-  
-  if (!overlay || !modal || !titleEl || !contentElModal) return;
-  
-  // 設置標題
-  titleEl.textContent = typeInfo.title;
-  
-  // 複製內容到模態視窗
-  contentElModal.innerHTML = contentEl.innerHTML;
-  
-  // 確保表格在模態視窗中正確顯示
-  const tables = contentElModal.querySelectorAll('table');
-  tables.forEach(table => {
-    // 如果表格不在滾動容器中，添加容器
-    if (!table.parentElement.classList.contains('mode1-oneclick-result-content-wrapper')) {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'mode1-oneclick-result-content-wrapper';
-      wrapper.style.overflowX = 'auto';
-      wrapper.style.webkitOverflowScrolling = 'touch';
-      wrapper.style.overscrollBehaviorX = 'contain';
-      table.parentElement.insertBefore(wrapper, table);
-      wrapper.appendChild(table);
-    }
-  });
-  
-  // 顯示模態視窗
-  overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  
-  // iOS Safari 處理
-  if (window.innerWidth <= 768) {
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
-  }
-};
-
-// 關閉展開模態視窗
-window.closeMode1ExpandModal = function() {
-  const overlay = document.getElementById('mode1ExpandModalOverlay');
-  if (overlay) {
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
-  }
-};
-
-// 匯出生成結果
-function exportMode1OneClickResult(type) {
-  const contentEl = document.getElementById(`mode1OneClick${type === 'positioning' ? 'Positioning' : type === 'topics' ? 'Topics' : 'Weekly'}Content`);
-  if (!contentEl || !contentEl.innerHTML.trim()) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('沒有可匯出的內容', 3000);
-    }
-    return;
-  }
-  
-  try {
-    const textContent = contentEl.innerText || contentEl.textContent || '';
-    const typeNames = {
-      'positioning': '帳號定位',
-      'topics': '選題方向',
-      'weekly': '短影音腳本'
-    };
-    const typeName = typeNames[type] || type;
-    
-    const csvContent = `類型,標題,內容,匯出時間\n"${type}","${typeName}","${textContent.replace(/"/g, '""').replace(/\n/g, ' ')}","${new Date().toLocaleString('zh-TW', {
-      timeZone: 'Asia/Taipei',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    })}"`;
-    
-    const csvBlob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const csvUrl = URL.createObjectURL(csvBlob);
-    const csvLink = document.createElement('a');
-    csvLink.href = csvUrl;
-    csvLink.download = `ip-${type}-${Date.now()}.csv`;
-    csvLink.click();
-    URL.revokeObjectURL(csvUrl);
-    
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('✅ 匯出成功', 3000);
-    }
-  } catch (error) {
-    console.error('匯出失敗:', error);
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('匯出失敗，請稍後再試', 3000);
-    }
-  }
-}
-
-// 處理模式導航（檢查權限）
-async function handleModeNavigation(event, targetMode) {
-  event.preventDefault();
-  event.stopPropagation();
-  
-  // 檢查登入狀態
-  if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
-    const loggedIn = await window.ReelMindCommon.checkLoginStatus();
-    
-    if (!loggedIn) {
-      // 未登入，顯示通知並跳轉到登入頁面
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('請先登入以使用此功能', 3000);
-      }
-      // 使用 common.js 的登入函數
-      if (typeof goToLogin === 'function') {
-        goToLogin();
-      } else if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
-        window.ReelMindCommon.goToLogin();
-      } else {
-        // 降級處理：直接跳轉到 Google 登入
-        const backendUrl = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-        const redirectUri = encodeURIComponent(window.location.origin + '/' + (targetMode === 'mode1' ? 'mode1.html' : 'mode3.html'));
-        window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
-      }
-      return false;
-    }
-    
-    // 已登入，檢查訂閱狀態
-    if (window.ReelMindCommon && typeof window.ReelMindCommon.checkSubscriptionStatus === 'function') {
-      await window.ReelMindCommon.checkSubscriptionStatus();
-    }
-    
-    const subscribed = window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function' 
-      ? window.ReelMindCommon.isSubscribed() 
-      : false;
-    
-    if (!subscribed) {
-      // 已登入但未訂閱，跳轉到訂閱頁面
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('請先訂閱以使用此功能', 3000);
-      }
-      window.location.href = '/subscription.html';
-      return false;
-    }
-  } else {
-    // 如果 common.js 未載入，降級處理：直接檢查 localStorage
-    const token = localStorage.getItem('ipPlanningToken') || localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('ipPlanningUser') || localStorage.getItem('user') || 'null');
-    
-    if (!token || !user) {
-      // 未登入
-      alert('請先登入以使用此功能！');
-      const backendUrl = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-      const redirectUri = encodeURIComponent(window.location.origin + '/' + (targetMode === 'mode1' ? 'mode1.html' : 'mode3.html'));
-      window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
-      return false;
-    }
-    
-    // 檢查訂閱狀態
-    const isSubscribed = user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1' || user.is_subscribed === 'true';
-    if (!isSubscribed) {
-      alert('請先訂閱以使用此功能！');
-      window.location.href = '/subscription.html';
-      return false;
-    }
-  }
-  
-  // 已登入且已訂閱，允許跳轉
-  window.location.href = targetMode === 'mode1' ? 'mode1.html' : 'mode3.html';
-  return false;
-}
-
-// 編輯 Mode1 歷史記錄標題
-window.editMode1HistoryTitle = function(resultId) {
-  const titleElement = document.getElementById(`mode1HistoryTitle${resultId}`);
-  const inputElement = document.getElementById(`mode1HistoryTitleInput${resultId}`);
-  
-  if (titleElement && inputElement) {
-    const currentTitle = titleElement.textContent.trim();
-    inputElement.value = currentTitle;
-    titleElement.style.display = 'none';
-    inputElement.style.display = 'block';
-    inputElement.focus();
-    inputElement.select();
-  }
-}
-
-// 保存 Mode1 歷史記錄標題
-window.saveMode1HistoryTitle = function(resultId) {
-  const titleElement = document.getElementById(`mode1HistoryTitle${resultId}`);
-  const inputElement = document.getElementById(`mode1HistoryTitleInput${resultId}`);
-  
-  if (titleElement && inputElement) {
-    const newTitle = inputElement.value.trim();
-    const titleKey = `mode1-history-title-${resultId}`;
-    
-    // 獲取默認標題
-    const item = document.querySelector(`.mode1-oneclick-history-item[data-result-id="${resultId}"]`);
-    let defaultTitle = '帳號定位';
-    if (item) {
-      const resultType = item.dataset.resultType;
-      if (resultType === 'plan') {
-        defaultTitle = '選題方向';
-      } else if (resultType === 'scripts') {
-        defaultTitle = '短影音腳本';
-      }
-    }
-    
-    const finalTitle = newTitle || defaultTitle;
-    titleElement.textContent = finalTitle;
-    
-    // 保存到 localStorage
-    localStorage.setItem(titleKey, finalTitle);
-    
-    if (newTitle) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('✅ 標題已更新', 2000);
-      }
-    }
-    
-    titleElement.style.display = '';
-    inputElement.style.display = 'none';
-  }
-}
-
-// 取消編輯 Mode1 歷史記錄標題
-window.cancelMode1HistoryTitleEdit = function(resultId) {
-  const titleElement = document.getElementById(`mode1HistoryTitle${resultId}`);
-  const inputElement = document.getElementById(`mode1HistoryTitleInput${resultId}`);
-  
-  if (titleElement && inputElement) {
-    titleElement.style.display = '';
-    inputElement.style.display = 'none';
-  }
-}
-
-// 登入函數
-// 使用 common.js 中的統一函數（已導出到 window）
-// goToLogin, toggleMobileDrawer, openMobileDrawer, closeMobileDrawer 現在都在 common.js 中統一管理
-
