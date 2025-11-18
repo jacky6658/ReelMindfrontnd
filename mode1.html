@@ -675,9 +675,9 @@
           opacity: 0;
           display: flex;
           flex-direction: column;
-        }
-        
-        .mode1-instructions-drawer.open {
+      }
+      
+      .mode1-instructions-drawer.open {
           right: auto;
           transform: translate(-50%, -50%) scale(1);
           opacity: 1;
@@ -3289,6 +3289,38 @@
           <li>所有生成內容都會自動記錄到長期記憶，後續對話會更精準</li>
           <li>可在「創作者資料庫」中查看所有歷史生成記錄</li>
         </ul>
+        
+        <p><strong>如何更新帳號定位</strong></p>
+        <div class="mode1-step-guide">
+          <div class="mode1-step">
+            <div class="mode1-step-number">方法一</div>
+            <div class="mode1-step-content">
+              <strong>使用「重新定位」快速按鈕</strong>
+              <p>點擊對話框下方的「重新定位」按鈕，系統會完全忽略之前的對話內容和定位結果，從頭開始詢問您的需求，生成全新的帳號定位。這是最快速的方式。</p>
+            </div>
+          </div>
+          <div class="mode1-step">
+            <div class="mode1-step-number">方法二</div>
+            <div class="mode1-step-content">
+              <strong>在「一鍵生成」中重新生成</strong>
+              <p>點擊右上角「生成結果」按鈕，切換到「一鍵生成」標籤，找到「帳號定位」卡片，點擊「重新生成」按鈕。系統會根據您最新的對話內容生成新的定位。</p>
+            </div>
+          </div>
+          <div class="mode1-step">
+            <div class="mode1-step-number">方法三</div>
+            <div class="mode1-step-content">
+              <strong>繼續對話後重新生成</strong>
+              <p>繼續與AI對話，分享您的新想法或變化，然後使用「一鍵生成」功能重新生成帳號定位。AI會根據最新的對話內容生成更新的定位。</p>
+            </div>
+          </div>
+        </div>
+        
+        <p><strong>重要提示</strong></p>
+        <ul>
+          <li>系統會自動使用<strong>最新生成並保存的帳號定位</strong>，當您點擊「IP Profile」快速按鈕時，會顯示最新的定位結果</li>
+          <li>如果您想要使用最新的定位，請確保在「一鍵生成」中生成後點擊「儲存」按鈕</li>
+          <li>如果系統顯示的是舊的定位，請使用上述方法重新生成並儲存新的定位</li>
+        </ul>
       </div>
     </div>
     
@@ -3301,7 +3333,7 @@
           </h2>
           <button class="mode1-oneclick-modal-close" onclick="closeMode1OneClickModal()">✕</button>
         </div>
-        
+
         <!-- 切換標籤 -->
         <div class="mode1-oneclick-tabs">
           <button class="mode1-oneclick-tab active" id="mode1OneClickTabHistory" onclick="switchMode1OneClickTab('history')">
@@ -3309,7 +3341,7 @@
           </button>
           <button class="mode1-oneclick-tab" id="mode1OneClickTabGenerate" onclick="switchMode1OneClickTab('generate')">
             <span>一鍵生成</span>
-          </button>
+              </button>
         </div>
         
         <div class="mode1-oneclick-modal-content">
@@ -3321,12 +3353,12 @@
               </div>
             </div>
           </div>
-          
+
           <!-- 一鍵生成區域 -->
           <div class="mode1-oneclick-tab-content" id="mode1OneClickGenerateContent">
             <button class="mode1-oneclick-generate-all-btn" id="mode1OneClickGenerateAllBtn" onclick="generateMode1All()">
               <span>一鍵生成全部（帳號定位 + 選題方向 + 一週腳本）</span>
-            </button>
+              </button>
             
             <div class="mode1-oneclick-results-grid">
             <!-- 帳號定位卡片 -->
@@ -3357,9 +3389,9 @@
                 <button class="mode1-oneclick-action-btn" onclick="regenerateMode1OneClickResult('positioning')">
                   <span>重新生成</span>
                 </button>
-              </div>
             </div>
-            
+          </div>
+
             <!-- 選題方向卡片 -->
             <div class="mode1-oneclick-result-card" id="mode1OneClickTopicsCard">
               <div class="mode1-oneclick-result-card-header">
@@ -3376,8 +3408,8 @@
               <div class="mode1-oneclick-result-expand" id="mode1OneClickTopicsExpand" style="display: none;">
                 <button class="mode1-oneclick-expand-btn" onclick="toggleMode1OneClickExpand('topics')">
                   <span>展開</span>
-                </button>
-              </div>
+              </button>
+            </div>
               <div class="mode1-oneclick-result-actions" id="mode1OneClickTopicsActions" style="display: none;">
                 <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('topics')">
                   <span>儲存</span>
@@ -3388,9 +3420,9 @@
                 <button class="mode1-oneclick-action-btn" onclick="regenerateMode1OneClickResult('topics')">
                   <span>重新生成</span>
                 </button>
-              </div>
-            </div>
-            
+          </div>
+        </div>
+        
             <!-- 一週腳本卡片 -->
             <div class="mode1-oneclick-result-card" id="mode1OneClickWeeklyCard">
               <div class="mode1-oneclick-result-card-header">
@@ -3407,18 +3439,18 @@
               <div class="mode1-oneclick-result-expand" id="mode1OneClickWeeklyExpand" style="display: none;">
                 <button class="mode1-oneclick-expand-btn" onclick="toggleMode1OneClickExpand('weekly')">
                   <span>展開</span>
-                </button>
+          </button>
               </div>
               <div class="mode1-oneclick-result-actions" id="mode1OneClickWeeklyActions" style="display: none;">
                 <button class="mode1-oneclick-action-btn save" onclick="saveMode1OneClickResult('weekly')">
                   <span>儲存</span>
-                </button>
+          </button>
                 <button class="mode1-oneclick-action-btn" onclick="exportMode1OneClickResult('weekly')">
                   <span>匯出</span>
                 </button>
                 <button class="mode1-oneclick-action-btn" onclick="regenerateMode1OneClickResult('weekly')">
                   <span>重新生成</span>
-                </button>
+          </button>
               </div>
             </div>
           </div>

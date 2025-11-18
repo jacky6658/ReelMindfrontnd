@@ -67,6 +67,9 @@ async function loadMyScriptsForUserDB() {
     if (content) {
       content.innerHTML = '<div class="loading-text">請先登入以查看腳本記錄</div>';
     }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入以查看腳本記錄', 3000);
+    }
     return;
   }
   
@@ -149,12 +152,18 @@ async function loadMyScriptsForUserDB() {
           return loadMyScriptsForUserDB();
         }
         content.innerHTML = '<div class="loading-text">請先登入</div>';
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('請先登入以查看腳本記錄', 3000);
+        }
       }
     } else if (response.status === 404) {
       console.log('腳本載入失敗: API不存在');
       // 如果後端 API 不存在，只顯示本地腳本
       if (content && localScripts.length === 0) {
         content.innerHTML = '<div class="loading-text">腳本功能即將上線，請稍後再試</div>';
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('腳本功能即將上線，請稍後再試', 3000);
+        }
       }
     } else {
       const errorData = await response.json().catch(() => ({}));
@@ -162,6 +171,9 @@ async function loadMyScriptsForUserDB() {
       // 如果後端載入失敗，只顯示本地腳本（不顯示錯誤訊息，避免影響用戶體驗）
       if (content && localScripts.length === 0) {
         content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
+        }
       }
     }
   } catch (error) {
@@ -169,6 +181,9 @@ async function loadMyScriptsForUserDB() {
     // 如果後端載入失敗，只顯示本地腳本（不顯示錯誤訊息，避免影響用戶體驗）
     if (content && localScripts.length === 0) {
       content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
+      }
     }
   }
 }
@@ -959,6 +974,9 @@ async function loadPersonalInfoForUserDB() {
   
   if (!ipPlanningUser) {
     content.innerHTML = '<div class="loading-text">請先登入以查看個人資料</div>';
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入以查看個人資料', 3000);
+    }
     return;
   }
   
@@ -1192,7 +1210,9 @@ async function fetchUserInfo() {
 // 取消自動續費
 async function cancelAutoRenewForUserDB() {
   if (!ipPlanningToken) {
-    alert('請先登入');
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入', 3000);
+    }
     return;
   }
   
@@ -1227,14 +1247,20 @@ async function cancelAutoRenewForUserDB() {
         loadPersonalInfoForUserDB();
       }
       
-      alert('✅ 已成功取消自動續費');
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('✅ 已成功取消自動續費', 3000);
+      }
     } else {
       const errorData = await response.json().catch(() => ({ error: '未知錯誤' }));
-      alert('❌ 取消自動續費失敗：' + (errorData.error || '請稍後再試'));
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('❌ 取消自動續費失敗：' + (errorData.error || '請稍後再試'), 3000);
+      }
     }
   } catch (error) {
     console.error('取消自動續費失敗:', error);
-    alert('❌ 取消自動續費失敗，請稍後再試');
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('❌ 取消自動續費失敗，請稍後再試', 3000);
+    }
   }
 }
 
@@ -1322,6 +1348,9 @@ async function loadPositioningRecordsForUserDB() {
     if (content) {
       content.innerHTML = '<div class="loading-text">請先登入以查看帳號定位記錄</div>';
     }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入以查看帳號定位記錄', 3000);
+    }
     return;
   }
   
@@ -1347,9 +1376,15 @@ async function loadPositioningRecordsForUserDB() {
       if (content) {
         content.innerHTML = '<div class="loading-text">請先登入</div>';
       }
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入以查看帳號定位記錄', 3000);
+      }
     } else if (response.status === 404) {
       if (content) {
         content.innerHTML = '<div class="loading-text">帳號定位功能即將上線，請稍後再試</div>';
+      }
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('帳號定位功能即將上線，請稍後再試', 3000);
       }
     } else {
       const errorData = await response.json().catch(() => ({}));
@@ -1359,6 +1394,9 @@ async function loadPositioningRecordsForUserDB() {
     console.error('Load positioning records error:', error);
     if (content) {
       content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+    }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
     }
   }
 }
@@ -1693,6 +1731,9 @@ async function loadTopicHistoryForUserDB() {
     if (content) {
       content.innerHTML = '<div class="loading-text">請先登入以查看選題內容</div>';
     }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入以查看選題內容', 3000);
+    }
     return;
   }
   
@@ -1725,15 +1766,24 @@ async function loadTopicHistoryForUserDB() {
       if (content) {
         content.innerHTML = '<div class="loading-text">請先登入</div>';
       }
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入以查看選題內容', 3000);
+      }
     } else {
       if (content) {
         content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+      }
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
       }
     }
   } catch (error) {
     console.error('載入選題內容錯誤:', error);
     if (content) {
       content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+    }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
     }
   }
 }
@@ -2058,6 +2108,9 @@ async function loadIpPlanningResultsForUserDB() {
     if (content) {
       content.innerHTML = '<div class="loading-text">請先登入以查看 IP 人設規劃結果</div>';
     }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入以查看 IP 人設規劃結果', 3000);
+    }
     return;
   }
   
@@ -2088,15 +2141,24 @@ async function loadIpPlanningResultsForUserDB() {
       if (content) {
         content.innerHTML = '<div class="loading-text">請先登入</div>';
       }
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入以查看 IP 人設規劃結果', 3000);
+      }
     } else {
       if (content) {
         content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+      }
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
       }
     }
   } catch (error) {
     console.error('載入 IP 人設規劃結果錯誤:', error);
     if (content) {
       content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+    }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
     }
   }
 }
@@ -2539,6 +2601,9 @@ async function loadMyOrdersForUserDB() {
   
   if (!ipPlanningToken || !ipPlanningUser || !ipPlanningUser.user_id) {
     content.innerHTML = '<div class="loading-text">請先登入以查看訂單記錄</div>';
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入以查看訂單記錄', 3000);
+    }
     return;
   }
   
@@ -2558,6 +2623,9 @@ async function loadMyOrdersForUserDB() {
       displayOrdersForUserDB(orders);
     } else if (response.status === 401) {
       content.innerHTML = '<div class="loading-text">請先登入</div>';
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入以查看訂單記錄', 3000);
+      }
     } else {
       const errorData = await response.json().catch(() => ({ error: '載入失敗' }));
       throw new Error(errorData.error || '載入失敗');
@@ -2565,6 +2633,9 @@ async function loadMyOrdersForUserDB() {
   } catch (error) {
     console.error('載入訂單失敗:', error);
     content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
+    }
   }
 }
 
@@ -3142,20 +3213,61 @@ async function testApiKey() {
         }
       }
     } else {
-      const errorData = await response.json();
-      testResultDiv.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="color: #ef4444; font-size: 18px;">❌</span>
-          <div>
-            <div style="font-weight: 500; color: #ef4444; margin-bottom: 4px;">測試失敗</div>
-            <div style="color: #6b7280; font-size: 13px;">${errorData.error || '未知錯誤，請稍後再試'}</div>
+      // 處理 HTTP 錯誤狀態碼
+      let errorMessage = '未知錯誤，請稍後再試';
+      
+      if (response.status === 429) {
+        // 速率限制錯誤 - 嘗試從後端獲取中文錯誤訊息
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || '測試請求過於頻繁，請等待 1 分鐘後再試（每分鐘最多測試 3 次）';
+        } catch (e) {
+          // 如果無法解析 JSON，使用預設訊息
+          errorMessage = '測試請求過於頻繁，請等待 1 分鐘後再試（每分鐘最多測試 3 次）';
+        }
+        
+        testResultDiv.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: #f59e0b; font-size: 18px;">⚠️</span>
+            <div>
+              <div style="font-weight: 500; color: #f59e0b; margin-bottom: 4px;">測試請求過於頻繁</div>
+              <div style="color: #6b7280; font-size: 13px;">${errorMessage}</div>
+            </div>
           </div>
-        </div>
-      `;
-      testResultDiv.style.background = '#fef2f2';
-      testResultDiv.style.border = '1px solid #ef4444';
+        `;
+        testResultDiv.style.background = '#fffbeb';
+        testResultDiv.style.border = '1px solid #f59e0b';
+      } else {
+        // 其他錯誤
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // 無法解析 JSON，使用狀態碼訊息
+          if (response.status === 401) {
+            errorMessage = '請先登入';
+          } else if (response.status === 403) {
+            errorMessage = '無權限訪問';
+          } else if (response.status === 500) {
+            errorMessage = '伺服器錯誤，請稍後再試';
+          }
+        }
+        
+        testResultDiv.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: #ef4444; font-size: 18px;">❌</span>
+            <div>
+              <div style="font-weight: 500; color: #ef4444; margin-bottom: 4px;">測試失敗</div>
+              <div style="color: #6b7280; font-size: 13px;">${errorMessage}</div>
+            </div>
+          </div>
+        `;
+        testResultDiv.style.background = '#fef2f2';
+        testResultDiv.style.border = '1px solid #ef4444';
+      }
+      
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast(`測試失敗: ${errorData.error || '未知錯誤'}`, 3000);
+        window.ReelMindCommon.showToast('❌ API 金鑰測試失敗: ' + errorMessage, 3000);
       }
     }
   } catch (error) {
