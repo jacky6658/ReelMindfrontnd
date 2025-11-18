@@ -3212,8 +3212,12 @@ function loadDefaultModelOptions(provider, modelSelect) {
   if (provider === 'gemini') {
     const geminiOptions = [
       { value: '', text: '使用系統預設 (gemini-2.5-flash)' },
-      { value: 'gemini-2.0-flash-exp', text: 'Gemini 2.0 Flash (實驗版)' },
+      { value: 'gemini-2.5-pro', text: 'Gemini 2.5 Pro (最新)' },
       { value: 'gemini-2.5-flash', text: 'Gemini 2.5 Flash' },
+      { value: 'gemini-2.5-flash-lite', text: 'Gemini 2.5 Flash-Lite' },
+      { value: 'gemini-2.0-flash-exp', text: 'Gemini 2.0 Flash (實驗版)' },
+      { value: 'gemini-1.5-pro-latest', text: 'Gemini 1.5 Pro (最新版)' },
+      { value: 'gemini-1.5-flash-latest', text: 'Gemini 1.5 Flash (最新版)' },
       { value: 'gemini-1.5-pro', text: 'Gemini 1.5 Pro' },
       { value: 'gemini-1.5-flash', text: 'Gemini 1.5 Flash' }
     ];
@@ -3227,10 +3231,15 @@ function loadDefaultModelOptions(provider, modelSelect) {
   } else if (provider === 'openai') {
     const gptOptions = [
       { value: '', text: '使用系統預設' },
+      { value: 'gpt-5.1', text: 'GPT-5.1 (最新)' },
+      { value: 'gpt-5', text: 'GPT-5' },
       { value: 'gpt-4o', text: 'GPT-4o' },
       { value: 'gpt-4-turbo', text: 'GPT-4 Turbo' },
       { value: 'gpt-4', text: 'GPT-4' },
-      { value: 'gpt-3.5-turbo', text: 'GPT-3.5 Turbo' }
+      { value: 'gpt-4o-mini', text: 'GPT-4o Mini' },
+      { value: 'gpt-3.5-turbo', text: 'GPT-3.5 Turbo' },
+      { value: 'o1-preview', text: 'O1 Preview' },
+      { value: 'o1-mini', text: 'O1 Mini' }
     ];
     
     gptOptions.forEach(option => {
