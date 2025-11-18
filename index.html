@@ -14753,7 +14753,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               <div style="font-size: 14px; opacity: 0.9;">綁定後可獲得更高的使用額度和更穩定的服務</div>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
-              <button onclick="window.location.href='userDB.html'; setTimeout(() => { if (typeof showDbSection === 'function') showDbSection('settings'); }, 100);" style="
+              <button onclick="window.location.href='userDB.html#settings'; return false;" style="
                 padding: 8px 16px;
                 background: white;
                 color: #d97706;
@@ -14763,6 +14763,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 cursor: pointer;
                 font-size: 14px;
                 white-space: nowrap;
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
               ">立即綁定</button>
               <button onclick="this.closest('#llm-key-notification').remove()" style="
                 padding: 8px;

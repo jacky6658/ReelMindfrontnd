@@ -762,13 +762,26 @@
       }
       
       .action-btn {
-        padding: 8px 16px;
+        padding: 10px 16px;
         border: none;
         border-radius: 6px;
         cursor: pointer;
         font-size: 14px;
         font-weight: 500;
         transition: all 0.2s;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        white-space: nowrap;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        user-select: none;
+      }
+      
+      .action-btn:active {
+        transform: scale(0.98);
       }
       
       .view-btn {
@@ -1023,7 +1036,7 @@
         -webkit-tap-highlight-color: transparent;
       }
       
-      /* 手機版適配 */
+      /* 手機版適配 - RWD 響應式設計 */
       @media (max-width: 768px) {
         .user-db-page {
           padding: 16px;
@@ -1033,24 +1046,58 @@
           padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); /* iOS 安全區域 */
           max-width: 100%;
           overflow-x: hidden;
+          box-sizing: border-box;
         }
         
         .user-db-container {
           flex-direction: column;
           max-width: 100%;
           overflow-x: hidden;
+          gap: 16px; /* 減少間距 */
         }
         
         .user-db-sidebar {
-          width: 100%;
+          width: 100% !important;
+          max-width: 100% !important;
           margin-bottom: 20px;
           border-radius: 12px;
-          max-width: 100%;
+          padding: 16px !important; /* 減少 padding */
           display: block !important; /* 確保手機版顯示 */
+          box-sizing: border-box;
         }
         
         .user-db-content {
           display: none !important; /* 手機版隱藏內容區域 */
+        }
+        
+        /* 手機版選單項目優化 */
+        .menu-item {
+          padding: 14px 16px !important; /* 增加觸控目標 */
+          min-height: 48px !important; /* 確保觸控目標足夠大 */
+          font-size: 15px !important; /* 稍微增大字體 */
+        }
+        
+        .menu-icon {
+          font-size: 18px !important; /* 增大圖標 */
+        }
+        
+        /* 手機版側邊欄標題優化 */
+        .sidebar-header {
+          padding-bottom: 16px !important;
+          margin-bottom: 16px !important;
+        }
+        
+        .profile-avatar {
+          width: 40px !important;
+          height: 40px !important;
+        }
+        
+        .profile-info h3 {
+          font-size: 15px !important;
+        }
+        
+        .profile-info p {
+          font-size: 13px !important;
         }
         
         .db-section {
@@ -1139,10 +1186,11 @@
         }
         
         .userdb-modal-body {
-          padding: 24px;
+          padding: 16px !important; /* 手機版減少 padding */
           overflow-y: auto;
           max-height: calc(90vh - 80px);
           -webkit-overflow-scrolling: touch;
+          font-size: 14px; /* 基礎字體大小 */
         }
         
         .section-content {
@@ -1152,6 +1200,134 @@
           overflow-wrap: break-word; /* 優化文字換行 */
           -webkit-hyphens: auto; /* iOS 自動斷字 */
           hyphens: auto;
+          font-size: 14px; /* 確保基礎字體大小 */
+        }
+        
+        /* 手機版標題和文字大小調整 */
+        .userdb-modal-body h2,
+        .userdb-modal-body h3,
+        .userdb-modal-body h4 {
+          font-size: 18px !important;
+          margin: 12px 0 8px 0 !important;
+          line-height: 1.4 !important;
+        }
+        
+        .userdb-modal-body h2 {
+          font-size: 20px !important;
+        }
+        
+        .userdb-modal-body p {
+          font-size: 14px !important;
+          line-height: 1.6 !important;
+          margin: 8px 0 !important;
+        }
+        
+        /* 個人資料樣式調整 */
+        .userdb-modal-body .profile-details {
+          gap: 12px !important;
+        }
+        
+        .userdb-modal-body .detail-item {
+          padding: 12px !important;
+          gap: 8px !important;
+          flex-direction: column !important;
+          align-items: flex-start !important;
+        }
+        
+        .userdb-modal-body .detail-item label {
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          margin-bottom: 4px !important;
+          min-width: auto !important;
+        }
+        
+        .userdb-modal-body .detail-item span {
+          font-size: 14px !important;
+          word-break: break-word !important;
+          width: 100% !important;
+        }
+        
+        /* 設定區域樣式調整 */
+        .userdb-modal-body .setting-group {
+          margin-top: 20px !important;
+        }
+        
+        .userdb-modal-body .setting-item {
+          margin-bottom: 16px !important;
+        }
+        
+        .userdb-modal-body .setting-desc {
+          font-size: 12px !important;
+          line-height: 1.5 !important;
+          margin-top: 6px !important;
+        }
+        
+        /* 統計數字樣式調整 */
+        .userdb-modal-body .stat-number {
+          font-size: 28px !important;
+          margin-bottom: 6px !important;
+        }
+        
+        .userdb-modal-body .stat-label {
+          font-size: 13px !important;
+        }
+        
+        /* 腳本項目樣式調整 */
+        .userdb-modal-body .script-item {
+          font-size: 14px !important;
+        }
+        
+        .userdb-modal-body .script-name {
+          font-size: 14px !important;
+        }
+        
+        .userdb-modal-body .script-date {
+          font-size: 12px !important;
+        }
+        
+        /* 按鈕樣式調整 */
+        .userdb-modal-body button {
+          font-size: 14px !important;
+          padding: 10px 16px !important;
+        }
+        
+        /* 列表樣式調整 */
+        .userdb-modal-body ul,
+        .userdb-modal-body ol {
+          padding-left: 20px !important;
+          margin: 8px 0 !important;
+        }
+        
+        .userdb-modal-body li {
+          font-size: 14px !important;
+          line-height: 1.6 !important;
+          margin: 6px 0 !important;
+        }
+        
+        /* 表格內容調整 */
+        .userdb-modal-body table {
+          font-size: 12px !important;
+        }
+        
+        .userdb-modal-body table th,
+        .userdb-modal-body table td {
+          padding: 8px 6px !important;
+          font-size: 12px !important;
+        }
+        
+        /* 幫助中心樣式調整 */
+        .userdb-modal-body .help-section {
+          margin-bottom: 20px !important;
+        }
+        
+        .userdb-modal-body .help-section h4 {
+          font-size: 16px !important;
+          margin-bottom: 8px !important;
+        }
+        
+        .userdb-modal-body .help-section p {
+          font-size: 13px !important;
+          margin-bottom: 6px !important;
         }
         
         /* 手機版表格樣式 */
@@ -1236,25 +1412,131 @@
         .positioning-record-item,
         .topic-item,
         .ip-planning-item {
-          padding: 12px;
-          margin-bottom: 16px;
+          padding: 12px !important;
+          margin-bottom: 16px !important;
+          font-size: 14px !important;
+        }
+        
+        .userdb-modal-body .positioning-record-item h4,
+        .userdb-modal-body .topic-item h4,
+        .userdb-modal-body .ip-planning-item h4 {
+          font-size: 16px !important;
+          margin: 0 0 8px 0 !important;
+          font-weight: 600 !important;
+        }
+        
+        .userdb-modal-body .positioning-record-item p,
+        .userdb-modal-body .topic-item p,
+        .userdb-modal-body .ip-planning-item p {
+          font-size: 13px !important;
+          line-height: 1.6 !important;
+          margin: 6px 0 !important;
+        }
+        
+        .userdb-modal-body .positioning-record-item .record-meta,
+        .userdb-modal-body .topic-item .topic-meta,
+        .userdb-modal-body .ip-planning-item .ip-planning-meta {
+          font-size: 12px !important;
+          color: #6b7280 !important;
+          margin-top: 8px !important;
         }
         
         .record-actions,
         .topic-item-actions,
         .ip-planning-actions {
-          flex-direction: column;
-          gap: 8px;
+          flex-direction: column !important;
+          gap: 8px !important;
+          margin-top: 12px !important;
         }
         
         .record-actions .action-btn,
         .topic-item-actions .action-btn,
         .ip-planning-actions .action-btn {
-          width: 100%;
-          padding: 12px 16px;
-          min-height: 44px; /* iOS 最小觸控目標 */
-          -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊高亮 */
-          touch-action: manipulation; /* 優化觸控響應 */
+          width: 100% !important;
+          padding: 12px 16px !important;
+          min-height: 44px !important; /* iOS 最小觸控目標 */
+          font-size: 14px !important;
+          -webkit-tap-highlight-color: transparent !important; /* 移除 iOS 點擊高亮 */
+          touch-action: manipulation !important; /* 優化觸控響應 */
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 6px !important;
+          user-select: none !important;
+        }
+        
+        .record-actions .action-btn:active,
+        .topic-item-actions .action-btn:active,
+        .ip-planning-actions .action-btn:active {
+          transform: scale(0.97) !important;
+          opacity: 0.9 !important;
+        }
+        
+        /* 訂單項目樣式調整 */
+        .userdb-modal-body .order-item {
+          padding: 12px !important;
+          margin-bottom: 12px !important;
+          font-size: 14px !important;
+        }
+        
+        .userdb-modal-body .order-item .order-id {
+          font-size: 13px !important;
+          font-weight: 600 !important;
+        }
+        
+        .userdb-modal-body .order-item .order-date,
+        .userdb-modal-body .order-item .order-amount {
+          font-size: 12px !important;
+          color: #6b7280 !important;
+        }
+        
+        /* 對話記錄樣式調整 */
+        .userdb-modal-body .conversation-item {
+          padding: 12px !important;
+          margin-bottom: 12px !important;
+          font-size: 14px !important;
+        }
+        
+        .userdb-modal-body .conversation-item .conversation-preview {
+          font-size: 13px !important;
+          line-height: 1.5 !important;
+        }
+        
+        /* 通用文字樣式調整 */
+        .userdb-modal-body .text-sm {
+          font-size: 12px !important;
+        }
+        
+        .userdb-modal-body .text-base {
+          font-size: 14px !important;
+        }
+        
+        .userdb-modal-body .text-lg {
+          font-size: 16px !important;
+        }
+        
+        /* 標籤和徽章樣式調整 */
+        .userdb-modal-body .badge,
+        .userdb-modal-body .tag {
+          font-size: 11px !important;
+          padding: 4px 8px !important;
+        }
+        
+        /* 分隔線樣式 */
+        .userdb-modal-body hr {
+          margin: 12px 0 !important;
+        }
+        
+        /* 卡片樣式調整 */
+        .userdb-modal-body .card {
+          padding: 12px !important;
+          margin-bottom: 12px !important;
+        }
+        
+        /* 確保所有文字都能正確換行 */
+        .userdb-modal-body * {
+          max-width: 100% !important;
+          box-sizing: border-box !important;
         }
         
         /* 手機版輸入框和選擇框優化 */
@@ -1496,7 +1778,7 @@
                 <div class="setting-group">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
                     <h4 style="margin: 0;"><i class="fas fa-key" style="margin-right: 8px;"></i>AI API Key金鑰管理</h4>
-                    <button onclick="window.location.href='index.html'; setTimeout(() => { if (typeof switchPage === 'function') switchPage('guide-article2'); }, 100);" style="
+                    <button onclick="window.location.href='guide.html?article=article5'; return false;" style="
                       padding: 8px 16px;
                       background: #3b82f6;
                       color: white;
@@ -1890,8 +2172,13 @@
         }
       }
       
-      // 載入個人資料庫的個人資料
+      // 載入個人資料庫的個人資料（此函數已被 assets/js/userDB.js 中的版本覆蓋，保留此處僅作為備用）
       async function loadPersonalInfoForUserDB() {
+        // 如果 userDB.js 中的函數已載入，使用那個版本
+        if (window.loadPersonalInfoForUserDB && window.loadPersonalInfoForUserDB.toString().includes('assets/js/userDB.js')) {
+          return window.loadPersonalInfoForUserDB();
+        }
+        
         const content = document.querySelector('#db-personalInfo .section-content');
         if (!content) return;
         
@@ -1900,21 +2187,35 @@
           return;
         }
         
+        // 如果用戶資料已經完整，直接渲染，不需要 loading 和延遲
+        if (ipPlanningUser && (ipPlanningUser.name || ipPlanningUser.email) && ipPlanningUser.created_at) {
+          await renderPersonalInfoContent();
+          return;
+        }
+        
+        // 只有在需要載入資料時才顯示 loading
         showLoadingAnimation(content, '載入個人資料中...');
         
-        setTimeout(async () => {
-          await renderPersonalInfoContent();
-        }, 300);
-        
+        // 如果用戶資料不完整，先嘗試從 API 獲取
         if (ipPlanningToken && !ipPlanningUser.created_at) {
           try {
             await fetchUserInfo();
-            if (ipPlanningUser && ipPlanningUser.created_at) {
-              renderPersonalInfoContent();
-            }
+            // API 請求完成後再渲染
+            await renderPersonalInfoContent();
           } catch (error) {
             console.warn('無法從伺服器獲取最新資訊，使用本地資料');
+            // 即使 API 失敗，也嘗試用本地資料渲染
+            if (ipPlanningUser && (ipPlanningUser.name || ipPlanningUser.email)) {
+              await renderPersonalInfoContent();
+            } else {
+              content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+            }
           }
+        } else if (ipPlanningUser && (ipPlanningUser.name || ipPlanningUser.email)) {
+          // 有本地資料但沒有 created_at，直接渲染（不需要等待）
+          await renderPersonalInfoContent();
+        } else {
+          content.innerHTML = '<div class="loading-text">暫無個人資料</div>';
         }
       }
       
@@ -2160,9 +2461,27 @@
           return;
         }
         
-        // 載入數據
+        // 載入數據（優化版：個人資料優先使用已載入的資料）
         const loadContent = async () => {
           try {
+            // 個人資料特殊處理：如果資料已完整，直接渲染，不需要等待 API
+            if (sectionName === 'personalInfo' && ipPlanningUser && (ipPlanningUser.name || ipPlanningUser.email)) {
+              // 資料已存在，先嘗試直接渲染（使用 userDB.html 中的 renderPersonalInfoContent）
+              if (typeof renderPersonalInfoContent === 'function') {
+                // 確保 section 可見以渲染內容
+                targetSection.style.display = 'block';
+                await renderPersonalInfoContent();
+                // 等待渲染完成（減少延遲）
+                await new Promise(resolve => setTimeout(resolve, 50));
+                if (sectionContent && sectionContent.innerHTML && sectionContent.innerHTML.trim() !== '') {
+                  bodyEl.innerHTML = sectionContent.innerHTML;
+                  console.log('個人資料已快速載入到彈跳視窗');
+                  targetSection.style.display = originalDisplay || 'none';
+                  return;
+                }
+              }
+            }
+            
             switch(sectionName) {
               case 'personalInfo':
                 await loadPersonalInfoForUserDB();
@@ -2195,14 +2514,33 @@
                 break;
             }
             
-            // 等待內容渲染後再複製
-            await new Promise(resolve => setTimeout(resolve, 300));
+            // 等待內容渲染後再複製（個人資料已優化，減少延遲）
+            const delay = sectionName === 'personalInfo' ? 10 : 300;
+            await new Promise(resolve => setTimeout(resolve, delay));
             
-            if (sectionContent && sectionContent.innerHTML) {
+            // 如果內容還是空的，再等待一下
+            if (!sectionContent || !sectionContent.innerHTML || sectionContent.innerHTML.trim() === '') {
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            if (sectionContent && sectionContent.innerHTML && sectionContent.innerHTML.trim() !== '') {
               bodyEl.innerHTML = sectionContent.innerHTML;
               console.log('內容已載入到彈跳視窗');
             } else {
-              bodyEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #6b7280;">暫無內容</div>';
+              // 如果還是沒有內容，顯示載入中或暫無內容
+              if (sectionName === 'personalInfo') {
+                bodyEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #6b7280;">載入中...</div>';
+                // 再等待一下，如果還是沒有，顯示暫無內容
+                setTimeout(() => {
+                  if (!sectionContent || !sectionContent.innerHTML || sectionContent.innerHTML.trim() === '') {
+                    bodyEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #6b7280;">暫無內容</div>';
+                  } else {
+                    bodyEl.innerHTML = sectionContent.innerHTML;
+                  }
+                }, 500);
+              } else {
+                bodyEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #6b7280;">暫無內容</div>';
+              }
             }
           } catch (error) {
             console.error('載入內容失敗:', error);
@@ -2289,22 +2627,67 @@
         // 更新用戶資訊顯示
         updateUserInfo();
         
-        // 載入個人資料（預設顯示）
-        const isMobile = window.innerWidth <= 768;
-        if (isMobile) {
-          // 手機版：預設打開個人資料彈跳視窗
-          setTimeout(() => {
-            openUserDbModal('personalInfo');
-          }, 300);
-        } else {
-          // 桌面版：使用原有方式
-          loadPersonalInfoForUserDB();
-        }
+        // 等待用戶資料載入完成後再打開彈跳視窗（避免延遲）
+        const initializeUserDB = async () => {
+          // 如果沒有用戶資訊但有 token，先獲取用戶資訊
+          if (ipPlanningToken && (!ipPlanningUser || !ipPlanningUser.user_id)) {
+            try {
+              await fetchUserInfo();
+            } catch (error) {
+              console.warn('獲取用戶資訊失敗:', error);
+            }
+          }
+          
+          // 檢查 URL hash，如果有指定分類則跳轉到該分類
+          const hash = window.location.hash.replace('#', '');
+          const isMobile = window.innerWidth <= 768;
+          
+          if (hash) {
+            // 有 hash，跳轉到指定分類
+            if (isMobile) {
+              // 手機版：打開對應的彈跳視窗（減少延遲）
+              setTimeout(() => {
+                openUserDbModal(hash);
+              }, 100);
+            } else {
+              // 桌面版：切換到對應的分類
+              if (typeof showDbSection === 'function') {
+                showDbSection(hash);
+              }
+            }
+          } else {
+            // 沒有 hash，載入個人資料（預設顯示）
+            if (isMobile) {
+              // 手機版：預設打開個人資料彈跳視窗（減少延遲）
+              setTimeout(() => {
+                openUserDbModal('personalInfo');
+              }, 100);
+            } else {
+              // 桌面版：使用原有方式
+              loadPersonalInfoForUserDB();
+            }
+          }
+        };
         
-        // 如果沒有用戶資訊但有 token，嘗試獲取
-        if (ipPlanningToken && (!ipPlanningUser || !ipPlanningUser.user_id)) {
-          await fetchUserInfo();
-        }
+        // 執行初始化
+        await initializeUserDB();
+        
+        // 監聽 hash 變化
+        window.addEventListener('hashchange', function() {
+          const newHash = window.location.hash.replace('#', '');
+          if (newHash) {
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+              openUserDbModal(newHash);
+            } else {
+              if (typeof showDbSection === 'function') {
+                showDbSection(newHash);
+              }
+            }
+          }
+        });
+        
+        // 用戶資訊獲取已在 initializeUserDB 中處理
       });
     </script>
     

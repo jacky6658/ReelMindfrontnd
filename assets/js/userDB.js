@@ -230,10 +230,22 @@ function displayScriptsForUserDB(scripts) {
         </div>
       </div>
       <div class="script-actions" id="actions-${escapedScriptId}" style="display: none;">
-        <button class="action-btn view-btn" onclick="viewFullScriptForUserDB('${safeScriptId.replace(/'/g, "\\'")}')">查看完整結果</button>
-        <button class="action-btn download-pdf-btn" onclick="downloadScriptPDF('${safeScriptId.replace(/'/g, "\\'")}')">下載PDF檔案</button>
-        <button class="action-btn download-csv-btn" onclick="downloadScriptCSV('${safeScriptId.replace(/'/g, "\\'")}')">下載CSV檔案</button>
-        <button class="action-btn delete-btn" onclick="deleteScriptForUserDB('${safeScriptId.replace(/'/g, "\\'")}')">刪除</button>
+        <button class="action-btn view-btn" onclick="viewFullScriptForUserDB('${safeScriptId.replace(/'/g, "\\'")}')" data-script-id="${escapedScriptId}">
+          <i class="fas fa-eye" style="font-size: 12px;"></i>
+          查看完整結果
+        </button>
+        <button class="action-btn download-pdf-btn" onclick="downloadScriptPDF('${safeScriptId.replace(/'/g, "\\'")}')" data-script-id="${escapedScriptId}">
+          <i class="fas fa-file-pdf" style="font-size: 12px;"></i>
+          下載PDF檔案
+        </button>
+        <button class="action-btn download-csv-btn" onclick="downloadScriptCSV('${safeScriptId.replace(/'/g, "\\'")}')" data-script-id="${escapedScriptId}">
+          <i class="fas fa-file-csv" style="font-size: 12px;"></i>
+          下載CSV檔案
+        </button>
+        <button class="action-btn delete-btn" onclick="deleteScriptForUserDB('${safeScriptId.replace(/'/g, "\\'")}')" data-script-id="${escapedScriptId}">
+          <i class="fas fa-trash" style="font-size: 12px;"></i>
+          刪除
+        </button>
       </div>
     </div>
   `;
@@ -509,7 +521,7 @@ window.viewFullScriptForUserDB = function(scriptId) {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10000;
+    z-index: 100000 !important;
     padding: 20px;
     box-sizing: border-box;
   `;
@@ -950,23 +962,35 @@ async function loadPersonalInfoForUserDB() {
     return;
   }
   
-  showLoadingAnimation(content, '載入個人資料中...');
-  
-  if (ipPlanningUser && (ipPlanningUser.name || ipPlanningUser.email)) {
-    setTimeout(async () => {
-      await renderPersonalInfoContent();
-    }, 300);
+  // 如果用戶資料已經完整，直接渲染，不需要 loading 和延遲
+  if (ipPlanningUser && (ipPlanningUser.name || ipPlanningUser.email) && ipPlanningUser.created_at) {
+    await renderPersonalInfoContent();
+    return;
   }
   
+  // 只有在需要載入資料時才顯示 loading
+  showLoadingAnimation(content, '載入個人資料中...');
+  
+  // 如果用戶資料不完整，先嘗試從 API 獲取
   if (ipPlanningToken && !ipPlanningUser.created_at) {
     try {
       await fetchUserInfo();
-      if (ipPlanningUser && ipPlanningUser.created_at) {
-        renderPersonalInfoContent();
-      }
+      // API 請求完成後再渲染
+      await renderPersonalInfoContent();
     } catch (error) {
       console.warn('無法從伺服器獲取最新資訊，使用本地資料');
+      // 即使 API 失敗，也嘗試用本地資料渲染
+      if (ipPlanningUser && (ipPlanningUser.name || ipPlanningUser.email)) {
+        await renderPersonalInfoContent();
+      } else {
+        content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+      }
     }
+  } else if (ipPlanningUser && (ipPlanningUser.name || ipPlanningUser.email)) {
+    // 有本地資料但沒有 created_at，直接渲染（不需要等待）
+    await renderPersonalInfoContent();
+  } else {
+    content.innerHTML = '<div class="loading-text">暫無個人資料</div>';
   }
 }
 
@@ -1315,7 +1339,10 @@ async function loadPositioningRecordsForUserDB() {
     
     if (response.ok) {
       const data = await response.json();
-      displayPositioningRecordsForUserDB(data.records || []);
+      const records = data.records || [];
+      // 更新緩存
+      cachedPositioningRecords = records;
+      displayPositioningRecordsForUserDB(records);
     } else if (response.status === 401) {
       if (content) {
         content.innerHTML = '<div class="loading-text">請先登入</div>';
@@ -1366,15 +1393,24 @@ function displayPositioningRecordsForUserDB(records) {
         </div>
         <div class="record-preview">${preview}</div>
         <div class="record-actions">
-          <button class="action-btn view-btn" onclick="viewPositioningDetailForUserDB('${String(record.id).replace(/'/g, "\\'")}', '${String(recordNumber).replace(/'/g, "\\'")}')">查看完整結果</button>
-          <button class="action-btn delete-btn" onclick="deletePositioningRecordForUserDB('${String(record.id).replace(/'/g, "\\'")}')">刪除</button>
+          <button class="action-btn view-btn" onclick="viewPositioningDetailForUserDB('${String(record.id).replace(/'/g, "\\'")}', '${String(recordNumber).replace(/'/g, "\\'")}')" data-record-id="${escapeHtml(String(record.id || ''))}">
+            <i class="fas fa-eye" style="font-size: 12px;"></i>
+            查看完整結果
+          </button>
+          <button class="action-btn delete-btn" onclick="deletePositioningRecordForUserDB('${String(record.id).replace(/'/g, "\\'")}')" data-record-id="${escapeHtml(String(record.id || ''))}">
+            <i class="fas fa-trash" style="font-size: 12px;"></i>
+            刪除
+          </button>
         </div>
       </div>
     `;
   }).join('');
 }
 
-// 查看帳號定位詳細內容
+// 緩存定位記錄數據（避免重複 API 請求）
+let cachedPositioningRecords = null;
+
+// 查看帳號定位詳細內容（優化版：優先使用緩存數據）
 window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
   if (!ipPlanningUser?.user_id) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1392,28 +1428,52 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
     return;
   }
   
-  try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-    const response = await fetch(`${API_URL}/api/user/positioning/${ipPlanningUser.user_id}`, {
-      headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`
-      }
+  // 先嘗試從緩存中獲取記錄
+  let record = null;
+  if (cachedPositioningRecords && cachedPositioningRecords.length > 0) {
+    record = cachedPositioningRecords.find(r => {
+      const rId = String(r.id || '');
+      const searchId = String(recordId || '');
+      return rId === searchId || r.id == recordId;
     });
-    
-    if (response.ok) {
-      const data = await response.json();
-      const records = data.records || [];
-      
-      // 轉換 recordId 為字符串和數字進行比較（因為後端可能返回數字或字符串）
-      const record = records.find(r => {
-        const rId = String(r.id || '');
-        const searchId = String(recordId || '');
-        return rId === searchId || r.id == recordId; // 使用 == 進行寬鬆比較
+  }
+  
+  // 如果緩存中沒有，才發送 API 請求
+  if (!record) {
+    try {
+      const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+      const response = await fetch(`${API_URL}/api/user/positioning/${ipPlanningUser.user_id}`, {
+        headers: {
+          'Authorization': `Bearer ${ipPlanningToken}`
+        }
       });
       
-      console.log('查找記錄:', { recordId, record, recordsCount: records.length });
-      
-      if (record) {
+      if (response.ok) {
+        const data = await response.json();
+        const records = data.records || [];
+        // 更新緩存
+        cachedPositioningRecords = records;
+        
+        // 查找記錄
+        record = records.find(r => {
+          const rId = String(r.id || '');
+          const searchId = String(recordId || '');
+          return rId === searchId || r.id == recordId;
+        });
+      } else {
+        throw new Error('載入失敗');
+      }
+    } catch (error) {
+      console.error('載入定位記錄失敗:', error);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
+      }
+      return;
+    }
+  }
+  
+  // 如果找到記錄，立即顯示 modal（不需要等待）
+  if (record) {
         // 創建彈出視窗（使用內聯樣式確保顯示）
         const modal = document.createElement('div');
         modal.className = 'positioning-detail-modal-overlay';
@@ -1427,7 +1487,7 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
           display: flex;
           justify-content: center;
           align-items: center;
-          z-index: 10000;
+          z-index: 100000 !important;
           padding: 20px;
           box-sizing: border-box;
         `;
@@ -2679,7 +2739,7 @@ window.showOrderDetail = async function(orderId) {
                            order.invoice_type || '-';
     
     const detailHTML = `
-      <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;" onclick="closeOrderDetail(event)">
+      <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100000 !important; display: flex; align-items: center; justify-content: center; padding: 20px;" onclick="closeOrderDetail(event)">
         <div style="background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
           <div style="padding: 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
             <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #1f2937;">📋 訂單詳情</h2>
@@ -2814,7 +2874,7 @@ window.closeOrderDetail = function(event) {
   if (event && event.target !== event.currentTarget) {
     return;
   }
-  const modal = document.querySelector('[style*="z-index: 10000"]');
+  const modal = document.querySelector('[style*="z-index: 100000"]');
   if (modal) {
     modal.remove();
   }
