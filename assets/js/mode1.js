@@ -756,8 +756,11 @@ async function handleQuickButton(type) {
       console.warn('未知的快速按鈕類型:', type);
   }
 }
-// 導出到全局作用域，供 HTML onclick 使用
-window.handleQuickButton = handleQuickButton;
+
+// 立即導出到全局作用域，供 HTML onclick 使用（在函數定義後立即導出）
+if (typeof window !== 'undefined') {
+  window.handleQuickButton = handleQuickButton;
+}
 
 // 發送 Mode1 訊息
 async function sendMode1Message(message, conversationType = 'ip_planning') {
