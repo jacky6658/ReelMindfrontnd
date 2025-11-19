@@ -734,7 +734,7 @@ a{text-decoration:none;color:inherit}
     checkout();
   }
 
-  // 初始化：從 URL 參數讀取方案，如果沒有則預設為月費
+  // 初始化：從 URL 參數讀取方案，如果沒有則預設為永久使用
   const urlPlan = getUrlParam('plan');
   const initialPlan = urlPlan === 'yearly' ? 'yearly' : (urlPlan === 'lifetime' ? 'lifetime' : 'lifetime');
   setPlan(initialPlan);

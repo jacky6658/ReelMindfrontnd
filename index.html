@@ -14319,8 +14319,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                               (finalUserInfo && finalUserInfo.is_subscribed);
             
             if (finalCheck) {
-            const planName = planType === 'yearly' ? '年費' : '月費';
-              const planDays = planType === 'yearly' ? '1年' : '1個月';
+            const planName = planType === 'lifetime' ? '永久使用' : (planType === 'yearly' ? '年費' : '年費');
+              const planDays = planType === 'lifetime' ? '永久' : (planType === 'yearly' ? '1年' : '1年');
               showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
             } else {
               // 如果最終檢查還是沒有訂閱，可能是後端更新延遲，顯示提示而不是錯誤
@@ -14344,8 +14344,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                         ipPlanningUser.is_subscribed = latestUserInfo.is_subscribed;
                         localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                       }
-                      const planName = planType === 'yearly' ? '年費' : '月費';
-                      const planDays = planType === 'yearly' ? '1年' : '1個月';
+                      const planName = planType === 'lifetime' ? '永久使用' : (planType === 'yearly' ? '年費' : '年費');
+                      const planDays = planType === 'lifetime' ? '永久' : (planType === 'yearly' ? '1年' : '1年');
                       showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
                       return;
                     }
@@ -14358,8 +14358,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 const recheck = document.body.dataset.subscribed === 'true' || 
                                localStorage.getItem('subscriptionStatus') === 'active';
                 if (recheck) {
-                  const planName = planType === 'yearly' ? '年費' : '月費';
-                  const planDays = planType === 'yearly' ? '1年' : '1個月';
+                  const planName = planType === 'lifetime' ? '永久使用' : (planType === 'yearly' ? '年費' : '年費');
+                  const planDays = planType === 'lifetime' ? '永久' : (planType === 'yearly' ? '1年' : '1年');
                   showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
                 } else {
                   // 如果還是沒有，但後端已經授權成功（response.ok），顯示成功訊息而不是錯誤
@@ -14511,8 +14511,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 處理授權成功頁面（從後端 redirect 回來）
         if (activationSuccess === 'success') {
           const plan = urlParams.get('plan') || hashParams.get('plan') || 'yearly';
-          const planName = plan === 'yearly' ? '年費' : '月費';
-          const planDays = plan === 'yearly' ? '1年' : '1個月';
+          const planName = plan === 'lifetime' ? '永久使用' : (plan === 'yearly' ? '年費' : '年費');
+          const planDays = plan === 'lifetime' ? '永久' : (plan === 'yearly' ? '1年' : '1年');
           showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
           // 重新檢查訂閱狀態
           checkSubscriptionStatus().then(() => {
@@ -15074,7 +15074,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           } else {
             // 降級處理：使用原有邏輯
             if (!isSubscribed()) {
-              // 預設導到訂閱頁（不帶方案；如需可改 'monthly' 或 'yearly'）
+              // 預設導到訂閱頁（不帶方案；如需可改 'yearly' 或 'lifetime'）
               return showSubscriptionPaywall();
             }
           }
@@ -19236,7 +19236,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                     ? '<span style="display: inline-block; padding: 4px 12px; background: #d1fae5; color: #065f46; border-radius: 12px; font-size: 12px; font-weight: 600;">✅ 已付款</span>'
                     : '<span style="display: inline-block; padding: 4px 12px; background: #fee2e2; color: #991b1b; border-radius: 12px; font-size: 12px; font-weight: 600;">⏳ 待付款</span>';
                   
-                  const planText = order.plan_type === 'monthly' ? '月費方案' : order.plan_type === 'yearly' ? '年費方案' : order.plan_type || '-';
+                  const planText = order.plan_type === 'lifetime' ? '永久使用方案' : order.plan_type === 'yearly' ? '年費方案' : order.plan_type || '-';
                   
                   return `
                     <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s; cursor: pointer;" onclick="showOrderDetail('${order.order_id || order.id}')" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
@@ -19324,7 +19324,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }[order.payment_method] || order.payment_method || '-';
           
           // 方案顯示
-          const planText = order.plan_type === 'monthly' ? '月費方案' : 
+          const planText = order.plan_type === 'lifetime' ? '永久使用方案' : 
                           order.plan_type === 'yearly' ? '年費方案' : 
                           order.plan_type || '-';
           

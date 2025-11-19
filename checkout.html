@@ -530,12 +530,9 @@ a{text-decoration:none;color:inherit}
     if (currentPlan === 'lifetime') {
       planName = '永久使用方案';
       planDesc = '一次購買，永久使用';
-    } else if (isYearly) {
+    } else {  // yearly
       planName = '年費方案 🔥';
       planDesc = '最划算的長期方案';
-    } else {
-      planName = '月費方案';
-      planDesc = '彈性方案，適合短期使用者';
     }
     
     document.getElementById('summaryPlanName').textContent = testMode 
@@ -547,7 +544,7 @@ a{text-decoration:none;color:inherit}
       : planDesc;
 
     // 更新訂單摘要
-    const displayPlanName = currentPlan === 'lifetime' ? '永久使用方案' : (isYearly ? '年費方案' : '月費方案');
+    const displayPlanName = currentPlan === 'lifetime' ? '永久使用方案' : '年費方案';
     document.getElementById('sumPlan').textContent = testMode 
       ? `${displayPlanName} (測試)` 
       : displayPlanName;

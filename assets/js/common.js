@@ -395,8 +395,8 @@
                           (userInfoFromAPI && userInfoFromAPI.is_subscribed);
         
         if (finalCheck || subscriptionActive) {
-          const planName = planType === 'yearly' ? '年費' : '月費';
-          const planDays = planType === 'yearly' ? '1年' : '1個月';
+          const planName = planType === 'lifetime' ? '永久使用' : (planType === 'yearly' ? '年費' : '年費');
+          const planDays = planType === 'lifetime' ? '永久' : (planType === 'yearly' ? '1年' : '1年');
           showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
         } else {
           // 如果最終檢查還是沒有訂閱，可能是後端更新延遲，顯示提示而不是錯誤
@@ -420,8 +420,8 @@
                     ipPlanningUser.is_subscribed = latestUserInfo.is_subscribed;
                     localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                   }
-                  const planName = planType === 'yearly' ? '年費' : '月費';
-                  const planDays = planType === 'yearly' ? '1年' : '1個月';
+                  const planName = planType === 'lifetime' ? '永久使用' : (planType === 'yearly' ? '年費' : '年費');
+                  const planDays = planType === 'lifetime' ? '永久' : (planType === 'yearly' ? '1年' : '1年');
                   showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
                   return;
                 }
@@ -435,8 +435,8 @@
             const recheck = document.body.dataset.subscribed === 'true' || 
                            localStorage.getItem('subscriptionStatus') === 'active';
             if (recheck) {
-              const planName = planType === 'yearly' ? '年費' : '月費';
-              const planDays = planType === 'yearly' ? '1年' : '1個月';
+              const planName = planType === 'lifetime' ? '永久使用' : (planType === 'yearly' ? '年費' : '年費');
+              const planDays = planType === 'lifetime' ? '永久' : (planType === 'yearly' ? '1年' : '1年');
               showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
             } else {
               // 如果還是沒有，但後端已經授權成功（response.ok），顯示成功訊息而不是錯誤
