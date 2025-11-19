@@ -15270,9 +15270,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        // 已登入：使用 API 動態建立訂單（自動授權）
-        // 導向到 checkout.html 填寫付款資訊
-        window.location.href = `checkout.html?plan=${plan}`;
+        // 已登入：先跳轉到訂閱頁面，讓用戶選擇方案
+        // subscription.html 會處理後續的 checkout 流程
+        window.location.href = `subscription.html?plan=${plan}`;
       }
       
       // 在登入成功後與訂閱狀態載入時，同步本地 user.is_subscribed 欄位
