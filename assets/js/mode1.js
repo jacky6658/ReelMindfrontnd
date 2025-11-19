@@ -288,22 +288,33 @@ window.loadMode1OneClickHistory = loadMode1OneClickHistory;
 // 匯出歷史結果（客戶端生成 CSV）
 window.exportHistoryResult = async function(resultId, resultType) {
   try {
+    console.log('🔍 exportHistoryResult 被調用，resultId:', resultId, 'resultType:', resultType);
     // 從快取或 API 獲取數據
     const data = await fetchHistoryData();
     if (!data || !data.success || !data.results) {
+      console.error('❌ 無法獲取歷史數據');
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('找不到要匯出的數據', 3000);
       }
-        return;
-      }
+      return;
+    }
 
-    const result = data.results.find(r => r.id === resultId);
+    // 處理類型轉換：resultId 可能是字串或數字
+    const result = data.results.find(r => {
+      return r.id == resultId || 
+             String(r.id) === String(resultId) || 
+             Number(r.id) === Number(resultId);
+    });
+    
     if (!result) {
+      console.error('❌ 找不到要匯出的記錄，resultId:', resultId);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('找不到要匯出的記錄', 3000);
       }
       return;
     }
+    
+    console.log('✅ 找到要匯出的記錄:', result.title);
 
     // 生成 CSV 內容
     const typeNames = {
@@ -411,23 +422,53 @@ window.updateSelectedSettingsDisplay = updateSelectedSettingsDisplay;
 
 // 選擇歷史結果
 async function selectHistoryResult(type, resultId) {
-  const data = await fetchHistoryData();
-  if (!data || !data.success || !data.results) return;
-
-  const result = data.results.find(r => r.id === resultId);
-  if (result) {
-    if (selectedSettings[type] && selectedSettings[type].id === resultId) {
-      // 如果已經選擇，則取消選擇
-      selectedSettings[type] = null;
-    } else {
-      // 否則選擇
-      selectedSettings[type] = {
-        id: result.id,
-        title: result.title || `未命名${type.charAt(0).toUpperCase() + type.slice(1)}`,
-        content: result.content,
-      };
+  try {
+    console.log('🔍 selectHistoryResult 被調用，type:', type, 'resultId:', resultId);
+    const data = await fetchHistoryData();
+    if (!data || !data.success || !data.results) {
+      console.error('❌ 無法獲取歷史數據');
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('無法獲取數據，請稍後再試', 3000);
+      }
+      return;
     }
-    updateSelectedSettingsDisplay();
+
+    // 處理類型轉換：resultId 可能是字串或數字
+    const result = data.results.find(r => {
+      return r.id == resultId || 
+             String(r.id) === String(resultId) || 
+             Number(r.id) === Number(resultId);
+    });
+    
+    if (result) {
+      if (selectedSettings[type] && selectedSettings[type].id == resultId) {
+        // 如果已經選擇，則取消選擇
+        selectedSettings[type] = null;
+        console.log('✅ 已取消選擇');
+      } else {
+        // 否則選擇
+        selectedSettings[type] = {
+          id: result.id,
+          title: result.title || `未命名${type.charAt(0).toUpperCase() + type.slice(1)}`,
+          content: result.content,
+        };
+        console.log('✅ 已選擇:', selectedSettings[type].title);
+      }
+      updateSelectedSettingsDisplay();
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(selectedSettings[type] ? '✅ 已選擇' : '已取消選擇', 2000);
+      }
+    } else {
+      console.error('❌ 找不到對應的結果，resultId:', resultId);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('找不到對應的記錄', 3000);
+      }
+    }
+  } catch (error) {
+    console.error('❌ selectHistoryResult 錯誤:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('選擇失敗，請稍後再試', 3000);
+    }
   }
 }
 window.selectHistoryResult = selectHistoryResult;
@@ -661,20 +702,46 @@ window.cancelMode1HistoryTitleEdit = cancelMode1HistoryTitleEdit;
 
 // 展開/收起歷史記錄內容
 function toggleHistoryContentExpanded(resultId) {
-  const contentWrapper = document.getElementById(`contentWrapper-${resultId}`);
-  const expandBtn = contentWrapper.querySelector('.mode1-oneclick-expand-btn');
-  const expandIcon = expandBtn.querySelector('i');
+  try {
+    console.log('🔍 toggleHistoryContentExpanded 被調用，resultId:', resultId);
+    const contentWrapper = document.getElementById(`contentWrapper-${resultId}`);
+    if (!contentWrapper) {
+      console.error('❌ 找不到 contentWrapper，resultId:', resultId);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('找不到內容區域', 3000);
+      }
+      return;
+    }
+    
+    const expandBtn = contentWrapper.querySelector('.mode1-oneclick-expand-btn');
+    if (!expandBtn) {
+      console.error('❌ 找不到 expandBtn');
+      return;
+    }
+    
+    const expandIcon = expandBtn.querySelector('i');
+    if (!expandIcon) {
+      console.error('❌ 找不到 expandIcon');
+      return;
+    }
 
-  if (contentWrapper.classList.contains('expanded')) {
-    contentWrapper.classList.remove('expanded');
-    expandBtn.querySelector('span').textContent = '展開';
-    expandIcon.classList.remove('fa-chevron-up');
-    expandIcon.classList.add('fa-chevron-down');
-  } else {
-    contentWrapper.classList.add('expanded');
-    expandBtn.querySelector('span').textContent = '收起';
-    expandIcon.classList.remove('fa-chevron-down');
-    expandIcon.classList.add('fa-chevron-up');
+    if (contentWrapper.classList.contains('expanded')) {
+      contentWrapper.classList.remove('expanded');
+      expandBtn.querySelector('span').textContent = '展開';
+      expandIcon.classList.remove('fa-chevron-up');
+      expandIcon.classList.add('fa-chevron-down');
+    } else {
+      contentWrapper.classList.add('expanded');
+      expandBtn.querySelector('span').textContent = '收起';
+      expandIcon.classList.remove('fa-chevron-down');
+      expandIcon.classList.add('fa-chevron-up');
+    }
+    console.log('✅ toggleHistoryContentExpanded 執行成功');
+  } catch (error) {
+    console.error('❌ toggleHistoryContentExpanded 錯誤:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('操作失敗，請稍後再試', 3000);
+    }
   }
 }
 window.toggleHistoryContentExpanded = toggleHistoryContentExpanded;
@@ -685,55 +752,125 @@ let currentExpandModalContent = null; // 用於保存當前展開的內容，防
 
 // 開啟展開內容 Modal
 async function openMode1ExpandModal(resultId, resultType) {
-  const overlay = document.getElementById('mode1ExpandModalOverlay');
-  const modal = document.getElementById('mode1ExpandModal');
-  const modalTitle = document.getElementById('mode1ExpandModalTitle');
-  const modalContentDiv = document.getElementById('mode1ExpandModalContent');
-  
-  if (!overlay || !modal || !modalTitle || !modalContentDiv) return;
+  try {
+    console.log('🔍 openMode1ExpandModal 被調用');
+    console.log('  - resultId:', resultId, '類型:', typeof resultId);
+    console.log('  - resultType:', resultType);
+    
+    const overlay = document.getElementById('mode1ExpandModalOverlay');
+    const modal = document.getElementById('mode1ExpandModal');
+    const modalTitle = document.getElementById('mode1ExpandModalTitle');
+    const modalContentDiv = document.getElementById('mode1ExpandModalContent');
+    
+    if (!overlay || !modal || !modalTitle || !modalContentDiv) {
+      console.error('❌ 找不到 Modal 元素');
+      console.error('  - overlay:', overlay);
+      console.error('  - modal:', modal);
+      console.error('  - modalTitle:', modalTitle);
+      console.error('  - modalContentDiv:', modalContentDiv);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('無法打開視窗，請刷新頁面重試', 3000);
+      }
+      return;
+    }
 
-  modalContentDiv.innerHTML = '<p style="text-align: center; color: #9ca3af;">載入中...</p>'; // 顯示載入中
+    console.log('✅ Modal 元素找到，開始載入數據');
+    modalContentDiv.innerHTML = '<p style="text-align: center; color: #9ca3af;">載入中...</p>';
 
-  const data = await fetchHistoryData();
-  if (!data || !data.success || !data.results) {
-    modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">載入失敗，請稍後再試。</p>';
+    const data = await fetchHistoryData();
+    console.log('📦 獲取的數據:', data);
+    
+    if (!data || !data.success || !data.results) {
+      console.error('❌ 無法獲取歷史數據');
+      modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">載入失敗，請稍後再試。</p>';
       return;
     }
     
-  const result = data.results.find(r => r.id === resultId);
-
-  if (result) {
-    const typeNames = {
-      'profile': '帳號定位',
-      'plan': '選題方向',
-      'scripts': '短影音腳本'
-    };
-    modalTitle.textContent = result.title || `查看完整${typeNames[result.type] || ''}內容`;
-    modalContentDiv.innerHTML = renderMode1Markdown(result.content);
-    currentExpandModalContent = result.content; // 快取內容
+    console.log('📋 結果數量:', data.results.length);
+    console.log('🔍 尋找 resultId:', resultId);
+    console.log('🔍 所有結果的 ID:', data.results.map(r => ({ id: r.id, type: typeof r.id })));
     
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden'; // 禁止背景滾動
-
-    // 手機版：處理表格溢出
-    if (window.innerWidth <= 768) {
-      const tables = modalContentDiv.querySelectorAll('table');
-      tables.forEach(table => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'mode1-oneclick-result-content-wrapper in-expand-modal'; // 添加類名以便 CSS 處理
-        table.parentNode.insertBefore(wrapper, table);
-        wrapper.appendChild(table);
-      });
-    }
+    // 處理類型轉換：resultId 可能是字串或數字
+    const result = data.results.find(r => {
+      // 嘗試多種匹配方式
+      return r.id == resultId || 
+             String(r.id) === String(resultId) || 
+             Number(r.id) === Number(resultId);
+    });
     
-    // 強制重繪，確保滾動條正確顯示
-    modalContentDiv.scrollTop = 0;
-    setTimeout(() => {
+    console.log('🎯 找到的結果:', result);
+    
+    if (result) {
+      console.log('✅ 找到對應結果');
+      console.log('  - result.id:', result.id);
+      console.log('  - result.title:', result.title);
+      console.log('  - result.content 長度:', result.content ? result.content.length : 0);
+      console.log('  - result.content 前100字:', result.content ? result.content.substring(0, 100) : '無內容');
+      
+      if (!result.content || result.content.trim() === '') {
+        console.error('❌ result.content 為空');
+        modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">此記錄沒有內容。</p>';
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        return;
+      }
+      
+      const typeNames = {
+        'profile': '帳號定位',
+        'plan': '選題方向',
+        'scripts': '短影音腳本'
+      };
+      modalTitle.textContent = result.title || `查看完整${typeNames[result.type] || resultType || ''}內容`;
+      
+      console.log('🎨 開始渲染 Markdown');
+      const renderedContent = renderMode1Markdown(result.content);
+      console.log('✅ 渲染完成，內容長度:', renderedContent.length);
+      console.log('  - 渲染內容前100字:', renderedContent.substring(0, 100));
+      
+      if (!renderedContent || renderedContent.trim() === '') {
+        console.error('❌ 渲染結果為空，使用原始內容');
+        modalContentDiv.innerHTML = '<div style="white-space: pre-wrap; padding: 20px;">' + 
+          (window.escapeHtml ? window.escapeHtml(result.content) : result.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')) + 
+          '</div>';
+      } else {
+        modalContentDiv.innerHTML = renderedContent;
+      }
+      
+      currentExpandModalContent = result.content;
+      
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      // 手機版：處理表格溢出
+      if (window.innerWidth <= 768) {
+        const tables = modalContentDiv.querySelectorAll('table');
+        tables.forEach(table => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'mode1-oneclick-result-content-wrapper in-expand-modal';
+          table.parentNode.insertBefore(wrapper, table);
+          wrapper.appendChild(table);
+        });
+      }
+      
       modalContentDiv.scrollTop = 0;
-    }, 50);
-
+      setTimeout(() => {
+        modalContentDiv.scrollTop = 0;
+      }, 50);
+      
+      console.log('✅ Modal 打開成功');
     } else {
-    modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">找不到對應的內容。</p>';
+      console.error('❌ 找不到對應的結果');
+      console.error('  - 所有結果的 ID:', data.results.map(r => ({ id: r.id, type: typeof r.id })));
+      modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">找不到對應的內容。</p>';
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+  } catch (error) {
+    console.error('❌ openMode1ExpandModal 錯誤:', error);
+    console.error('錯誤堆疊:', error.stack);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('打開視窗失敗，請稍後再試', 3000);
+    }
   }
 }
 window.openMode1ExpandModal = openMode1ExpandModal;
