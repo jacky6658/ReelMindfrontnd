@@ -1680,49 +1680,14 @@ document.addEventListener('DOMContentLoaded', async function() {
   // 初始化 Mode1 聊天功能
   initMode1Chat();
 
-  const historyContainer = document.getElementById('mode1OneClickHistoryContainer');
-  if (historyContainer) {
-    historyContainer.addEventListener('click', function(e) {
-      const expandBtn = e.target.closest('.mode1-oneclick-expand-btn');
-      if (expandBtn) {
-        const resultId = expandBtn.getAttribute('data-result-id');
-        if (resultId && window.toggleHistoryContentExpanded) {
-          window.toggleHistoryContentExpanded(resultId);
-        }
-        return;
-      }
-      
-      const button = e.target.closest('.mode1-oneclick-history-item-btn');
-      if (!button) return;
-      
-      const resultId = button.getAttribute('data-result-id');
-      const resultType = button.getAttribute('data-result-type');
-      const action = button.getAttribute('data-action');
-      
-      if (action === 'delete') {
-        if (window.deleteMode1HistoryResult && resultId && resultType) {
-          window.deleteMode1HistoryResult(resultId, resultType);
-        }
-        return;
-      }
-      
-      if (!resultId) return;
-      
-      if (button.classList.contains('primary')) {
-        if (window.selectHistoryResult && resultType) {
-          window.selectHistoryResult(resultType, resultId);
-        }
-      } else if (button.querySelector('.fa-expand')) {
-        if (window.toggleHistoryContentExpanded) {
-          window.toggleHistoryContentExpanded(resultId);
-        }
-      } else if (button.querySelector('.fa-download')) {
-        if (window.exportHistoryResult && resultType) {
-          window.exportHistoryResult(resultId, resultType);
-        }
-      }
-    });
-  }
+  // 移除事件委託監聽器，讓按鈕的 onclick 屬性直接執行
+  // 所有按鈕都已經有 onclick 屬性，並且所有函數都已導出到全局作用域
+  // const historyContainer = document.getElementById('mode1OneClickHistoryContainer');
+  // if (historyContainer) {
+  //   historyContainer.addEventListener('click', function(e) {
+  //     // 事件委託已移除，使用按鈕的 onclick 屬性
+  //   });
+  // }
 
   // 更新用戶資訊
   updateUserInfo();
