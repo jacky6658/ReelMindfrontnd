@@ -982,7 +982,7 @@ async function loadPersonalInfoForUserDB() {
   
   // 如果用戶資料已經完整，直接渲染，不需要 loading 和延遲
   if (ipPlanningUser && (ipPlanningUser.name || ipPlanningUser.email) && ipPlanningUser.created_at) {
-    await renderPersonalInfoContent();
+      await renderPersonalInfoContent();
     return;
   }
   
@@ -1504,22 +1504,22 @@ let cachedPositioningRecords = null;
 // 查看帳號定位詳細內容（優化版：優先使用緩存數據）
 window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
   try {
-    if (!ipPlanningUser?.user_id) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('請先登入', 3000);
-      }
-      return;
+  if (!ipPlanningUser?.user_id) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入', 3000);
     }
-    
-    // 驗證和清理參數
-    if (!recordId) {
-      console.error('無效的 recordId:', recordId);
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('無效的記錄 ID', 3000);
-      }
-      return;
+    return;
+  }
+  
+  // 驗證和清理參數
+  if (!recordId) {
+    console.error('無效的 recordId:', recordId);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('無效的記錄 ID', 3000);
     }
-    
+    return;
+  }
+  
     // 先嘗試從緩存中獲取記錄
     let record = null;
     if (cachedPositioningRecords && cachedPositioningRecords.length > 0) {
@@ -1532,24 +1532,24 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
     
     // 如果緩存中沒有，才發送 API 請求
     if (!record) {
-      try {
-        const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-        const response = await fetch(`${API_URL}/api/user/positioning/${ipPlanningUser.user_id}`, {
-          headers: {
-            'Authorization': `Bearer ${ipPlanningToken}`
-          }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          const records = data.records || [];
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/user/positioning/${ipPlanningUser.user_id}`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      const records = data.records || [];
           // 更新緩存
           cachedPositioningRecords = records;
-          
+      
           // 查找記錄
           record = records.find(r => {
-            const rId = String(r.id || '');
-            const searchId = String(recordId || '');
+        const rId = String(r.id || '');
+        const searchId = String(recordId || '');
             return rId === searchId || r.id == recordId;
           });
         } else {
@@ -1565,7 +1565,7 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
     }
     
     // 如果找到記錄，立即顯示 modal（不需要等待）
-    if (record) {
+      if (record) {
         // 創建彈出視窗（使用內聯樣式確保顯示）
         const modal = document.createElement('div');
         modal.className = 'positioning-detail-modal-overlay';
@@ -1638,10 +1638,10 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
             modal.remove();
           });
         });
-    } else {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('找不到該記錄', 3000);
-      }
+      } else {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('找不到該記錄', 3000);
+        }
     }
   } catch (error) {
     console.error('View positioning detail error:', error);
@@ -3272,7 +3272,7 @@ async function testApiKey() {
       if (response.status === 429) {
         // 速率限制錯誤 - 嘗試從後端獲取中文錯誤訊息
         try {
-          const errorData = await response.json();
+      const errorData = await response.json();
           errorMessage = errorData.error || '測試請求過於頻繁，請等待 1 分鐘後再試（每分鐘最多測試 3 次）';
         } catch (e) {
           // 如果無法解析 JSON，使用預設訊息
@@ -3306,17 +3306,17 @@ async function testApiKey() {
           }
         }
         
-        testResultDiv.innerHTML = `
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="color: #ef4444; font-size: 18px;">❌</span>
-            <div>
-              <div style="font-weight: 500; color: #ef4444; margin-bottom: 4px;">測試失敗</div>
+      testResultDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="color: #ef4444; font-size: 18px;">❌</span>
+          <div>
+            <div style="font-weight: 500; color: #ef4444; margin-bottom: 4px;">測試失敗</div>
               <div style="color: #6b7280; font-size: 13px;">${errorMessage}</div>
-            </div>
           </div>
-        `;
-        testResultDiv.style.background = '#fef2f2';
-        testResultDiv.style.border = '1px solid #ef4444';
+        </div>
+      `;
+      testResultDiv.style.background = '#fef2f2';
+      testResultDiv.style.border = '1px solid #ef4444';
       }
       
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -3410,7 +3410,7 @@ async function updateModelOptions() {
           modelSelect.value = currentValue;
         } else {
           modelSelect.value = ''; // 如果之前的選擇無效，使用系統預設
-        }
+    }
       } else {
         modelSelect.value = ''; // 使用系統預設
       }

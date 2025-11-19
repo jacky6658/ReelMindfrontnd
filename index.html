@@ -13298,11 +13298,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           window.ReelMindCommon.goToLogin();
           return;
         }
-        // 降級處理：顯示登入頁面
-        const loginPage = document.getElementById('loginPage');
-        const appContainer = document.getElementById('appContainer');
-        if (loginPage) loginPage.style.display = 'flex';
-        if (appContainer) appContainer.style.display = 'none';
+        // 如果 common.js 還沒載入，直接跳轉到 Google OAuth URL（不等待）
+        const fbParam = encodeURIComponent(window.location.origin);
+        window.location.href = `https://aivideobackend.zeabur.app/api/auth/google?fb=${fbParam}`;
       }
       // 確保 goToLogin 在全局作用域中可用
       window.goToLogin = goToLogin;
@@ -15183,17 +15181,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }
         }
         
-        // 如果未登入，要求登入
+        // 如果未登入，直接跳轉到 Google 登入
         if (!isLoggedIn) {
-          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast('請先登入後再使用免費體驗功能', 3000);
+          // 直接調用 goToLogin，跳轉到 Google OAuth
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+            window.ReelMindCommon.goToLogin();
+          } else if (typeof window.goToLogin === 'function') {
+            window.goToLogin();
           } else {
-            alert('請先登入後再使用免費體驗功能');
+            // 降級處理：直接跳轉到 Google OAuth URL
+            const fbParam = encodeURIComponent(window.location.origin);
+            window.location.href = `https://aivideobackend.zeabur.app/api/auth/google?fb=${fbParam}`;
           }
-          // 跳轉到登入頁面
-          setTimeout(() => {
-            window.location.href = '/#login';
-          }, 1500);
           return;
         }
         

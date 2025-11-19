@@ -1,6 +1,6 @@
 // mode1.js - IP人設規劃模式專用函數
 // 從 mode1.html 提取的所有 JavaScript 代碼
-// 版本: 2025-01-13 (修復 checkLoginStatus, getCSRFToken 錯誤)
+// 版本: 2025-11-13 (修復 checkLoginStatus, getCSRFToken 錯誤)
 
 // API_BASE_URL 已在 config.js 中定義為全局變數
 // 這裡直接使用 window.APP_CONFIG，避免重複聲明
@@ -257,22 +257,22 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
           ${renderMode1Markdown(result.content)}
         </div>
         <div class="mode1-oneclick-result-expand">
-          <button class="mode1-oneclick-expand-btn" type="button" data-result-id="${result.id}">
+          <button class="mode1-oneclick-expand-btn" type="button" data-result-id="${result.id}" onclick="toggleHistoryContentExpanded('${result.id}')">
             <span>展開</span> <i class="fas fa-chevron-down"></i>
           </button>
         </div>
       </div>
       <div class="mode1-oneclick-history-item-actions">
-        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" type="button" data-result-id="${result.id}" data-result-type="${result.type}">
+        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" type="button" data-result-id="${result.id}" data-result-type="${result.type}" onclick="selectHistoryResult('${result.type}', '${result.id}')">
           <i class="fas fa-check"></i> <span>${isSelected ? '已選擇' : '選擇'}</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${result.id}">
+        <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${result.id}" data-result-type="${result.type}" onclick="openMode1ExpandModal('${result.id}', '${result.type}')">
           <i class="fas fa-expand"></i> <span>展開</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${result.id}" data-result-type="${result.type}">
+        <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${result.id}" data-result-type="${result.type}" onclick="exportHistoryResult('${result.id}', '${result.type}')">
           <i class="fas fa-download"></i> <span>匯出</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn danger" data-action="delete" data-type="${result.type}" data-id="${result.id}">
+        <button class="mode1-oneclick-history-item-btn danger" data-action="delete" data-type="${result.type}" data-id="${result.id}" type="button" onclick="deleteMode1HistoryResult('${result.id}', '${result.type}')">
           <i class="fas fa-trash-alt"></i> <span>刪除</span>
         </button>
       </div>
