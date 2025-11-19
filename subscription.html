@@ -488,29 +488,7 @@ a{text-decoration:none;color:inherit}
 <main class="wrap" style="padding:28px 0">
   <div class="safe grid" style="grid-template-columns: repeat(3, 1fr); gap: 16px;">
 
-    <!-- 第一：永久使用方案（優先推廣） -->
-    <section class="card" style="border: 2px solid var(--blue); box-shadow: 0 20px 50px rgba(37,99,235,.15); position: relative;">
-      <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--blue); color: white; padding: 4px 16px; border-radius: 999px; font-size: 12px; font-weight: 900;">🔥 最多人選擇</div>
-      <div class="body" style="text-align: center; display: flex; flex-direction: column; height: 100%;">
-        <div style="flex: 1;">
-          <h2 class="h2">永久使用方案</h2>
-          <div class="price" style="color: var(--ink); margin: 16px 0;">NT$9,900</div>
-          <div class="sub" style="margin-bottom: 16px;">一次購買，永久使用</div>
-          <div class="hr"></div>
-          <ul class="list" style="text-align: left; margin: 16px 0;">
-            <li>IP人設規劃(包含套用設定與AI短影音顧問深度對談，自動生成帳號定位、14天選題規劃、今日腳本，支援歷史記錄管理與自由搭配設定)</li>
-            <li>一鍵生成(無限制次數)</li>
-            <li>創作者資料庫(PDF / CSV 下載)</li>
-            <li>客服支援</li>
-          </ul>
-          <div class="hr"></div>
-          <div class="small" style="margin-top: 0; text-align: center; margin-bottom: 12px;">一次付款，終身使用，無需續費</div>
-        </div>
-        <a href="#" onclick="handleSubscriptionClick('lifetime'); return false;" class="btn blue monthly-btn" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none; position: relative; z-index: 10000 !important; cursor: pointer !important; pointer-events: auto !important; background: var(--blue) !important; color: white !important; padding: 12px 24px; border-radius: 999px; font-weight: 900;">立即購買</a>
-      </div>
-    </section>
-
-    <!-- 第二：年費方案 -->
+    <!-- 第一：年費方案 -->
     <section class="card">
       <div class="body" style="text-align: center; display: flex; flex-direction: column; height: 100%;">
         <div style="flex: 1;">
@@ -528,7 +506,29 @@ a{text-decoration:none;color:inherit}
           </ul>
           <div class="hr"></div>
         </div>
-        <a href="#" onclick="handleSubscriptionClick('yearly'); return false;" class="btn blue" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none;">立即升級 🔥 年付方案</a>
+        <a href="#" onclick="handleSubscriptionClick('yearly'); return false;" class="btn blue" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none;">立即購買</a>
+      </div>
+    </section>
+
+    <!-- 第二：永久使用方案（優先推廣） -->
+    <section class="card" style="border: 2px solid var(--blue); box-shadow: 0 20px 50px rgba(37,99,235,.15); position: relative;">
+      <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--blue); color: white; padding: 4px 16px; border-radius: 999px; font-size: 12px; font-weight: 900; white-space: nowrap;">🔥 最多人選擇</div>
+      <div class="body" style="text-align: center; display: flex; flex-direction: column; height: 100%;">
+        <div style="flex: 1;">
+          <h2 class="h2">永久使用方案</h2>
+          <div class="price" style="color: var(--ink); margin: 16px 0;">NT$9,900</div>
+          <div class="sub" style="margin-bottom: 16px;">一次購買，永久使用</div>
+          <div class="hr"></div>
+          <ul class="list" style="text-align: left; margin: 16px 0;">
+            <li>IP人設規劃(包含套用設定與AI短影音顧問深度對談，自動生成帳號定位、14天選題規劃、今日腳本，支援歷史記錄管理與自由搭配設定)</li>
+            <li>一鍵生成(無限制次數)</li>
+            <li>創作者資料庫(PDF / CSV 下載)</li>
+            <li>客服支援</li>
+          </ul>
+          <div class="hr"></div>
+          <div class="small" style="margin-top: 0; text-align: center; margin-bottom: 12px;">一次付款，終身使用，無需續費</div>
+        </div>
+        <a href="#" onclick="handleSubscriptionClick('lifetime'); return false;" class="btn blue monthly-btn" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none; position: relative; z-index: 10000 !important; cursor: pointer !important; pointer-events: auto !important; background: var(--blue) !important; color: white !important; padding: 12px 24px; border-radius: 999px; font-weight: 900;">立即升級 永久使用方案</a>
       </div>
     </section>
 
@@ -579,7 +579,7 @@ a{text-decoration:none;color:inherit}
 
 <script>
   // 價格設定（如未來調整，改這裡即可）
-  const price = { lifetime: 9900, yearly: 7980 };
+  const price = { lifetime: 9900, yearly: 4788 };
   let current = 'lifetime';
 
   function format(n){ return 'NT$' + n.toLocaleString('zh-Hant-TW'); }
