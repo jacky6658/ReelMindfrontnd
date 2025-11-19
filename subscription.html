@@ -181,11 +181,11 @@ a{text-decoration:none;color:inherit}
   box-shadow: 0 30px 70px rgba(37,99,235,.25);
 }
 
-/* 標籤動畫 */
-.card[style*="border: 2px solid var(--blue)"] > div[style*="position: absolute"] {
+/* 標籤動畫 - 已移除，避免與 translateX(-50%) 衝突導致標籤位置移動 */
+/* .card[style*="border: 2px solid var(--blue)"] > div[style*="position: absolute"] {
   animation: pulse 2s ease-in-out infinite;
   animation-delay: 1s;
-}
+} */
 
 /* 按鈕動畫 */
 .btn {
@@ -493,7 +493,7 @@ a{text-decoration:none;color:inherit}
       <div class="body" style="text-align: center; display: flex; flex-direction: column; height: 100%;">
         <div style="flex: 1;">
           <h2 class="h2">年費方案</h2>
-          <div class="price" style="color: var(--blue); font-size: 34px; font-weight: 900;">NT$399元/月</div>
+          <div class="price" style="color: var(--ink); font-size: 34px; font-weight: 900;">NT$399元<span style="font-size: 0.6em;">/月</span></div>
           <div class="sub" style="margin: 8px 0; color: var(--ink);">
             <div style="font-size: 14px; font-weight: 500;">以年計費</div>
           </div>
@@ -512,11 +512,11 @@ a{text-decoration:none;color:inherit}
 
     <!-- 第二：永久使用方案（優先推廣） -->
     <section class="card" style="border: 2px solid var(--blue); box-shadow: 0 20px 50px rgba(37,99,235,.15); position: relative;">
-      <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--blue); color: white; padding: 4px 16px; border-radius: 999px; font-size: 12px; font-weight: 900; white-space: nowrap;">🔥 最多人選擇</div>
+      <div style="position: absolute; top: -12px; left: 50%; right: auto; transform: translateX(-50%); background: var(--blue); color: white; padding: 4px 16px; border-radius: 999px; font-size: 12px; font-weight: 900; white-space: nowrap; display: inline-block;">🔥 最多人選擇</div>
       <div class="body" style="text-align: center; display: flex; flex-direction: column; height: 100%;">
         <div style="flex: 1;">
           <h2 class="h2">永久使用方案</h2>
-          <div class="price" style="color: var(--ink); margin: 16px 0;">NT$9,900</div>
+          <div class="price" style="color: var(--blue); margin: 16px 0;">NT$9,900</div>
           <div class="sub" style="margin-bottom: 16px;">一次購買，永久使用</div>
           <div class="hr"></div>
           <ul class="list" style="text-align: left; margin: 16px 0;">
