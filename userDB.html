@@ -2416,6 +2416,11 @@
             ipPlanningUser = userData;
             localStorage.setItem('ipPlanningUser', JSON.stringify(userData));
             updateUserInfo();
+            
+            // 獲取用戶資訊後，檢查 IP 人設規劃權限
+            if (typeof checkIpPlanningPermission === 'function') {
+              await checkIpPlanningPermission();
+            }
           } else if (response.status === 401) {
             // Token 過期，嘗試刷新
             if (window.Api && window.Api.refreshTokenIfNeeded) {

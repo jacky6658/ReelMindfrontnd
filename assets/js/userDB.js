@@ -478,6 +478,66 @@ async function updateScriptNameForUserDB(scriptId, newName) {
   }
 }
 
+// 查看腳本詳細（一鍵生成分類使用）
+window.viewScriptDetailForUserDB = function(scriptId) {
+  // 調用現有的查看完整腳本函數
+  if (window.viewFullScriptForUserDB) {
+    window.viewFullScriptForUserDB(scriptId);
+  } else {
+    // 如果函數不存在，從 API 獲取腳本並顯示
+    viewScriptDetailFromAPI(scriptId);
+  }
+};
+
+// 從 API 獲取腳本詳細
+async function viewScriptDetailFromAPI(scriptId) {
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/scripts/my`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      const script = data.scripts?.find(s => String(s.id) === String(scriptId));
+      if (script) {
+        // 轉換格式並顯示
+        const formattedScript = {
+          id: script.id,
+          name: script.name || script.title || '未命名腳本',
+          created_at: script.created_at ? formatTaiwanTime(script.created_at) : '',
+          script_data: script.script_data || {},
+          content: script.content
+        };
+        if (window.viewFullScriptForUserDB) {
+          // 臨時添加到本地儲存以便 viewFullScriptForUserDB 可以找到
+          const localScripts = getLocalScripts();
+          const existingIndex = localScripts.findIndex(s => s.id == scriptId);
+          if (existingIndex !== -1) {
+            localScripts[existingIndex] = formattedScript;
+          } else {
+            localScripts.push(formattedScript);
+          }
+          localStorage.setItem('user_scripts', JSON.stringify(localScripts));
+          window.viewFullScriptForUserDB(scriptId);
+        }
+      } else {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('找不到腳本', 3000);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('獲取腳本詳細錯誤:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
+    }
+  }
+}
+
 // 查看完整腳本
 window.viewFullScriptForUserDB = function(scriptId) {
   const scripts = getLocalScripts();
@@ -2963,6 +3023,280 @@ window.downloadIpPlanningPDF = function(resultId) {
   }
 };
 
+// ===== 一鍵生成管理函數 =====
+
+// 載入一鍵生成結果（整合 mode3 的所有結果）
+async function loadOneClickGenerationForUserDB() {
+  const content = document.getElementById('one-click-content');
+  
+  if (!ipPlanningUser?.user_id) {
+    if (content) {
+      content.innerHTML = '<div class="loading-text">請先登入以查看一鍵生成結果</div>';
+    }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入以查看一鍵生成結果', 3000);
+    }
+    return;
+  }
+  
+  if (content) {
+    showLoadingAnimation(content, '載入一鍵生成結果中...');
+  }
+  
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    
+    // 獲取所有 ip_planning_results（只顯示 source='mode3' 的結果）
+    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.results) {
+        // 只顯示 mode3 的結果
+        const mode3Results = data.results.filter(r => {
+          try {
+            const metadata = typeof r.metadata === 'string' ? JSON.parse(r.metadata) : (r.metadata || {});
+            return metadata.source === 'mode3';
+          } catch (e) {
+            // 如果 metadata 解析失敗，檢查是否為舊的 positioning_records 遷移資料
+            return false;
+          }
+        });
+        
+        // 同時獲取 user_scripts（mode3 的腳本）
+        const scriptsResponse = await fetch(`${API_URL}/api/scripts/my`, {
+          headers: {
+            'Authorization': `Bearer ${ipPlanningToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        let scripts = [];
+        if (scriptsResponse.ok) {
+          const scriptsData = await scriptsResponse.json();
+          if (scriptsData.scripts) {
+            // 只顯示 mode3 的腳本（script_data.source === 'mode3' 或沒有 source 標記的舊腳本）
+            scripts = scriptsData.scripts.filter(s => {
+              try {
+                const scriptData = typeof s.script_data === 'string' ? JSON.parse(s.script_data) : (s.script_data || {});
+                return scriptData.source === 'mode3' || !scriptData.source;
+              } catch (e) {
+                return true; // 舊資料預設顯示
+              }
+            });
+          }
+        }
+        
+        displayOneClickGenerationResults(mode3Results, scripts);
+      } else {
+        if (content) {
+          content.innerHTML = '<div class="loading-text">尚無一鍵生成結果</div>';
+        }
+      }
+    } else if (response.status === 401) {
+      if (content) {
+        content.innerHTML = '<div class="loading-text">請先登入</div>';
+      }
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入以查看一鍵生成結果', 3000);
+      }
+    } else {
+      if (content) {
+        content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+      }
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
+      }
+    }
+  } catch (error) {
+    console.error('載入一鍵生成結果錯誤:', error);
+    if (content) {
+      content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
+    }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
+    }
+  }
+}
+
+// 顯示一鍵生成結果
+function displayOneClickGenerationResults(mode3Results, scripts) {
+  const content = document.getElementById('one-click-content');
+  
+  if (!content) return;
+  
+  // 使用保存的類型，如果沒有則從 active tab 獲取
+  let currentType = window.currentOneClickType || 'scripts';
+  const activeTab = document.querySelector('.one-click-tab.active');
+  if (activeTab && !window.currentOneClickType) {
+    if (activeTab.textContent.includes('腳本')) {
+      currentType = 'scripts';
+    } else if (activeTab.textContent.includes('帳號定位')) {
+      currentType = 'profile';
+    } else if (activeTab.textContent.includes('選題方向')) {
+      currentType = 'plan';
+    }
+  }
+  
+  if (currentType === 'scripts') {
+    // 顯示腳本
+    if (scripts.length === 0) {
+      content.innerHTML = '<div class="loading-text">尚無腳本</div>';
+      return;
+    }
+    
+    const sortedScripts = [...scripts].sort((a, b) => {
+      const timeA = new Date(a.created_at || 0).getTime();
+      const timeB = new Date(b.created_at || 0).getTime();
+      return timeB - timeA;
+    });
+    
+    content.innerHTML = sortedScripts.map((script, index) => {
+      const date = script.created_at ? formatTaiwanTime(script.created_at) : (script.created_at || '');
+      const scriptName = escapeHtml(script.script_name || script.name || script.title || '未命名腳本');
+      const safeScriptId = String(script.id || '').replace(/['"\\]/g, '');
+      const escapedScriptId = escapeHtml(safeScriptId);
+      
+      return `
+        <div class="script-item" data-script-id="${escapedScriptId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="margin: 0; color: #1F2937; font-size: 1.1rem;">${scriptName}</h4>
+            <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="action-btn" onclick="viewScriptDetailForUserDB('${safeScriptId.replace(/'/g, "\\'")}')" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">👁️ 查看完整</button>
+            <button class="action-btn" onclick="downloadScriptPDF('${safeScriptId.replace(/'/g, "\\'")}')" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">📄 PDF</button>
+            <button class="action-btn" onclick="downloadScriptCSV('${safeScriptId.replace(/'/g, "\\'")}')" style="background: #6366f1; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">📊 CSV</button>
+            <button class="action-btn delete-btn" onclick="deleteScriptForUserDB('${safeScriptId.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">🗑️ 刪除</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } else {
+    // 顯示帳號定位或選題方向（從 mode3Results 過濾）
+    const filteredResults = mode3Results.filter(r => {
+      if (currentType === 'profile') {
+        return r.result_type === 'profile';
+      } else if (currentType === 'plan') {
+        return r.result_type === 'plan';
+      }
+      return false;
+    });
+    
+    if (filteredResults.length === 0) {
+      content.innerHTML = `<div class="loading-text">尚無${currentType === 'profile' ? '帳號定位' : '選題方向'}結果</div>`;
+      return;
+    }
+    
+    const sortedResults = [...filteredResults].sort((a, b) => {
+      const timeA = new Date(a.created_at || 0).getTime();
+      const timeB = new Date(b.created_at || 0).getTime();
+      return timeB - timeA;
+    });
+    
+    content.innerHTML = sortedResults.map((result, index) => {
+      const date = formatTaiwanTime(result.created_at);
+      const title = escapeHtml(result.title || (currentType === 'profile' ? '帳號定位' : '選題方向'));
+      const safeResultId = String(result.id || '').replace(/['"\\]/g, '');
+      const escapedResultId = escapeHtml(safeResultId);
+      
+      let safeContent = '';
+      if (result.content) {
+        const contentStr = String(result.content);
+        if (/<[^>]+>/.test(contentStr)) {
+          if (typeof DOMPurify !== 'undefined') {
+            safeContent = DOMPurify.sanitize(contentStr, {
+              ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],
+              ADD_ATTR: ['colspan', 'rowspan']
+            });
+          } else {
+            safeContent = escapeHtml(contentStr);
+          }
+        } else {
+          if (window.safeRenderMarkdown) {
+            safeContent = window.safeRenderMarkdown(contentStr);
+          } else if (typeof marked !== 'undefined') {
+            if (!marked.getDefaults || !marked.getDefaults().gfm) {
+              marked.setOptions({ gfm: true, breaks: true, tables: true });
+            }
+            const html = marked.parse(contentStr);
+            if (typeof DOMPurify !== 'undefined') {
+              safeContent = DOMPurify.sanitize(html, {
+                ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],
+                ADD_ATTR: ['colspan', 'rowspan']
+              });
+            } else {
+              safeContent = html;
+            }
+          } else {
+            safeContent = escapeHtml(contentStr).replace(/\n/g, '<br>');
+          }
+        }
+      }
+      
+      return `
+        <div class="one-click-item" data-result-id="${escapedResultId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="margin: 0; color: #1F2937; font-size: 1.1rem;">${title}</h4>
+            <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
+          </div>
+          <div style="color: #374151; line-height: 1.6; max-height: 300px; overflow-y: auto; margin-bottom: 12px;">
+            ${safeContent}
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="action-btn" onclick="viewIpPlanningDetailForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">👁️ 查看完整</button>
+            <button class="action-btn" onclick="downloadIpPlanningPDF('${safeResultId.replace(/'/g, "\\'")}')" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">📄 PDF</button>
+            <button class="action-btn delete-btn" onclick="deleteIpPlanningResultForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">🗑️ 刪除</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+// 切換一鍵生成類型
+window.showOneClickType = function(type) {
+  document.querySelectorAll('.one-click-tab').forEach(tab => {
+    tab.classList.remove('active');
+    tab.style.borderBottom = 'none';
+    tab.style.color = '#6B7280';
+    tab.style.fontWeight = 'normal';
+  });
+  
+  const tabs = document.querySelectorAll('.one-click-tab');
+  let targetTab = null;
+  if (type === 'scripts') {
+    targetTab = Array.from(tabs).find(tab => tab.textContent.includes('腳本'));
+  } else if (type === 'profile') {
+    targetTab = Array.from(tabs).find(tab => tab.textContent.includes('帳號定位'));
+  } else if (type === 'plan') {
+    targetTab = Array.from(tabs).find(tab => tab.textContent.includes('選題方向'));
+  }
+  
+  if (targetTab) {
+    targetTab.classList.add('active');
+    targetTab.style.borderBottom = '2px solid #3B82F6';
+    targetTab.style.color = '#3B82F6';
+    targetTab.style.fontWeight = '600';
+  }
+  
+  // 保存當前類型並重新載入資料
+  window.currentOneClickType = type;
+  loadOneClickGenerationForUserDB();
+};
+
+// 匯出一鍵生成結果
+window.exportOneClickGenerationResults = function() {
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast('匯出功能開發中', 3000);
+  }
+};
+
 // ===== 權限檢查函數 =====
 
 // 檢查 IP 人設規劃權限並顯示/隱藏選單
@@ -3017,6 +3351,11 @@ async function checkIpPlanningPermission() {
     if (section) section.style.display = 'none';
   }
 }
+
+// 確保函數在全局作用域中可用
+window.loadOneClickGenerationForUserDB = loadOneClickGenerationForUserDB;
+window.showOneClickType = showOneClickType;
+window.checkIpPlanningPermission = checkIpPlanningPermission;
 
 // ===== 訂單管理函數 =====
 
