@@ -428,27 +428,27 @@
       
       @media (max-width: 768px) {
         .page-content {
-          padding: 12px;
+          padding: 0; /* 移除左右 padding，讓藍色背景延伸 */
           padding-top: calc(80px + env(safe-area-inset-top, 0px)); /* 手機版導航列高度約 60-70px，加上安全區域 */
           padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
         }
         
         .step-flow-container {
           max-width: 100%;
-          padding: 0 20px; /* 手機版左右留出空間 */
+          padding: 0; /* 移除左右 padding，讓藍色背景延伸 */
           padding-top: 20px; /* 手機版上方留出空間，避免被切到 */
         }
       }
       
       @media (max-width: 480px) {
         .page-content {
-          padding: 10px;
+          padding: 0; /* 移除左右 padding，讓藍色背景延伸 */
           padding-top: calc(80px + env(safe-area-inset-top, 0px)); /* 手機版導航列高度約 60-70px，加上安全區域 */
           padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
         }
         
         .step-flow-container {
-          padding: 0 16px; /* 小手機版左右留出空間 */
+          padding: 0; /* 移除左右 padding，讓藍色背景延伸 */
           padding-top: 16px; /* 小手機版上方留出空間，避免被切到 */
         }
         
@@ -624,31 +624,34 @@
       
       @media (max-width: 768px) {
         .progress-steps {
-          gap: 8px; /* 手機版減少間距 */
+          gap: 4px; /* 手機版進一步減少間距 */
           margin-bottom: 32px;
           flex-wrap: nowrap; /* 強制並排，不換行 */
-          overflow-x: auto; /* 如果內容太寬，允許橫向滾動 */
-          -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
-          padding-bottom: 8px; /* 為滾動條留出空間 */
+          overflow-x: visible; /* 移除橫向滾動 */
+          justify-content: space-between; /* 平均分配三個步驟 */
+          padding: 0 16px; /* 左右留出少量空間 */
         }
         
         .progress-step {
-          flex-shrink: 0; /* 防止步驟被壓縮 */
+          flex: 1; /* 讓步驟平均分配空間 */
+          flex-shrink: 1; /* 允許適當縮小 */
+          min-width: 0; /* 允許縮小到0 */
         }
         
         .progress-step-connector {
-          width: 20px; /* 手機版減少連接線寬度 */
+          width: 8px; /* 手機版大幅減少連接線寬度 */
           flex-shrink: 0; /* 防止連接線被壓縮 */
         }
         
         .progress-step-label {
-          font-size: 12px; /* 手機版縮小字體 */
+          font-size: 11px; /* 手機版進一步縮小字體 */
+          white-space: nowrap; /* 防止文字換行 */
         }
         
         .progress-step-circle {
-          width: 40px; /* 手機版稍微縮小圓圈 */
-          height: 40px;
-          font-size: 14px;
+          width: 36px; /* 手機版進一步縮小圓圈 */
+          height: 36px;
+          font-size: 13px;
         }
       }
       
@@ -660,16 +663,15 @@
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
         padding: 32px;
         margin-bottom: 24px;
-
-        width: min(95%, 600px); /* 新增 */
-        max-width: 600px;       /* 新增 */
-        margin-left: auto;      /* 新增 */
-        margin-right: auto;     /* 新增 */
       }
       
       @media (max-width: 768px) {
         .step-card {
           padding: 16px;
+          width: calc(100% - 32px); /* 左右各留 16px 藍色邊 */
+          max-width: 600px;
+          margin-left: auto;
+          margin-right: auto;
         }
         
         .step-card-header {
@@ -934,6 +936,15 @@
         gap: 24px;
         padding: 64px 20px;
         min-height: 300px;
+      }
+      
+      @media (max-width: 768px) {
+        .loading-container {
+          width: calc(100% - 32px); /* 左右各留 16px 藍色邊 */
+          max-width: 600px;
+          margin-left: auto;
+          margin-right: auto;
+        }
       }
       
       .loading-icon-wrapper {
@@ -1376,6 +1387,12 @@
         display: flex;
         flex-direction: column;
         transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      
+      @media (max-width: 768px) {
+        .step-card .results-container {
+          width: 100%; /* 結果容器在 step-card 內，已經有 step-card 的寬度限制 */
+        }
       }
       
       .result-content {
