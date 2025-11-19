@@ -446,17 +446,25 @@ async function selectHistoryResult(type, resultId) {
         selectedSettings[type] = null;
         console.log('✅ 已取消選擇');
       } else {
-        // 否則選擇
+        // 清除所有其他已選擇的設定（限制一次只能選擇一個）
+        selectedSettings.profile = null;
+        selectedSettings.plan = null;
+        selectedSettings.scripts = null;
+        
+        // 選擇新的設定
         selectedSettings[type] = {
           id: result.id,
           title: result.title || `未命名${type.charAt(0).toUpperCase() + type.slice(1)}`,
           content: result.content,
         };
-        console.log('✅ 已選擇:', selectedSettings[type].title);
+        console.log('✅ 已選擇:', selectedSettings[type].title, '（已清除其他設定）');
       }
       updateSelectedSettingsDisplay();
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast(selectedSettings[type] ? '✅ 已選擇' : '已取消選擇', 2000);
+        const message = selectedSettings[type] 
+          ? `✅ 已選擇 ${selectedSettings[type].title}（已清除其他設定）` 
+          : '已取消選擇';
+        window.ReelMindCommon.showToast(message, 2000);
       }
     } else {
       console.error('❌ 找不到對應的結果，resultId:', resultId);

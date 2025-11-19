@@ -1653,21 +1653,13 @@
               <span class="menu-icon"><i class="fas fa-user"></i></span>
               <span class="menu-text">個人資料</span>
             </div>
-            <div class="menu-item" onclick="handleMenuClick('myScripts')">
-              <span class="menu-icon"><i class="fas fa-file-alt"></i></span>
-              <span class="menu-text">我的腳本</span>
-            </div>
-            <div class="menu-item" onclick="handleMenuClick('accountPositioning')">
-              <span class="menu-icon"><i class="fas fa-bullseye"></i></span>
-              <span class="menu-text">帳號定位</span>
-            </div>
-            <div class="menu-item" onclick="handleMenuClick('topicRecords')">
-              <span class="menu-icon"><i class="fas fa-lightbulb"></i></span>
-              <span class="menu-text">選題內容</span>
-            </div>
-            <div class="menu-item" onclick="handleMenuClick('ipPlanning')">
+            <div class="menu-item" id="menu-ipPlanning" onclick="handleMenuClick('ipPlanning')" style="display: none;">
               <span class="menu-icon"><i class="fas fa-user-tie"></i></span>
               <span class="menu-text">IP人設規劃</span>
+            </div>
+            <div class="menu-item" onclick="handleMenuClick('oneClickGeneration')">
+              <span class="menu-icon"><i class="fas fa-bolt"></i></span>
+              <span class="menu-text">一鍵生成</span>
             </div>
             <div class="menu-item" onclick="handleMenuClick('myOrders')">
               <span class="menu-icon"><i class="fas fa-credit-card"></i></span>
@@ -1714,29 +1706,8 @@
               <p>載入中...</p>
             </div>
           </div>
-          <!-- 我的腳本 -->
-          <div id="db-myScripts" class="db-section">
-            <h3 class="section-title"><i class="fas fa-file-alt" style="margin-right: 8px;"></i>我的腳本</h3>
-            <div class="section-content">
-              <p>載入中...</p>
-            </div>
-          </div>
-          <!-- 帳號定位 -->
-          <div id="db-accountPositioning" class="db-section">
-            <h3 class="section-title"><i class="fas fa-bullseye" style="margin-right: 8px;"></i>帳號定位</h3>
-            <div class="section-content">
-              <p>載入中...</p>
-            </div>
-          </div>
-          <!-- 選題內容 -->
-          <div id="db-topicRecords" class="db-section">
-            <h3 class="section-title"><i class="fas fa-lightbulb" style="margin-right: 8px;"></i>選題內容</h3>
-            <div class="section-content">
-              <p>載入中...</p>
-            </div>
-          </div>
           <!-- IP人設規劃 -->
-          <div id="db-ipPlanning" class="db-section">
+          <div id="db-ipPlanning" class="db-section" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px;">
               <h3 class="section-title"><i class="fas fa-user-tie" style="margin-right: 8px;"></i>IP人設規劃</h3>
               <button onclick="exportIpPlanningResults()" style="padding: 10px 16px; min-height: 44px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; -webkit-tap-highlight-color: transparent; touch-action: manipulation;"><i class="fas fa-download" style="margin-right: 4px;"></i>匯出</button>
@@ -1748,6 +1719,23 @@
                 <button class="ip-planning-tab" onclick="showIpPlanningType('scripts')" style="padding: 10px 16px; min-height: 44px; border: none; background: transparent; cursor: pointer; color: #6B7280; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">一週腳本</button>
               </div>
               <div id="ip-planning-content" class="ip-planning-content">
+                <div class="loading-text">載入中...</div>
+              </div>
+            </div>
+          </div>
+          <!-- 一鍵生成 -->
+          <div id="db-oneClickGeneration" class="db-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px;">
+              <h3 class="section-title"><i class="fas fa-bolt" style="margin-right: 8px;"></i>一鍵生成</h3>
+              <button onclick="exportOneClickGenerationResults()" style="padding: 10px 16px; min-height: 44px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; -webkit-tap-highlight-color: transparent; touch-action: manipulation;"><i class="fas fa-download" style="margin-right: 4px;"></i>匯出</button>
+            </div>
+            <div class="section-content">
+              <div class="one-click-tabs" style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #E5E7EB;">
+                <button class="one-click-tab active" onclick="showOneClickType('scripts')" style="padding: 10px 16px; min-height: 44px; border: none; background: transparent; cursor: pointer; border-bottom: 2px solid #3B82F6; color: #3B82F6; font-weight: 600; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">腳本</button>
+                <button class="one-click-tab" onclick="showOneClickType('profile')" style="padding: 10px 16px; min-height: 44px; border: none; background: transparent; cursor: pointer; color: #6B7280; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">帳號定位</button>
+                <button class="one-click-tab" onclick="showOneClickType('plan')" style="padding: 10px 16px; min-height: 44px; border: none; background: transparent; cursor: pointer; color: #6B7280; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">選題方向</button>
+              </div>
+              <div id="one-click-content" class="one-click-content">
                 <div class="loading-text">載入中...</div>
               </div>
             </div>
@@ -2100,23 +2088,23 @@
         
         // 根據分區載入相應數據
         try {
-          switch(sectionName) {
-            case 'personalInfo':
+        switch(sectionName) {
+          case 'personalInfo':
               // 優先使用 userDB.js 中的函數
               if (window.loadPersonalInfoForUserDB && typeof window.loadPersonalInfoForUserDB === 'function') {
                 await window.loadPersonalInfoForUserDB();
               } else if (typeof loadPersonalInfoForUserDB === 'function') {
                 await loadPersonalInfoForUserDB();
               }
-              break;
-            case 'myScripts':
+            break;
+          case 'myScripts':
               if (window.loadMyScriptsForUserDB && typeof window.loadMyScriptsForUserDB === 'function') {
                 await window.loadMyScriptsForUserDB();
               } else if (typeof loadMyScriptsForUserDB === 'function') {
                 await loadMyScriptsForUserDB();
               }
-              break;
-            case 'settings':
+            break;
+          case 'settings':
               // 確保 loadSavedApiKey 函數已載入
               if (typeof loadSavedApiKey === 'function') {
                 await loadSavedApiKey();
@@ -2125,46 +2113,46 @@
               } else {
                 console.error('loadSavedApiKey 函數未找到');
               }
-              break;
-            case 'accountPositioning':
+            break;
+          case 'accountPositioning':
               if (window.loadPositioningRecordsForUserDB && typeof window.loadPositioningRecordsForUserDB === 'function') {
                 await window.loadPositioningRecordsForUserDB();
               } else if (typeof loadPositioningRecordsForUserDB === 'function') {
                 await loadPositioningRecordsForUserDB();
               }
-              break;
-            case 'topicRecords':
+            break;
+          case 'topicRecords':
               if (window.loadTopicHistoryForUserDB && typeof window.loadTopicHistoryForUserDB === 'function') {
                 await window.loadTopicHistoryForUserDB();
               } else if (typeof loadTopicHistoryForUserDB === 'function') {
                 await loadTopicHistoryForUserDB();
               }
-              break;
-            case 'ipPlanning':
+            break;
+          case 'ipPlanning':
               if (window.loadIpPlanningResultsForUserDB && typeof window.loadIpPlanningResultsForUserDB === 'function') {
                 await window.loadIpPlanningResultsForUserDB();
               } else if (typeof loadIpPlanningResultsForUserDB === 'function') {
                 await loadIpPlanningResultsForUserDB();
               }
-              break;
-            case 'myOrders':
+            break;
+          case 'myOrders':
               if (window.loadMyOrdersForUserDB && typeof window.loadMyOrdersForUserDB === 'function') {
                 await window.loadMyOrdersForUserDB();
               } else if (typeof loadMyOrdersForUserDB === 'function') {
                 await loadMyOrdersForUserDB();
               }
-              break;
-            case 'usageStats':
+            break;
+          case 'usageStats':
               if (window.loadUsageStatsForUserDB && typeof window.loadUsageStatsForUserDB === 'function') {
                 await window.loadUsageStatsForUserDB();
               } else if (typeof loadUsageStatsForUserDB === 'function') {
                 await loadUsageStatsForUserDB();
               }
-              break;
-            case 'helpCenter':
-              // 幫助中心內容已在HTML中定義，無需動態載入
-              break;
-          }
+            break;
+          case 'helpCenter':
+            // 幫助中心內容已在HTML中定義，無需動態載入
+            break;
+        }
         } catch (error) {
           console.error('載入分區數據失敗:', error);
           if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -2456,6 +2444,11 @@
         }
       }
       
+      // 檢查 IP 人設規劃權限（頁面載入時）
+      if (typeof checkIpPlanningPermission === 'function') {
+        checkIpPlanningPermission();
+      }
+      
       // 打開彈跳視窗
       function openUserDbModal(sectionName) {
         const overlay = document.getElementById('userdbModalOverlay');
@@ -2684,9 +2677,9 @@
         // 等待用戶資料載入完成後再打開彈跳視窗（避免延遲）
         const initializeUserDB = async () => {
           // 如果沒有用戶資訊但有 token，先獲取用戶資訊
-          if (ipPlanningToken && (!ipPlanningUser || !ipPlanningUser.user_id)) {
+        if (ipPlanningToken && (!ipPlanningUser || !ipPlanningUser.user_id)) {
             try {
-              await fetchUserInfo();
+          await fetchUserInfo();
             } catch (error) {
               console.warn('獲取用戶資訊失敗:', error);
             }

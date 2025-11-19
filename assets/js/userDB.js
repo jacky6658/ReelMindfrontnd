@@ -1367,20 +1367,14 @@ function showDbSection(sectionName) {
     case 'personalInfo':
       loadPersonalInfoForUserDB();
       break;
-    case 'myScripts':
-      loadMyScriptsForUserDB();
-      break;
     case 'settings':
       loadSavedApiKey();
       break;
-    case 'accountPositioning':
-      loadPositioningRecordsForUserDB();
-      break;
-    case 'topicRecords':
-      loadTopicHistoryForUserDB();
-      break;
     case 'ipPlanning':
       loadIpPlanningResultsForUserDB();
+      break;
+    case 'oneClickGeneration':
+      loadOneClickGenerationForUserDB();
       break;
     case 'myOrders':
       loadMyOrdersForUserDB();
@@ -2183,8 +2177,18 @@ async function loadIpPlanningResultsForUserDB() {
     if (response.ok) {
       const data = await response.json();
       if (data.success && data.results) {
-        window.currentIpPlanningResults = data.results;
-        displayIpPlanningResultsForUserDB(data.results);
+        // 只顯示 mode1 的結果（過濾掉 source='mode3' 的結果）
+        const mode1Results = data.results.filter(r => {
+          try {
+            const metadata = typeof r.metadata === 'string' ? JSON.parse(r.metadata) : (r.metadata || {});
+            return metadata.source !== 'mode3';
+          } catch (e) {
+            // 如果 metadata 解析失敗，預設顯示（舊資料）
+            return true;
+          }
+        });
+        window.currentIpPlanningResults = mode1Results;
+        displayIpPlanningResultsForUserDB(mode1Results);
       } else {
         if (content) {
           content.innerHTML = '<div class="loading-text">尚無 IP 人設規劃結果</div>';
@@ -2374,6 +2378,8 @@ function displayIpPlanningResultsForUserDB(results) {
           </div>
           <div style="display: flex; align-items: center; gap: 12px;">
             <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
+            <button class="action-btn view-btn" onclick="viewIpPlanningDetailForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'" title="查看完整結果">👁️ 查看完整</button>
+            <button class="action-btn pdf-btn" onclick="downloadIpPlanningPDF('${safeResultId.replace(/'/g, "\\'")}')" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'" title="匯出PDF">📄 PDF</button>
             <button class="action-btn delete-btn" onclick="deleteIpPlanningResultForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'" title="刪除此項目">🗑️ 刪除</button>
           </div>
         </div>
@@ -2642,6 +2648,373 @@ window.saveIpPlanningItemTitle = function(resultId) {
       editIcon.style.opacity = '0.6';
     }
     inputElement.style.display = 'none';
+  }
+}
+
+// 查看 IP 人設規劃詳細內容
+window.viewIpPlanningDetailForUserDB = async function(resultId) {
+  try {
+    if (!ipPlanningUser?.user_id) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入', 3000);
+      }
+      return;
+    }
+    
+    // 驗證和清理參數
+    if (!resultId) {
+      console.error('無效的 resultId:', resultId);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('無效的記錄 ID', 3000);
+      }
+      return;
+    }
+    
+    // 先嘗試從緩存中獲取記錄
+    let result = null;
+    if (window.currentIpPlanningResults && window.currentIpPlanningResults.length > 0) {
+      result = window.currentIpPlanningResults.find(r => {
+        const rId = String(r.id || '');
+        const searchId = String(resultId || '');
+        return rId === searchId || r.id == resultId;
+      });
+    }
+    
+    // 如果緩存中沒有，才發送 API 請求
+    if (!result) {
+      try {
+        const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+        const response = await fetch(`${API_URL}/api/ip-planning/my`, {
+          headers: {
+            'Authorization': `Bearer ${ipPlanningToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.results) {
+            window.currentIpPlanningResults = data.results;
+            result = data.results.find(r => {
+              const rId = String(r.id || '');
+              const searchId = String(resultId || '');
+              return rId === searchId || r.id == resultId;
+            });
+          }
+        }
+      } catch (error) {
+        console.error('載入 IP 人設規劃結果失敗:', error);
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
+        }
+        return;
+      }
+    }
+    
+    // 如果找到記錄，顯示 modal
+    if (result) {
+      // 獲取標題
+      let savedTitle = '';
+      if (ipPlanningUser && ipPlanningUser.user_id) {
+        savedTitle = localStorage.getItem(`ip-planning-item-title-${ipPlanningUser.user_id}-${result.id}`);
+      }
+      const activeTab = document.querySelector('.ip-planning-tab.active');
+      let defaultTitle = '帳號定位';
+      if (activeTab) {
+        if (activeTab.textContent.includes('帳號定位')) {
+          defaultTitle = '帳號定位';
+        } else if (activeTab.textContent.includes('選題方向')) {
+          defaultTitle = '選題方向（影片類型配比）';
+        } else if (activeTab.textContent.includes('一週腳本')) {
+          defaultTitle = '一週腳本';
+        }
+      }
+      const finalTitle = savedTitle || (result.title && result.title !== '請在此編輯你的標題' ? result.title : defaultTitle);
+      
+      // 處理內容
+      let safeContent = '';
+      if (result.content) {
+        const contentStr = String(result.content);
+        if (/<[^>]+>/.test(contentStr)) {
+          if (typeof DOMPurify !== 'undefined') {
+            safeContent = DOMPurify.sanitize(contentStr, {
+              ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],
+              ADD_ATTR: ['colspan', 'rowspan']
+            });
+          } else {
+            safeContent = escapeHtml(contentStr);
+          }
+        } else {
+          if (window.safeRenderMarkdown) {
+            safeContent = window.safeRenderMarkdown(contentStr);
+          } else if (typeof marked !== 'undefined') {
+            if (!marked.getDefaults || !marked.getDefaults().gfm) {
+              marked.setOptions({ gfm: true, breaks: true, tables: true });
+            }
+            const html = marked.parse(contentStr);
+            if (typeof DOMPurify !== 'undefined') {
+              safeContent = DOMPurify.sanitize(html, {
+                ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],
+                ADD_ATTR: ['colspan', 'rowspan']
+              });
+            } else {
+              safeContent = html;
+            }
+          } else {
+            safeContent = escapeHtml(contentStr).replace(/\n/g, '<br>');
+          }
+        }
+      }
+      
+      // 創建彈出視窗
+      const modal = document.createElement('div');
+      modal.className = 'ip-planning-detail-modal-overlay';
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100000 !important;
+        padding: 20px;
+        box-sizing: border-box;
+      `;
+      
+      // 點擊背景關閉
+      modal.onclick = function(e) {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      };
+      
+      const modalContent = document.createElement('div');
+      modalContent.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        max-width: 900px;
+        width: 100%;
+        max-height: 90vh;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+      `;
+      
+      modalContent.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #e5e7eb;">
+          <h3 style="margin: 0; color: #1f2937; font-size: 20px; font-weight: 600;">${escapeHtml(finalTitle)}</h3>
+          <button class="ip-planning-modal-close-btn" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #6b7280; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">×</button>
+        </div>
+        <div style="padding: 24px; overflow-y: auto; flex: 1;">
+          <div style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e5e7eb;">
+            <span style="color: #6b7280; font-size: 14px;">建立時間：</span>
+            <span style="color: #1f2937; font-size: 14px; margin-left: 8px;">${formatTaiwanTime(result.created_at)}</span>
+          </div>
+          <div style="color: #374151; line-height: 1.8; font-size: 15px;">${safeContent}</div>
+        </div>
+        <div style="padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end;">
+          <button class="ip-planning-modal-close-btn" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">關閉</button>
+        </div>
+      `;
+      
+      // 阻止點擊內容區域關閉
+      modalContent.onclick = function(e) {
+        e.stopPropagation();
+      };
+      
+      // 為關閉按鈕添加事件監聽器
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+      
+      const closeButtons = modalContent.querySelectorAll('.ip-planning-modal-close-btn');
+      closeButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          modal.remove();
+        });
+      });
+    } else {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('找不到該記錄', 3000);
+      }
+    }
+  } catch (error) {
+    console.error('View IP planning detail error:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
+    }
+  }
+};
+
+// 匯出 IP 人設規劃結果為 PDF
+window.downloadIpPlanningPDF = function(resultId) {
+  try {
+    // 驗證和清理 resultId
+    if (!resultId || (typeof resultId !== 'string' && typeof resultId !== 'number')) {
+      console.error('無效的 resultId:', resultId);
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('無效的記錄 ID', 3000);
+      }
+      return;
+    }
+    
+    // 從緩存中獲取結果
+    let result = null;
+    if (window.currentIpPlanningResults && window.currentIpPlanningResults.length > 0) {
+      result = window.currentIpPlanningResults.find(r => {
+        const rId = String(r.id || '');
+        const searchId = String(resultId || '');
+        return rId === searchId || r.id == resultId;
+      });
+    }
+    
+    if (!result) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('找不到該記錄', 3000);
+      }
+      return;
+    }
+    
+    // 獲取標題
+    let savedTitle = '';
+    if (ipPlanningUser && ipPlanningUser.user_id) {
+      savedTitle = localStorage.getItem(`ip-planning-item-title-${ipPlanningUser.user_id}-${result.id}`);
+    }
+    const activeTab = document.querySelector('.ip-planning-tab.active');
+    let defaultTitle = '帳號定位';
+    if (activeTab) {
+      if (activeTab.textContent.includes('帳號定位')) {
+        defaultTitle = '帳號定位';
+      } else if (activeTab.textContent.includes('選題方向')) {
+        defaultTitle = '選題方向（影片類型配比）';
+      } else if (activeTab.textContent.includes('一週腳本')) {
+        defaultTitle = '一週腳本';
+      }
+    }
+    const finalTitle = savedTitle || (result.title && result.title !== '請在此編輯你的標題' ? result.title : defaultTitle);
+    
+    // 處理內容（移除 HTML 標籤，保留純文字和基本格式）
+    let printContent = result.content || '';
+    // 移除 HTML 標籤，但保留換行
+    printContent = printContent.replace(/<br\s*\/?>/gi, '\n');
+    printContent = printContent.replace(/<\/p>/gi, '\n\n');
+    printContent = printContent.replace(/<\/div>/gi, '\n');
+    printContent = printContent.replace(/<\/li>/gi, '\n');
+    printContent = printContent.replace(/<li>/gi, '• ');
+    printContent = printContent.replace(/<[^>]+>/g, '');
+    printContent = printContent.replace(/&nbsp;/g, ' ');
+    printContent = printContent.replace(/&amp;/g, '&');
+    printContent = printContent.replace(/&lt;/g, '<');
+    printContent = printContent.replace(/&gt;/g, '>');
+    printContent = printContent.replace(/&quot;/g, '"');
+    printContent = printContent.replace(/&#039;/g, "'");
+    
+    // 構建 PDF 內容
+    let pdfContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>${escapeHtml(finalTitle)}</title>
+        <style>
+          @media print {
+            body { margin: 0; padding: 20px; }
+            .no-print { display: none; }
+          }
+          body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+          h1 { color: #1f2937; margin-bottom: 10px; font-size: 24px; }
+          .meta { color: #6b7280; margin-bottom: 20px; font-size: 14px; }
+          .content { color: #374151; white-space: pre-wrap; font-size: 14px; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          th { background: #f8fafc; padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; }
+          td { padding: 10px; border-bottom: 1px solid #e5e7eb; color: #4b5563; }
+          tr:nth-child(even) { background: #f9fafb; }
+        </style>
+      </head>
+      <body>
+        <h1>${escapeHtml(finalTitle)}</h1>
+        <div class="meta">建立時間：${formatTaiwanTime(result.created_at)}</div>
+        <div class="content">${escapeHtml(printContent)}</div>
+      </body>
+      </html>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(pdfContent);
+    printWindow.document.close();
+    
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('PDF 準備就緒，請使用瀏覽器的列印功能儲存為 PDF', 3000);
+        }
+      }, 250);
+    };
+  } catch (error) {
+    console.error('Download IP planning PDF error:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('❌ 匯出失敗，請稍後再試', 3000);
+    }
+  }
+};
+
+// ===== 權限檢查函數 =====
+
+// 檢查 IP 人設規劃權限並顯示/隱藏選單
+async function checkIpPlanningPermission() {
+  if (!ipPlanningUser?.user_id) {
+    // 未登入，隱藏 IP 人設規劃選單
+    const menuItem = document.getElementById('menu-ipPlanning');
+    const section = document.getElementById('db-ipPlanning');
+    if (menuItem) menuItem.style.display = 'none';
+    if (section) section.style.display = 'none';
+    return;
+  }
+  
+  try {
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const response = await fetch(`${API_URL}/api/user/ip-planning/permission`, {
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      const hasPermission = data.has_permission || false;
+      
+      const menuItem = document.getElementById('menu-ipPlanning');
+      const section = document.getElementById('db-ipPlanning');
+      
+      if (hasPermission) {
+        // 有權限，顯示選單
+        if (menuItem) menuItem.style.display = '';
+        if (section) section.style.display = '';
+      } else {
+        // 無權限，隱藏選單
+        if (menuItem) menuItem.style.display = 'none';
+        if (section) section.style.display = 'none';
+      }
+    } else {
+      // API 錯誤，隱藏選單
+      const menuItem = document.getElementById('menu-ipPlanning');
+      const section = document.getElementById('db-ipPlanning');
+      if (menuItem) menuItem.style.display = 'none';
+      if (section) section.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('檢查 IP 人設規劃權限錯誤:', error);
+    // 錯誤時隱藏選單
+    const menuItem = document.getElementById('menu-ipPlanning');
+    const section = document.getElementById('db-ipPlanning');
+    if (menuItem) menuItem.style.display = 'none';
+    if (section) section.style.display = 'none';
   }
 }
 

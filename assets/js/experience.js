@@ -1618,11 +1618,11 @@ async function saveResult(type) {
           }
           
           // 顯示通知（common.js 的 showToast 已支援多行訊息）
-          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
             window.ReelMindCommon.showToast(message, 5000);
-          } else {
-            alert(message);
-          }
+              } else {
+                alert(message);
+              }
         } else {
           throw new Error('儲存失敗');
         }
@@ -1692,11 +1692,11 @@ async function saveResult(type) {
           }
           
           // 顯示通知（common.js 的 showToast 已支援多行訊息）
-          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
             window.ReelMindCommon.showToast(message, 5000);
-          } else {
-            alert(message);
-          }
+              } else {
+                alert(message);
+              }
         } else {
           throw new Error('儲存失敗');
         }
@@ -1772,7 +1772,7 @@ async function saveScript() {
       window.ReelMindCommon.showToast(message, duration);
     } else {
       // 降級處理：使用 alert（支援多行）
-      alert(message);
+        alert(message);
     }
   };
   
