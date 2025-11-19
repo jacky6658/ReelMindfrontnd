@@ -1594,28 +1594,35 @@ async function saveResult(type) {
         
         if (response.ok) {
           const data = await response.json();
-          // 顯示通知（確保一定會顯示）
-          const showNotification = (message, duration = 3000) => {
-            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-              window.ReelMindCommon.showToast(message, duration);
-            } else {
-              const toastEl = document.getElementById('toast');
-              if (toastEl) {
-                toastEl.textContent = message;
-                toastEl.style.display = 'block';
-                toastEl.style.opacity = '1';
-                setTimeout(() => {
-                  toastEl.style.opacity = '0';
-                  setTimeout(() => {
-                    toastEl.style.display = 'none';
-                  }, 300);
-                }, duration);
-              } else {
-                alert(message);
-              }
-            }
-          };
-          showNotification(`✅ 帳號定位已儲存（編號：${data.record_number}）`, 3000);
+          // 檢查是否為免費體驗用戶
+          let isSubscribed = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+            isSubscribed = window.ReelMindCommon.isSubscribed();
+          } else {
+            const userSubscribed = !!(ipPlanningUser && (
+              ipPlanningUser.is_subscribed === true || 
+              ipPlanningUser.is_subscribed === 1 || 
+              ipPlanningUser.is_subscribed === '1' ||
+              ipPlanningUser.is_subscribed === 'true'
+            ));
+            isSubscribed = userSubscribed;
+          }
+          
+          // 構建提示訊息
+          let message = `✅ 已儲存目前設定\n\n帳號定位已儲存（編號：${data.record_number}）`;
+          
+          if (!isSubscribed) {
+            const usageCount = getFreeTrialUsageCount();
+            message += `\n\n📊 免費體驗使用次數已更新: ${usageCount}/3`;
+            message += `\n\n此功能為進階方案的一部分，如需永久保存與更多次數，歡迎升級帳號權限。`;
+          }
+          
+          // 顯示通知（common.js 的 showToast 已支援多行訊息）
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast(message, 5000);
+          } else {
+            alert(message);
+          }
         } else {
           throw new Error('儲存失敗');
         }
@@ -1661,28 +1668,35 @@ async function saveResult(type) {
         
         if (response.ok) {
           const data = await response.json();
-          // 顯示通知（確保一定會顯示）
-          const showNotification = (message, duration = 3000) => {
-            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-              window.ReelMindCommon.showToast(message, duration);
-            } else {
-              const toastEl = document.getElementById('toast');
-              if (toastEl) {
-                toastEl.textContent = message;
-                toastEl.style.display = 'block';
-                toastEl.style.opacity = '1';
-                setTimeout(() => {
-                  toastEl.style.opacity = '0';
-                  setTimeout(() => {
-                    toastEl.style.display = 'none';
-                  }, 300);
-                }, duration);
-              } else {
-                alert(message);
-              }
-            }
-          };
-          showNotification(`✅ 選題已儲存${data.record_number ? `（編號：${data.record_number}）` : ''}`, 3000);
+          // 檢查是否為免費體驗用戶
+          let isSubscribed = false;
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+            isSubscribed = window.ReelMindCommon.isSubscribed();
+          } else {
+            const userSubscribed = !!(ipPlanningUser && (
+              ipPlanningUser.is_subscribed === true || 
+              ipPlanningUser.is_subscribed === 1 || 
+              ipPlanningUser.is_subscribed === '1' ||
+              ipPlanningUser.is_subscribed === 'true'
+            ));
+            isSubscribed = userSubscribed;
+          }
+          
+          // 構建提示訊息
+          let message = `✅ 已儲存目前設定\n\n選題已儲存${data.record_number ? `（編號：${data.record_number}）` : ''}`;
+          
+          if (!isSubscribed) {
+            const usageCount = getFreeTrialUsageCount();
+            message += `\n\n📊 免費體驗使用次數已更新: ${usageCount}/3`;
+            message += `\n\n此功能為進階方案的一部分，如需永久保存與更多次數，歡迎升級帳號權限。`;
+          }
+          
+          // 顯示通知（common.js 的 showToast 已支援多行訊息）
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast(message, 5000);
+          } else {
+            alert(message);
+          }
         } else {
           throw new Error('儲存失敗');
         }
@@ -1751,26 +1765,14 @@ async function saveResult(type) {
 async function saveScript() {
   console.log('saveScript() 被調用');
   
-  // 輔助函數：顯示通知（確保一定會顯示）
+  // 輔助函數：顯示通知（確保一定會顯示，支援多行文字）
   const showNotification = (message, duration = 3000) => {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      // common.js 的 showToast 已支援多行訊息
       window.ReelMindCommon.showToast(message, duration);
     } else {
-      // 備用方案：使用 alert 或創建簡單的 toast
-      const toastEl = document.getElementById('toast');
-      if (toastEl) {
-        toastEl.textContent = message;
-        toastEl.style.display = 'block';
-        toastEl.style.opacity = '1';
-        setTimeout(() => {
-          toastEl.style.opacity = '0';
-          setTimeout(() => {
-            toastEl.style.display = 'none';
-          }, 300);
-        }, duration);
-      } else {
-        alert(message);
-      }
+      // 降級處理：使用 alert（支援多行）
+      alert(message);
     }
   };
   
@@ -1816,11 +1818,59 @@ async function saveScript() {
     if (response.ok) {
       const data = await response.json().catch(() => ({}));
       console.log('腳本儲存成功:', data);
-      showNotification('✅ 腳本儲存成功！', 3000);
+      
+      // 檢查是否為免費體驗用戶
+      let isSubscribed = false;
+      if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+        isSubscribed = window.ReelMindCommon.isSubscribed();
+      } else {
+        const userSubscribed = !!(ipPlanningUser && (
+          ipPlanningUser.is_subscribed === true || 
+          ipPlanningUser.is_subscribed === 1 || 
+          ipPlanningUser.is_subscribed === '1' ||
+          ipPlanningUser.is_subscribed === 'true'
+        ));
+        isSubscribed = userSubscribed;
+      }
+      
+      // 構建提示訊息
+      let message = '✅ 已儲存目前設定\n\n腳本儲存成功！';
+      
+      if (!isSubscribed) {
+        const usageCount = getFreeTrialUsageCount();
+        message += `\n\n📊 免費體驗使用次數已更新: ${usageCount}/3`;
+        message += `\n\n此功能為進階方案的一部分，如需永久保存與更多次數，歡迎升級帳號權限。`;
+      }
+      
+      showNotification(message, 5000);
     } else if (response.status === 404) {
       localStorage.setItem(`saved_script_${Date.now()}`, content);
       console.log('腳本已儲存到本地（API 不存在）');
-      showNotification('✅ 腳本已儲存到本地！', 3000);
+      
+      // 檢查是否為免費體驗用戶
+      let isSubscribed = false;
+      if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+        isSubscribed = window.ReelMindCommon.isSubscribed();
+      } else {
+        const userSubscribed = !!(ipPlanningUser && (
+          ipPlanningUser.is_subscribed === true || 
+          ipPlanningUser.is_subscribed === 1 || 
+          ipPlanningUser.is_subscribed === '1' ||
+          ipPlanningUser.is_subscribed === 'true'
+        ));
+        isSubscribed = userSubscribed;
+      }
+      
+      // 構建提示訊息
+      let message = '✅ 已儲存目前設定\n\n腳本已儲存到本地！';
+      
+      if (!isSubscribed) {
+        const usageCount = getFreeTrialUsageCount();
+        message += `\n\n📊 免費體驗使用次數已更新: ${usageCount}/3`;
+        message += `\n\n此功能為進階方案的一部分，如需永久保存與更多次數，歡迎升級帳號權限。`;
+      }
+      
+      showNotification(message, 5000);
     } else {
       const errorData = await response.json().catch(() => ({ error: '儲存失敗' }));
       console.error('儲存失敗:', errorData);
@@ -1831,7 +1881,31 @@ async function saveScript() {
     // 儲存到本地作為備份
     localStorage.setItem(`saved_script_${Date.now()}`, content);
     console.log('腳本已儲存到本地（伺服器儲存失敗）');
-    showNotification('⚠️ 腳本已儲存到本地（伺服器儲存失敗）', 3000);
+    
+    // 檢查是否為免費體驗用戶
+    let isSubscribed = false;
+    if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+      isSubscribed = window.ReelMindCommon.isSubscribed();
+    } else {
+      const userSubscribed = !!(ipPlanningUser && (
+        ipPlanningUser.is_subscribed === true || 
+        ipPlanningUser.is_subscribed === 1 || 
+        ipPlanningUser.is_subscribed === '1' ||
+        ipPlanningUser.is_subscribed === 'true'
+      ));
+      isSubscribed = userSubscribed;
+    }
+    
+    // 構建提示訊息
+    let message = '⚠️ 已儲存目前設定\n\n腳本已儲存到本地（伺服器儲存失敗）';
+    
+    if (!isSubscribed) {
+      const usageCount = getFreeTrialUsageCount();
+      message += `\n\n📊 免費體驗使用次數已更新: ${usageCount}/3`;
+      message += `\n\n此功能為進階方案的一部分，如需永久保存與更多次數，歡迎升級帳號權限。`;
+    }
+    
+    showNotification(message, 5000);
   }
 }
 
