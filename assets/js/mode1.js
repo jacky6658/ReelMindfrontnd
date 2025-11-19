@@ -90,12 +90,6 @@ function openMode1OneClickModal() {
   if (overlay) {
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden'; // 禁止背景滾動
-    
-    // 確保事件委派已綁定（document 級別只需要綁定一次，但確保已綁定）
-    if (window.setupHistoryContainerEventDelegation && !document._mode1HistoryClickHandler) {
-      window.setupHistoryContainerEventDelegation();
-    }
-    
     // 預設顯示帳號定位
     switchMode1HistoryType('profile');
     // 強制更新一次選取狀態
@@ -263,19 +257,19 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
           ${renderMode1Markdown(result.content)}
         </div>
         <div class="mode1-oneclick-result-expand">
-          <button class="mode1-oneclick-expand-btn" data-action="toggle-expand" data-id="${result.id}">
+          <button class="mode1-oneclick-expand-btn" type="button" data-result-id="${result.id}">
             <span>展開</span> <i class="fas fa-chevron-down"></i>
           </button>
         </div>
       </div>
       <div class="mode1-oneclick-history-item-actions">
-        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" data-action="select" data-type="${result.type}" data-id="${result.id}">
+        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" type="button" data-result-id="${result.id}" data-result-type="${result.type}">
           <i class="fas fa-check"></i> <span>${isSelected ? '已選擇' : '選擇'}</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn" data-action="expand" data-type="${result.type}" data-id="${result.id}">
-          <i class="fas fa-expand"></i> <span>查看完整</span>
+        <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${result.id}">
+          <i class="fas fa-expand"></i> <span>展開</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn" data-action="export" data-type="${result.type}" data-id="${result.id}">
+        <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${result.id}" data-result-type="${result.type}">
           <i class="fas fa-download"></i> <span>匯出</span>
         </button>
         <button class="mode1-oneclick-history-item-btn danger" data-action="delete" data-type="${result.type}" data-id="${result.id}">
@@ -288,15 +282,6 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
 
   historyContainer.innerHTML = ''; // 清空載入中提示
   historyContainer.appendChild(fragment);
-  
-  // 歷史記錄載入完成後，確保事件委派已綁定（document 級別只需要綁定一次）
-  // 這裡不需要重新綁定，因為 document 級別的事件委派已經在頁面載入時綁定了
-  // 但為了確保，可以檢查一下
-  if (window.setupHistoryContainerEventDelegation && !document._mode1HistoryClickHandler) {
-    setTimeout(() => {
-      window.setupHistoryContainerEventDelegation();
-    }, 100);
-  }
 }
 window.loadMode1OneClickHistory = loadMode1OneClickHistory;
 
@@ -330,14 +315,7 @@ window.exportHistoryResult = async function(resultId, resultType) {
     const title = result.title || `未命名${typeName}`;
     
     // 移除 HTML 標籤，只保留純文本
-    // 先創建臨時元素來解析HTML並提取文本
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = result.content;
-    let textContent = tempDiv.textContent || tempDiv.innerText || '';
-    // 清理多餘的空白字符，但保留換行
-    textContent = textContent.replace(/\s+/g, ' ').trim();
-    // CSV 轉義：將雙引號轉換為兩個雙引號
-    textContent = textContent.replace(/"/g, '""');
+    const textContent = result.content.replace(/<[^>]*>/g, '').replace(/\n/g, ' ').replace(/"/g, '""');
     const formattedDate = new Date(result.created_at).toLocaleString('zh-TW', {
       timeZone: 'Asia/Taipei',
       year: 'numeric',
@@ -434,45 +412,22 @@ window.updateSelectedSettingsDisplay = updateSelectedSettingsDisplay;
 // 選擇歷史結果
 async function selectHistoryResult(type, resultId) {
   const data = await fetchHistoryData();
-  if (!data || !data.success || !data.results) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('無法載入歷史記錄', 3000);
-    }
-    return;
-  }
+  if (!data || !data.success || !data.results) return;
 
   const result = data.results.find(r => r.id === resultId);
   if (result) {
-    const typeNames = {
-      'profile': '帳號定位',
-      'plan': '選題方向',
-      'scripts': '短影音腳本'
-    };
-    const typeName = typeNames[type] || type;
-    
     if (selectedSettings[type] && selectedSettings[type].id === resultId) {
       // 如果已經選擇，則取消選擇
       selectedSettings[type] = null;
-      updateSelectedSettingsDisplay();
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast(`已取消選擇${typeName}`, 2000);
-      }
     } else {
       // 否則選擇
       selectedSettings[type] = {
         id: result.id,
-        title: result.title || `未命名${typeName}`,
+        title: result.title || `未命名${type.charAt(0).toUpperCase() + type.slice(1)}`,
         content: result.content,
       };
-      updateSelectedSettingsDisplay();
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast(`✅ 已套用${typeName}，後續對話將使用此設定`, 3000);
-      }
     }
-  } else {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('找不到對應的記錄', 3000);
-    }
+    updateSelectedSettingsDisplay();
   }
 }
 window.selectHistoryResult = selectHistoryResult;
@@ -706,40 +661,20 @@ window.cancelMode1HistoryTitleEdit = cancelMode1HistoryTitleEdit;
 
 // 展開/收起歷史記錄內容
 function toggleHistoryContentExpanded(resultId) {
-  if (!resultId) {
-    console.error('toggleHistoryContentExpanded: 缺少 resultId');
-    return;
-  }
-  
   const contentWrapper = document.getElementById(`contentWrapper-${resultId}`);
-  if (!contentWrapper) {
-    console.error('toggleHistoryContentExpanded: 找不到 contentWrapper，resultId:', resultId);
-    return;
-  }
-  
   const expandBtn = contentWrapper.querySelector('.mode1-oneclick-expand-btn');
-  if (!expandBtn) {
-    console.error('toggleHistoryContentExpanded: 找不到 expandBtn');
-    return;
-  }
-  
   const expandIcon = expandBtn.querySelector('i');
-  const expandSpan = expandBtn.querySelector('span');
-  
+
   if (contentWrapper.classList.contains('expanded')) {
     contentWrapper.classList.remove('expanded');
-    if (expandSpan) expandSpan.textContent = '展開';
-    if (expandIcon) {
-      expandIcon.classList.remove('fa-chevron-up');
-      expandIcon.classList.add('fa-chevron-down');
-    }
+    expandBtn.querySelector('span').textContent = '展開';
+    expandIcon.classList.remove('fa-chevron-up');
+    expandIcon.classList.add('fa-chevron-down');
   } else {
     contentWrapper.classList.add('expanded');
-    if (expandSpan) expandSpan.textContent = '收起';
-    if (expandIcon) {
-      expandIcon.classList.remove('fa-chevron-down');
-      expandIcon.classList.add('fa-chevron-up');
-    }
+    expandBtn.querySelector('span').textContent = '收起';
+    expandIcon.classList.remove('fa-chevron-down');
+    expandIcon.classList.add('fa-chevron-up');
   }
 }
 window.toggleHistoryContentExpanded = toggleHistoryContentExpanded;
@@ -981,30 +916,9 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       }
     }
     
-    // 檢查是否有已選擇的設定，如果有則自動附加到訊息中
-    let finalMessage = message;
-    const hasSelectedSettings = selectedSettings.profile || selectedSettings.plan || selectedSettings.scripts;
-    
-    if (hasSelectedSettings) {
-      let contextPrefix = '【已套用的設定】\n\n';
-      
-      if (selectedSettings.profile) {
-        contextPrefix += `【帳號定位】\n${selectedSettings.profile.content}\n\n`;
-      }
-      if (selectedSettings.plan) {
-        contextPrefix += `【選題方向】\n${selectedSettings.plan.content}\n\n`;
-      }
-      if (selectedSettings.scripts) {
-        contextPrefix += `【短影音腳本】\n${selectedSettings.scripts.content}\n\n`;
-      }
-      
-      contextPrefix += '---\n\n';
-      finalMessage = contextPrefix + message;
-    }
-    
     // 確保傳遞 user_id 和 conversation_type 給後端，以便載入記憶和 RAG
     const requestBody = {
-      message: finalMessage,
+      message: message,
       conversation_type: conversationType  // 後端需要這個來過濾記憶
     };
     
@@ -1766,91 +1680,49 @@ document.addEventListener('DOMContentLoaded', async function() {
   // 初始化 Mode1 聊天功能
   initMode1Chat();
 
-  // 添加事件委派處理生成結果按鈕點擊（使用 document 級別，確保即使容器是動態創建的也能工作）
-  function setupHistoryContainerEventDelegation() {
-    // 如果已經綁定過，先移除
-    if (document._mode1HistoryClickHandler) {
-      document.removeEventListener('click', document._mode1HistoryClickHandler, true);
-    }
-    
-    // 創建新的事件處理器
-    const clickHandler = function(e) {
-      // 只處理在 Modal 內的點擊
-      const modal = document.getElementById('mode1OneClickModalOverlay');
-      if (!modal || !modal.classList.contains('open')) {
-        return; // Modal 未打開，不處理
-      }
-      
-      // 確保點擊目標在歷史記錄容器內
-      const container = document.getElementById('mode1OneClickHistoryContainer');
-      if (!container || !container.contains(e.target)) {
-        return;
-      }
-      
-      // 處理展開/收起按鈕（在內容區域內）
+  const historyContainer = document.getElementById('mode1OneClickHistoryContainer');
+  if (historyContainer) {
+    historyContainer.addEventListener('click', function(e) {
       const expandBtn = e.target.closest('.mode1-oneclick-expand-btn');
       if (expandBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-        const resultId = expandBtn.getAttribute('data-id');
+        const resultId = expandBtn.getAttribute('data-result-id');
         if (resultId && window.toggleHistoryContentExpanded) {
           window.toggleHistoryContentExpanded(resultId);
         }
         return;
       }
       
-      // 處理其他操作按鈕（選擇、查看完整、匯出、刪除）
       const button = e.target.closest('.mode1-oneclick-history-item-btn');
-      if (!button) {
-        return;
-      }
+      if (!button) return;
       
-      e.preventDefault();
-      e.stopPropagation();
-      
+      const resultId = button.getAttribute('data-result-id');
+      const resultType = button.getAttribute('data-result-type');
       const action = button.getAttribute('data-action');
-      const resultId = button.getAttribute('data-id');
-      const resultType = button.getAttribute('data-type');
       
-      if (!action || !resultId || !resultType) {
+      if (action === 'delete') {
+        if (window.deleteMode1HistoryResult && resultId && resultType) {
+          window.deleteMode1HistoryResult(resultId, resultType);
+        }
         return;
       }
       
-      // 執行對應的操作
-      switch (action) {
-        case 'select':
-          if (window.selectHistoryResult) {
-            window.selectHistoryResult(resultType, resultId);
-          }
-          break;
-        case 'expand':
-          if (window.openMode1ExpandModal) {
-            window.openMode1ExpandModal(resultId, resultType);
-          }
-          break;
-        case 'export':
-          if (window.exportHistoryResult) {
-            window.exportHistoryResult(resultId, resultType);
-          }
-          break;
-        case 'delete':
-          if (window.deleteMode1HistoryResult) {
-            window.deleteMode1HistoryResult(resultId, resultType);
-          }
-          break;
+      if (!resultId) return;
+      
+      if (button.classList.contains('primary')) {
+        if (window.selectHistoryResult && resultType) {
+          window.selectHistoryResult(resultType, resultId);
+        }
+      } else if (button.querySelector('.fa-expand')) {
+        if (window.toggleHistoryContentExpanded) {
+          window.toggleHistoryContentExpanded(resultId);
+        }
+      } else if (button.querySelector('.fa-download')) {
+        if (window.exportHistoryResult && resultType) {
+          window.exportHistoryResult(resultId, resultType);
+        }
       }
-    };
-    
-    // 綁定到 document，使用捕獲階段確保能捕獲到所有點擊
-    document._mode1HistoryClickHandler = clickHandler;
-    document.addEventListener('click', clickHandler, true);
+    });
   }
-  
-  // 導出到全局，以便在歷史記錄載入後可以重新綁定
-  window.setupHistoryContainerEventDelegation = setupHistoryContainerEventDelegation;
-  
-  // 立即設置事件委派（只設置一次，因為是 document 級別）
-  setupHistoryContainerEventDelegation();
 
   // 更新用戶資訊
   updateUserInfo();
