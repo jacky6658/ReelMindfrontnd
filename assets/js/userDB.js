@@ -747,7 +747,9 @@ window.deleteScriptForUserDB = async function(scriptId) {
         throw new Error('無效的腳本 ID');
       }
       
-      const response = await fetch(`${API_URL}/api/scripts/${numericScriptId}`, {
+      // 使用完整的 URL，避免被 api.js 攔截時使用錯誤的 BASE
+      const deleteUrl = `${API_URL}/api/scripts/${numericScriptId}`;
+      const response = await fetch(deleteUrl, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${ipPlanningToken}`,
@@ -816,9 +818,10 @@ window.deleteScriptForUserDB = async function(scriptId) {
 // 記錄使用事件（下載、功能使用等）
 async function recordUsageEvent(eventType, eventCategory, resourceId, resourceType, metadata = {}) {
   try {
-    const token = localStorage.getItem('token');
+    // 優先使用 ipPlanningToken，如果沒有則嘗試其他 token
+    const token = ipPlanningToken || localStorage.getItem('ipPlanningToken') || localStorage.getItem('token');
     if (!token) {
-      console.warn('未登入，無法記錄使用事件');
+      // 靜默失敗，不顯示警告（因為這不是關鍵功能）
       return;
     }
     
@@ -2109,7 +2112,7 @@ function displayTopicRecordsForUserDB(generations) {
           ${!sections.hotTopics && !sections.specificSuggestions && !sections.strategies && !sections.contentPlanning && !sections.timeline ? `
           <div class="topic-section" data-section-id="default-${escapedGenId}" style="background: #f9fafb; border-left: 3px solid #6b7280; border-radius: 4px; overflow: hidden;">
             <div class="topic-section-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; user-select: none;" onclick="toggleTopicSection('default-${safeGenId.replace(/'/g, "\\'")}')">
-              <h5 style="margin: 0; color: #1f2937; font-size: 14px; font-weight: 600;">📄 內容</h5>
+              <h5 style="margin: 0; color: #1f2937; font-size: 14px; font-weight: 600;"><i class="fas fa-file-alt" style="margin-right: 6px;"></i>內容</h5>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span class="topic-section-toggle" style="font-size: 12px; color: #6b7280;">▼</span>
               </div>
@@ -2119,7 +2122,7 @@ function displayTopicRecordsForUserDB(generations) {
           ` : ''}
         </div>
         <div class="topic-item-actions" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
-          <button class="action-btn delete-btn" onclick="deleteTopicRecordForUserDB('${safeGenId.replace(/'/g, "\\'")}', '${itemTitle.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">🗑️ 刪除</button>
+          <button class="action-btn delete-btn" onclick="deleteTopicRecordForUserDB('${safeGenId.replace(/'/g, "\\'")}', '${itemTitle.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'"><i class="fas fa-trash-alt"></i> 刪除</button>
         </div>
       </div>
     `;
@@ -2232,6 +2235,14 @@ window.deleteTopicRecordForUserDB = async function(genId, itemTitle) {
         // 如果前端還沒移除，重新載入列表
         if (!itemRemoved) {
           await loadTopicHistoryForUserDB();
+        }
+        // 檢查是否在一鍵生成分類，如果是則重新載入
+        const oneClickContent = document.getElementById('one-click-content');
+        if (oneClickContent && oneClickContent.style.display !== 'none') {
+          const activeTab = document.querySelector('.one-click-tab.active');
+          if (activeTab && (activeTab.textContent.includes('選題方向') || activeTab.textContent.includes('帳號定位'))) {
+            await loadOneClickGenerationForUserDB();
+          }
         }
         return;
       } else {
@@ -2727,6 +2738,15 @@ window.deleteIpPlanningResultForUserDB = async function(resultId) {
         loadIpPlanningResultsForUserDB();
       }
       
+      // 檢查是否在一鍵生成分類，如果是則重新載入
+      const oneClickContent = document.getElementById('one-click-content');
+      if (oneClickContent && oneClickContent.style.display !== 'none') {
+        const activeTab = document.querySelector('.one-click-tab.active');
+        if (activeTab && (activeTab.textContent.includes('選題方向') || activeTab.textContent.includes('帳號定位'))) {
+          await loadOneClickGenerationForUserDB();
+        }
+      }
+      
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast(data.message || '✅ 記錄已刪除', 3000);
       }
@@ -2896,36 +2916,52 @@ window.viewIpPlanningDetailForUserDB = async function(resultId) {
       }
       const finalTitle = savedTitle || (result.title && result.title !== '請在此編輯你的標題' ? result.title : defaultTitle);
       
-      // 處理內容
+      // 處理內容（與 displayOneClickGenerationResults 保持一致）
       let safeContent = '';
       if (result.content) {
-        const contentStr = String(result.content);
+        let contentStr = String(result.content);
+        
+        // 先解碼 HTML 實體
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = contentStr;
+        contentStr = tempDiv.textContent || tempDiv.innerText || contentStr;
+        
+        // 檢查是否為 HTML
         if (/<[^>]+>/.test(contentStr)) {
+          // 已經是 HTML，使用 DOMPurify 清理
           if (typeof DOMPurify !== 'undefined') {
             safeContent = DOMPurify.sanitize(contentStr, {
-              ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],
-              ADD_ATTR: ['colspan', 'rowspan']
+              ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+              ADD_ATTR: ['colspan', 'rowspan', 'style']
             });
           } else {
             safeContent = escapeHtml(contentStr);
           }
         } else {
+          // 純文本，使用 Markdown 轉譯
           if (window.safeRenderMarkdown) {
             safeContent = window.safeRenderMarkdown(contentStr);
           } else if (typeof marked !== 'undefined') {
+            // 確保 marked 支援表格和換行
             if (!marked.getDefaults || !marked.getDefaults().gfm) {
-              marked.setOptions({ gfm: true, breaks: true, tables: true });
+              marked.setOptions({ 
+                gfm: true,  // GitHub Flavored Markdown（支援表格）
+                breaks: true,  // 支援換行
+                tables: true  // 明確啟用表格支援
+              });
             }
             const html = marked.parse(contentStr);
+            // 使用 DOMPurify 清理（如果可用）
             if (typeof DOMPurify !== 'undefined') {
               safeContent = DOMPurify.sanitize(html, {
-                ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],
-                ADD_ATTR: ['colspan', 'rowspan']
+                ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+                ADD_ATTR: ['colspan', 'rowspan', 'style']
               });
             } else {
               safeContent = html;
             }
           } else {
+            // 最後使用轉義的純文字模式
             safeContent = escapeHtml(contentStr).replace(/\n/g, '<br>');
           }
         }
