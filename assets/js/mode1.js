@@ -195,6 +195,36 @@ function clearHistoryCache() {
   cachedHistoryTimestamp = null;
 }
 
+// 計算文本相似度（使用簡單的 Jaccard 相似度）
+function calculateTextSimilarity(text1, text2) {
+  if (!text1 || !text2) return 0;
+  
+  // 將文本轉換為字符集合（使用 3-gram 提高準確度）
+  const getNgrams = (text, n = 3) => {
+    const ngrams = new Set();
+    for (let i = 0; i <= text.length - n; i++) {
+      ngrams.add(text.substring(i, i + n));
+    }
+    return ngrams;
+  };
+  
+  const ngrams1 = getNgrams(text1.toLowerCase());
+  const ngrams2 = getNgrams(text2.toLowerCase());
+  
+  // 計算交集和並集
+  let intersection = 0;
+  const union = new Set([...ngrams1, ...ngrams2]);
+  
+  for (const ngram of ngrams1) {
+    if (ngrams2.has(ngram)) {
+      intersection++;
+    }
+  }
+  
+  // Jaccard 相似度 = 交集 / 並集
+  return union.size > 0 ? intersection / union.size : 0;
+}
+
 // 載入過往紀錄
 async function loadMode1OneClickHistory(type, forceRefresh = false) {
   const historyContainer = document.getElementById('mode1OneClickHistoryContainer');
@@ -857,25 +887,7 @@ async function handleQuickButton(type) {
   
   switch(type) {
     case 'ip-profile':
-      // 先打開生成結果彈跳視窗，顯示過往的帳號定位記錄（不消耗 LLM token）
-      // 切換到「帳號定位」標籤頁
-      if (window.openMode1OneClickModal) {
-        window.openMode1OneClickModal();
-        // 等待彈跳視窗打開後，切換到「帳號定位」標籤頁
-        setTimeout(() => {
-          if (window.switchMode1HistoryType) {
-            window.switchMode1HistoryType('profile');
-          }
-        }, 100);
-        
-        // 顯示提示訊息
-        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast('📋 已顯示過往的帳號定位記錄，您可以選擇使用或直接與 AI 對話生成新的', 4000);
-        }
-    } else {
-        // 如果彈跳視窗函數不存在，降級為直接發送訊息
-        sendMode1Message('請幫我建立 IP Profile（個人品牌定位）。', 'ip_planning');
-      }
+      sendMode1Message('請幫我建立 IP Profile（個人品牌定位）。', 'ip_planning');
       break;
     case '14day-plan':
       sendMode1Message('請幫我規劃 14 天的短影音內容計劃。', 'ip_planning');
@@ -1106,11 +1118,50 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
             // 處理 save_request 事件（後端發送的儲存請求）
             if (json.type === 'save_request') {
               // 後端檢測到儲存指令，觸發儲存流程
-              // 流程：儲存 → 先到生成結果 → 再存到創作者資料庫 → LLM 回覆（不消耗 token）
-              const saveResultType = json.conversation_type === 'ip_planning' ? 'ip_planning' : conversationType;
-              
-              // 先儲存到生成結果（流程：儲存 → 先到生成結果 → 再存到創作者資料庫 → LLM 回覆）
-              saveMode1Result(saveResultType).then(() => {
+              // 需要根據 AI 回應內容判斷實際類型，而不是直接使用 conversation_type
+              // 使用延遲執行，確保 AI 回應內容已經完整顯示在 DOM 中
+              setTimeout(async () => {
+                // 從 DOM 中獲取最新的 AI 回應內容
+                const chatMessages = document.getElementById('mode1-chatMessages');
+                const aiMessages = chatMessages.querySelectorAll('.message.assistant .message-content');
+                let currentContent = '';
+                
+                if (aiMessages.length > 0) {
+                  currentContent = aiMessages[aiMessages.length - 1].innerHTML || '';
+                } else {
+                  // 如果 DOM 中還沒有，使用累積的內容
+                  currentContent = aiResponseContent || '';
+                }
+                
+                // 提取純文本用於判斷
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = currentContent;
+                const plainText = (tempDiv.textContent || tempDiv.innerText || '').toLowerCase();
+                
+                // 根據內容判斷類型（優先順序：腳本 > 選題方向 > 帳號定位）
+                let saveResultType = 'ip_planning'; // 預設為帳號定位
+                
+                // 腳本關鍵字
+                const scriptKeywords = ['今日腳本', '短影音腳本', '影片腳本', '腳本內容', '開場', '中場', '結尾', '腳本', '開頭', '結尾', '行動呼籲', '畫面描述', '發佈文案', '主題:', '腳本結構', '時長:', '目標觀眾'];
+                const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
+                
+                // 選題方向關鍵字
+                const planKeywords = ['選題方向', '影片類型', '內容類型', '主題配比', '內容配比', '影片配比', '主題規劃', '內容規劃', '影片類型配比', '內容策略矩陣', '策略矩陣', '配比', '對應目標', '心理階段', '建議比例'];
+                const hasPlanContent = planKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) || 
+                                       /影片類型.*配比|內容.*配比|策略矩陣/i.test(plainText) ||
+                                       (plainText.includes('表格') && plainText.includes('比例'));
+                
+                if (hasScriptContent) {
+                  saveResultType = 'scripts';
+                } else if (hasPlanContent) {
+                  saveResultType = 'plan';
+                } else {
+                  saveResultType = 'ip_planning';
+                }
+                
+                // 先儲存到生成結果（流程：儲存 → 先到生成結果 → 再存到創作者資料庫 → LLM 回覆）
+                try {
+                  await saveMode1Result(saveResultType);
                 // 儲存成功後，打開生成結果彈跳視窗並切換到對應標籤頁
                 if (window.openMode1OneClickModal) {
                   window.openMode1OneClickModal();
@@ -1140,13 +1191,14 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
                 chatMessages.appendChild(aiConfirmMessage);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
                 
-                // 顯示成功提示
-                if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-                  window.ReelMindCommon.showToast('✅ 內容已儲存並顯示在生成結果中', 3000);
+                  // 顯示成功提示
+                  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+                    window.ReelMindCommon.showToast('✅ 內容已儲存並顯示在生成結果中', 3000);
+                  }
+                } catch (error) {
+                  // 靜默失敗
                 }
-              }).catch(error => {
-                // 靜默失敗
-              });
+              }, 500); // 延遲 500ms 確保內容已渲染到 DOM
               
               // 跳過後續的 AI 回應（因為已經處理了儲存）
               continue;
@@ -1251,17 +1303,24 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
 
     // 自動儲存邏輯：根據內容判斷類型並自動儲存
     if (conversationType === 'ip_planning' && aiResponseContent && aiResponseContent.trim().length > 50) {
-      // 帳號定位關鍵字
-      const positioningKeywords = ['目標受眾', '內容定位', '風格調性', '競爭優勢', '執行建議', '帳號定位', '品牌定位'];
-      const hasPositioningContent = positioningKeywords.some(keyword => aiResponseContent.includes(keyword));
+      // 先提取純文本用於比較（移除 HTML 標籤）
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = aiResponseContent;
+      const plainText = tempDiv.textContent || tempDiv.innerText || '';
       
-      // 選題方向關鍵字
-      const planKeywords = ['選題方向', '影片類型', '內容類型', '主題配比', '內容配比', '影片配比', '主題規劃', '內容規劃'];
-      const hasPlanContent = planKeywords.some(keyword => aiResponseContent.includes(keyword));
+      // 腳本關鍵字（優先級最高）
+      const scriptKeywords = ['今日腳本', '短影音腳本', '影片腳本', '腳本內容', '開場', '中場', '結尾', '腳本', '開頭', '結尾', '行動呼籲', '畫面描述', '發佈文案'];
+      const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword));
       
-      // 腳本關鍵字
-      const scriptKeywords = ['今日腳本', '短影音腳本', '影片腳本', '腳本內容', '開場', '中場', '結尾', '腳本', '開頭', '結尾'];
-      const hasScriptContent = scriptKeywords.some(keyword => aiResponseContent.includes(keyword));
+      // 選題方向關鍵字（優先級第二，擴展關鍵字列表）
+      const planKeywords = ['選題方向', '影片類型', '內容類型', '主題配比', '內容配比', '影片配比', '主題規劃', '內容規劃', '影片類型配比', '內容策略矩陣', '策略矩陣', '配比', '對應目標', '心理階段', '建議比例'];
+      const hasPlanContent = planKeywords.some(keyword => plainText.includes(keyword)) || 
+                             /影片類型.*配比|內容.*配比|策略矩陣/i.test(plainText) ||
+                             (plainText.includes('表格') && plainText.includes('比例'));
+      
+      // 帳號定位關鍵字（優先級最低）
+      const positioningKeywords = ['目標受眾', '內容定位', '風格調性', '競爭優勢', '執行建議', '帳號定位', '品牌定位', '差異化優勢', '傳達目標'];
+      const hasPositioningContent = positioningKeywords.some(keyword => plainText.includes(keyword));
       
       let detectedType = null;
       let targetTab = null;
@@ -1281,6 +1340,40 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       if (detectedType) {
         setTimeout(async () => {
           try {
+            // 檢查是否有重複內容
+            const historyData = await fetchHistoryData(true); // 強制刷新獲取最新數據
+            if (historyData && historyData.success && historyData.results) {
+              const sameTypeResults = historyData.results.filter(r => {
+                const rType = r.result_type || r.type;
+                return rType === (detectedType === 'ip_planning' ? 'profile' : detectedType);
+              });
+              
+              // 檢查是否有相同或高度相似的內容
+              let isDuplicate = false;
+              for (const existingResult of sameTypeResults) {
+                const existingContent = existingResult.content || '';
+                // 提取現有內容的純文本
+                const existingTempDiv = document.createElement('div');
+                existingTempDiv.innerHTML = existingContent;
+                const existingPlainText = (existingTempDiv.textContent || existingTempDiv.innerText || '').trim();
+                
+                // 計算相似度（簡單的文本相似度比較）
+                const similarity = calculateTextSimilarity(plainText.trim(), existingPlainText);
+                
+                // 如果相似度超過 85%，視為重複內容
+                if (similarity > 0.85) {
+                  isDuplicate = true;
+                  break;
+                }
+              }
+              
+              if (isDuplicate) {
+                // 內容重複，不自動儲存
+                return;
+              }
+            }
+            
+            // 內容不重複，執行儲存
             await saveMode1Result(detectedType);
             if (window.openMode1OneClickModal) {
               window.openMode1OneClickModal();
@@ -1696,7 +1789,15 @@ async function saveMode1Result(resultType) {
     // ip_planning -> profile, plan -> plan, scripts -> scripts
     let resultTypeForBackend = resultType;
     if (resultType === 'ip_planning') {
-      resultTypeForBackend = 'profile';  // 預設為 profile，或者可以讓用戶選擇
+      resultTypeForBackend = 'profile';
+    } else if (resultType === 'plan') {
+      resultTypeForBackend = 'plan';
+    } else if (resultType === 'scripts') {
+      resultTypeForBackend = 'scripts';
+    }
+    // 如果 resultType 已經是 'profile'，直接使用
+    if (resultType === 'profile') {
+      resultTypeForBackend = 'profile';
     }
     
     const response = await fetch(`${API_URL}/api/ip-planning/save`, {

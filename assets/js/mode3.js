@@ -1614,8 +1614,8 @@ async function saveResult(type) {
             content: content,
             metadata: {
               source: 'mode3',  // 標記來源為 mode3，確保與 mode1 分離
-              platform: currentPlatform || '未設定',
-              topic: currentTopic || '選題推薦'
+            platform: currentPlatform || '未設定',
+            topic: currentTopic || '選題推薦'
             }
           })
         });
@@ -1803,9 +1803,9 @@ async function saveScript() {
         script_data: {
           source: 'mode3',  // 標記來源為 mode3，確保與 mode1 分離
           title: '未命名腳本',
-          platform: currentPlatform || '未設定',
-          topic: currentTopic || '未設定',
-          profile: currentProfile || '未設定'
+        platform: currentPlatform || '未設定',
+        topic: currentTopic || '未設定',
+        profile: currentProfile || '未設定'
         }
       })
     });
