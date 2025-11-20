@@ -992,9 +992,12 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
     return;
   }
   
-  // 雙重檢查：如果正在發送，直接返回（防止重複調用）
+  // 檢查是否正在發送（防止重複調用）
+  // 注意：如果 isMode1Sending 為 true，可能是因為：
+  // 1. 上一次發送還沒完成（正常情況，應該等待）
+  // 2. 標誌卡住了（異常情況，應該被事件處理器重置）
   if (isMode1Sending) {
-    console.log('⚠️ 訊息發送中，忽略重複調用');
+    console.log('⚠️ 訊息發送中，請稍候...');
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('訊息發送中，請稍候...', 2000);
     }
@@ -1003,7 +1006,7 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
   
   // 立即設置發送標誌（在異步操作之前）
   isMode1Sending = true;
-  console.log('✅ sendMode1Message 開始執行，設置 isMode1Sending = true', message);
+  console.log('✅ sendMode1Message 開始執行', message);
   
   // 檢查用戶是否已綁定 LLM 金鑰
   const hasLlmKey = await checkUserLlmKey();
@@ -2020,23 +2023,27 @@ function initMode1Chat() {
       e.stopPropagation();
       e.stopImmediatePropagation();
       
-      if (isMode1Sending) {
-        console.log('⚠️ 正在發送中，忽略按鈕點擊');
-        return; // 如果正在發送，直接返回
-      }
-      
       const message = messageInput.value.trim();
       if (message) {
-        // 立即設置發送標誌
-        isMode1Sending = true;
-        console.log('✅ 開始發送訊息（按鈕點擊觸發）');
+        // 如果 isMode1Sending 卡住了，強制重置
+        if (isMode1Sending) {
+          console.warn('⚠️ 檢測到 isMode1Sending 卡住，強制重置');
+          isMode1Sending = false;
+          sendBtn.disabled = false;
+        }
+        
+        console.log('✅ 開始發送訊息（按鈕點擊觸發）', message);
         
         // 清空輸入框（防止重複發送）
         messageInput.value = '';
         messageInput.style.height = 'auto';
         
-        // 發送訊息
-        sendMode1Message(message);
+        // 發送訊息（sendMode1Message 會自己管理 isMode1Sending）
+        sendMode1Message(message).catch(err => {
+          console.error('發送訊息錯誤:', err);
+          isMode1Sending = false;
+          sendBtn.disabled = false;
+        });
       }
     }, true); // 使用 capture 階段
 
@@ -2050,13 +2057,18 @@ function initMode1Chat() {
         
         const message = messageInput.value.trim();
         if (message) {
-          console.log('✅ 開始發送訊息（Enter 鍵觸發）', message);
-          
-          // 如果 isMode1Sending 卡住了，強制重置
+          // 如果 isMode1Sending 卡住了，強制重置（在調用前重置，確保不會被攔截）
           if (isMode1Sending) {
             console.warn('⚠️ 檢測到 isMode1Sending 卡住，強制重置');
             isMode1Sending = false;
+            // 重新啟用發送按鈕
+            const sendBtn = document.getElementById('mode1-sendBtn');
+            if (sendBtn) {
+              sendBtn.disabled = false;
+            }
           }
+          
+          console.log('✅ 開始發送訊息（Enter 鍵觸發）', message);
           
           // 清空輸入框（防止重複發送）
           messageInput.value = '';
