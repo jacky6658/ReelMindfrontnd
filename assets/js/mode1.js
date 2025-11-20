@@ -473,7 +473,8 @@ window.saveHistoryResultToUserDB = async function(resultId, resultType) {
         title: title,
         content: result.content,
         metadata: {
-          source: 'mode1'  // 標記來源為 mode1
+          source: 'mode1',  // 標記來源為 mode1
+          saved_to_userdb: true  // 標記已儲存到 userDB
         }
       })
     });
@@ -1341,12 +1342,27 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
     
     // 在流結束後，判斷內容類型並添加按鈕（僅在檢測到結果類型時顯示）
     if (aiMessageEl && aiResponseContent && aiResponseContent.trim().length > 50) {
+      // 檢查是否為詢問階段（不應該顯示按鈕）
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = aiResponseContent;
+      const plainText = (tempDiv.textContent || tempDiv.innerText || '').toLowerCase();
+      
+      // 詢問性關鍵字：如果包含這些，表示是詢問階段，不應該顯示按鈕
+      const questionKeywords = ['您希望', '您想要', '您想', '請告訴我', '請選擇', '例如:', '例如：', '例如', '您希望這次', '您希望這次的', '聚焦在哪個', '聚焦在', '您希望這次的腳本聚焦', '您希望這次的腳本', '您希望這次的腳本聚焦在哪個具體的選題方向上呢'];
+      const isQuestion = questionKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
+      
+      // 如果是詢問階段，不顯示按鈕
+      if (isQuestion) {
+        currentRequestType = null;
+        return;
+      }
+      
       // 優先使用記錄的請求類型，如果沒有則使用關鍵字檢測
       let detectedType = null;
       let typeName = '';
       
-      // 優先使用記錄的請求類型
-      if (currentRequestType) {
+      // 優先使用記錄的請求類型，但需要確認不是詢問階段
+      if (currentRequestType && !isQuestion) {
         detectedType = currentRequestType;
         if (currentRequestType === 'ip_planning') {
           typeName = '帳號定位';
@@ -1357,23 +1373,23 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
         }
       } else {
         // 如果沒有記錄的類型，使用關鍵字檢測作為備用
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = aiResponseContent;
-        const plainText = (tempDiv.textContent || tempDiv.innerText || '').toLowerCase();
+        // 腳本關鍵字（優先級最高）- 必須包含明確的腳本結構或內容
+        const scriptKeywords = ['開場', '中場', '結尾', 'hook', 'value', 'cta', '問題', '解決', '證明', 'after', 'before', '秘密揭露', '迷思', '原理', '要點', '行動', '起', '承', '轉', '合', '台詞內容', '畫面描述', '資訊融入建議', '字幕建議', '音效建議', '發佈文案', '資訊融入總覽'];
+        const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) && 
+                                 (plainText.includes('腳本') || plainText.includes('script') || plainText.includes('主題標題'));
         
-        // 腳本關鍵字（優先級最高）
-        const scriptKeywords = ['今日腳本', '短影音腳本', '影片腳本', '腳本內容', '開場', '中場', '結尾', '腳本', '開頭', '結尾', '行動呼籲', '畫面描述', '發佈文案', '主題:', '腳本結構', '時長:', '目標觀眾', '資訊融入總覽'];
-        const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
-        
-        // 選題方向關鍵字（優先級第二）- 更精確的關鍵字，避免誤判
-        const planKeywords = ['選題方向', '影片類型配比', '內容策略矩陣', '策略矩陣', '影片類型', '主題配比', '內容配比', '影片配比', '對應目標', '心理階段', '建議比例', '14天', '14 天'];
-        const hasPlanContent = planKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) || 
+        // 選題方向關鍵字（優先級第二）- 必須包含表格或明確的配比內容
+        const planKeywords = ['影片類型配比', '內容策略矩陣', '策略矩陣', '對應目標', '心理階段', '建議比例'];
+        const hasPlanContent = (planKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) || 
                                /影片類型.*配比|內容.*配比|策略矩陣/i.test(plainText) ||
-                               (plainText.includes('表格') && (plainText.includes('比例') || plainText.includes('配比')));
+                               (plainText.includes('表格') && (plainText.includes('比例') || plainText.includes('配比')))) &&
+                               !isQuestion; // 確保不是詢問階段
         
-        // 帳號定位關鍵字（優先級最低）- 更精確的關鍵字，避免誤判
-        const positioningKeywords = ['目標受眾', '風格調性', '競爭優勢', '執行建議', '帳號定位', '品牌定位', '差異化優勢', '傳達目標', 'ip profile', '個人品牌'];
-        const hasPositioningContent = positioningKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
+        // 帳號定位關鍵字（優先級最低）- 必須包含完整的定位內容
+        const positioningKeywords = ['目標受眾', '風格調性', '競爭優勢', '執行建議', '品牌定位', '差異化優勢', '傳達目標'];
+        const hasPositioningContent = positioningKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) &&
+                                     (plainText.includes('帳號定位') || plainText.includes('ip profile') || plainText.includes('個人品牌')) &&
+                                     !isQuestion; // 確保不是詢問階段
         
         if (hasScriptContent) {
           detectedType = 'scripts';
@@ -1395,6 +1411,10 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
         // 檢查是否已經有按鈕區域
         let actionsEl = aiMessageEl.querySelector('.message-actions');
         if (!actionsEl) {
+          // 獲取訊息內容區域，將按鈕添加到內容結尾
+          const contentDiv = aiMessageEl.querySelector('.message-content');
+          if (!contentDiv) return; // 如果沒有內容區域，不添加按鈕
+          
           actionsEl = document.createElement('div');
           actionsEl.className = 'message-actions';
           actionsEl.style.cssText = 'display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;';
@@ -1413,7 +1433,8 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
           
           actionsEl.appendChild(saveBtn);
           actionsEl.appendChild(regenerateBtn);
-          aiMessageEl.appendChild(actionsEl);
+          // 將按鈕添加到訊息內容的結尾，而不是訊息元素的結尾
+          contentDiv.appendChild(actionsEl);
           
           // 儲存類型信息
           aiMessageEl.dataset.resultType = detectedType;

@@ -2331,13 +2331,15 @@ async function loadIpPlanningResultsForUserDB() {
       const data = await response.json();
       if (data.success && data.results) {
         // 只顯示 mode1 的結果（過濾掉 source='mode3' 的結果）
+        // 並且只顯示有 saved_to_userdb 標記的記錄（從 userDB 儲存的）
         const mode1Results = data.results.filter(r => {
           try {
             const metadata = typeof r.metadata === 'string' ? JSON.parse(r.metadata) : (r.metadata || {});
-            return metadata.source !== 'mode3';
+            // 只顯示：1. source 不是 'mode3'，2. 有 saved_to_userdb 標記（表示是從 userDB 儲存的）
+            return metadata.source !== 'mode3' && metadata.saved_to_userdb === true;
           } catch (e) {
-            // 如果 metadata 解析失敗，預設顯示（舊資料）
-            return true;
+            // 如果 metadata 解析失敗，預設不顯示（因為無法確認是否應該顯示）
+            return false;
           }
         });
         window.currentIpPlanningResults = mode1Results;
