@@ -178,9 +178,9 @@ async function fetchHistoryData(forceRefresh = false) {
           }
         })
         .map(result => ({
-          ...result,
-          type: result.result_type || result.type  // 將 result_type 映射為 type
-        }));
+        ...result,
+        type: result.result_type || result.type  // 將 result_type 映射為 type
+      }));
     }
     
     cachedHistoryData = data;
@@ -310,8 +310,8 @@ window.exportHistoryResult = async function(resultId, resultType) {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('找不到要匯出的數據', 3000);
       }
-      return;
-    }
+        return;
+      }
 
     // 處理類型轉換：resultId 可能是字串或數字
     const result = data.results.find(r => {
@@ -438,7 +438,7 @@ window.updateSelectedSettingsDisplay = updateSelectedSettingsDisplay;
 async function selectHistoryResult(type, resultId) {
   try {
     console.log('🔍 selectHistoryResult 被調用，type:', type, 'resultId:', resultId);
-    const data = await fetchHistoryData();
+  const data = await fetchHistoryData();
     if (!data || !data.success || !data.results) {
       console.error('❌ 無法獲取歷史數據');
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -454,26 +454,26 @@ async function selectHistoryResult(type, resultId) {
              Number(r.id) === Number(resultId);
     });
     
-    if (result) {
+  if (result) {
       if (selectedSettings[type] && selectedSettings[type].id == resultId) {
-        // 如果已經選擇，則取消選擇
-        selectedSettings[type] = null;
+      // 如果已經選擇，則取消選擇
+      selectedSettings[type] = null;
         console.log('✅ 已取消選擇');
-      } else {
+    } else {
         // 清除所有其他已選擇的設定（限制一次只能選擇一個）
         selectedSettings.profile = null;
         selectedSettings.plan = null;
         selectedSettings.scripts = null;
         
         // 選擇新的設定
-        selectedSettings[type] = {
-          id: result.id,
-          title: result.title || `未命名${type.charAt(0).toUpperCase() + type.slice(1)}`,
-          content: result.content,
-        };
+      selectedSettings[type] = {
+        id: result.id,
+        title: result.title || `未命名${type.charAt(0).toUpperCase() + type.slice(1)}`,
+        content: result.content,
+      };
         console.log('✅ 已選擇:', selectedSettings[type].title, '（已清除其他設定）');
-      }
-      updateSelectedSettingsDisplay();
+    }
+    updateSelectedSettingsDisplay();
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         const message = selectedSettings[type] 
           ? `✅ 已選擇 ${selectedSettings[type].title}（已清除其他設定）` 
@@ -726,7 +726,7 @@ window.cancelMode1HistoryTitleEdit = cancelMode1HistoryTitleEdit;
 function toggleHistoryContentExpanded(resultId) {
   try {
     console.log('🔍 toggleHistoryContentExpanded 被調用，resultId:', resultId);
-    const contentWrapper = document.getElementById(`contentWrapper-${resultId}`);
+  const contentWrapper = document.getElementById(`contentWrapper-${resultId}`);
     if (!contentWrapper) {
       console.error('❌ 找不到 contentWrapper，resultId:', resultId);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -735,28 +735,28 @@ function toggleHistoryContentExpanded(resultId) {
       return;
     }
     
-    const expandBtn = contentWrapper.querySelector('.mode1-oneclick-expand-btn');
+  const expandBtn = contentWrapper.querySelector('.mode1-oneclick-expand-btn');
     if (!expandBtn) {
       console.error('❌ 找不到 expandBtn');
       return;
     }
     
-    const expandIcon = expandBtn.querySelector('i');
+  const expandIcon = expandBtn.querySelector('i');
     if (!expandIcon) {
       console.error('❌ 找不到 expandIcon');
       return;
     }
 
-    if (contentWrapper.classList.contains('expanded')) {
-      contentWrapper.classList.remove('expanded');
-      expandBtn.querySelector('span').textContent = '展開';
-      expandIcon.classList.remove('fa-chevron-up');
-      expandIcon.classList.add('fa-chevron-down');
-    } else {
-      contentWrapper.classList.add('expanded');
-      expandBtn.querySelector('span').textContent = '收起';
-      expandIcon.classList.remove('fa-chevron-down');
-      expandIcon.classList.add('fa-chevron-up');
+  if (contentWrapper.classList.contains('expanded')) {
+    contentWrapper.classList.remove('expanded');
+    expandBtn.querySelector('span').textContent = '展開';
+    expandIcon.classList.remove('fa-chevron-up');
+    expandIcon.classList.add('fa-chevron-down');
+  } else {
+    contentWrapper.classList.add('expanded');
+    expandBtn.querySelector('span').textContent = '收起';
+    expandIcon.classList.remove('fa-chevron-down');
+    expandIcon.classList.add('fa-chevron-up');
     }
     console.log('✅ toggleHistoryContentExpanded 執行成功');
   } catch (error) {
@@ -779,11 +779,11 @@ async function openMode1ExpandModal(resultId, resultType) {
     console.log('  - resultId:', resultId, '類型:', typeof resultId);
     console.log('  - resultType:', resultType);
     
-    const overlay = document.getElementById('mode1ExpandModalOverlay');
-    const modal = document.getElementById('mode1ExpandModal');
-    const modalTitle = document.getElementById('mode1ExpandModalTitle');
-    const modalContentDiv = document.getElementById('mode1ExpandModalContent');
-    
+  const overlay = document.getElementById('mode1ExpandModalOverlay');
+  const modal = document.getElementById('mode1ExpandModal');
+  const modalTitle = document.getElementById('mode1ExpandModalTitle');
+  const modalContentDiv = document.getElementById('mode1ExpandModalContent');
+  
     if (!overlay || !modal || !modalTitle || !modalContentDiv) {
       console.error('❌ 找不到 Modal 元素');
       console.error('  - overlay:', overlay);
@@ -799,12 +799,12 @@ async function openMode1ExpandModal(resultId, resultType) {
     console.log('✅ Modal 元素找到，開始載入數據');
     modalContentDiv.innerHTML = '<p style="text-align: center; color: #9ca3af;">載入中...</p>';
 
-    const data = await fetchHistoryData();
+  const data = await fetchHistoryData();
     console.log('📦 獲取的數據:', data);
     
-    if (!data || !data.success || !data.results) {
+  if (!data || !data.success || !data.results) {
       console.error('❌ 無法獲取歷史數據');
-      modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">載入失敗，請稍後再試。</p>';
+    modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">載入失敗，請稍後再試。</p>';
       return;
     }
     
@@ -821,8 +821,8 @@ async function openMode1ExpandModal(resultId, resultType) {
     });
     
     console.log('🎯 找到的結果:', result);
-    
-    if (result) {
+
+  if (result) {
       console.log('✅ 找到對應結果');
       console.log('  - result.id:', result.id);
       console.log('  - result.title:', result.title);
@@ -837,11 +837,11 @@ async function openMode1ExpandModal(resultId, resultType) {
         return;
       }
       
-      const typeNames = {
-        'profile': '帳號定位',
-        'plan': '選題方向',
-        'scripts': '短影音腳本'
-      };
+    const typeNames = {
+      'profile': '帳號定位',
+      'plan': '選題方向',
+      'scripts': '短影音腳本'
+    };
       modalTitle.textContent = result.title || `查看完整${typeNames[result.type] || resultType || ''}內容`;
       
       console.log('🎨 開始渲染 Markdown');
@@ -859,31 +859,31 @@ async function openMode1ExpandModal(resultId, resultType) {
       }
       
       currentExpandModalContent = result.content;
-      
-      overlay.classList.add('open');
+    
+    overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
 
-      // 手機版：處理表格溢出
-      if (window.innerWidth <= 768) {
-        const tables = modalContentDiv.querySelectorAll('table');
-        tables.forEach(table => {
-          const wrapper = document.createElement('div');
+    // 手機版：處理表格溢出
+    if (window.innerWidth <= 768) {
+      const tables = modalContentDiv.querySelectorAll('table');
+      tables.forEach(table => {
+        const wrapper = document.createElement('div');
           wrapper.className = 'mode1-oneclick-result-content-wrapper in-expand-modal';
-          table.parentNode.insertBefore(wrapper, table);
-          wrapper.appendChild(table);
-        });
-      }
-      
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      });
+    }
+    
+    modalContentDiv.scrollTop = 0;
+    setTimeout(() => {
       modalContentDiv.scrollTop = 0;
-      setTimeout(() => {
-        modalContentDiv.scrollTop = 0;
-      }, 50);
-      
+    }, 50);
+
       console.log('✅ Modal 打開成功');
     } else {
       console.error('❌ 找不到對應的結果');
       console.error('  - 所有結果的 ID:', data.results.map(r => ({ id: r.id, type: typeof r.id })));
-      modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">找不到對應的內容。</p>';
+    modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">找不到對應的內容。</p>';
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
     }
@@ -1078,8 +1078,8 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       if (typingIndicatorEl.parentNode) {
         typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
       }
-      return;
-    }
+    return;
+  }
 
     // 獲取 CSRF Token
     let csrfToken = '';
@@ -1298,14 +1298,14 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
               }
               
               if (contentDiv) {
-                contentDiv.innerHTML = renderedHtml;
+              contentDiv.innerHTML = renderedHtml;
 
-                // 處理程式碼高亮
-                contentDiv.querySelectorAll('pre code').forEach(block => {
-                  hljs.highlightElement(block);
-                });
+              // 處理程式碼高亮
+              contentDiv.querySelectorAll('pre code').forEach(block => {
+                hljs.highlightElement(block);
+              });
 
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+              chatMessages.scrollTop = chatMessages.scrollHeight;
               }
             }
           } catch (e) {
@@ -2042,23 +2042,15 @@ function initMode1Chat() {
         e.stopPropagation();
         e.stopImmediatePropagation(); // 阻止同一元素上的其他監聽器
         
-        // 檢查是否正在發送（在阻止事件之前檢查）
-        if (isMode1Sending) {
-          console.log('⚠️ 正在發送中，忽略 Enter 鍵');
-          return;
-        }
-        
         const message = messageInput.value.trim();
         if (message) {
-          // 立即設置發送標誌，防止重複觸發
-          isMode1Sending = true;
           console.log('✅ 開始發送訊息（Enter 鍵觸發）');
           
           // 清空輸入框（防止重複發送）
           messageInput.value = '';
           messageInput.style.height = 'auto';
           
-          // 發送訊息
+          // 發送訊息（sendMode1Message 會自己管理 isMode1Sending）
           sendMode1Message(message);
         }
       }
