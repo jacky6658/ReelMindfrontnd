@@ -261,14 +261,9 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
         </div>
         <span class="mode1-oneclick-history-item-date">${formattedDate}</span>
       </div>
-      <div class="mode1-oneclick-history-item-content-wrapper collapsed" id="contentWrapper-${result.id}">
+      <div class="mode1-oneclick-history-item-content-wrapper" id="contentWrapper-${result.id}">
         <div class="mode1-oneclick-history-item-content" id="content-${result.id}">
           ${renderMode1Markdown(result.content)}
-        </div>
-        <div class="mode1-oneclick-result-expand">
-          <button class="mode1-oneclick-expand-btn" type="button" data-result-id="${result.id}" onclick="toggleHistoryContentExpanded('${result.id}')">
-            <span>展開</span> <i class="fas fa-chevron-down"></i>
-          </button>
         </div>
       </div>
       <div class="mode1-oneclick-history-item-actions">
