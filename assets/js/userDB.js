@@ -780,6 +780,46 @@ window.deleteScriptForUserDB = async function(scriptId) {
   }
 }
 
+// 記錄使用事件（下載、功能使用等）
+async function recordUsageEvent(eventType, eventCategory, resourceId, resourceType, metadata = {}) {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('未登入，無法記錄使用事件');
+      return;
+    }
+    
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    
+    const response = await fetch(`${API_URL}/api/user/usage-event`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        event_type: eventType,
+        event_category: eventCategory,
+        resource_id: resourceId ? String(resourceId) : null,
+        resource_type: resourceType,
+        metadata: JSON.stringify({
+          ...metadata,
+          timestamp: new Date().toISOString(),
+          user_agent: navigator.userAgent,
+          url: window.location.href
+        })
+      })
+    });
+    
+    if (!response.ok) {
+      console.warn('記錄使用事件失敗:', await response.text());
+    }
+  } catch (error) {
+    // 靜默失敗，不影響用戶體驗
+    console.warn('記錄使用事件時出錯:', error);
+  }
+}
+
 // 下載PDF
 window.downloadScriptPDF = function(scriptId) {
   const scripts = getLocalScripts();
@@ -918,6 +958,11 @@ window.downloadScriptPDF = function(scriptId) {
   printWindow.onload = () => {
     setTimeout(() => {
       printWindow.print();
+      // 記錄下載事件
+      recordUsageEvent('download_pdf', 'script', scriptId, 'script', {
+        script_name: script.name || '未命名腳本',
+        script_created_at: script.created_at
+      });
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('PDF 準備就緒，請使用瀏覽器的列印功能儲存為 PDF', 3000);
       }
@@ -1019,7 +1064,11 @@ window.downloadScriptCSV = function(scriptId) {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
-  
+  // 記錄下載事件
+  recordUsageEvent('download_csv', 'script', scriptId, 'script', {
+    script_name: script.name || '未命名腳本',
+    script_created_at: script.created_at
+  });
   if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
     window.ReelMindCommon.showToast('CSV 檔案下載成功！', 2000);
   }
@@ -3010,6 +3059,11 @@ window.downloadIpPlanningPDF = function(resultId) {
     printWindow.onload = () => {
       setTimeout(() => {
         printWindow.print();
+        // 記錄下載事件
+        recordUsageEvent('download_pdf', 'ip_planning', String(resultId), 'ip_planning_result', {
+          result_title: finalTitle,
+          result_type: result.type || 'unknown'
+        });
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast('PDF 準備就緒，請使用瀏覽器的列印功能儲存為 PDF', 3000);
         }
@@ -3169,10 +3223,10 @@ function displayOneClickGenerationResults(mode3Results, scripts) {
             <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="action-btn" onclick="viewScriptDetailForUserDB('${safeScriptId.replace(/'/g, "\\'")}')" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">👁️ 查看完整</button>
-            <button class="action-btn" onclick="downloadScriptPDF('${safeScriptId.replace(/'/g, "\\'")}')" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">📄 PDF</button>
-            <button class="action-btn" onclick="downloadScriptCSV('${safeScriptId.replace(/'/g, "\\'")}')" style="background: #6366f1; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">📊 CSV</button>
-            <button class="action-btn delete-btn" onclick="deleteScriptForUserDB('${safeScriptId.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">🗑️ 刪除</button>
+            <button class="action-btn" onclick="viewScriptDetailForUserDB('${safeScriptId.replace(/'/g, "\\'")}')" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;"><i class="fas fa-eye"></i> 查看完整</button>
+            <button class="action-btn" onclick="downloadScriptPDF('${safeScriptId.replace(/'/g, "\\'")}')" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button class="action-btn" onclick="downloadScriptCSV('${safeScriptId.replace(/'/g, "\\'")}')" style="background: #6366f1; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;"><i class="fas fa-file-alt"></i> CSV</button>
+            <button class="action-btn delete-btn" onclick="deleteScriptForUserDB('${safeScriptId.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;"><i class="fas fa-trash-alt"></i> 刪除</button>
           </div>
         </div>
       `;
@@ -3208,33 +3262,65 @@ function displayOneClickGenerationResults(mode3Results, scripts) {
       let safeContent = '';
       if (result.content) {
         const contentStr = String(result.content);
-        if (/<[^>]+>/.test(contentStr)) {
+        
+        // 先清理可能的 HTML 實體編碼
+        let cleanedText = contentStr
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&')
+          .replace(/&quot;/g, '"')
+          .replace(/&#039;/g, "'")
+          .replace(/&nbsp;/g, ' ');
+        
+        // 檢查是否包含 HTML 標籤
+        const hasHtmlTags = /<[a-z][\s\S]*>/i.test(cleanedText);
+        
+        if (hasHtmlTags) {
+          // 如果包含 HTML，使用 DOMPurify 清理
           if (typeof DOMPurify !== 'undefined') {
-            safeContent = DOMPurify.sanitize(contentStr, {
-              ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],
-              ADD_ATTR: ['colspan', 'rowspan']
+            safeContent = DOMPurify.sanitize(cleanedText, {
+              ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'strong', 'em', 'b', 'i', 'u', 'p', 'br', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code'],
+              ADD_ATTR: ['colspan', 'rowspan', 'class', 'style']
             });
           } else {
-            safeContent = escapeHtml(contentStr);
+            safeContent = escapeHtml(cleanedText);
           }
         } else {
+          // 純文本，使用 Markdown 轉譯
           if (window.safeRenderMarkdown) {
-            safeContent = window.safeRenderMarkdown(contentStr);
+            safeContent = window.safeRenderMarkdown(cleanedText);
           } else if (typeof marked !== 'undefined') {
+            // 確保 marked 配置正確
             if (!marked.getDefaults || !marked.getDefaults().gfm) {
-              marked.setOptions({ gfm: true, breaks: true, tables: true });
+              marked.setOptions({ 
+                gfm: true,  // GitHub Flavored Markdown（支援表格）
+                breaks: true,  // 支援換行
+                tables: true,  // 明確啟用表格支援
+                headerIds: false,  // 不生成 header ID
+                mangle: false  // 不混淆 email
+              });
             }
-            const html = marked.parse(contentStr);
+            const html = marked.parse(cleanedText);
             if (typeof DOMPurify !== 'undefined') {
               safeContent = DOMPurify.sanitize(html, {
-                ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],
-                ADD_ATTR: ['colspan', 'rowspan']
+                ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'strong', 'em', 'b', 'i', 'u', 'p', 'br', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code'],
+                ADD_ATTR: ['colspan', 'rowspan', 'class', 'style']
               });
             } else {
               safeContent = html;
             }
           } else {
-            safeContent = escapeHtml(contentStr).replace(/\n/g, '<br>');
+            // 如果沒有 marked，手動處理基本 Markdown 格式
+            let processed = cleanedText;
+            // 處理粗體 **text** 或 __text__
+            processed = processed.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            processed = processed.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+            // 處理斜體 *text* 或 _text_（但要避免與粗體衝突）
+            processed = processed.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+            processed = processed.replace(/(?<!_)_([^_]+)_(?!_)/g, '<em>$1</em>');
+            // 處理換行
+            processed = escapeHtml(processed).replace(/\n/g, '<br>');
+            safeContent = processed;
           }
         }
       }
@@ -3249,9 +3335,9 @@ function displayOneClickGenerationResults(mode3Results, scripts) {
             ${safeContent}
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="action-btn" onclick="viewIpPlanningDetailForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">👁️ 查看完整</button>
-            <button class="action-btn" onclick="downloadIpPlanningPDF('${safeResultId.replace(/'/g, "\\'")}')" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">📄 PDF</button>
-            <button class="action-btn delete-btn" onclick="deleteIpPlanningResultForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">🗑️ 刪除</button>
+            <button class="action-btn" onclick="viewIpPlanningDetailForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;"><i class="fas fa-eye"></i> 查看完整</button>
+            <button class="action-btn" onclick="downloadIpPlanningPDF('${safeResultId.replace(/'/g, "\\'")}')" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button class="action-btn delete-btn" onclick="deleteIpPlanningResultForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;"><i class="fas fa-trash-alt"></i> 刪除</button>
           </div>
         </div>
       `;
