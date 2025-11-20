@@ -986,39 +986,22 @@ async function checkUserLlmKey() {
 
 // 發送 Mode1 訊息
 async function sendMode1Message(message, conversationType = 'ip_planning') {
-  // 檢查訊息是否為空
   if (!message || !message.trim()) {
-    console.warn('⚠️ 訊息為空，不發送');
     return;
   }
   
-  // 檢查是否正在發送（防止重複調用）
-  // 注意：如果 isMode1Sending 為 true，可能是因為：
-  // 1. 上一次發送還沒完成（正常情況，應該等待）
-  // 2. 標誌卡住了（異常情況，應該被事件處理器重置）
   if (isMode1Sending) {
-    console.log('⚠️ 訊息發送中，請稍候...');
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('訊息發送中，請稍候...', 2000);
-    }
     return;
   }
   
-  // 立即設置發送標誌（在異步操作之前）
   isMode1Sending = true;
-  console.log('✅ sendMode1Message 開始執行', message);
   
-  // 檢查用戶是否已綁定 LLM 金鑰
   const hasLlmKey = await checkUserLlmKey();
   if (!hasLlmKey) {
-    // 重置發送標誌（因為不會發送）
     isMode1Sending = false;
-    console.log('❌ 未綁定 LLM 金鑰，重置 isMode1Sending = false');
-    
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('⚠️ 請先綁定您的 LLM API 金鑰才能與 AI 對談。點擊「立即綁定」前往設定。', 5000);
     }
-    // 延遲後跳轉到設定頁面
     setTimeout(() => {
       window.location.href = 'userDB.html#settings';
     }, 2000);
@@ -1075,15 +1058,11 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
   try {
     const token = localStorage.getItem('ipPlanningToken');
     if (!token) {
-      // 重置發送標誌（因為不會發送）
       isMode1Sending = false;
-      console.log('❌ 未登入，重置 isMode1Sending = false');
-      sendBtn.disabled = false; // 重新啟用發送按鈕
-      
+      sendBtn.disabled = false;
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('請先登入', 3000);
       }
-      // 移除打字指示器
       if (typingIndicatorEl.parentNode) {
         typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
       }
@@ -1123,14 +1102,11 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
     });
     
     if (!response.ok) {
-      // 移除打字指示器
       if (typingIndicatorEl.parentNode) {
         typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
       }
       
       const errorData = await response.json();
-      console.error('API 錯誤:', errorData);
-      
       let errorMessage = 'AI 回應失敗，請稍後再試。';
       if (errorData.message) {
         errorMessage = errorData.message;
@@ -1143,22 +1119,18 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
         }
       }
       
-      // 添加一個 AI 錯誤訊息
       const escapedErrorMessage = window.escapeHtml ? window.escapeHtml(errorMessage) : errorMessage.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
       const aiErrorMessage = createMode1Message('assistant', `<span style="color: #ef4444;">❌ ${escapedErrorMessage}</span>`);
       chatMessages.appendChild(aiErrorMessage);
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
-      // 重置發送標誌（API 失敗）
       isMode1Sending = false;
-      console.log('❌ API 錯誤，重置 isMode1Sending = false');
-      sendBtn.disabled = false; // 重新啟用發送按鈕
+      sendBtn.disabled = false;
 
-      // 即使 API 失敗，也嘗試記錄用戶訊息到記憶
       try {
         await recordMode1ConversationMessage(conversationType, 'user', message, token, ipPlanningUser);
       } catch (memError) {
-        console.error('記錄用戶訊息到記憶錯誤:', memError);
+        // 靜默失敗
       }
 
       return;
@@ -1346,34 +1318,25 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
     }
 
   } catch (error) {
-    console.error('發送訊息時出錯:', error);
-    // 重置發送標誌（發生錯誤）
     isMode1Sending = false;
-    console.log('❌ 發送訊息錯誤，重置 isMode1Sending = false');
-    sendBtn.disabled = false; // 重新啟用發送按鈕
+    sendBtn.disabled = false;
     
-    // 移除打字指示器
     if (typingIndicatorEl && typingIndicatorEl.parentNode) {
       typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
     }
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('發送訊息失敗，請檢查網絡或稍後再試。', 3000);
     }
-    // 嘗試記錄用戶訊息到記憶
     try {
       await recordMode1ConversationMessage(conversationType, 'user', message, ipPlanningToken, ipPlanningUser);
     } catch (memError) {
-      console.error('記錄用戶訊息到記憶錯誤:', memError);
+      // 靜默失敗
     }
 
   } finally {
-    // 確保在所有情況下都重置發送標誌（雙重保護）
-    if (isMode1Sending) {
-      console.log('✅ finally 區塊：重置 isMode1Sending = false');
-    }
     isMode1Sending = false;
-    sendBtn.disabled = false; // 重新啟用發送按鈕
-    chatMessages.scrollTop = chatMessages.scrollHeight; // 確保最後滾動到底部
+    sendBtn.disabled = false;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 }
 
@@ -1576,26 +1539,10 @@ async function recordMode1ConversationMessage(conversationType, role, content, t
       } catch (e) {
         errorData = { detail: `HTTP ${response.status}: ${response.statusText}` };
       }
-      // 改為 console.warn，不影響主流程
-      console.warn('記錄長期記憶失敗:', errorData);
-      
-      // 如果是 422 錯誤，可能是驗證失敗，記錄詳細信息
-      if (response.status === 422 && errorData.detail) {
-        console.warn('驗證失敗詳情:', errorData.detail);
-      }
-    } else {
-      console.log('✅ 記憶已記錄:', role);
+      // 靜默失敗，不影響主流程
     }
   } catch (error) {
-    // 改進錯誤處理，區分超時和其他錯誤
-    if (error.name === 'AbortError') {
-      console.warn('記錄長期記憶超時（已跳過，不影響聊天功能）');
-    } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-      console.warn('記錄長期記憶網路錯誤（已跳過，不影響聊天功能）:', error.message);
-    } else {
-      console.warn('記錄長期記憶錯誤（已跳過，不影響聊天功能）:', error);
-    }
-    // 重要：不拋出錯誤，確保不影響主流程
+    // 靜默失敗，不影響主流程
   }
 }
 
@@ -2017,7 +1964,6 @@ function initMode1Chat() {
       lastViewportHeight = currentHeight;
     });
 
-    // 發送按鈕
     sendBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -2025,59 +1971,41 @@ function initMode1Chat() {
       
       const message = messageInput.value.trim();
       if (message) {
-        // 如果 isMode1Sending 卡住了，強制重置
         if (isMode1Sending) {
-          console.warn('⚠️ 檢測到 isMode1Sending 卡住，強制重置');
           isMode1Sending = false;
           sendBtn.disabled = false;
         }
         
-        console.log('✅ 開始發送訊息（按鈕點擊觸發）', message);
-        
-        // 清空輸入框（防止重複發送）
         messageInput.value = '';
         messageInput.style.height = 'auto';
         
-        // 發送訊息（sendMode1Message 會自己管理 isMode1Sending）
         sendMode1Message(message).catch(err => {
-          console.error('發送訊息錯誤:', err);
           isMode1Sending = false;
           sendBtn.disabled = false;
         });
       }
-    }, true); // 使用 capture 階段
+    }, true);
 
-    // Enter 發送（使用 capture 階段和 stopImmediatePropagation 防止重複觸發）
     messageInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
-        // 立即阻止所有默認行為和事件傳播
         e.preventDefault();
         e.stopPropagation();
-        e.stopImmediatePropagation(); // 阻止同一元素上的其他監聽器
+        e.stopImmediatePropagation();
         
         const message = messageInput.value.trim();
         if (message) {
-          // 如果 isMode1Sending 卡住了，強制重置（在調用前重置，確保不會被攔截）
           if (isMode1Sending) {
-            console.warn('⚠️ 檢測到 isMode1Sending 卡住，強制重置');
             isMode1Sending = false;
-            // 重新啟用發送按鈕
             const sendBtn = document.getElementById('mode1-sendBtn');
             if (sendBtn) {
               sendBtn.disabled = false;
             }
           }
           
-          console.log('✅ 開始發送訊息（Enter 鍵觸發）', message);
-          
-          // 清空輸入框（防止重複發送）
           messageInput.value = '';
           messageInput.style.height = 'auto';
           
-          // 發送訊息（sendMode1Message 會自己管理 isMode1Sending）
           sendMode1Message(message).catch(err => {
-            console.error('發送訊息錯誤:', err);
-            // 確保錯誤時也重置標誌
             isMode1Sending = false;
             const sendBtn = document.getElementById('mode1-sendBtn');
             if (sendBtn) {
@@ -2086,7 +2014,7 @@ function initMode1Chat() {
           });
         }
       }
-    }, true); // 使用 capture 階段，優先處理
+    }, true);
     
     // 防止表單提交（如果輸入框在表單內）
     const form = messageInput.closest('form');
