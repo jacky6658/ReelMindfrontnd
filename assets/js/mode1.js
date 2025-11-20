@@ -139,7 +139,6 @@ window.switchMode1HistoryType = switchMode1HistoryType;
 // 從後端獲取歷史數據
 async function fetchHistoryData(forceRefresh = false) {
   if (!forceRefresh && cachedHistoryData && cachedHistoryTimestamp && (Date.now() - cachedHistoryTimestamp < CACHE_DURATION)) {
-    console.log('✅ 從快取載入歷史數據');
     return cachedHistoryData;
   }
 
@@ -155,7 +154,6 @@ async function fetchHistoryData(forceRefresh = false) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('獲取歷史數據失敗:', errorData);
       return null;
     }
 
@@ -185,10 +183,8 @@ async function fetchHistoryData(forceRefresh = false) {
     
     cachedHistoryData = data;
     cachedHistoryTimestamp = Date.now();
-    console.log('✅ 成功從 API 獲取歷史數據並快取（已過濾 mode3 資料）');
     return data;
   } catch (error) {
-    console.error('獲取歷史數據時出錯:', error);
     return null;
   }
 }
@@ -197,7 +193,6 @@ async function fetchHistoryData(forceRefresh = false) {
 function clearHistoryCache() {
   cachedHistoryData = null;
   cachedHistoryTimestamp = null;
-  console.log('快取已清除');
 }
 
 // 載入過往紀錄
@@ -302,11 +297,9 @@ window.loadMode1OneClickHistory = loadMode1OneClickHistory;
 // 匯出歷史結果（客戶端生成 CSV）
 window.exportHistoryResult = async function(resultId, resultType) {
   try {
-    console.log('🔍 exportHistoryResult 被調用，resultId:', resultId, 'resultType:', resultType);
     // 從快取或 API 獲取數據
     const data = await fetchHistoryData();
     if (!data || !data.success || !data.results) {
-      console.error('❌ 無法獲取歷史數據');
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('找不到要匯出的數據', 3000);
       }
@@ -321,14 +314,12 @@ window.exportHistoryResult = async function(resultId, resultType) {
     });
     
     if (!result) {
-      console.error('❌ 找不到要匯出的記錄，resultId:', resultId);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('找不到要匯出的記錄', 3000);
       }
       return;
     }
     
-    console.log('✅ 找到要匯出的記錄:', result.title);
 
     // 生成 CSV 內容
     const typeNames = {
@@ -365,7 +356,6 @@ window.exportHistoryResult = async function(resultId, resultType) {
       window.ReelMindCommon.showToast('✅ 匯出成功', 3000);
     }
   } catch (error) {
-    console.error('匯出時出錯:', error);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('匯出失敗，請稍後再試', 3000);
     }
@@ -437,10 +427,8 @@ window.updateSelectedSettingsDisplay = updateSelectedSettingsDisplay;
 // 選擇歷史結果
 async function selectHistoryResult(type, resultId) {
   try {
-    console.log('🔍 selectHistoryResult 被調用，type:', type, 'resultId:', resultId);
   const data = await fetchHistoryData();
     if (!data || !data.success || !data.results) {
-      console.error('❌ 無法獲取歷史數據');
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('無法獲取數據，請稍後再試', 3000);
       }
@@ -458,7 +446,6 @@ async function selectHistoryResult(type, resultId) {
       if (selectedSettings[type] && selectedSettings[type].id == resultId) {
       // 如果已經選擇，則取消選擇
       selectedSettings[type] = null;
-        console.log('✅ 已取消選擇');
     } else {
         // 清除所有其他已選擇的設定（限制一次只能選擇一個）
         selectedSettings.profile = null;
@@ -471,7 +458,6 @@ async function selectHistoryResult(type, resultId) {
         title: result.title || `未命名${type.charAt(0).toUpperCase() + type.slice(1)}`,
         content: result.content,
       };
-        console.log('✅ 已選擇:', selectedSettings[type].title, '（已清除其他設定）');
     }
     updateSelectedSettingsDisplay();
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -481,13 +467,11 @@ async function selectHistoryResult(type, resultId) {
         window.ReelMindCommon.showToast(message, 2000);
       }
     } else {
-      console.error('❌ 找不到對應的結果，resultId:', resultId);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('找不到對應的記錄', 3000);
       }
     }
   } catch (error) {
-    console.error('❌ selectHistoryResult 錯誤:', error);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('選擇失敗，請稍後再試', 3000);
     }
@@ -580,13 +564,11 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
       await loadMode1OneClickHistory(targetType, true); // 強制刷新
     } else {
       const errorData = await response.json();
-      console.error('刪除失敗:', errorData);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast(`刪除失敗: ${errorData.message || '未知錯誤'}`, 3000);
       }
     }
   } catch (error) {
-    console.error('刪除時出錯:', error);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('刪除失敗，請稍後再試', 3000);
     }
@@ -685,14 +667,12 @@ async function saveMode1HistoryTitle(resultId) {
       }
     } else {
         const errorData = await response.json();
-        console.error('更新標題失敗:', errorData);
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast(`更新標題失敗: ${errorData.message || '未知錯誤'}`, 3000);
         }
       }
       */
     } catch (error) {
-      console.error('更新標題時出錯:', error);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('更新標題失敗，請稍後再試', 3000);
       }
@@ -725,10 +705,8 @@ window.cancelMode1HistoryTitleEdit = cancelMode1HistoryTitleEdit;
 // 展開/收起歷史記錄內容
 function toggleHistoryContentExpanded(resultId) {
   try {
-    console.log('🔍 toggleHistoryContentExpanded 被調用，resultId:', resultId);
   const contentWrapper = document.getElementById(`contentWrapper-${resultId}`);
     if (!contentWrapper) {
-      console.error('❌ 找不到 contentWrapper，resultId:', resultId);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('找不到內容區域', 3000);
       }
@@ -737,13 +715,11 @@ function toggleHistoryContentExpanded(resultId) {
     
   const expandBtn = contentWrapper.querySelector('.mode1-oneclick-expand-btn');
     if (!expandBtn) {
-      console.error('❌ 找不到 expandBtn');
       return;
     }
     
   const expandIcon = expandBtn.querySelector('i');
     if (!expandIcon) {
-      console.error('❌ 找不到 expandIcon');
       return;
     }
 
@@ -758,9 +734,7 @@ function toggleHistoryContentExpanded(resultId) {
     expandIcon.classList.remove('fa-chevron-down');
     expandIcon.classList.add('fa-chevron-up');
     }
-    console.log('✅ toggleHistoryContentExpanded 執行成功');
   } catch (error) {
-    console.error('❌ toggleHistoryContentExpanded 錯誤:', error);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('操作失敗，請稍後再試', 3000);
     }
@@ -775,9 +749,6 @@ let currentExpandModalContent = null; // 用於保存當前展開的內容，防
 // 開啟展開內容 Modal
 async function openMode1ExpandModal(resultId, resultType) {
   try {
-    console.log('🔍 openMode1ExpandModal 被調用');
-    console.log('  - resultId:', resultId, '類型:', typeof resultId);
-    console.log('  - resultType:', resultType);
     
   const overlay = document.getElementById('mode1ExpandModalOverlay');
   const modal = document.getElementById('mode1ExpandModal');
@@ -785,32 +756,21 @@ async function openMode1ExpandModal(resultId, resultType) {
   const modalContentDiv = document.getElementById('mode1ExpandModalContent');
   
     if (!overlay || !modal || !modalTitle || !modalContentDiv) {
-      console.error('❌ 找不到 Modal 元素');
-      console.error('  - overlay:', overlay);
-      console.error('  - modal:', modal);
-      console.error('  - modalTitle:', modalTitle);
-      console.error('  - modalContentDiv:', modalContentDiv);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('無法打開視窗，請刷新頁面重試', 3000);
       }
       return;
     }
 
-    console.log('✅ Modal 元素找到，開始載入數據');
     modalContentDiv.innerHTML = '<p style="text-align: center; color: #9ca3af;">載入中...</p>';
 
   const data = await fetchHistoryData();
-    console.log('📦 獲取的數據:', data);
     
   if (!data || !data.success || !data.results) {
-      console.error('❌ 無法獲取歷史數據');
     modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">載入失敗，請稍後再試。</p>';
       return;
     }
     
-    console.log('📋 結果數量:', data.results.length);
-    console.log('🔍 尋找 resultId:', resultId);
-    console.log('🔍 所有結果的 ID:', data.results.map(r => ({ id: r.id, type: typeof r.id })));
     
     // 處理類型轉換：resultId 可能是字串或數字
     const result = data.results.find(r => {
@@ -820,17 +780,10 @@ async function openMode1ExpandModal(resultId, resultType) {
              Number(r.id) === Number(resultId);
     });
     
-    console.log('🎯 找到的結果:', result);
 
   if (result) {
-      console.log('✅ 找到對應結果');
-      console.log('  - result.id:', result.id);
-      console.log('  - result.title:', result.title);
-      console.log('  - result.content 長度:', result.content ? result.content.length : 0);
-      console.log('  - result.content 前100字:', result.content ? result.content.substring(0, 100) : '無內容');
       
       if (!result.content || result.content.trim() === '') {
-        console.error('❌ result.content 為空');
         modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">此記錄沒有內容。</p>';
         overlay.classList.add('open');
         document.body.style.overflow = 'hidden';
@@ -844,13 +797,9 @@ async function openMode1ExpandModal(resultId, resultType) {
     };
       modalTitle.textContent = result.title || `查看完整${typeNames[result.type] || resultType || ''}內容`;
       
-      console.log('🎨 開始渲染 Markdown');
       const renderedContent = renderMode1Markdown(result.content);
-      console.log('✅ 渲染完成，內容長度:', renderedContent.length);
-      console.log('  - 渲染內容前100字:', renderedContent.substring(0, 100));
       
       if (!renderedContent || renderedContent.trim() === '') {
-        console.error('❌ 渲染結果為空，使用原始內容');
         modalContentDiv.innerHTML = '<div style="white-space: pre-wrap; padding: 20px;">' + 
           (window.escapeHtml ? window.escapeHtml(result.content) : result.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')) + 
           '</div>';
@@ -879,17 +828,12 @@ async function openMode1ExpandModal(resultId, resultType) {
       modalContentDiv.scrollTop = 0;
     }, 50);
 
-      console.log('✅ Modal 打開成功');
     } else {
-      console.error('❌ 找不到對應的結果');
-      console.error('  - 所有結果的 ID:', data.results.map(r => ({ id: r.id, type: typeof r.id })));
     modalContentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">找不到對應的內容。</p>';
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
     }
   } catch (error) {
-    console.error('❌ openMode1ExpandModal 錯誤:', error);
-    console.error('錯誤堆疊:', error.stack);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('打開視窗失敗，請稍後再試', 3000);
     }
@@ -951,7 +895,6 @@ async function handleQuickButton(type) {
       sendMode1Message('【重要：完全重新開始】請完全忽略之前所有的對話內容、帳號定位結果和長期記憶。這是一個全新的帳號定位需求，請從頭開始。請先詢問我以下問題：1. 我的目標受眾是誰？2. 我想要達成的目標是什麼？3. 我主要使用的平台是什麼？4. 我偏好的內容風格是什麼？請根據我的新回答，生成一個全新的、獨立的帳號定位，不要參考任何之前的內容。', 'ip_planning');
       break;
     default:
-      console.warn('未知的快速按鈕類型:', type);
   }
 }
 window.handleQuickButton = handleQuickButton; // 立即導出到全局，以便 HTML onclick 使用
@@ -979,7 +922,6 @@ async function checkUserLlmKey() {
     }
     return false;
   } catch (error) {
-    console.error('檢查 LLM 金鑰失敗:', error);
     return false;
   }
 }
@@ -1075,7 +1017,6 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       try {
         csrfToken = await window.Api.getCsrfToken() || '';
       } catch (e) {
-        console.warn('獲取 CSRF Token 失敗:', e);
       }
     }
     
@@ -1209,10 +1150,7 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
                   window.ReelMindCommon.showToast('✅ 內容已儲存並顯示在生成結果中', 3000);
                 }
               }).catch(error => {
-                console.error('儲存失敗:', error);
-                if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-                  window.ReelMindCommon.showToast('儲存失敗，請稍後再試', 3000);
-                }
+                // 靜默失敗
               });
               
               // 跳過後續的 AI 回應（因為已經處理了儲存）
@@ -1292,7 +1230,6 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
           } catch (e) {
             // 只記錄真正的錯誤，忽略無法解析的數據（可能是空行或其他格式）
             if (data && data.trim() && data !== '[DONE]') {
-              console.warn('解析 SSE 數據失敗:', e, '數據:', data);
             }
           }
         }
@@ -1314,7 +1251,36 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       await recordMode1ConversationMessage(conversationType, 'user', message, token, ipPlanningUser);
       await recordMode1ConversationMessage(conversationType, 'assistant', aiResponseContent, token, ipPlanningUser);
     } catch (error) {
-      console.error('記錄長期記憶錯誤:', error);
+      // 靜默失敗
+    }
+
+    // 自動儲存邏輯：如果生成的是帳號定位且內容足夠長，自動儲存
+    if (conversationType === 'ip_planning' && aiResponseContent && aiResponseContent.trim().length > 50) {
+      const positioningKeywords = ['目標受眾', '內容定位', '風格調性', '競爭優勢', '執行建議', '帳號定位', '品牌定位'];
+      const hasPositioningContent = positioningKeywords.some(keyword => aiResponseContent.includes(keyword));
+      
+      if (hasPositioningContent) {
+        setTimeout(async () => {
+          try {
+            await saveMode1Result('ip_planning');
+            if (window.openMode1OneClickModal) {
+              window.openMode1OneClickModal();
+              setTimeout(() => {
+                if (window.switchMode1HistoryType) {
+                  window.switchMode1HistoryType('profile');
+                }
+                setTimeout(() => {
+                  if (window.loadMode1OneClickHistory) {
+                    window.loadMode1OneClickHistory('profile', true);
+                  }
+                }, 200);
+              }, 100);
+            }
+          } catch (error) {
+            // 靜默失敗
+          }
+        }, 1000);
+      }
     }
 
   } catch (error) {
@@ -1450,7 +1416,6 @@ function renderMode1Markdown(text) {
       
       return cleanHtml;
     } catch (e) {
-      console.error('Markdown 渲染錯誤:', e);
       // 降級處理：如果渲染失敗，轉義並保留換行
       if (window.escapeHtml) {
         return window.escapeHtml(cleanedText).replace(/\n/g, '<br>');
@@ -1476,7 +1441,6 @@ function renderMode1Markdown(text) {
 // 記錄會話訊息到記憶（短期記憶和長期記憶）
 async function recordMode1ConversationMessage(conversationType, role, content, token, user) {
   if (!token || !user || !user.user_id) {
-    console.warn('未登入，無法記錄記憶。');
     return;
   }
 
@@ -1487,7 +1451,6 @@ async function recordMode1ConversationMessage(conversationType, role, content, t
       try {
         csrfToken = await window.Api.getCsrfToken() || '';
       } catch (e) {
-        console.warn('獲取 CSRF Token 失敗:', e);
       }
     }
     
@@ -1500,7 +1463,6 @@ async function recordMode1ConversationMessage(conversationType, role, content, t
     
     // 確保所有必填字段都有值
     if (!conversationType || !sessionId || !role || !content) {
-      console.warn('記錄長期記憶失敗：缺少必填字段', { conversationType, sessionId, role, content: content ? '有內容' : '無內容' });
       return;
     }
     
@@ -1592,7 +1554,6 @@ function updateUserInfo() {
       try {
         currentUser = JSON.parse(userStr);
           } catch (e) {
-        console.warn('無法解析用戶資料:', e);
       }
     }
   }
@@ -1697,7 +1658,6 @@ async function saveMode1Result(resultType) {
       try {
         csrfToken = await window.Api.getCsrfToken() || '';
       } catch (e) {
-        console.warn('獲取 CSRF Token 失敗:', e);
       }
     }
     
@@ -1753,17 +1713,13 @@ async function saveMode1Result(resultType) {
         }
       }
       
-      // 不在此處顯示 toast，因為會在 save_request 事件處理中顯示
-      console.log('✅ 內容已儲存到生成結果');
     } else {
       const errorData = await response.json();
-      console.error('保存失敗:', errorData);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast(`保存失敗: ${errorData.message || '未知錯誤'}`, 3000);
       }
     }
   } catch (error) {
-    console.error('保存時出錯:', error);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('保存失敗，請稍後再試', 3000);
     }
@@ -1838,7 +1794,6 @@ if (typeof window !== 'undefined') {
 
 // 頁面初始化
 document.addEventListener('DOMContentLoaded', async function() {
-  console.log('🚀 ========== Mode1 (IP人設規劃) 頁面初始化 ==========');
   
   // 立即強制隱藏舊的抽屜（最高優先級）
   const oldResultsOverlay = document.getElementById('mode1ResultsOverlay');
@@ -1894,12 +1849,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     const openModal = window.openMode1OneClickModal || openMode1OneClickModal;
     if (typeof openModal === 'function') {
       resultsBtn.addEventListener('click', openModal);
-      console.log('✅ 生成結果按鈕事件已綁定');
     } else {
-      console.error('❌ openMode1OneClickModal 函數未定義');
     }
   } else {
-    console.warn('⚠️ 找不到生成結果按鈕 (mode1ResultsBtn)');
   }
 
   // 處理 SSE 事件
@@ -1912,7 +1864,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 function initMode1Chat() {
   // 防止重複初始化
   if (mode1ChatInitialized) {
-    console.log('Mode1 聊天功能已初始化，跳過重複初始化');
     return;
   }
   
@@ -2025,7 +1976,6 @@ function initMode1Chat() {
         e.stopImmediatePropagation();
         
         if (isMode1Sending) {
-          console.log('⚠️ 正在發送中，忽略表單提交');
           return;
         }
         
@@ -2033,7 +1983,6 @@ function initMode1Chat() {
         if (message) {
           // 立即設置發送標誌
           isMode1Sending = true;
-          console.log('✅ 開始發送訊息（表單提交觸發）');
           
           // 清空輸入框
           messageInput.value = '';
