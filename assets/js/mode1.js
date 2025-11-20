@@ -163,15 +163,29 @@ async function fetchHistoryData(forceRefresh = false) {
     
     // 後端返回的字段是 result_type，需要映射為 type 以符合前端代碼
     if (data && data.success && data.results) {
-      data.results = data.results.map(result => ({
-        ...result,
-        type: result.result_type || result.type  // 將 result_type 映射為 type
-      }));
+      // 只顯示 mode1 的結果（過濾掉 mode3 的結果）
+      data.results = data.results
+        .filter(result => {
+          try {
+            const metadata = typeof result.metadata === 'string' 
+              ? JSON.parse(result.metadata) 
+              : (result.metadata || {});
+            // 只顯示 source === 'mode1' 或沒有 source 的舊資料（向後兼容）
+            return metadata.source === 'mode1' || !metadata.source;
+          } catch (e) {
+            // 如果 metadata 解析失敗，預設顯示（舊資料）
+            return true;
+          }
+        })
+        .map(result => ({
+          ...result,
+          type: result.result_type || result.type  // 將 result_type 映射為 type
+        }));
     }
     
     cachedHistoryData = data;
     cachedHistoryTimestamp = Date.now();
-    console.log('✅ 成功從 API 獲取歷史數據並快取');
+    console.log('✅ 成功從 API 獲取歷史數據並快取（已過濾 mode3 資料）');
     return data;
   } catch (error) {
     console.error('獲取歷史數據時出錯:', error);
@@ -972,17 +986,26 @@ async function checkUserLlmKey() {
 
 // 發送 Mode1 訊息
 async function sendMode1Message(message, conversationType = 'ip_planning') {
+  // 雙重檢查：如果正在發送，直接返回（防止重複調用）
   if (isMode1Sending) {
-    console.log('訊息發送中，請稍候...');
+    console.log('⚠️ 訊息發送中，忽略重複調用');
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('訊息發送中，請稍候...', 2000);
     }
     return;
   }
   
+  // 立即設置發送標誌（在異步操作之前）
+  isMode1Sending = true;
+  console.log('✅ sendMode1Message 開始執行，設置 isMode1Sending = true');
+  
   // 檢查用戶是否已綁定 LLM 金鑰
   const hasLlmKey = await checkUserLlmKey();
   if (!hasLlmKey) {
+    // 重置發送標誌（因為不會發送）
+    isMode1Sending = false;
+    console.log('❌ 未綁定 LLM 金鑰，重置 isMode1Sending = false');
+    
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('⚠️ 請先綁定您的 LLM API 金鑰才能與 AI 對談。點擊「立即綁定」前往設定。', 5000);
     }
@@ -1004,11 +1027,13 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
   // 顯示用戶訊息
   const userMessageEl = createMode1Message('user', message, userAvatarUrl);
   chatMessages.appendChild(userMessageEl);
-  messageInput.value = ''; // 清空輸入框
+  // 注意：輸入框已在事件處理器中清空，這裡不需要重複清空
+  // messageInput.value = ''; // 已在事件處理器中清空
   messageInput.style.height = 'auto'; // 重置輸入框高度
   chatMessages.scrollTop = chatMessages.scrollHeight; // 滾動到底部
 
-  isMode1Sending = true;
+  // 注意：isMode1Sending 已在函數開頭設置，這裡不需要重複設置
+  // isMode1Sending = true; // 已在函數開頭設置
   sendBtn.disabled = true; // 禁用發送按鈕
 
   // 顯示打字指示器
@@ -1041,6 +1066,11 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
   try {
     const token = localStorage.getItem('ipPlanningToken');
     if (!token) {
+      // 重置發送標誌（因為不會發送）
+      isMode1Sending = false;
+      console.log('❌ 未登入，重置 isMode1Sending = false');
+      sendBtn.disabled = false; // 重新啟用發送按鈕
+      
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('請先登入', 3000);
       }
@@ -1048,8 +1078,8 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       if (typingIndicatorEl.parentNode) {
         typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
       }
-    return;
-  }
+      return;
+    }
 
     // 獲取 CSRF Token
     let csrfToken = '';
@@ -1109,6 +1139,11 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       const aiErrorMessage = createMode1Message('assistant', `<span style="color: #ef4444;">❌ ${escapedErrorMessage}</span>`);
       chatMessages.appendChild(aiErrorMessage);
       chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      // 重置發送標誌（API 失敗）
+      isMode1Sending = false;
+      console.log('❌ API 錯誤，重置 isMode1Sending = false');
+      sendBtn.disabled = false; // 重新啟用發送按鈕
 
       // 即使 API 失敗，也嘗試記錄用戶訊息到記憶
       try {
@@ -1303,8 +1338,13 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
 
   } catch (error) {
     console.error('發送訊息時出錯:', error);
+    // 重置發送標誌（發生錯誤）
+    isMode1Sending = false;
+    console.log('❌ 發送訊息錯誤，重置 isMode1Sending = false');
+    sendBtn.disabled = false; // 重新啟用發送按鈕
+    
     // 移除打字指示器
-    if (typingIndicatorEl.parentNode) {
+    if (typingIndicatorEl && typingIndicatorEl.parentNode) {
       typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
     }
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1318,8 +1358,12 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
     }
 
   } finally {
+    // 確保在所有情況下都重置發送標誌（雙重保護）
+    if (isMode1Sending) {
+      console.log('✅ finally 區塊：重置 isMode1Sending = false');
+    }
     isMode1Sending = false;
-    sendBtn.disabled = false; // 啟用發送按鈕
+    sendBtn.disabled = false; // 重新啟用發送按鈕
     chatMessages.scrollTop = chatMessages.scrollHeight; // 確保最後滾動到底部
   }
 }
@@ -1729,7 +1773,9 @@ async function saveMode1Result(resultType) {
         result_type: resultTypeForBackend,
         title: extractedTitle,
         content: latestAiMessageContent,
-        metadata: {}
+        metadata: {
+          source: 'mode1'  // 標記來源為 mode1，確保與 mode3 分離
+        }
       })
     });
     
@@ -1966,34 +2012,57 @@ function initMode1Chat() {
     sendBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
       
       if (isMode1Sending) {
+        console.log('⚠️ 正在發送中，忽略按鈕點擊');
         return; // 如果正在發送，直接返回
       }
       
       const message = messageInput.value.trim();
       if (message) {
+        // 立即設置發送標誌
+        isMode1Sending = true;
+        console.log('✅ 開始發送訊息（按鈕點擊觸發）');
+        
+        // 清空輸入框（防止重複發送）
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        
+        // 發送訊息
         sendMode1Message(message);
       }
-    });
+    }, true); // 使用 capture 階段
 
-    // Enter 發送
+    // Enter 發送（使用 capture 階段和 stopImmediatePropagation 防止重複觸發）
     messageInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
+        // 立即阻止所有默認行為和事件傳播
         e.preventDefault();
-        e.stopPropagation(); // 阻止事件冒泡
+        e.stopPropagation();
+        e.stopImmediatePropagation(); // 阻止同一元素上的其他監聽器
         
-        // 檢查是否正在發送
+        // 檢查是否正在發送（在阻止事件之前檢查）
         if (isMode1Sending) {
-          return; // 如果正在發送，直接返回
+          console.log('⚠️ 正在發送中，忽略 Enter 鍵');
+          return;
         }
         
         const message = messageInput.value.trim();
         if (message) {
+          // 立即設置發送標誌，防止重複觸發
+          isMode1Sending = true;
+          console.log('✅ 開始發送訊息（Enter 鍵觸發）');
+          
+          // 清空輸入框（防止重複發送）
+          messageInput.value = '';
+          messageInput.style.height = 'auto';
+          
+          // 發送訊息
           sendMode1Message(message);
         }
       }
-    });
+    }, true); // 使用 capture 階段，優先處理
     
     // 防止表單提交（如果輸入框在表單內）
     const form = messageInput.closest('form');
@@ -2001,16 +2070,27 @@ function initMode1Chat() {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         
         if (isMode1Sending) {
+          console.log('⚠️ 正在發送中，忽略表單提交');
           return;
         }
         
         const message = messageInput.value.trim();
         if (message) {
+          // 立即設置發送標誌
+          isMode1Sending = true;
+          console.log('✅ 開始發送訊息（表單提交觸發）');
+          
+          // 清空輸入框
+          messageInput.value = '';
+          messageInput.style.height = 'auto';
+          
+          // 發送訊息
           sendMode1Message(message);
         }
-      });
+      }, true); // 使用 capture 階段
     }
   }
 }

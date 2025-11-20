@@ -1472,6 +1472,167 @@
           opacity: 0.9 !important;
         }
         
+        /* IP人設規劃列表項目手機版布局切換 */
+        .ip-planning-header-mobile {
+          display: flex !important;
+        }
+        
+        .ip-planning-header-desktop {
+          display: none !important;
+        }
+        
+        .ip-planning-actions-mobile {
+          display: flex !important;
+        }
+        
+        .ip-planning-actions-desktop {
+          display: none !important;
+        }
+        
+        /* 確保 IP人設規劃列表項目不水平溢出 */
+        .ip-planning-item {
+          width: 100% !important;
+          max-width: 100% !important;
+          padding: 16px !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          box-sizing: border-box !important;
+          overflow-x: hidden !important;
+        }
+        
+        .ip-planning-header-mobile,
+        .ip-planning-header-desktop {
+          width: 100% !important;
+          max-width: 100% !important;
+          overflow-x: hidden !important;
+          box-sizing: border-box !important;
+          flex-wrap: wrap !important;
+        }
+        
+        .ip-planning-item-title {
+          max-width: 100% !important;
+          word-break: break-word !important;
+          overflow-wrap: break-word !important;
+          white-space: normal !important;
+        }
+        
+        .ip-planning-content-item {
+          width: 100% !important;
+          max-width: 100% !important;
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          box-sizing: border-box !important;
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
+        }
+        
+        .ip-planning-actions-mobile {
+          width: 100% !important;
+          max-width: 100% !important;
+          overflow-x: hidden !important;
+          box-sizing: border-box !important;
+          flex-wrap: wrap !important;
+          gap: 8px !important;
+        }
+        
+        .ip-planning-actions-mobile .action-btn {
+          box-sizing: border-box !important;
+          max-width: 100% !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+        
+        /* IP人設規劃彈跳視窗手機版優化 */
+        .ip-planning-detail-modal-overlay {
+          padding: 0 !important;
+          align-items: flex-end !important;
+        }
+        
+        .ip-planning-detail-modal-overlay > div {
+          max-width: 100% !important;
+          width: 100% !important;
+          max-height: 90vh !important;
+          border-radius: 16px 16px 0 0 !important;
+          margin: 0 !important;
+        }
+        
+        /* 彈跳視窗內容區域：不水平溢出（除了表格） */
+        .ip-planning-detail-modal-overlay > div > div:nth-child(2) {
+          padding: 16px !important;
+          font-size: 14px !important;
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
+        }
+        
+        .ip-planning-detail-modal-overlay > div > div:nth-child(2) > div:last-child {
+          font-size: 14px !important;
+          line-height: 1.6 !important;
+          word-break: break-word !important;
+          overflow-wrap: break-word !important;
+        }
+        
+        /* 列表項目中的表格：可以水平滾動（預覽用） */
+        .ip-planning-content-item table {
+          font-size: 12px !important;
+          display: block !important;
+          overflow-x: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 0 !important;
+        }
+        
+        /* 彈跳視窗中的表格：可以水平滾動（這是唯一允許水平滾動的地方） */
+        .ip-planning-detail-modal-overlay table,
+        .userdb-modal-body table {
+          font-size: 12px !important;
+          display: block !important;
+          overflow-x: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 12px 0 !important;
+        }
+        
+        /* 確保所有文字內容正確換行 */
+        .ip-planning-item *,
+        .ip-planning-content-item * {
+          max-width: 100% !important;
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
+        }
+        
+        /* 除了表格，其他元素都不允許水平滾動 */
+        .ip-planning-item *:not(table),
+        .ip-planning-content-item *:not(table) {
+          overflow-x: hidden !important;
+        }
+        
+        /* 桌面版保持原樣 */
+        @media (min-width: 769px) {
+          .ip-planning-header-mobile {
+            display: none !important;
+          }
+          
+          .ip-planning-header-desktop {
+            display: flex !important;
+          }
+          
+          .ip-planning-actions-mobile {
+            display: none !important;
+          }
+          
+          .ip-planning-actions-desktop {
+            display: flex !important;
+          }
+        }
+        
         /* 訂單項目樣式調整 */
         .userdb-modal-body .order-item {
           padding: 12px !important;

@@ -2478,22 +2478,45 @@ function displayIpPlanningResultsForUserDB(results) {
     }
     
     return `
-      <div class="ip-planning-item" data-result-id="${escapedResultId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        <div class="ip-planning-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <div class="ip-planning-item" data-result-id="${escapedResultId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: hidden; box-sizing: border-box;">
+        <!-- 手機版：標題在上方 -->
+        <div class="ip-planning-header-mobile" style="display: none; flex-direction: column; gap: 8px; margin-bottom: 12px; width: 100%; box-sizing: border-box;">
+          <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+            <h4 class="ip-planning-item-title" data-result-id="${escapedResultId}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; flex: 1; padding-right: 24px; word-break: break-word; overflow-wrap: break-word;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="點擊編輯標題">${title}</h4>
+            <span class="ip-planning-item-edit-icon" data-result-id="${escapedResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none; flex-shrink: 0;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fas fa-edit"></i></span>
+          </div>
+          <input type="text" class="ip-planning-item-title-input" data-result-id="${escapedResultId}" style="display: none; width: 100%; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; box-sizing: border-box;" onblur="saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')">
+          <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
+        </div>
+        
+        <!-- 桌面版：標題和日期在同一行 -->
+        <div class="ip-planning-header-desktop" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-            <h4 class="ip-planning-item-title" data-result-id="${escapedResultId}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; position: relative; padding-right: 24px;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="點擊編輯標題">${title}</h4>
-            <span class="ip-planning-item-edit-icon" data-result-id="${escapedResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✏️</span>
-            <input type="text" class="ip-planning-item-title-input" data-result-id="${escapedResultId}" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; max-width: 300px;" onblur="saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')">
+            <h4 class="ip-planning-item-title" data-result-id="${escapedResultId}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; position: relative; padding-right: 24px; word-break: break-word; overflow-wrap: break-word;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="點擊編輯標題">${title}</h4>
+            <span class="ip-planning-item-edit-icon" data-result-id="${escapedResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fas fa-edit"></i></span>
+            <input type="text" class="ip-planning-item-title-input" data-result-id="${escapedResultId}" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; max-width: 300px; box-sizing: border-box;" onblur="saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')">
           </div>
           <div style="display: flex; align-items: center; gap: 12px;">
             <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
-            <button class="action-btn view-btn" onclick="viewIpPlanningDetailForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'" title="查看完整結果">👁️ 查看完整</button>
-            <button class="action-btn pdf-btn" onclick="downloadIpPlanningPDF('${safeResultId.replace(/'/g, "\\'")}')" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'" title="匯出PDF">📄 PDF</button>
-            <button class="action-btn delete-btn" onclick="deleteIpPlanningResultForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'" title="刪除此項目">🗑️ 刪除</button>
           </div>
         </div>
-        <div class="ip-planning-content-item" style="color: #374151; line-height: 1.6; max-height: 300px; overflow-y: auto;">
+        
+        <div class="ip-planning-content-item" style="color: #374151; line-height: 1.6; max-height: 300px; overflow-y: auto; overflow-x: hidden; margin-bottom: 12px; word-wrap: break-word; overflow-wrap: break-word;">
           ${safeContent}
+        </div>
+        
+        <!-- 手機版：按鈕在下方，使用 flex-wrap -->
+        <div class="ip-planning-actions-mobile" style="display: none; flex-wrap: wrap; gap: 8px; width: 100%; box-sizing: border-box;">
+          <button class="action-btn view-btn" onclick="viewIpPlanningDetailForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s; flex: 1; min-width: calc(50% - 4px); display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation;" title="查看完整結果"><i class="fas fa-eye"></i> 查看完整</button>
+          <button class="action-btn pdf-btn" onclick="downloadIpPlanningPDF('${safeResultId.replace(/'/g, "\\'")}')" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s; flex: 1; min-width: calc(50% - 4px); display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation;" title="匯出PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+          <button class="action-btn delete-btn" onclick="deleteIpPlanningResultForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation;" title="刪除此項目"><i class="fas fa-trash-alt"></i> 刪除</button>
+        </div>
+        
+        <!-- 桌面版：按鈕在右側 -->
+        <div class="ip-planning-actions-desktop" style="display: flex; align-items: center; gap: 12px; justify-content: flex-end;">
+          <button class="action-btn view-btn" onclick="viewIpPlanningDetailForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s; display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'" title="查看完整結果"><i class="fas fa-eye"></i> 查看完整</button>
+          <button class="action-btn pdf-btn" onclick="downloadIpPlanningPDF('${safeResultId.replace(/'/g, "\\'")}')" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s; display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'" title="匯出PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+          <button class="action-btn delete-btn" onclick="deleteIpPlanningResultForUserDB('${safeResultId.replace(/'/g, "\\'")}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s; display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'" title="刪除此項目"><i class="fas fa-trash-alt"></i> 刪除</button>
         </div>
       </div>
     `;
@@ -2914,19 +2937,19 @@ window.viewIpPlanningDetailForUserDB = async function(resultId) {
       `;
       
       modalContent.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #e5e7eb;">
-          <h3 style="margin: 0; color: #1f2937; font-size: 20px; font-weight: 600;">${escapeHtml(finalTitle)}</h3>
-          <button class="ip-planning-modal-close-btn" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #6b7280; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">×</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; background: white; z-index: 10; border-radius: 12px 12px 0 0; box-sizing: border-box;">
+          <h3 style="margin: 0; color: #1f2937; font-size: 20px; font-weight: 600; flex: 1; padding-right: 12px; word-break: break-word; overflow-wrap: break-word; box-sizing: border-box;">${escapeHtml(finalTitle)}</h3>
+          <button class="ip-planning-modal-close-btn" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #6b7280; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: background 0.2s; flex-shrink: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">×</button>
         </div>
-        <div style="padding: 24px; overflow-y: auto; flex: 1;">
+        <div style="padding: 24px; overflow-y: auto; overflow-x: hidden; flex: 1; -webkit-overflow-scrolling: touch; box-sizing: border-box;">
           <div style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e5e7eb;">
             <span style="color: #6b7280; font-size: 14px;">建立時間：</span>
             <span style="color: #1f2937; font-size: 14px; margin-left: 8px;">${formatTaiwanTime(result.created_at)}</span>
           </div>
-          <div style="color: #374151; line-height: 1.8; font-size: 15px;">${safeContent}</div>
+          <div style="color: #374151; line-height: 1.8; font-size: 15px; word-break: break-word; overflow-wrap: break-word; box-sizing: border-box;">${safeContent}</div>
         </div>
-        <div style="padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end;">
-          <button class="ip-planning-modal-close-btn" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">關閉</button>
+        <div style="padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; position: sticky; bottom: 0; background: white; z-index: 10; border-radius: 0 0 12px 12px; box-sizing: border-box;">
+          <button class="ip-planning-modal-close-btn" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s; width: 100%; max-width: 200px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">關閉</button>
         </div>
       `;
       

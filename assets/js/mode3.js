@@ -1539,7 +1539,8 @@ async function saveResult(type) {
     
     if (type === 'positioning') {
       try {
-        const response = await fetch(`${API_URL}/api/user/positioning/save`, {
+        // 改為使用 /api/ip-planning/save，儲存到 ip_planning_results 表並標記 source: 'mode3'
+        const response = await fetch(`${API_URL}/api/ip-planning/save`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1547,7 +1548,12 @@ async function saveResult(type) {
           },
           body: JSON.stringify({
             user_id: ipPlanningUser.user_id,
-            content: content
+            result_type: 'profile',  // 帳號定位對應 profile
+            title: '帳號定位',
+            content: content,
+            metadata: {
+              source: 'mode3'  // 標記來源為 mode3，確保與 mode1 分離
+            }
           })
         });
         
@@ -1575,12 +1581,13 @@ async function saveResult(type) {
             }
           };
           if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast(`✅ 帳號定位已儲存（編號：${data.record_number}）`, 3000);
+            window.ReelMindCommon.showToast('✅ 帳號定位已儲存', 3000);
           } else {
-            showToastNotification(`✅ 帳號定位已儲存（編號：${data.record_number}）`, 3000);
+            showToastNotification('✅ 帳號定位已儲存', 3000);
           }
         } else {
-          throw new Error('儲存失敗');
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || '儲存失敗');
         }
       } catch (error) {
         console.error('儲存錯誤:', error);
@@ -1592,9 +1599,9 @@ async function saveResult(type) {
         }
       }
     } else if (type === 'topics') {
-      // 儲存選題到 userDB（使用 /api/generations 端點）
+      // 改為使用 /api/ip-planning/save，儲存到 ip_planning_results 表並標記 source: 'mode3'
       try {
-        const response = await fetch(`${API_URL}/api/generations`, {
+        const response = await fetch(`${API_URL}/api/ip-planning/save`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1602,9 +1609,14 @@ async function saveResult(type) {
           },
           body: JSON.stringify({
             user_id: ipPlanningUser.user_id,
+            result_type: 'plan',  // 選題方向對應 plan
+            title: '選題方向',
             content: content,
-            platform: currentPlatform || '未設定',
-            topic: currentTopic || '選題推薦'
+            metadata: {
+              source: 'mode3',  // 標記來源為 mode3，確保與 mode1 分離
+              platform: currentPlatform || '未設定',
+              topic: currentTopic || '選題推薦'
+            }
           })
         });
         
@@ -1632,12 +1644,13 @@ async function saveResult(type) {
           }
         };
           if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-            window.ReelMindCommon.showToast(`✅ 選題已儲存${data.generation_id ? `（ID：${data.generation_id}）` : ''}`, 3000);
+            window.ReelMindCommon.showToast('✅ 選題方向已儲存', 3000);
           } else {
-            showToastNotification(`✅ 選題已儲存${data.generation_id ? `（ID：${data.generation_id}）` : ''}`, 3000);
+            showToastNotification('✅ 選題方向已儲存', 3000);
       }
     } else {
-          throw new Error('儲存失敗');
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || '儲存失敗');
         }
       } catch (error) {
         console.error('儲存選題錯誤:', error);
@@ -1741,7 +1754,21 @@ async function saveScript() {
     return;
   }
   
-  const content = document.getElementById('scriptContent').textContent;
+  // 使用 innerHTML 或 innerText 獲取完整內容（保留格式）
+  const scriptContentEl = document.getElementById('scriptContent');
+  if (!scriptContentEl) {
+    console.log('找不到腳本內容元素');
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('找不到腳本內容', 3000);
+    }
+    return;
+  }
+  
+  // 優先使用 innerHTML 保留格式，如果為空則使用 innerText
+  let content = scriptContentEl.innerHTML || scriptContentEl.innerText || scriptContentEl.textContent || '';
+  
+  // 清理可能的 HTML 標籤（如果需要純文本）
+  // 但保留換行等基本格式
   if (!content || content.includes('請點選「一鍵生成腳本」按鈕開始') || content.includes('請先完成')) {
     console.log('沒有可儲存的內容');
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1772,7 +1799,14 @@ async function saveScript() {
         content: content,
         platform: currentPlatform || '未設定',
         topic: currentTopic || '未設定',
-        profile: currentProfile || '未設定'
+        profile: currentProfile || '未設定',
+        script_data: {
+          source: 'mode3',  // 標記來源為 mode3，確保與 mode1 分離
+          title: '未命名腳本',
+          platform: currentPlatform || '未設定',
+          topic: currentTopic || '未設定',
+          profile: currentProfile || '未設定'
+        }
       })
     });
     
