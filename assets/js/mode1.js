@@ -303,8 +303,8 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
         <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${result.id}" data-result-type="${result.type}" onclick="openMode1ExpandModal('${result.id}', '${result.type}')">
           <i class="fas fa-expand"></i> <span>展開</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${result.id}" data-result-type="${result.type}" onclick="exportHistoryResult('${result.id}', '${result.type}')">
-          <i class="fas fa-download"></i> <span>匯出</span>
+        <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${result.id}" data-result-type="${result.type}" onclick="saveHistoryResultToUserDB('${result.id}', '${result.type}')">
+          <i class="fas fa-database"></i> <span>儲存到創作者資料庫</span>
         </button>
         <button class="mode1-oneclick-history-item-btn danger" data-action="delete" data-type="${result.type}" data-id="${result.id}" type="button" onclick="deleteMode1HistoryResult('${result.id}', '${result.type}')">
           <i class="fas fa-trash-alt"></i> <span>刪除</span>
@@ -383,6 +383,114 @@ window.exportHistoryResult = async function(resultId, resultType) {
   } catch (error) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('匯出失敗，請稍後再試', 3000);
+    }
+  }
+};
+
+// 儲存生成結果到創作者資料庫（userDB）
+window.saveHistoryResultToUserDB = async function(resultId, resultType) {
+  try {
+    const token = localStorage.getItem('ipPlanningToken');
+    if (!token) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入', 3000);
+      }
+      return;
+    }
+
+    // 從快取或 API 獲取數據
+    const data = await fetchHistoryData();
+    if (!data || !data.success || !data.results) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('找不到要儲存的數據', 3000);
+      }
+      return;
+    }
+
+    // 處理類型轉換：resultId 可能是字串或數字
+    const result = data.results.find(r => {
+      return r.id == resultId || 
+             String(r.id) === String(resultId) || 
+             Number(r.id) === Number(resultId);
+    });
+    
+    if (!result) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('找不到要儲存的記錄', 3000);
+      }
+      return;
+    }
+
+    // 獲取用戶 ID
+    const user = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
+    if (!user || !user.user_id) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('無法獲取用戶資訊', 3000);
+      }
+      return;
+    }
+
+    // 獲取 CSRF Token
+    let csrfToken = '';
+    if (window.Api && window.Api.getCsrfToken) {
+      try {
+        csrfToken = await window.Api.getCsrfToken() || '';
+      } catch (e) {
+        // 靜默失敗
+      }
+    }
+
+    // 映射 resultType 到後端期望的格式
+    let resultTypeForBackend = resultType;
+    if (resultType === 'profile') {
+      resultTypeForBackend = 'profile';
+    } else if (resultType === 'plan') {
+      resultTypeForBackend = 'plan';
+    } else if (resultType === 'scripts') {
+      resultTypeForBackend = 'scripts';
+    }
+
+    // 準備標題
+    const typeNames = {
+      'profile': '帳號定位',
+      'plan': '選題方向',
+      'scripts': '短影音腳本'
+    };
+    const typeName = typeNames[resultType] || resultType;
+    const title = result.title || `未命名${typeName}`;
+
+    // 發送請求儲存到 userDB
+    const response = await fetch(`${API_URL}/api/ip-planning/save`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+      body: JSON.stringify({
+        user_id: user.user_id,
+        result_type: resultTypeForBackend,
+        title: title,
+        content: result.content,
+        metadata: {
+          source: 'mode1'  // 標記來源為 mode1
+        }
+      })
+    });
+
+    if (response.ok) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(`✅ 已儲存到創作者資料庫的「${typeName}」`, 3000);
+      }
+    } else {
+      const errorData = await response.json();
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast(`儲存失敗: ${errorData.error || '未知錯誤'}`, 3000);
+      }
+    }
+  } catch (error) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('儲存失敗，請稍後再試', 3000);
     }
   }
 };
@@ -727,45 +835,7 @@ function cancelMode1HistoryTitleEdit(resultId, originalTitle) {
 window.cancelMode1HistoryTitleEdit = cancelMode1HistoryTitleEdit;
 
 
-// 展開/收起歷史記錄內容
-function toggleHistoryContentExpanded(resultId) {
-  try {
-  const contentWrapper = document.getElementById(`contentWrapper-${resultId}`);
-    if (!contentWrapper) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('找不到內容區域', 3000);
-      }
-      return;
-    }
-    
-  const expandBtn = contentWrapper.querySelector('.mode1-oneclick-expand-btn');
-    if (!expandBtn) {
-      return;
-    }
-    
-  const expandIcon = expandBtn.querySelector('i');
-    if (!expandIcon) {
-      return;
-    }
-
-  if (contentWrapper.classList.contains('expanded')) {
-    contentWrapper.classList.remove('expanded');
-    expandBtn.querySelector('span').textContent = '展開';
-    expandIcon.classList.remove('fa-chevron-up');
-    expandIcon.classList.add('fa-chevron-down');
-  } else {
-    contentWrapper.classList.add('expanded');
-    expandBtn.querySelector('span').textContent = '收起';
-    expandIcon.classList.remove('fa-chevron-down');
-    expandIcon.classList.add('fa-chevron-up');
-    }
-  } catch (error) {
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('操作失敗，請稍後再試', 3000);
-    }
-  }
-}
-window.toggleHistoryContentExpanded = toggleHistoryContentExpanded;
+// toggleHistoryContentExpanded 函數已移除，展開收起按鈕已不再使用
 
 
 // ===== 展開內容 Modal 相關函數 =====
@@ -1115,94 +1185,7 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
           try {
             const json = JSON.parse(data);
             
-            // 處理 save_request 事件（後端發送的儲存請求）
-            if (json.type === 'save_request') {
-              // 後端檢測到儲存指令，觸發儲存流程
-              // 需要根據 AI 回應內容判斷實際類型，而不是直接使用 conversation_type
-              // 使用延遲執行，確保 AI 回應內容已經完整顯示在 DOM 中
-              setTimeout(async () => {
-                // 從 DOM 中獲取最新的 AI 回應內容
-                const chatMessages = document.getElementById('mode1-chatMessages');
-                const aiMessages = chatMessages.querySelectorAll('.message.assistant .message-content');
-                let currentContent = '';
-                
-                if (aiMessages.length > 0) {
-                  currentContent = aiMessages[aiMessages.length - 1].innerHTML || '';
-                } else {
-                  // 如果 DOM 中還沒有，使用累積的內容
-                  currentContent = aiResponseContent || '';
-                }
-                
-                // 提取純文本用於判斷
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = currentContent;
-                const plainText = (tempDiv.textContent || tempDiv.innerText || '').toLowerCase();
-                
-                // 根據內容判斷類型（優先順序：腳本 > 選題方向 > 帳號定位）
-                let saveResultType = 'ip_planning'; // 預設為帳號定位
-                
-                // 腳本關鍵字
-                const scriptKeywords = ['今日腳本', '短影音腳本', '影片腳本', '腳本內容', '開場', '中場', '結尾', '腳本', '開頭', '結尾', '行動呼籲', '畫面描述', '發佈文案', '主題:', '腳本結構', '時長:', '目標觀眾'];
-                const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
-                
-                // 選題方向關鍵字
-                const planKeywords = ['選題方向', '影片類型', '內容類型', '主題配比', '內容配比', '影片配比', '主題規劃', '內容規劃', '影片類型配比', '內容策略矩陣', '策略矩陣', '配比', '對應目標', '心理階段', '建議比例'];
-                const hasPlanContent = planKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) || 
-                                       /影片類型.*配比|內容.*配比|策略矩陣/i.test(plainText) ||
-                                       (plainText.includes('表格') && plainText.includes('比例'));
-                
-                if (hasScriptContent) {
-                  saveResultType = 'scripts';
-                } else if (hasPlanContent) {
-                  saveResultType = 'plan';
-                } else {
-                  saveResultType = 'ip_planning';
-                }
-                
-                // 先儲存到生成結果（流程：儲存 → 先到生成結果 → 再存到創作者資料庫 → LLM 回覆）
-                try {
-                  await saveMode1Result(saveResultType);
-                // 儲存成功後，打開生成結果彈跳視窗並切換到對應標籤頁
-                if (window.openMode1OneClickModal) {
-                  window.openMode1OneClickModal();
-                  setTimeout(() => {
-                    // 根據 resultType 切換到對應標籤頁
-                    const typeMap = {
-                      'ip_planning': 'profile',
-                      'plan': 'plan',
-                      'scripts': 'scripts'
-                    };
-                    const targetType = typeMap[saveResultType] || 'profile';
-                    if (window.switchMode1HistoryType) {
-                      window.switchMode1HistoryType(targetType);
-                    }
-                    
-                    // 強制重新載入歷史記錄，確保新儲存的內容顯示出來
-                    setTimeout(() => {
-                      if (window.loadMode1OneClickHistory) {
-                        window.loadMode1OneClickHistory(targetType, true);
-                      }
-                    }, 200);
-                  }, 100);
-                }
-                
-                // 顯示 AI 確認訊息（不消耗 token，直接在前端顯示）
-                const aiConfirmMessage = createMode1Message('assistant', '✅ 好的，我已將最新的生成內容保存到您的創作者資料庫。');
-                chatMessages.appendChild(aiConfirmMessage);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                
-                  // 顯示成功提示
-                  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-                    window.ReelMindCommon.showToast('✅ 內容已儲存並顯示在生成結果中', 3000);
-                  }
-                } catch (error) {
-                  // 靜默失敗
-                }
-              }, 500); // 延遲 500ms 確保內容已渲染到 DOM
-              
-              // 跳過後續的 AI 回應（因為已經處理了儲存）
-              continue;
-            }
+            // save_request 事件已移除，不再自動儲存到 userDB
             
             // 忽略非內容事件（如 start, end）
             if (json.type === 'start' || json.type === 'end') {
@@ -1300,100 +1283,78 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
     } catch (error) {
       // 靜默失敗
     }
-
-    // 自動儲存邏輯：根據內容判斷類型並自動儲存
-    if (conversationType === 'ip_planning' && aiResponseContent && aiResponseContent.trim().length > 50) {
-      // 先提取純文本用於比較（移除 HTML 標籤）
+    
+    // 在流結束後，判斷內容類型並添加按鈕（僅在檢測到結果類型時顯示）
+    if (aiMessageEl && aiResponseContent && aiResponseContent.trim().length > 50) {
+      // 提取純文本用於判斷
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = aiResponseContent;
-      const plainText = tempDiv.textContent || tempDiv.innerText || '';
+      const plainText = (tempDiv.textContent || tempDiv.innerText || '').toLowerCase();
+      
+      // 判斷內容類型
+      let detectedType = null;
+      let typeName = '';
       
       // 腳本關鍵字（優先級最高）
-      const scriptKeywords = ['今日腳本', '短影音腳本', '影片腳本', '腳本內容', '開場', '中場', '結尾', '腳本', '開頭', '結尾', '行動呼籲', '畫面描述', '發佈文案'];
-      const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword));
+      const scriptKeywords = ['今日腳本', '短影音腳本', '影片腳本', '腳本內容', '開場', '中場', '結尾', '腳本', '開頭', '結尾', '行動呼籲', '畫面描述', '發佈文案', '主題:', '腳本結構', '時長:', '目標觀眾', '資訊融入總覽'];
+      const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
       
-      // 選題方向關鍵字（優先級第二，擴展關鍵字列表）
+      // 選題方向關鍵字（優先級第二）
       const planKeywords = ['選題方向', '影片類型', '內容類型', '主題配比', '內容配比', '影片配比', '主題規劃', '內容規劃', '影片類型配比', '內容策略矩陣', '策略矩陣', '配比', '對應目標', '心理階段', '建議比例'];
-      const hasPlanContent = planKeywords.some(keyword => plainText.includes(keyword)) || 
+      const hasPlanContent = planKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) || 
                              /影片類型.*配比|內容.*配比|策略矩陣/i.test(plainText) ||
-                             (plainText.includes('表格') && plainText.includes('比例'));
+                             (plainText.includes('表格') && (plainText.includes('比例') || plainText.includes('配比')));
       
       // 帳號定位關鍵字（優先級最低）
       const positioningKeywords = ['目標受眾', '內容定位', '風格調性', '競爭優勢', '執行建議', '帳號定位', '品牌定位', '差異化優勢', '傳達目標'];
-      const hasPositioningContent = positioningKeywords.some(keyword => plainText.includes(keyword));
+      const hasPositioningContent = positioningKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
       
-      let detectedType = null;
-      let targetTab = null;
-      
-      // 根據關鍵字判斷類型（優先順序：腳本 > 選題方向 > 帳號定位）
       if (hasScriptContent) {
         detectedType = 'scripts';
-        targetTab = 'scripts';
+        typeName = '短影音腳本';
       } else if (hasPlanContent) {
         detectedType = 'plan';
-        targetTab = 'plan';
+        typeName = '選題方向';
       } else if (hasPositioningContent) {
         detectedType = 'ip_planning';
-        targetTab = 'profile';
+        typeName = '帳號定位';
       }
       
-      if (detectedType) {
-        setTimeout(async () => {
-          try {
-            // 檢查是否有重複內容
-            const historyData = await fetchHistoryData(true); // 強制刷新獲取最新數據
-            if (historyData && historyData.success && historyData.results) {
-              const sameTypeResults = historyData.results.filter(r => {
-                const rType = r.result_type || r.type;
-                return rType === (detectedType === 'ip_planning' ? 'profile' : detectedType);
-              });
-              
-              // 檢查是否有相同或高度相似的內容
-              let isDuplicate = false;
-              for (const existingResult of sameTypeResults) {
-                const existingContent = existingResult.content || '';
-                // 提取現有內容的純文本
-                const existingTempDiv = document.createElement('div');
-                existingTempDiv.innerHTML = existingContent;
-                const existingPlainText = (existingTempDiv.textContent || existingTempDiv.innerText || '').trim();
-                
-                // 計算相似度（簡單的文本相似度比較）
-                const similarity = calculateTextSimilarity(plainText.trim(), existingPlainText);
-                
-                // 如果相似度超過 85%，視為重複內容
-                if (similarity > 0.85) {
-                  isDuplicate = true;
-                  break;
-                }
-              }
-              
-              if (isDuplicate) {
-                // 內容重複，不自動儲存
-                return;
-              }
-            }
-            
-            // 內容不重複，執行儲存
-            await saveMode1Result(detectedType);
-            if (window.openMode1OneClickModal) {
-              window.openMode1OneClickModal();
-              setTimeout(() => {
-                if (window.switchMode1HistoryType) {
-                  window.switchMode1HistoryType(targetTab);
-                }
-                setTimeout(() => {
-                  if (window.loadMode1OneClickHistory) {
-                    window.loadMode1OneClickHistory(targetTab, true);
-                  }
-                }, 200);
-              }, 100);
-            }
-          } catch (error) {
-            // 靜默失敗
-          }
-        }, 1000);
+      // 如果檢測到結果類型，添加按鈕
+      if (detectedType && aiMessageEl) {
+        // 檢查是否已經有按鈕區域
+        let actionsEl = aiMessageEl.querySelector('.message-actions');
+        if (!actionsEl) {
+          actionsEl = document.createElement('div');
+          actionsEl.className = 'message-actions';
+          actionsEl.style.cssText = 'display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;';
+          
+          const saveBtn = document.createElement('button');
+          saveBtn.className = 'mode1-message-save-btn';
+          saveBtn.style.cssText = 'padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; -webkit-tap-highlight-color: transparent; touch-action: manipulation;';
+          saveBtn.innerHTML = '<i class="fas fa-save"></i> 儲存';
+          saveBtn.onclick = () => handleMode1MessageSave(detectedType, typeName, aiMessageEl);
+          
+          const regenerateBtn = document.createElement('button');
+          regenerateBtn.className = 'mode1-message-regenerate-btn';
+          regenerateBtn.style.cssText = 'padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; -webkit-tap-highlight-color: transparent; touch-action: manipulation;';
+          regenerateBtn.innerHTML = '<i class="fas fa-redo"></i> 換一個';
+          regenerateBtn.onclick = () => handleMode1MessageRegenerate(detectedType, typeName);
+          
+          actionsEl.appendChild(saveBtn);
+          actionsEl.appendChild(regenerateBtn);
+          aiMessageEl.appendChild(actionsEl);
+          
+          // 儲存類型信息
+          aiMessageEl.dataset.resultType = detectedType;
+          aiMessageEl.dataset.typeName = typeName;
+          
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
       }
     }
+
+    // 自動儲存邏輯已移除，不再自動儲存到 userDB
 
   } catch (error) {
     isMode1Sending = false;
@@ -1720,7 +1681,7 @@ function updateUserInfo() {
 }
 
 // 保存 Mode1 生成結果
-async function saveMode1Result(resultType) {
+async function saveMode1Result(resultType, messageEl = null) {
   const token = localStorage.getItem('ipPlanningToken');
   if (!token) {
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1729,17 +1690,27 @@ async function saveMode1Result(resultType) {
     return;
   }
   
-  // 找到最新的 AI 回應
-  const chatMessages = document.getElementById('mode1-chatMessages');
-  const aiMessages = chatMessages.querySelectorAll('.message.assistant .message-content');
-  if (aiMessages.length === 0) {
+  // 如果指定了訊息元素，使用該元素的內容；否則使用最新的 AI 回應
+  let latestAiMessageContent = '';
+  if (messageEl) {
+    const contentDiv = messageEl.querySelector('.message-content');
+    if (contentDiv) {
+      latestAiMessageContent = contentDiv.innerHTML;
+    }
+  }
+  
+  // 如果沒有從指定元素獲取到內容，則使用最新的 AI 回應
+  if (!latestAiMessageContent) {
+    const chatMessages = document.getElementById('mode1-chatMessages');
+    const aiMessages = chatMessages.querySelectorAll('.message.assistant .message-content');
+    if (aiMessages.length === 0) {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      window.ReelMindCommon.showToast('沒有可儲存的 AI 回應內容。', 3000);
+        window.ReelMindCommon.showToast('沒有可儲存的 AI 回應內容。', 3000);
       }
       return;
     }
-    
-  const latestAiMessageContent = aiMessages[aiMessages.length - 1].innerHTML;
+    latestAiMessageContent = aiMessages[aiMessages.length - 1].innerHTML;
+  }
 
   if (!latestAiMessageContent || latestAiMessageContent.includes('AI 正在生成')) {
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1850,6 +1821,92 @@ async function saveMode1Result(resultType) {
 }
 window.saveMode1Result = saveMode1Result; // 導出到全局作用域
 
+// 處理訊息中的儲存按鈕點擊
+async function handleMode1MessageSave(detectedType, typeName, messageEl) {
+  try {
+    // 禁用按鈕，防止重複點擊
+    const saveBtn = messageEl.querySelector('.mode1-message-save-btn');
+    const regenerateBtn = messageEl.querySelector('.mode1-message-regenerate-btn');
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.style.opacity = '0.6';
+      saveBtn.style.cursor = 'not-allowed';
+    }
+    if (regenerateBtn) {
+      regenerateBtn.disabled = true;
+      regenerateBtn.style.opacity = '0.6';
+    }
+    
+    // 執行儲存
+    await saveMode1Result(detectedType, messageEl);
+    
+    // 生成回覆訊息
+    const replyMessage = `✅ 已儲存在生成結果的「${typeName}」和創作者資料庫的「${typeName}」。`;
+    const aiReplyEl = createMode1Message('assistant', replyMessage);
+    
+    const chatMessages = document.getElementById('mode1-chatMessages');
+    chatMessages.appendChild(aiReplyEl);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // 顯示成功提示
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast(`✅ 已儲存到「${typeName}」`, 3000);
+    }
+    
+    // 打開生成結果彈跳視窗並切換到對應標籤頁
+    if (window.openMode1OneClickModal) {
+      window.openMode1OneClickModal();
+      setTimeout(() => {
+        const typeMap = {
+          'ip_planning': 'profile',
+          'plan': 'plan',
+          'scripts': 'scripts'
+        };
+        const targetType = typeMap[detectedType] || 'profile';
+        if (window.switchMode1HistoryType) {
+          window.switchMode1HistoryType(targetType);
+        }
+        setTimeout(() => {
+          if (window.loadMode1OneClickHistory) {
+            window.loadMode1OneClickHistory(targetType, true);
+          }
+        }, 200);
+      }, 100);
+    }
+  } catch (error) {
+    // 恢復按鈕狀態
+    const saveBtn = messageEl.querySelector('.mode1-message-save-btn');
+    const regenerateBtn = messageEl.querySelector('.mode1-message-regenerate-btn');
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.style.opacity = '1';
+      saveBtn.style.cursor = 'pointer';
+    }
+    if (regenerateBtn) {
+      regenerateBtn.disabled = false;
+      regenerateBtn.style.opacity = '1';
+    }
+    
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('儲存失敗，請稍後再試', 3000);
+    }
+  }
+}
+window.handleMode1MessageSave = handleMode1MessageSave;
+
+// 處理訊息中的重新生成按鈕點擊
+async function handleMode1MessageRegenerate(detectedType, typeName) {
+  const messages = {
+    'scripts': '請幫我重新生成今日的短影音腳本。',
+    'plan': '請幫我重新規劃 14 天的短影音內容計劃（選題方向）。',
+    'ip_planning': '請幫我重新建立 IP Profile（個人品牌定位）。'
+  };
+  
+  const message = messages[detectedType] || '請幫我重新生成。';
+  await sendMode1Message(message, 'ip_planning');
+}
+window.handleMode1MessageRegenerate = handleMode1MessageRegenerate;
+
 // ===== 全局函數導出（確保在 DOMContentLoaded 之前可用，所有函數已定義） =====
 if (typeof window !== 'undefined') {
   // 使用說明抽屜相關函數
@@ -1902,9 +1959,7 @@ if (typeof window !== 'undefined') {
   if (typeof closeMode1ExpandModal === 'function') {
     window.closeMode1ExpandModal = closeMode1ExpandModal;
   }
-  if (typeof toggleHistoryContentExpanded === 'function') {
-    window.toggleHistoryContentExpanded = toggleHistoryContentExpanded;
-  }
+  // toggleHistoryContentExpanded 函數已移除
 
   // 其他可能被 HTML onclick 直接調用的函數（從 common.js 來的，但防止其他頁面沒有引入 common.js 時出錯）
   if (typeof handleModeNavigation === 'function') {

@@ -2835,6 +2835,74 @@
         }
       }
       
+      /* Mode1 訊息操作按鈕樣式 */
+      .message-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #e5e7eb;
+      }
+      
+      .mode1-message-save-btn {
+        padding: 8px 16px;
+        background: #10b981;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        min-height: 36px;
+      }
+      
+      .mode1-message-save-btn:hover:not(:disabled) {
+        background: #059669;
+      }
+      
+      .mode1-message-save-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      .mode1-message-regenerate-btn {
+        padding: 8px 16px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        min-height: 36px;
+      }
+      
+      .mode1-message-regenerate-btn:hover:not(:disabled) {
+        background: #2563eb;
+      }
+      
+      .mode1-message-regenerate-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      .mode1-message-save-btn:active:not(:disabled),
+      .mode1-message-regenerate-btn:active:not(:disabled) {
+        transform: scale(0.98);
+      }
+      
       /* 手機版聊天訊息樣式 */
       @media (max-width: 768px) {
         #mode1-chatMessages {
@@ -2844,6 +2912,17 @@
           padding-left: calc(12px + env(safe-area-inset-left, 0px)); /* iOS 安全區域 */
           padding-right: calc(12px + env(safe-area-inset-right, 0px)); /* iOS 安全區域 */
           padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); /* iOS 安全區域 */
+        }
+        
+        .message-actions {
+          flex-direction: column;
+        }
+        
+        .mode1-message-save-btn,
+        .mode1-message-regenerate-btn {
+          width: 100%;
+          justify-content: center;
+          min-height: 44px; /* iOS 最小觸控目標 */
         }
         
         #mode1-chatMessages .message.user .message-content {
