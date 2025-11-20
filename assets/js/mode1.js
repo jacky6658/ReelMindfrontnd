@@ -957,18 +957,28 @@ async function handleQuickButton(type) {
   
   switch(type) {
     case 'ip-profile':
+      // 明確設置請求類型為帳號定位
+      currentRequestType = 'ip_planning';
       sendMode1Message('請幫我建立 IP Profile（個人品牌定位）。', 'ip_planning');
       break;
     case '14day-plan':
+      // 明確設置請求類型為選題方向
+      currentRequestType = 'plan';
       sendMode1Message('請幫我規劃 14 天的短影音內容計劃。', 'ip_planning');
       break;
     case 'today-script':
+      // 明確設置請求類型為腳本
+      currentRequestType = 'scripts';
       sendMode1Message('請幫我生成今日的短影音腳本。', 'ip_planning');
       break;
     case 'change-script-structure':
+      // 明確設置請求類型為腳本
+      currentRequestType = 'scripts';
       sendMode1Message('請幫我調整短影音腳本的結構。', 'ip_planning');
       break;
     case 'reposition':
+      // 明確設置請求類型為帳號定位
+      currentRequestType = 'ip_planning';
       sendMode1Message('【重要：完全重新開始】請完全忽略之前所有的對話內容、帳號定位結果和長期記憶。這是一個全新的帳號定位需求，請從頭開始。請先詢問我以下問題：1. 我的目標受眾是誰？2. 我想要達成的目標是什麼？3. 我主要使用的平台是什麼？4. 我偏好的內容風格是什麼？請根據我的新回答，生成一個全新的、獨立的帳號定位，不要參考任何之前的內容。', 'ip_planning');
       break;
     default:
@@ -1003,6 +1013,9 @@ async function checkUserLlmKey() {
   }
 }
 
+// 記錄當前請求的類型（用於正確分類儲存）
+let currentRequestType = null; // 'ip_planning', 'plan', 'scripts', null
+
 // 發送 Mode1 訊息
 async function sendMode1Message(message, conversationType = 'ip_planning') {
   if (!message || !message.trim()) {
@@ -1014,6 +1027,19 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
   }
   
   isMode1Sending = true;
+  
+  // 根據用戶訊息判斷請求類型（優先於關鍵字檢測）
+  const messageLower = message.toLowerCase();
+  if (messageLower.includes('ip profile') || messageLower.includes('個人品牌定位') || messageLower.includes('帳號定位') || messageLower.includes('重新定位')) {
+    currentRequestType = 'ip_planning';
+  } else if (messageLower.includes('14天') || messageLower.includes('14 天') || messageLower.includes('選題方向') || messageLower.includes('內容計劃') || messageLower.includes('內容計劃')) {
+    currentRequestType = 'plan';
+  } else if (messageLower.includes('腳本') || messageLower.includes('script') || messageLower.includes('今日腳本')) {
+    currentRequestType = 'scripts';
+  } else {
+    // 如果無法從訊息判斷，設為 null，後續使用關鍵字檢測
+    currentRequestType = null;
+  }
   
   const hasLlmKey = await checkUserLlmKey();
   if (!hasLlmKey) {
@@ -1056,7 +1082,7 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
 
   // 檢測用戶是否說"儲存"或"保存"
   const saveKeywords = ['儲存', '保存', 'save', '儲存腳本', '保存腳本', '儲存結果', '保存結果', '幫我儲存', '幫我保存'];
-  const messageLower = message.toLowerCase().trim();
+  // messageLower 已在上面聲明，這裡直接使用
   const shouldSave = saveKeywords.some(keyword => 
     messageLower.includes(keyword.toLowerCase()) || 
     message === keyword || 
@@ -1187,8 +1213,24 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
             
             // save_request 事件已移除，不再自動儲存到 userDB
             
-            // 忽略非內容事件（如 start, end）
-            if (json.type === 'start' || json.type === 'end') {
+            // 處理 end 事件：標記流結束，確保內容已顯示
+            if (json.type === 'end') {
+              // 如果已經收到內容但 aiMessageEl 為 null，創建並顯示
+              if (hasReceivedContent && !aiMessageEl && aiResponseContent && aiResponseContent.trim().length > 0) {
+                aiMessageEl = createMode1Message('assistant', '');
+                chatMessages.appendChild(aiMessageEl);
+                contentDiv = aiMessageEl.querySelector('.message-content');
+                if (contentDiv) {
+                  const renderedHtml = renderMode1Markdown(aiResponseContent);
+                  contentDiv.innerHTML = renderedHtml;
+                  chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+              }
+              continue;
+            }
+            
+            // 忽略 start 事件
+            if (json.type === 'start') {
               continue;
             }
             
@@ -1239,11 +1281,11 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
                           return `<pre><code class="language-javascript">${DOMPurify.sanitize(part, { USE_PROFILES: { html: false } })}</code></pre>`;
                       } else { // 這是普通文本
                           isCodeBlock = false;
-                          return safeRenderMarkdown(part);
+                          return window.safeRenderMarkdown ? window.safeRenderMarkdown(part) : renderMode1Markdown(part);
                       }
                   }).join('');
               } else {
-                  renderedHtml = safeRenderMarkdown(tempContent);
+                  renderedHtml = window.safeRenderMarkdown ? window.safeRenderMarkdown(tempContent) : renderMode1Markdown(tempContent);
               }
               
               if (contentDiv) {
@@ -1267,13 +1309,26 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
     }
 
     // 確保在流結束時，如果還沒有收到任何內容，也要移除 typing indicator
-    if (!hasReceivedContent && typingIndicatorEl.parentNode) {
+    if (!hasReceivedContent && typingIndicatorEl && typingIndicatorEl.parentNode) {
       typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
       
       // 如果完全沒有收到內容，顯示錯誤訊息
       const aiErrorMessage = createMode1Message('assistant', '<span style="color: #ef4444;">❌ AI 沒有返回任何內容，請稍後再試。</span>');
       chatMessages.appendChild(aiErrorMessage);
       chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // 如果收到了內容但 aiMessageEl 為 null（不應該發生，但作為安全措施）
+    if (hasReceivedContent && !aiMessageEl && aiResponseContent && aiResponseContent.trim().length > 0) {
+      // 創建 AI 訊息元素並顯示內容
+      aiMessageEl = createMode1Message('assistant', '');
+      chatMessages.appendChild(aiMessageEl);
+      contentDiv = aiMessageEl.querySelector('.message-content');
+      if (contentDiv) {
+        const renderedHtml = renderMode1Markdown(aiResponseContent);
+        contentDiv.innerHTML = renderedHtml;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
     }
 
     // 將完整的 AI 回應內容記錄到長期記憶
@@ -1286,39 +1341,54 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
     
     // 在流結束後，判斷內容類型並添加按鈕（僅在檢測到結果類型時顯示）
     if (aiMessageEl && aiResponseContent && aiResponseContent.trim().length > 50) {
-      // 提取純文本用於判斷
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = aiResponseContent;
-      const plainText = (tempDiv.textContent || tempDiv.innerText || '').toLowerCase();
-      
-      // 判斷內容類型
+      // 優先使用記錄的請求類型，如果沒有則使用關鍵字檢測
       let detectedType = null;
       let typeName = '';
       
-      // 腳本關鍵字（優先級最高）
-      const scriptKeywords = ['今日腳本', '短影音腳本', '影片腳本', '腳本內容', '開場', '中場', '結尾', '腳本', '開頭', '結尾', '行動呼籲', '畫面描述', '發佈文案', '主題:', '腳本結構', '時長:', '目標觀眾', '資訊融入總覽'];
-      const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
-      
-      // 選題方向關鍵字（優先級第二）
-      const planKeywords = ['選題方向', '影片類型', '內容類型', '主題配比', '內容配比', '影片配比', '主題規劃', '內容規劃', '影片類型配比', '內容策略矩陣', '策略矩陣', '配比', '對應目標', '心理階段', '建議比例'];
-      const hasPlanContent = planKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) || 
-                             /影片類型.*配比|內容.*配比|策略矩陣/i.test(plainText) ||
-                             (plainText.includes('表格') && (plainText.includes('比例') || plainText.includes('配比')));
-      
-      // 帳號定位關鍵字（優先級最低）
-      const positioningKeywords = ['目標受眾', '內容定位', '風格調性', '競爭優勢', '執行建議', '帳號定位', '品牌定位', '差異化優勢', '傳達目標'];
-      const hasPositioningContent = positioningKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
-      
-      if (hasScriptContent) {
-        detectedType = 'scripts';
-        typeName = '短影音腳本';
-      } else if (hasPlanContent) {
-        detectedType = 'plan';
-        typeName = '選題方向';
-      } else if (hasPositioningContent) {
-        detectedType = 'ip_planning';
-        typeName = '帳號定位';
+      // 優先使用記錄的請求類型
+      if (currentRequestType) {
+        detectedType = currentRequestType;
+        if (currentRequestType === 'ip_planning') {
+          typeName = '帳號定位';
+        } else if (currentRequestType === 'plan') {
+          typeName = '選題方向';
+        } else if (currentRequestType === 'scripts') {
+          typeName = '短影音腳本';
+        }
+      } else {
+        // 如果沒有記錄的類型，使用關鍵字檢測作為備用
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = aiResponseContent;
+        const plainText = (tempDiv.textContent || tempDiv.innerText || '').toLowerCase();
+        
+        // 腳本關鍵字（優先級最高）
+        const scriptKeywords = ['今日腳本', '短影音腳本', '影片腳本', '腳本內容', '開場', '中場', '結尾', '腳本', '開頭', '結尾', '行動呼籲', '畫面描述', '發佈文案', '主題:', '腳本結構', '時長:', '目標觀眾', '資訊融入總覽'];
+        const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
+        
+        // 選題方向關鍵字（優先級第二）- 更精確的關鍵字，避免誤判
+        const planKeywords = ['選題方向', '影片類型配比', '內容策略矩陣', '策略矩陣', '影片類型', '主題配比', '內容配比', '影片配比', '對應目標', '心理階段', '建議比例', '14天', '14 天'];
+        const hasPlanContent = planKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) || 
+                               /影片類型.*配比|內容.*配比|策略矩陣/i.test(plainText) ||
+                               (plainText.includes('表格') && (plainText.includes('比例') || plainText.includes('配比')));
+        
+        // 帳號定位關鍵字（優先級最低）- 更精確的關鍵字，避免誤判
+        const positioningKeywords = ['目標受眾', '風格調性', '競爭優勢', '執行建議', '帳號定位', '品牌定位', '差異化優勢', '傳達目標', 'ip profile', '個人品牌'];
+        const hasPositioningContent = positioningKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
+        
+        if (hasScriptContent) {
+          detectedType = 'scripts';
+          typeName = '短影音腳本';
+        } else if (hasPlanContent) {
+          detectedType = 'plan';
+          typeName = '選題方向';
+        } else if (hasPositioningContent) {
+          detectedType = 'ip_planning';
+          typeName = '帳號定位';
+        }
       }
+      
+      // 清除記錄的類型，為下次請求做準備
+      currentRequestType = null;
       
       // 如果檢測到結果類型，添加按鈕
       if (detectedType && aiMessageEl) {
@@ -1841,7 +1911,7 @@ async function handleMode1MessageSave(detectedType, typeName, messageEl) {
     await saveMode1Result(detectedType, messageEl);
     
     // 生成回覆訊息
-    const replyMessage = `✅ 已儲存在生成結果的「${typeName}」和創作者資料庫的「${typeName}」。`;
+    const replyMessage = `✅ 已儲存在生成結果的「${typeName}」請在上方生成結果查看`;
     const aiReplyEl = createMode1Message('assistant', replyMessage);
     
     const chatMessages = document.getElementById('mode1-chatMessages');
