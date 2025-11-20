@@ -3184,16 +3184,16 @@ function displayOneClickGenerationResults(mode3Results, scripts) {
   
   if (!content) return;
   
-  // 使用保存的類型，如果沒有則從 active tab 獲取
-  let currentType = window.currentOneClickType || 'scripts';
+  // 使用保存的類型，如果沒有則從 active tab 獲取（預設為帳號定位）
+  let currentType = window.currentOneClickType || 'profile';
   const activeTab = document.querySelector('.one-click-tab.active');
   if (activeTab && !window.currentOneClickType) {
-    if (activeTab.textContent.includes('腳本')) {
-      currentType = 'scripts';
-    } else if (activeTab.textContent.includes('帳號定位')) {
+    if (activeTab.textContent.includes('帳號定位')) {
       currentType = 'profile';
     } else if (activeTab.textContent.includes('選題方向')) {
       currentType = 'plan';
+    } else if (activeTab.textContent.includes('腳本')) {
+      currentType = 'scripts';
     }
   }
   
@@ -3263,64 +3263,84 @@ function displayOneClickGenerationResults(mode3Results, scripts) {
       if (result.content) {
         const contentStr = String(result.content);
         
-        // 先清理可能的 HTML 實體編碼
-        let cleanedText = contentStr
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&amp;/g, '&')
-          .replace(/&quot;/g, '"')
-          .replace(/&#039;/g, "'")
-          .replace(/&nbsp;/g, ' ');
-        
-        // 檢查是否包含 HTML 標籤
-        const hasHtmlTags = /<[a-z][\s\S]*>/i.test(cleanedText);
-        
-        if (hasHtmlTags) {
-          // 如果包含 HTML，使用 DOMPurify 清理
-          if (typeof DOMPurify !== 'undefined') {
-            safeContent = DOMPurify.sanitize(cleanedText, {
-              ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'strong', 'em', 'b', 'i', 'u', 'p', 'br', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code'],
-              ADD_ATTR: ['colspan', 'rowspan', 'class', 'style']
-            });
-          } else {
-            safeContent = escapeHtml(cleanedText);
-          }
+        // ✅ 使用與 mode1.js 相同的 renderMode1Markdown 邏輯
+        if (window.renderMode1Markdown) {
+          // 如果有統一的渲染函數，直接使用
+          safeContent = window.renderMode1Markdown(contentStr);
         } else {
-          // 純文本，使用 Markdown 轉譯
-          if (window.safeRenderMarkdown) {
-            safeContent = window.safeRenderMarkdown(cleanedText);
-          } else if (typeof marked !== 'undefined') {
-            // 確保 marked 配置正確
-            if (!marked.getDefaults || !marked.getDefaults().gfm) {
-              marked.setOptions({ 
-                gfm: true,  // GitHub Flavored Markdown（支援表格）
-                breaks: true,  // 支援換行
-                tables: true,  // 明確啟用表格支援
-                headerIds: false,  // 不生成 header ID
-                mangle: false  // 不混淆 email
-              });
-            }
-            const html = marked.parse(cleanedText);
-            if (typeof DOMPurify !== 'undefined') {
-              safeContent = DOMPurify.sanitize(html, {
-                ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'strong', 'em', 'b', 'i', 'u', 'p', 'br', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code'],
-                ADD_ATTR: ['colspan', 'rowspan', 'class', 'style']
+          // 先清理可能的編碼問題（HTML 實體解碼）
+          let cleanedText = contentStr
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#039;/g, "'")
+            .replace(/&nbsp;/g, ' ');
+          
+          // 檢查是否包含 HTML 標籤
+          const hasHtmlTags = /<[a-z][\s\S]*>/i.test(cleanedText);
+          
+          if (hasHtmlTags) {
+            // 如果包含 HTML，使用 DOMPurify 清理（與 mode1.js 保持一致）
+            if (window.DOMPurify) {
+              safeContent = window.DOMPurify.sanitize(cleanedText, {
+                USE_PROFILES: { html: true },
+                FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed'],
+                ADD_TAGS: [
+                  'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col',
+                  'strong', 'em', 'b', 'i', 'u', 's', 'strike', 'del', 'ins', 'mark', 'small', 'sub', 'sup',
+                  'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+                  'p', 'br', 'div', 'span', 'hr',
+                  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                  'blockquote', 'pre', 'code', 'kbd', 'samp',
+                  'a', 'img',
+                  'abbr', 'address', 'cite', 'q', 'time'
+                ],
+                ADD_ATTR: ['target', 'colspan', 'rowspan', 'class', 'style', 'href', 'src', 'alt', 'title', 'width', 'height'],
+                KEEP_CONTENT: true,
+                ALLOW_DATA_ATTR: false
               });
             } else {
-              safeContent = html;
+              safeContent = escapeHtml(cleanedText);
             }
           } else {
-            // 如果沒有 marked，手動處理基本 Markdown 格式
-            let processed = cleanedText;
-            // 處理粗體 **text** 或 __text__
-            processed = processed.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-            processed = processed.replace(/__([^_]+)__/g, '<strong>$1</strong>');
-            // 處理斜體 *text* 或 _text_（但要避免與粗體衝突）
-            processed = processed.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
-            processed = processed.replace(/(?<!_)_([^_]+)_(?!_)/g, '<em>$1</em>');
-            // 處理換行
-            processed = escapeHtml(processed).replace(/\n/g, '<br>');
-            safeContent = processed;
+            // 純文本，使用 Markdown 解析（與 mode1.js 保持一致）
+            if (window.marked && window.DOMPurify) {
+              try {
+                // 確保 marked 支援所有需要的功能
+                const rawHtml = marked.parse(cleanedText, {
+                  breaks: true,  // 單個換行符轉換為 <br>
+                  gfm: true,     // GitHub Flavored Markdown
+                  tables: true,  // 表格支援
+                  headerIds: false, // 不生成標題 ID
+                  mangle: false  // 不混淆 email
+                });
+                
+                // 使用 DOMPurify 清理 Markdown 轉換後的 HTML
+                safeContent = window.DOMPurify.sanitize(rawHtml, {
+                  USE_PROFILES: { html: true },
+                  FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed'],
+                  ADD_TAGS: [
+                    'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption',
+                    'strong', 'em', 'b', 'i', 'u', 'ul', 'ol', 'li',
+                    'p', 'br', 'div', 'span', 'hr',
+                    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                    'blockquote', 'pre', 'code', 'a', 'img'
+                  ],
+                  ADD_ATTR: ['target', 'colspan', 'rowspan', 'class', 'href', 'src', 'alt', 'title'],
+                  KEEP_CONTENT: true
+                });
+              } catch (e) {
+                console.error('Markdown 渲染錯誤:', e);
+                // 降級處理：如果渲染失敗，轉義並保留換行
+                safeContent = escapeHtml(cleanedText).replace(/\n/g, '<br>');
+              }
+            } else if (window.safeRenderMarkdown) {
+              safeContent = window.safeRenderMarkdown(cleanedText);
+            } else {
+              // 最終降級處理：轉義 HTML 並保留換行
+              safeContent = escapeHtml(cleanedText).replace(/\n/g, '<br>');
+            }
           }
         }
       }

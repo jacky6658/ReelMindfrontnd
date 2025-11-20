@@ -1123,18 +1123,14 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let aiResponseContent = '';
-    const aiMessageEl = createMode1Message('assistant', '');
-    chatMessages.appendChild(aiMessageEl);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    const contentDiv = aiMessageEl.querySelector('.message-content');
+    
+    // 延遲創建 AI 訊息元素和移除 typing indicator（在收到第一個實際內容時才執行）
+    let aiMessageEl = null;
+    let contentDiv = null;
+    let hasReceivedContent = false; // 標記是否已收到第一個內容
+    
     const fullContent = [];
     let isCodeBlock = false;
-
-    // 移除打字指示器
-    if (typingIndicatorEl.parentNode) {
-      typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
-    }
     
     // 清除快取，因為有新的 AI 回應
     clearHistoryCache();
@@ -1227,6 +1223,22 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
             
             // 只有當 content 存在且不為空時才處理
             if (content !== null && content !== undefined && content !== '') {
+              // 在收到第一個實際內容時，才創建 AI 訊息元素並移除 typing indicator
+              if (!hasReceivedContent) {
+                hasReceivedContent = true;
+                
+                // 移除 typing indicator
+                if (typingIndicatorEl.parentNode) {
+                  typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
+                }
+                
+                // 創建 AI 訊息元素
+                aiMessageEl = createMode1Message('assistant', '');
+                chatMessages.appendChild(aiMessageEl);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                contentDiv = aiMessageEl.querySelector('.message-content');
+              }
+              
               aiResponseContent += content;
               fullContent.push(content);
 
@@ -1250,14 +1262,16 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
                   renderedHtml = safeRenderMarkdown(tempContent);
               }
               
-              contentDiv.innerHTML = renderedHtml;
+              if (contentDiv) {
+                contentDiv.innerHTML = renderedHtml;
 
-              // 處理程式碼高亮
-              contentDiv.querySelectorAll('pre code').forEach(block => {
-                hljs.highlightElement(block);
-              });
+                // 處理程式碼高亮
+                contentDiv.querySelectorAll('pre code').forEach(block => {
+                  hljs.highlightElement(block);
+                });
 
-              chatMessages.scrollTop = chatMessages.scrollHeight;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+              }
             }
           } catch (e) {
             // 只記錄真正的錯誤，忽略無法解析的數據（可能是空行或其他格式）
@@ -1267,6 +1281,16 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
           }
         }
       }
+    }
+
+    // 確保在流結束時，如果還沒有收到任何內容，也要移除 typing indicator
+    if (!hasReceivedContent && typingIndicatorEl.parentNode) {
+      typingIndicatorEl.parentNode.removeChild(typingIndicatorEl);
+      
+      // 如果完全沒有收到內容，顯示錯誤訊息
+      const aiErrorMessage = createMode1Message('assistant', '<span style="color: #ef4444;">❌ AI 沒有返回任何內容，請稍後再試。</span>');
+      chatMessages.appendChild(aiErrorMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     // 將完整的 AI 回應內容記錄到長期記憶
@@ -1475,6 +1499,10 @@ async function recordMode1ConversationMessage(conversationType, role, content, t
     // 但為了避免驗證問題，我們不發送 metadata 字段
     // requestBody.metadata = null;
     
+    // 創建 AbortController 用於超時控制
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 秒超時
+    
     const response = await fetch(`${API_URL}/api/memory/long-term`, {
       method: 'POST',
       headers: {
@@ -1482,8 +1510,11 @@ async function recordMode1ConversationMessage(conversationType, role, content, t
         'Content-Type': 'application/json',
         'X-CSRF-Token': csrfToken
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
+      signal: controller.signal // 綁定 abort signal
     });
+    
+    clearTimeout(timeoutId); // 清除超時計時器
     
     if (!response.ok) {
       let errorData;
@@ -1492,17 +1523,26 @@ async function recordMode1ConversationMessage(conversationType, role, content, t
       } catch (e) {
         errorData = { detail: `HTTP ${response.status}: ${response.statusText}` };
       }
-      console.error('記錄長期記憶失敗:', errorData);
+      // 改為 console.warn，不影響主流程
+      console.warn('記錄長期記憶失敗:', errorData);
       
       // 如果是 422 錯誤，可能是驗證失敗，記錄詳細信息
       if (response.status === 422 && errorData.detail) {
-        console.error('驗證失敗詳情:', errorData.detail);
+        console.warn('驗證失敗詳情:', errorData.detail);
       }
     } else {
       console.log('✅ 記憶已記錄:', role);
     }
   } catch (error) {
-    console.error('記錄長期記憶錯誤:', error);
+    // 改進錯誤處理，區分超時和其他錯誤
+    if (error.name === 'AbortError') {
+      console.warn('記錄長期記憶超時（已跳過，不影響聊天功能）');
+    } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      console.warn('記錄長期記憶網路錯誤（已跳過，不影響聊天功能）:', error.message);
+    } else {
+      console.warn('記錄長期記憶錯誤（已跳過，不影響聊天功能）:', error);
+    }
+    // 重要：不拋出錯誤，確保不影響主流程
   }
 }
 
@@ -1868,6 +1908,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 // 初始化 Mode1 聊天功能
 function initMode1Chat() {
+  // 防止重複初始化
+  if (mode1ChatInitialized) {
+    console.log('Mode1 聊天功能已初始化，跳過重複初始化');
+    return;
+  }
+  
   const messageInput = document.getElementById('mode1-messageInput');
   const sendBtn = document.getElementById('mode1-sendBtn');
   const chatMessages = document.getElementById('mode1-chatMessages');
@@ -1875,6 +1921,9 @@ function initMode1Chat() {
   const body = document.body;
 
   if (messageInput && sendBtn && chatMessages && quickButtons) {
+    // 標記已初始化
+    mode1ChatInitialized = true;
+    
     // 啟用輸入框和按鈕
     sendBtn.disabled = false;
 
@@ -1914,7 +1963,14 @@ function initMode1Chat() {
     });
 
     // 發送按鈕
-    sendBtn.addEventListener('click', () => {
+    sendBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (isMode1Sending) {
+        return; // 如果正在發送，直接返回
+      }
+      
       const message = messageInput.value.trim();
       if (message) {
         sendMode1Message(message);
@@ -1925,11 +1981,36 @@ function initMode1Chat() {
     messageInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
+        e.stopPropagation(); // 阻止事件冒泡
+        
+        // 檢查是否正在發送
+        if (isMode1Sending) {
+          return; // 如果正在發送，直接返回
+        }
+        
         const message = messageInput.value.trim();
         if (message) {
           sendMode1Message(message);
         }
       }
     });
+    
+    // 防止表單提交（如果輸入框在表單內）
+    const form = messageInput.closest('form');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (isMode1Sending) {
+          return;
+        }
+        
+        const message = messageInput.value.trim();
+        if (message) {
+          sendMode1Message(message);
+        }
+      });
+    }
   }
 }
