@@ -1358,33 +1358,36 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
         }
       } else {
         // 如果沒有記錄的類型，使用關鍵字檢測作為備用
-        // 腳本關鍵字（優先級最高）- 必須包含明確的腳本結構或內容
-        const scriptKeywords = ['開場', '中場', '結尾', 'hook', 'value', 'cta', '問題', '解決', '證明', 'after', 'before', '秘密揭露', '迷思', '原理', '要點', '行動', '起', '承', '轉', '合', '台詞內容', '畫面描述', '資訊融入建議', '字幕建議', '音效建議', '發佈文案', '資訊融入總覽'];
-        const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) && 
-                                 (plainText.includes('腳本') || plainText.includes('script') || plainText.includes('主題標題'));
+        // 優先檢測帳號定位（因為它可能包含其他關鍵字，需要優先判斷）
+        const positioningKeywords = ['目標受眾', '風格調性', '競爭優勢', '執行建議', '品牌定位', '差異化優勢', '傳達目標', '帳號定位建議', '初步選題方向'];
+        const hasPositioningContent = positioningKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) &&
+                                     (plainText.includes('帳號定位') || plainText.includes('ip profile') || plainText.includes('個人品牌') || plainText.includes('定位建議')) &&
+                                     !isQuestion; // 確保不是詢問階段
         
         // 選題方向關鍵字（優先級第二）- 必須包含表格或明確的配比內容
         const planKeywords = ['影片類型配比', '內容策略矩陣', '策略矩陣', '對應目標', '心理階段', '建議比例'];
         const hasPlanContent = (planKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) || 
                                /影片類型.*配比|內容.*配比|策略矩陣/i.test(plainText) ||
                                (plainText.includes('表格') && (plainText.includes('比例') || plainText.includes('配比')))) &&
+                               !hasPositioningContent && // 確保不是帳號定位內容
                                !isQuestion; // 確保不是詢問階段
         
-        // 帳號定位關鍵字（優先級最低）- 必須包含完整的定位內容
-        const positioningKeywords = ['目標受眾', '風格調性', '競爭優勢', '執行建議', '品牌定位', '差異化優勢', '傳達目標'];
-        const hasPositioningContent = positioningKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) &&
-                                     (plainText.includes('帳號定位') || plainText.includes('ip profile') || plainText.includes('個人品牌')) &&
-                                     !isQuestion; // 確保不是詢問階段
+        // 腳本關鍵字（優先級最低）- 必須包含明確的腳本結構或內容，且不能是帳號定位或選題方向
+        const scriptKeywords = ['開場', '中場', '結尾', 'hook', 'value', 'cta', '問題', '解決', '證明', 'after', 'before', '秘密揭露', '迷思', '原理', '要點', '行動', '起', '承', '轉', '合', '台詞內容', '畫面描述', '資訊融入建議', '字幕建議', '音效建議', '發佈文案', '資訊融入總覽'];
+        const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) && 
+                                 (plainText.includes('腳本') || plainText.includes('script') || plainText.includes('主題標題')) &&
+                                 !hasPositioningContent && // 確保不是帳號定位內容
+                                 !hasPlanContent; // 確保不是選題方向內容
         
-        if (hasScriptContent) {
-          detectedType = 'scripts';
-          typeName = '短影音腳本';
+        if (hasPositioningContent) {
+          detectedType = 'ip_planning';
+          typeName = '帳號定位';
         } else if (hasPlanContent) {
           detectedType = 'plan';
           typeName = '選題方向';
-        } else if (hasPositioningContent) {
-          detectedType = 'ip_planning';
-          typeName = '帳號定位';
+        } else if (hasScriptContent) {
+          detectedType = 'scripts';
+          typeName = '短影音腳本';
         }
       }
       
