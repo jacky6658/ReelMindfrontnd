@@ -16,7 +16,7 @@
   // ===== 全域變數 =====
   let ipPlanningToken = null;
   let ipPlanningUser = null;
-  const API_BASE_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+  const API_BASE_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
 
   // ===== 初始化：從 localStorage 載入狀態 =====
   function initGlobalState() {

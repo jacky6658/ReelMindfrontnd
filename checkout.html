@@ -662,7 +662,7 @@ a{text-decoration:none;color:inherit}
     checkoutBtn.textContent = '處理中...';
     
     try {
-      const response = await fetch('https://aivideobackend.zeabur.app/api/payment/checkout', {
+      const response = await fetch('https://api.aijob.com.tw/api/payment/checkout', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -752,7 +752,7 @@ a{text-decoration:none;color:inherit}
     
     try {
       const token = localStorage.getItem('ipPlanningToken') || '';
-      const response = await fetch(`https://aivideobackend.zeabur.app/api/user/orders`, {
+      const response = await fetch(`https://api.aijob.com.tw/api/user/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -831,7 +831,7 @@ a{text-decoration:none;color:inherit}
   async function checkOrderStatus(orderId) {
     try {
       const token = localStorage.getItem('ipPlanningToken') || '';
-      const response = await fetch(`https://aivideobackend.zeabur.app/api/user/orders`, {
+      const response = await fetch(`https://api.aijob.com.tw/api/user/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -921,7 +921,7 @@ a{text-decoration:none;color:inherit}
 <!-- 載入 API 和認證模組（自動處理 CSRF Token） -->
 <script>
   window.APP_CONFIG = {
-    API_BASE: 'https://aivideobackend.zeabur.app'
+    API_BASE: 'https://api.aijob.com.tw'
   };
 </script>
 <script src="assets/js/auth.js"></script>

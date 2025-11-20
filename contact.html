@@ -190,7 +190,7 @@ a{text-decoration:none;color:inherit}
   window.APP_CONFIG = {
     API_BASE: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:8000'
-      : 'https://aivideobackend.zeabur.app'
+      : 'https://api.aijob.com.tw'
   };
 </script>
 <script src="assets/js/auth.js"></script>
@@ -200,7 +200,7 @@ a{text-decoration:none;color:inherit}
   // 後端 API 基礎 URL（根據環境自動判斷）
   const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:8000'
-    : 'https://aivideobackend.zeabur.app';
+    : 'https://api.aijob.com.tw';
 
   async function handleSubmit(event) {
     event.preventDefault();

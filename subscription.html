@@ -698,7 +698,7 @@ a{text-decoration:none;color:inherit}
     
     try {
       // 調用後端 API 建立訂單
-      const response = await fetch('https://aivideobackend.zeabur.app/api/payment/checkout', {
+      const response = await fetch('https://api.aijob.com.tw/api/payment/checkout', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -796,7 +796,7 @@ a{text-decoration:none;color:inherit}
     try {
       // 查詢訂單詳情
       const token = localStorage.getItem('ipPlanningToken') || '';
-      const response = await fetch(`https://aivideobackend.zeabur.app/api/user/orders`, {
+      const response = await fetch(`https://api.aijob.com.tw/api/user/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -881,7 +881,7 @@ a{text-decoration:none;color:inherit}
   async function checkOrderStatus(orderId) {
     try {
       const token = localStorage.getItem('ipPlanningToken') || '';
-      const response = await fetch(`https://aivideobackend.zeabur.app/api/user/orders`, {
+      const response = await fetch(`https://api.aijob.com.tw/api/user/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

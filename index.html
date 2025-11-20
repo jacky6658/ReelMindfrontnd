@@ -91,7 +91,7 @@
     <meta name="robots" content="index, follow" />
     <meta name="language" content="zh-Hant" />
     <meta name="revisit-after" content="7 days" />
-    <link rel="canonical" href="https://aivideonew.zeabur.app/" />
+    <link rel="canonical" href="http://reelmind.aijob.com.tw/" />
     
     <!-- GEO / Location Meta Tags -->
     <meta name="geo.region" content="TW" />
@@ -101,10 +101,10 @@
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://aivideonew.zeabur.app/" />
+    <meta property="og:url" content="http://reelmind.aijob.com.tw/" />
     <meta property="og:title" content="ReelMind | AI 短影音智能體 - AI 生成腳本 × AI 帳號定位" />
     <meta property="og:description" content="AI 短影音智能體：每天不到 NT$66，全年 AI 幫你帳號定位、生成靈感選題與爆款腳本。支援 IG、TikTok、YouTube Shorts。" />
-    <meta property="og:image" content="https://aivideonew.zeabur.app/assets/images/og-image.jpg" />
+    <meta property="og:image" content="http://reelmind.aijob.com.tw/assets/images/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="ReelMind AI 短影音智能體" />
@@ -113,10 +113,10 @@
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://aivideonew.zeabur.app/" />
+    <meta name="twitter:url" content="http://reelmind.aijob.com.tw/" />
     <meta name="twitter:title" content="ReelMind | AI 短影音智能體 - AI 生成腳本 × AI 帳號定位" />
     <meta name="twitter:description" content="AI 短影音智能體：每天不到 NT$66，全年 AI 幫你帳號定位、生成靈感選題與爆款腳本。" />
-    <meta name="twitter:image" content="https://aivideonew.zeabur.app/assets/images/og-image.jpg" />
+    <meta name="twitter:image" content="http://reelmind.aijob.com.tw/assets/images/og-image.jpg" />
     <meta name="twitter:image:alt" content="ReelMind AI 短影音智能體" />
     
     <!-- Additional SEO -->
@@ -154,13 +154,13 @@
         }
       },
       "description": "AI 短影音智能體：AI 生成腳本、AI 帳號定位、AI 智能體一鍵生成爆款短影音。支援 IG、TikTok、YouTube Shorts。服務地區：台北、台中、高雄。每天不到 NT$66，全年 AI 幫你帳號定位、生成靈感選題與爆款腳本。",
-      "url": "https://aivideonew.zeabur.app/",
+      "url": "http://reelmind.aijob.com.tw/",
       "applicationSubCategory": "AI 短影音工具",
       "keywords": "AI短影音,AI智能體,AI生成腳本,AI帳號定位,短影音製作",
       "provider": {
         "@type": "Organization",
         "name": "ReelMind AI",
-        "url": "https://aivideonew.zeabur.app/",
+        "url": "http://reelmind.aijob.com.tw/",
         "address": {
           "@type": "PostalAddress",
           "addressCountry": "TW",
@@ -231,7 +231,7 @@
       "@type": "LocalBusiness",
       "name": "ReelMind AI 短影音智能體",
       "description": "AI 短影音智能體服務，提供 AI 生成腳本、AI 帳號定位等服務",
-      "url": "https://aivideonew.zeabur.app/",
+      "url": "http://reelmind.aijob.com.tw/",
       "telephone": "+886-2-1234-5678",
       "address": {
         "@type": "PostalAddress",
@@ -268,8 +268,8 @@
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "ReelMind AI",
-      "url": "https://aivideonew.zeabur.app/",
-      "logo": "https://aivideonew.zeabur.app/assets/images/logo.png",
+      "url": "http://reelmind.aijob.com.tw/",
+      "logo": "http://reelmind.aijob.com.tw/assets/images/logo.png",
       "description": "AI 短影音智能體平台，提供 AI 生成腳本、AI 帳號定位等服務",
       "address": {
         "@type": "PostalAddress",
@@ -13247,7 +13247,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         // 如果 common.js 還沒載入，直接跳轉到 Google OAuth URL（不等待）
         const fbParam = encodeURIComponent(window.location.origin);
-        window.location.href = `https://aivideobackend.zeabur.app/api/auth/google?fb=${fbParam}`;
+        window.location.href = `https://api.aijob.com.tw/api/auth/google?fb=${fbParam}`;
       }
       // 確保 goToLogin 在全局作用域中可用
       window.goToLogin = goToLogin;
@@ -14131,7 +14131,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 已登入，直接驗證授權
         try {
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/user/license/verify?token=${token}`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/user/license/verify?token=${token}`, {
             headers: {
               'Authorization': `Bearer ${currentToken}`
             },
@@ -14203,7 +14203,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const currentToken = localStorage.getItem('ipPlanningToken');
             if (currentToken) {
               try {
-                const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
                   headers: {
                     'Authorization': `Bearer ${currentToken}`
                   }
@@ -14241,7 +14241,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             // 先強制刷新一次用戶資訊
             let finalUserInfo = null;
             try {
-              const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+              const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
                 headers: {
                   'Authorization': `Bearer ${currentToken}`
                 }
@@ -14277,7 +14277,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               setTimeout(async () => {
                 // 再次強制刷新用戶資訊
                 try {
-                  const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                  const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
                     headers: {
                       'Authorization': `Bearer ${currentToken}`
                     }
@@ -14358,7 +14358,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 const currentToken = localStorage.getItem('ipPlanningToken');
                 if (currentToken) {
                   try {
-                    const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+                    const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
                       headers: {
                         'Authorization': `Bearer ${currentToken}`
                       }
@@ -14414,7 +14414,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const currentToken = localStorage.getItem('ipPlanningToken');
           if (currentToken) {
             try {
-              const userResponse = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+              const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
                 headers: {
                   'Authorization': `Bearer ${currentToken}`
                 }
@@ -14704,7 +14704,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               return; // 未登入，不顯示通知
             }
             
-            const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+            const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
             const response = await fetch(`${API_URL}/api/user/llm-keys/check`, {
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -15138,7 +15138,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           } else {
             // 降級處理：直接跳轉到 Google OAuth URL
             const fbParam = encodeURIComponent(window.location.origin);
-            window.location.href = `https://aivideobackend.zeabur.app/api/auth/google?fb=${fbParam}`;
+            window.location.href = `https://api.aijob.com.tw/api/auth/google?fb=${fbParam}`;
           }
           return;
         }
@@ -15483,7 +15483,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
           try {
             console.log('📡 發送 API 請求獲取用戶資訊...');
-            let response = await fetch('https://aivideobackend.zeabur.app/api/auth/me', {
+            let response = await fetch('https://api.aijob.com.tw/api/auth/me', {
               headers: {
                 'Authorization': `Bearer ${ipPlanningToken}`
               }
@@ -15503,7 +15503,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 if (refreshedToken) {
                   ipPlanningToken = refreshedToken;
                 }
-                response = await fetch('https://aivideobackend.zeabur.app/api/auth/me', {
+                response = await fetch('https://api.aijob.com.tw/api/auth/me', {
                   headers: {
                     'Authorization': `Bearer ${ipPlanningToken}`
                   }
@@ -16115,7 +16115,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         try {
           // 載入對話記錄
           console.log('📝 [1/4] 正在載入對話記錄...');
-          const conversationsResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/conversations/${ipPlanningUser.user_id}`, {
+          const conversationsResponse = await fetch(`https://api.aijob.com.tw/api/user/conversations/${ipPlanningUser.user_id}`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
             }
@@ -16131,7 +16131,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 載入生成記錄
           console.log('📄 [2/4] 正在載入生成記錄...');
-          const generationsResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/generations/${ipPlanningUser.user_id}`, {
+          const generationsResponse = await fetch(`https://api.aijob.com.tw/api/user/generations/${ipPlanningUser.user_id}`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
             }
@@ -16151,7 +16151,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 載入用戶記憶
           console.log('🧠 [4/4] 正在載入用戶記憶...');
-          const memoryResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/memory/${ipPlanningUser.user_id}`, {
+          const memoryResponse = await fetch(`https://api.aijob.com.tw/api/user/memory/${ipPlanningUser.user_id}`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
             }
@@ -16222,7 +16222,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (!ipPlanningUser?.user_id) return;
         
         try {
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/user/positioning/${ipPlanningUser.user_id}`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/user/positioning/${ipPlanningUser.user_id}`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
             }
@@ -16283,7 +16283,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (!ipPlanningUser?.user_id) return;
         
         try {
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/user/positioning/${ipPlanningUser.user_id}`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/user/positioning/${ipPlanningUser.user_id}`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
             }
@@ -16341,7 +16341,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (!confirm('確定要刪除這筆記錄嗎？')) return;
         
         try {
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/user/positioning/${recordId}`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/user/positioning/${recordId}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
@@ -16541,7 +16541,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         try {
           // 調用後端API取消訂閱
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/auth/me`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
             method: 'PUT',
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`,
@@ -16582,7 +16582,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (ipPlanningToken) {
           try {
             console.log('📡 調用後端登出 API...');
-            const response = await fetch('https://aivideobackend.zeabur.app/api/auth/logout', {
+            const response = await fetch('https://api.aijob.com.tw/api/auth/logout', {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${ipPlanningToken}`,
@@ -16772,7 +16772,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 嘗試從 API 獲取詳細訂閱資訊
           if (ipPlanningToken && ipPlanningUser?.user_id) {
             try {
-              const subResponse = await fetch('https://aivideobackend.zeabur.app/api/user/subscription', {
+              const subResponse = await fetch('https://api.aijob.com.tw/api/user/subscription', {
                 headers: {
                   'Authorization': `Bearer ${ipPlanningToken}`
                 }
@@ -16869,7 +16869,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               </div>
               ` : `
               <div class="detail-actions">
-                <button class="btn btn-success" onclick="window.open('https://aivideonew.zeabur.app/', '_blank')" style="padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; background: #10b981; color: white;">
+                <button class="btn btn-success" onclick="window.open('http://reelmind.aijob.com.tw/', '_blank')" style="padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; background: #10b981; color: white;">
                   ✨ 啟用訂閱
                 </button>
               </div>
@@ -16950,7 +16950,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 從後端 API 獲取腳本列表
         try {
-          const response = await fetch('https://aivideobackend.zeabur.app/api/scripts/my', {
+          const response = await fetch('https://api.aijob.com.tw/api/scripts/my', {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`,
               'Content-Type': 'application/json'
@@ -17191,7 +17191,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         try {
           // 使用現有的後端API端點和參數
-          const endpoint = 'https://aivideobackend.zeabur.app/api/chat/stream';
+          const endpoint = 'https://api.aijob.com.tw/api/chat/stream';
           const headers = { 'Content-Type': 'application/json' };
           if (ipPlanningToken) {
             headers['Authorization'] = `Bearer ${ipPlanningToken}`;
@@ -17478,7 +17478,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         try {
           // 使用原有的後端API和LLM設定
-          const endpoint = 'https://aivideobackend.zeabur.app/api/chat/stream';
+          const endpoint = 'https://api.aijob.com.tw/api/chat/stream';
           const headers = { 'Content-Type': 'application/json' };
           if (ipPlanningToken) {
             headers['Authorization'] = `Bearer ${ipPlanningToken}`;
@@ -17802,7 +17802,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 嘗試更新後端（如果API存在）
           try {
-            const response = await fetch(`https://aivideobackend.zeabur.app/api/scripts/${scriptId}/name`, {
+            const response = await fetch(`https://api.aijob.com.tw/api/scripts/${scriptId}/name`, {
               method: 'PUT',
               headers: {
                 'Authorization': `Bearer ${ipPlanningToken}`,
@@ -18012,7 +18012,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         try {
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/scripts/${scriptId}`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/scripts/${scriptId}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`,
@@ -18051,7 +18051,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         showLoadingAnimation(content, '載入帳號定位記錄中...');
         
         try {
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/user/positioning/${ipPlanningUser.user_id}`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/user/positioning/${ipPlanningUser.user_id}`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
             }
@@ -18124,7 +18124,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (!ipPlanningUser?.user_id) return;
         
         try {
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/user/positioning/${ipPlanningUser.user_id}`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/user/positioning/${ipPlanningUser.user_id}`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
             }
@@ -18196,7 +18196,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         try {
           // 使用正確的 API 端點：/api/user/positioning/{recordId}
-          const url = `https://aivideobackend.zeabur.app/api/user/positioning/${cleanRecordId}`;
+          const url = `https://api.aijob.com.tw/api/user/positioning/${cleanRecordId}`;
           console.log('刪除請求 URL:', url);
           
           const response = await fetch(url, {
@@ -18236,7 +18236,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         try {
           // 從後端獲取選題生成記錄（generations 表）
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/generations/${ipPlanningUser.user_id}?limit=100`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/generations/${ipPlanningUser.user_id}?limit=100`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`,
               'Content-Type': 'application/json'
@@ -18284,7 +18284,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 先獲取帳號定位名稱
           let positioningName = '帳號定位';
           try {
-            const positioningResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/positioning/${ipPlanningUser.user_id}`, {
+            const positioningResponse = await fetch(`https://api.aijob.com.tw/api/user/positioning/${ipPlanningUser.user_id}`, {
               headers: {
                 'Authorization': `Bearer ${ipPlanningToken}`,
                 'Content-Type': 'application/json'
@@ -18312,7 +18312,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 主標題已改為固定「IP人設規劃」，不再需要編輯功能
           
           // 獲取 IP 人設規劃結果
-          const response = await fetch('https://aivideobackend.zeabur.app/api/ip-planning/my', {
+          const response = await fetch('https://api.aijob.com.tw/api/ip-planning/my', {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`,
               'Content-Type': 'application/json'
@@ -18997,7 +18997,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         try {
           // 嘗試從後端刪除（如果後端有API）
           if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
-            const response = await fetch(`https://aivideobackend.zeabur.app/api/generations/${genId}`, {
+            const response = await fetch(`https://api.aijob.com.tw/api/generations/${genId}`, {
               method: 'DELETE',
               headers: {
                 'Authorization': `Bearer ${ipPlanningToken}`,
@@ -19054,7 +19054,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           document.getElementById('totalScripts').textContent = scripts.length;
           
           // 獲取帳號定位數
-          const positioningResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/positioning/${ipPlanningUser.user_id}`, {
+          const positioningResponse = await fetch(`https://api.aijob.com.tw/api/user/positioning/${ipPlanningUser.user_id}`, {
             headers: {'Authorization': `Bearer ${ipPlanningToken}`}
           });
           if (positioningResponse.ok) {
@@ -19063,7 +19063,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }
           
           // 獲取對話數
-          const convResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/conversations/${ipPlanningUser.user_id}`, {
+          const convResponse = await fetch(`https://api.aijob.com.tw/api/user/conversations/${ipPlanningUser.user_id}`, {
             headers: {'Authorization': `Bearer ${ipPlanningToken}`}
           });
           if (convResponse.ok) {
@@ -19091,7 +19091,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         showLoadingAnimation(content, '載入訂單記錄中...');
         
         try {
-          const response = await fetch('https://aivideobackend.zeabur.app/api/user/orders', {
+          const response = await fetch('https://api.aijob.com.tw/api/user/orders', {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
             }
@@ -19211,7 +19211,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         try {
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/user/orders/${orderId}`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/user/orders/${orderId}`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
             }
@@ -19455,7 +19455,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 1. 獲取腳本數據
           try {
-            const scriptsResponse = await fetch(`https://aivideobackend.zeabur.app/api/scripts/my`, {
+            const scriptsResponse = await fetch(`https://api.aijob.com.tw/api/scripts/my`, {
               headers: { 'Authorization': `Bearer ${ipPlanningToken}` }
             });
             if (scriptsResponse.ok) {
@@ -19468,7 +19468,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 2. 獲取帳號定位數據
           try {
-            const positioningResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/positioning/${ipPlanningUser.user_id}`, {
+            const positioningResponse = await fetch(`https://api.aijob.com.tw/api/user/positioning/${ipPlanningUser.user_id}`, {
               headers: { 'Authorization': `Bearer ${ipPlanningToken}` }
             });
             if (positioningResponse.ok) {
@@ -19481,7 +19481,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 3. 獲取選題數據
           try {
-            const generationsResponse = await fetch(`https://aivideobackend.zeabur.app/api/generations/${ipPlanningUser.user_id}`, {
+            const generationsResponse = await fetch(`https://api.aijob.com.tw/api/generations/${ipPlanningUser.user_id}`, {
               headers: { 'Authorization': `Bearer ${ipPlanningToken}` }
             });
             if (generationsResponse.ok) {
@@ -19494,7 +19494,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 4. 獲取對話數據
           try {
-            const convResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/conversations/${ipPlanningUser.user_id}`, {
+            const convResponse = await fetch(`https://api.aijob.com.tw/api/user/conversations/${ipPlanningUser.user_id}`, {
               headers: { 'Authorization': `Bearer ${ipPlanningToken}` }
             });
             if (convResponse.ok) {
@@ -19940,7 +19940,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         try {
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/user/llm-keys/${ipPlanningUser.user_id}`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/user/llm-keys/${ipPlanningUser.user_id}`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`,
               'Content-Type': 'application/json'
@@ -20002,7 +20002,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         try {
           showToast('正在保存金鑰...', 2000);
           
-          const response = await fetch('https://aivideobackend.zeabur.app/api/user/llm-keys', {
+          const response = await fetch('https://api.aijob.com.tw/api/user/llm-keys', {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`,
@@ -20066,7 +20066,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         testResultDiv.style.color = '#6b7280';
         
         try {
-          const response = await fetch('https://aivideobackend.zeabur.app/api/user/llm-keys/test', {
+          const response = await fetch('https://api.aijob.com.tw/api/user/llm-keys/test', {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`,
@@ -20169,7 +20169,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         try {
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/user/llm-keys/${ipPlanningUser.user_id}`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/user/llm-keys/${ipPlanningUser.user_id}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`,
@@ -20356,7 +20356,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         document.getElementById('chatMessages').appendChild(thinkingDiv);
         
         try {
-          const response = await fetch('https://aivideobackend.zeabur.app/api/chat/stream', {
+          const response = await fetch('https://api.aijob.com.tw/api/chat/stream', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -20504,7 +20504,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         document.getElementById('scriptActions').style.display = 'flex';
         
         try {
-          const response = await fetch('https://aivideobackend.zeabur.app/api/generate/script', {
+          const response = await fetch('https://api.aijob.com.tw/api/generate/script', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -20588,7 +20588,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         document.getElementById('positioningActions').style.display = 'flex';
         
         try {
-          const response = await fetch('https://aivideobackend.zeabur.app/api/generate/positioning', {
+          const response = await fetch('https://api.aijob.com.tw/api/generate/positioning', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -20648,7 +20648,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 自動保存帳號定位到後端
           if (result && ipPlanningToken && ipPlanningUser) {
             try {
-              const saveResponse = await fetch('https://aivideobackend.zeabur.app/api/user/positioning/save', {
+              const saveResponse = await fetch('https://api.aijob.com.tw/api/user/positioning/save', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -20750,7 +20750,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         document.getElementById('topicActions').style.display = 'flex';
         
         try {
-          const response = await fetch('https://aivideobackend.zeabur.app/api/generate/topics', {
+          const response = await fetch('https://api.aijob.com.tw/api/generate/topics', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -20814,7 +20814,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 自動保存選題內容到 generations 表（生成完成後）
           if (generationEnded && result && result.trim() && ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
             try {
-              const saveResponse = await fetch('https://aivideobackend.zeabur.app/api/generations', {
+              const saveResponse = await fetch('https://api.aijob.com.tw/api/generations', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -20879,7 +20879,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 只有帳號定位需要保存到資料庫
           if (type === 'positioning') {
             try {
-              const response = await fetch('https://aivideobackend.zeabur.app/api/user/positioning/save', {
+              const response = await fetch('https://api.aijob.com.tw/api/user/positioning/save', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -20934,7 +20934,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const scriptData = extractScriptData(content);
           console.log('提取的腳本數據:', scriptData);
           
-          const response = await fetch('https://aivideobackend.zeabur.app/api/scripts/save', {
+          const response = await fetch('https://api.aijob.com.tw/api/scripts/save', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -21211,7 +21211,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         try {
-          const response = await fetch('https://aivideobackend.zeabur.app/api/scripts/my', {
+          const response = await fetch('https://api.aijob.com.tw/api/scripts/my', {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`,
               'Content-Type': 'application/json'
@@ -21294,7 +21294,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         try {
-          const response = await fetch('https://aivideobackend.zeabur.app/api/generations', {
+          const response = await fetch('https://api.aijob.com.tw/api/generations', {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`,
               'Content-Type': 'application/json'
@@ -21653,7 +21653,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         try {
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/scripts/${scriptId}/name`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/scripts/${scriptId}/name`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -22019,7 +22019,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         try {
-          const response = await fetch(`https://aivideobackend.zeabur.app/api/scripts/${scriptId}`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/scripts/${scriptId}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
@@ -22314,13 +22314,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           let authUrl = null;
           const fbParam = encodeURIComponent(window.location.origin);
           try {
-            const response = await fetch(`https://aivideobackend.zeabur.app/api/auth/google?fb=${fbParam}`);
+            const response = await fetch(`https://api.aijob.com.tw/api/auth/google?fb=${fbParam}`);
             const data = await response.json();
             authUrl = data && data.auth_url;
             console.log('DEBUG: Auth URL received:', authUrl);
           } catch (corsErr) {
             console.warn('DEBUG: Fetch auth_url failed (likely CORS). Fallback to direct navigate.', corsErr);
-            authUrl = `https://aivideobackend.zeabur.app/api/auth/google?fb=${fbParam}`;
+            authUrl = `https://api.aijob.com.tw/api/auth/google?fb=${fbParam}`;
           }
           
           // 檢測是否為手機版
@@ -22365,10 +22365,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             // 接受來自所有 origin 的認證訊息（因為使用 '*' targetOrigin）
             // 但記錄 origin 以調試
             const allowedOrigins = [
-              'https://aivideobackend.zeabur.app',
-              'http://aivideobackend.zeabur.app',
-              'https://aivideonew.zeabur.app',
-              'http://aivideonew.zeabur.app',
+              'https://api.aijob.com.tw',
+              'https://api.aijob.com.tw',
+              'http://reelmind.aijob.com.tw',
+              'http://reelmind.aijob.com.tw',
               window.location.origin,
               window.location.protocol + '//' + window.location.host,
               'null'  // 某些情況下 origin 可能是 'null'
@@ -22579,12 +22579,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 try {
                   console.log('DEBUG: Forcing one refresh after login to sync token...');
                   const t0 = localStorage.getItem('ipPlanningToken') || '';
-                  await fetch('https://aivideobackend.zeabur.app/api/auth/refresh', { method: 'POST', headers: t0 ? { 'Authorization': `Bearer ${t0}` } : {} });
+                  await fetch('https://api.aijob.com.tw/api/auth/refresh', { method: 'POST', headers: t0 ? { 'Authorization': `Bearer ${t0}` } : {} });
                 } catch (e) { console.warn('DEBUG: refresh after login failed (can ignore if CORS):', e); }
                 try {
                   console.log('DEBUG: Probing /api/auth/me after refresh...');
                   const currentToken = localStorage.getItem('ipPlanningToken') || '';
-                  const meRes = await fetch('https://aivideobackend.zeabur.app/api/auth/me', {
+                  const meRes = await fetch('https://api.aijob.com.tw/api/auth/me', {
                     headers: {
                       'Authorization': `Bearer ${currentToken}`
                     }
@@ -22892,7 +22892,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (!ipPlanningToken) return;
         
         try {
-          let response = await fetch('https://aivideobackend.zeabur.app/api/auth/me', {
+          let response = await fetch('https://api.aijob.com.tw/api/auth/me', {
           headers: { 'Authorization': `Bearer ${ipPlanningToken}` }
         });
           
@@ -22902,7 +22902,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const refreshed = await tryRefreshTokenSafe();
             if (refreshed) {
               // Token 刷新成功，使用新 token 重試
-              response = await fetch('https://aivideobackend.zeabur.app/api/auth/me', {
+              response = await fetch('https://api.aijob.com.tw/api/auth/me', {
                 headers: { 'Authorization': `Bearer ${ipPlanningToken}` }
               });
             } else {
@@ -23170,10 +23170,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 如果是開發環境，使用 localhost:8000；部署環境使用正確的後端網域
           let endpoint;
           if (isDevelopment) {
-            endpoint = 'https://aivideobackend.zeabur.app/api/chat/stream';
+            endpoint = 'https://api.aijob.com.tw/api/chat/stream';
           } else {
             // 部署環境：使用您提供的正確後端網域
-            endpoint = 'https://aivideobackend.zeabur.app/api/chat/stream';
+            endpoint = 'https://api.aijob.com.tw/api/chat/stream';
           }
           // 添加調試信息
           console.log('API 端點:', endpoint);
@@ -23330,7 +23330,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         try {
           // 測試後端根路徑
-          const rootResponse = await fetch('https://aivideobackend.zeabur.app/');
+          const rootResponse = await fetch('https://api.aijob.com.tw/');
           const rootText = await rootResponse.text();
           
           let testResult = `🔍 連線測試結果：\n\n`;
@@ -23338,7 +23338,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 測試健康檢查
           try {
-            const healthResponse = await fetch('https://aivideobackend.zeabur.app/api/health');
+            const healthResponse = await fetch('https://api.aijob.com.tw/api/health');
             const healthData = await healthResponse.json();
             
             testResult += `2️⃣ 健康檢查：${healthResponse.ok ? '✅ 正常' : '❌ 異常'}\n`;
@@ -23361,7 +23361,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 測試聊天API
           try {
-            const chatResponse = await fetch('https://aivideobackend.zeabur.app/api/chat/stream', {
+            const chatResponse = await fetch('https://api.aijob.com.tw/api/chat/stream', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ message: 'test', platform: null, topic: null, duration: '30' })
@@ -23976,7 +23976,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const sessionId = getCurrentSessionId(conversationType);
           
           // 發送長期記憶儲存請求
-          const res = await fetch('https://aivideobackend.zeabur.app/api/memory/long-term', {
+          const res = await fetch('https://api.aijob.com.tw/api/memory/long-term', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -23992,7 +23992,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 調試：記錄 API 請求詳情
           console.log('長期記憶 API 請求:', {
-            url: 'https://aivideobackend.zeabur.app/api/memory/long-term',
+            url: 'https://api.aijob.com.tw/api/memory/long-term',
             conversationType,
             role,
             sessionId,
@@ -24160,7 +24160,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           lastRefreshAttempt = now;
           
           // 如果 token 已經過期，可能無法通過驗證，但仍嘗試刷新
-          const r = await fetch('https://aivideobackend.zeabur.app/api/auth/refresh', {
+          const r = await fetch('https://api.aijob.com.tw/api/auth/refresh', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${ipPlanningToken}` }
           });
@@ -24216,7 +24216,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return [];
         }
         try {
-          const res = await fetch(`https://aivideobackend.zeabur.app/api/memory/sessions?conversation_type=${encodeURIComponent(conversationType)}`, {
+          const res = await fetch(`https://api.aijob.com.tw/api/memory/sessions?conversation_type=${encodeURIComponent(conversationType)}`, {
             headers: ipPlanningToken ? { 'Authorization': `Bearer ${ipPlanningToken}` } : {}
           });
           if (res.ok) return (await res.json()).sessions || [];
@@ -24234,7 +24234,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return [];
         }
         try {
-          const url = new URL('https://aivideobackend.zeabur.app/api/memory/long-term');
+          const url = new URL('https://api.aijob.com.tw/api/memory/long-term');
           url.searchParams.set('conversation_type', conversationType);
           if (sessionId) url.searchParams.set('session_id', sessionId);
           const res = await fetch(url.toString(), {
@@ -25361,7 +25361,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         button.innerHTML = '<span>⏳</span> 生成中...';
         
         try {
-          const response = await fetch('https://aivideobackend.zeabur.app/api/chat/stream', {
+          const response = await fetch('https://api.aijob.com.tw/api/chat/stream', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -25439,7 +25439,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         button.innerHTML = '<span>⏳</span> 生成中...';
         
         try {
-          const response = await fetch('https://aivideobackend.zeabur.app/api/chat/stream', {
+          const response = await fetch('https://api.aijob.com.tw/api/chat/stream', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -25516,7 +25516,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         button.innerHTML = '<span>⏳</span> 生成中...';
         
         try {
-          const response = await fetch('https://aivideobackend.zeabur.app/api/chat/stream', {
+          const response = await fetch('https://api.aijob.com.tw/api/chat/stream', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -25632,7 +25632,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 顯示儲存中通知
           showToast('正在儲存...', 2000);
           
-          const response = await fetch('https://aivideobackend.zeabur.app/api/ip-planning/save', {
+          const response = await fetch('https://api.aijob.com.tw/api/ip-planning/save', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -25774,7 +25774,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         try {
           // 載入對話記錄
-          const conversationsResponse = await fetch(`https://aivideobackend.zeabur.app/api/user/conversations/${ipPlanningUser.user_id}`);
+          const conversationsResponse = await fetch(`https://api.aijob.com.tw/api/user/conversations/${ipPlanningUser.user_id}`);
           
           if (conversationsResponse.ok) {
             const conversationsData = await conversationsResponse.json();
@@ -26139,9 +26139,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       // 一律使用主視窗跳轉（fb=前端基底網址）
       try{
         var fb = encodeURIComponent(window.location.origin);
-        window.location.href = 'https://aivideobackend.zeabur.app/api/auth/google?fb=' + fb;
+        window.location.href = 'https://api.aijob.com.tw/api/auth/google?fb=' + fb;
       }catch(_){
-        window.location.href = 'https://aivideobackend.zeabur.app/api/auth/google';
+        window.location.href = 'https://api.aijob.com.tw/api/auth/google';
       }
     }
     document.addEventListener('click', function(e){
@@ -26160,7 +26160,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
   
   // Mode3 IP人設規劃功能（從 index-ai-consultant.html 遷移）
   (function() {
-    const API_BASE_URL = 'https://aivideobackend.zeabur.app';
+    const API_BASE_URL = 'https://api.aijob.com.tw';
     let currentMode3ConversationType = 'ip_planning';
     let isMode3Sending = false; // 防止重複發送
     

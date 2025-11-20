@@ -95,7 +95,7 @@ async function loadMyScriptsForUserDB() {
   
   // 從後端 API 獲取腳本列表
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/scripts/my`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
@@ -443,7 +443,7 @@ async function updateScriptNameForUserDB(scriptId, newName) {
     
     // 嘗試更新後端
     try {
-      const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+      const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
       const response = await fetch(`${API_URL}/api/scripts/${scriptId}/name`, {
         method: 'PUT',
         headers: {
@@ -492,7 +492,7 @@ window.viewScriptDetailForUserDB = function(scriptId) {
 // 從 API 獲取腳本詳細
 async function viewScriptDetailFromAPI(scriptId) {
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/scripts/my`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
@@ -727,10 +727,27 @@ window.deleteScriptForUserDB = async function(scriptId) {
       container.innerHTML = '<div class="loading-text">還沒有儲存的腳本，請先使用一鍵生成功能創建腳本</div>';
     }
     
+    // 同時更新一鍵生成分類的顯示（如果當前在該分類）
+    const oneClickContent = document.getElementById('one-click-content');
+    if (oneClickContent) {
+      // 檢查當前是否在腳本標籤頁
+      const activeTab = document.querySelector('.one-click-tab.active');
+      if (activeTab && activeTab.textContent.includes('腳本')) {
+        // 重新載入一鍵生成分類的數據
+        await loadOneClickGenerationForUserDB();
+      }
+    }
+    
     // 嘗試從後端刪除（如果失敗也不影響本地刪除）
     try {
-      const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
-      const response = await fetch(`${API_URL}/api/scripts/${scriptId}`, {
+      const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
+      // 確保 scriptId 是數字類型
+      const numericScriptId = parseInt(scriptId, 10);
+      if (isNaN(numericScriptId)) {
+        throw new Error('無效的腳本 ID');
+      }
+      
+      const response = await fetch(`${API_URL}/api/scripts/${numericScriptId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${ipPlanningToken}`,
@@ -742,6 +759,10 @@ window.deleteScriptForUserDB = async function(scriptId) {
         console.log('後端腳本刪除成功');
         // 重新載入以同步後端數據
         await loadMyScriptsForUserDB();
+        // 如果在一鍵生成分類，也重新載入
+        if (oneClickContent) {
+          await loadOneClickGenerationForUserDB();
+        }
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast('腳本已刪除', 3000);
         }
@@ -753,6 +774,10 @@ window.deleteScriptForUserDB = async function(scriptId) {
         }
         // 重新載入以同步後端數據
         await loadMyScriptsForUserDB();
+        // 如果在一鍵生成分類，也重新載入
+        if (oneClickContent) {
+          await loadOneClickGenerationForUserDB();
+        }
       } else {
         // 其他錯誤，但本地已刪除，記錄錯誤但不影響用戶體驗
         const errorData = await response.json().catch(() => ({}));
@@ -762,6 +787,10 @@ window.deleteScriptForUserDB = async function(scriptId) {
         }
         // 重新載入以同步後端數據
         await loadMyScriptsForUserDB();
+        // 如果在一鍵生成分類，也重新載入
+        if (oneClickContent) {
+          await loadOneClickGenerationForUserDB();
+        }
       }
     } catch (apiError) {
       // API 調用失敗，但本地已刪除，記錄錯誤但不影響用戶體驗
@@ -771,6 +800,10 @@ window.deleteScriptForUserDB = async function(scriptId) {
       }
       // 重新載入以同步後端數據
       await loadMyScriptsForUserDB();
+      // 如果在一鍵生成分類，也重新載入
+      if (oneClickContent) {
+        await loadOneClickGenerationForUserDB();
+      }
     }
   } catch (error) {
     console.error('Delete script error:', error);
@@ -789,7 +822,7 @@ async function recordUsageEvent(eventType, eventCategory, resourceId, resourceTy
       return;
     }
     
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     
     const response = await fetch(`${API_URL}/api/user/usage-event`, {
       method: 'POST',
@@ -1159,7 +1192,7 @@ async function renderPersonalInfoContent() {
   
   if (ipPlanningToken && ipPlanningUser?.user_id) {
     try {
-      const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+      const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
       const subResponse = await fetch(`${API_URL}/api/user/subscription`, {
         headers: {
           'Authorization': `Bearer ${ipPlanningToken}`
@@ -1273,7 +1306,7 @@ async function fetchUserInfo() {
   if (!ipPlanningToken) return;
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     
     // 同時獲取用戶基本資訊和訂閱狀態
     const [userResponse, subscriptionResponse] = await Promise.all([
@@ -1330,7 +1363,7 @@ async function cancelAutoRenewForUserDB() {
   }
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/user/subscription/auto-renew`, {
       method: 'PUT',
       headers: {
@@ -1515,7 +1548,7 @@ async function loadPositioningRecordsForUserDB() {
   }
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/user/positioning/${ipPlanningUser.user_id}`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`
@@ -1636,7 +1669,7 @@ window.viewPositioningDetailForUserDB = async function(recordId, recordNumber) {
     // 如果緩存中沒有，才發送 API 請求
     if (!record) {
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/user/positioning/${ipPlanningUser.user_id}`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`
@@ -1769,7 +1802,7 @@ window.deletePositioningRecordForUserDB = async function(recordId) {
   }
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/user/positioning/${cleanRecordId}`, {
       method: 'DELETE',
       headers: {
@@ -1898,7 +1931,7 @@ async function loadTopicHistoryForUserDB() {
   }
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/generations/${ipPlanningUser.user_id}?limit=100`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
@@ -2182,7 +2215,7 @@ window.deleteTopicRecordForUserDB = async function(genId, itemTitle) {
   
   try {
     if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
-      const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+      const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
       const response = await fetch(`${API_URL}/api/generations/${numericGenId}`, {
         method: 'DELETE',
         headers: {
@@ -2275,7 +2308,7 @@ async function loadIpPlanningResultsForUserDB() {
   }
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/ip-planning/my`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
@@ -2670,7 +2703,7 @@ window.deleteIpPlanningResultForUserDB = async function(resultId) {
   if (!confirm(confirmMessage)) return;
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/ip-planning/results/${safeResultId}`, {
       method: 'DELETE',
       headers: {
@@ -2815,7 +2848,7 @@ window.viewIpPlanningDetailForUserDB = async function(resultId) {
     // 如果緩存中沒有，才發送 API 請求
     if (!result) {
       try {
-        const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+        const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
         const response = await fetch(`${API_URL}/api/ip-planning/my`, {
           headers: {
             'Authorization': `Bearer ${ipPlanningToken}`,
@@ -3121,7 +3154,7 @@ async function loadOneClickGenerationForUserDB() {
   }
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     
     // 獲取所有 ip_planning_results（只顯示 source='mode3' 的結果）
     const response = await fetch(`${API_URL}/api/ip-planning/my`, {
@@ -3440,7 +3473,7 @@ async function checkIpPlanningPermission() {
   }
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/user/ip-planning/permission`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
@@ -3504,7 +3537,7 @@ async function loadMyOrdersForUserDB() {
   showLoadingAnimation(content, '載入訂單記錄中...');
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/user/orders`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`
@@ -3633,7 +3666,7 @@ window.showOrderDetail = async function(orderId) {
   }
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/user/orders/${orderId}`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`
@@ -3861,7 +3894,7 @@ async function loadSavedApiKey() {
   }
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/user/llm-keys/${ipPlanningUser.user_id}`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
@@ -3975,7 +4008,7 @@ async function saveApiKey() {
       window.ReelMindCommon.showToast('正在保存金鑰...', 2000);
     }
     
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/user/llm-keys`, {
       method: 'POST',
       headers: {
@@ -4059,7 +4092,7 @@ async function testApiKey() {
   testResultDiv.style.color = '#6b7280';
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/user/llm-keys/test`, {
       method: 'POST',
       headers: {
@@ -4224,7 +4257,7 @@ async function updateModelOptions() {
   
   try {
     // 從後端動態載入模型列表
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/llm/models`);
     
     if (response.ok) {
@@ -4334,7 +4367,7 @@ async function clearSavedApiKey() {
   }
   
   try {
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     const response = await fetch(`${API_URL}/api/user/llm-keys/${ipPlanningUser.user_id}`, {
       method: 'DELETE',
       headers: {
@@ -4393,7 +4426,7 @@ async function exportUserData() {
       ipPlanning: []
     };
     
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     
     try {
       const scriptsResponse = await fetch(`${API_URL}/api/scripts/my`, {
@@ -4661,7 +4694,7 @@ async function loadUsageStatsForUserDB() {
       totalScriptsEl.textContent = scripts.length;
     }
     
-    const API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+    const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     
     try {
       const positioningResponse = await fetch(`${API_URL}/api/user/positioning/${ipPlanningUser.user_id}`, {

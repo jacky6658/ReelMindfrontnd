@@ -11,7 +11,7 @@ if (typeof window.isLocalDev === 'undefined') {
 if (typeof window.API_BASE_URL === 'undefined') {
   window.API_BASE_URL = window.isLocalDev 
     ? 'http://127.0.0.1:8000'  // 本地測試
-    : 'https://aivideobackend.zeabur.app';  // 正式版後端
+    : 'https://api.aijob.com.tw';  // 正式版後端
 }
 
 if (!window.APP_CONFIG) {

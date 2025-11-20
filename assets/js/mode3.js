@@ -5,7 +5,7 @@
 // 這裡直接使用 window.APP_CONFIG，避免重複聲明
 // 使用 window 檢查避免重複聲明錯誤
 if (typeof window.API_URL === 'undefined') {
-  window.API_URL = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+  window.API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
 }
 // 使用 window 對象避免 const 重複聲明錯誤（如果腳本被載入兩次）
 // 檢查是否已經在當前作用域中聲明過 API_URL
@@ -1952,7 +1952,7 @@ async function handleModeNavigation(event, targetMode) {
         window.ReelMindCommon.goToLogin();
       } else {
         // 降級處理：直接跳轉到 Google 登入
-        const backendUrl = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+        const backendUrl = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
         const redirectUri = encodeURIComponent(window.location.origin + '/' + (targetMode === 'mode1' ? 'mode1.html' : 'mode3.html'));
         window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
       }
@@ -1984,7 +1984,7 @@ async function handleModeNavigation(event, targetMode) {
     if (!token || !user) {
       // 未登入
       alert('請先登入以使用此功能！');
-      const backendUrl = window.APP_CONFIG?.API_BASE || 'https://aivideobackend.zeabur.app';
+      const backendUrl = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
       const redirectUri = encodeURIComponent(window.location.origin + '/' + (targetMode === 'mode1' ? 'mode1.html' : 'mode3.html'));
       window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
       return false;
