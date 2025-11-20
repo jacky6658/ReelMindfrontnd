@@ -1254,24 +1254,48 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       // 靜默失敗
     }
 
-    // 自動儲存邏輯：如果生成的是帳號定位且內容足夠長，自動儲存
+    // 自動儲存邏輯：根據內容判斷類型並自動儲存
     if (conversationType === 'ip_planning' && aiResponseContent && aiResponseContent.trim().length > 50) {
+      // 帳號定位關鍵字
       const positioningKeywords = ['目標受眾', '內容定位', '風格調性', '競爭優勢', '執行建議', '帳號定位', '品牌定位'];
       const hasPositioningContent = positioningKeywords.some(keyword => aiResponseContent.includes(keyword));
       
-      if (hasPositioningContent) {
+      // 選題方向關鍵字
+      const planKeywords = ['選題方向', '影片類型', '內容類型', '主題配比', '內容配比', '影片配比', '主題規劃', '內容規劃'];
+      const hasPlanContent = planKeywords.some(keyword => aiResponseContent.includes(keyword));
+      
+      // 腳本關鍵字
+      const scriptKeywords = ['今日腳本', '短影音腳本', '影片腳本', '腳本內容', '開場', '中場', '結尾', '腳本', '開頭', '結尾'];
+      const hasScriptContent = scriptKeywords.some(keyword => aiResponseContent.includes(keyword));
+      
+      let detectedType = null;
+      let targetTab = null;
+      
+      // 根據關鍵字判斷類型（優先順序：腳本 > 選題方向 > 帳號定位）
+      if (hasScriptContent) {
+        detectedType = 'scripts';
+        targetTab = 'scripts';
+      } else if (hasPlanContent) {
+        detectedType = 'plan';
+        targetTab = 'plan';
+      } else if (hasPositioningContent) {
+        detectedType = 'ip_planning';
+        targetTab = 'profile';
+      }
+      
+      if (detectedType) {
         setTimeout(async () => {
           try {
-            await saveMode1Result('ip_planning');
+            await saveMode1Result(detectedType);
             if (window.openMode1OneClickModal) {
               window.openMode1OneClickModal();
               setTimeout(() => {
                 if (window.switchMode1HistoryType) {
-                  window.switchMode1HistoryType('profile');
+                  window.switchMode1HistoryType(targetTab);
                 }
                 setTimeout(() => {
                   if (window.loadMode1OneClickHistory) {
-                    window.loadMode1OneClickHistory('profile', true);
+                    window.loadMode1OneClickHistory(targetTab, true);
                   }
                 }, 200);
               }, 100);
