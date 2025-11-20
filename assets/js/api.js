@@ -1,8 +1,16 @@
 (function(){
   const CFG = window.APP_CONFIG || {};
-  const BASE = CFG.API_BASE || '';
+  // 確保 BASE 有正確的 fallback，優先使用 window.APP_CONFIG.API_BASE，否則使用 window.API_BASE_URL，最後使用新網域
+  const BASE = CFG.API_BASE || window.API_BASE_URL || 'https://api.aijob.com.tw';
   const REFRESH_KEY = CFG.REFRESH_TOKEN_KEY || 'ipPlanningRefreshToken';
   const originalFetch = window.fetch.bind(window);
+  
+  // 調試：確認 BASE 設定
+  if (typeof console !== 'undefined' && console.log) {
+    console.log('[api.js] BASE:', BASE);
+    console.log('[api.js] window.APP_CONFIG:', window.APP_CONFIG);
+    console.log('[api.js] window.API_BASE_URL:', window.API_BASE_URL);
+  }
 
   // CSRF Token 管理
   let csrfTokenCache = null;
