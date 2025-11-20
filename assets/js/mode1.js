@@ -1414,14 +1414,17 @@ function renderMode1Markdown(text) {
   // 4. 如果沒有 HTML 標籤，嘗試 Markdown 解析
   if (window.marked && window.DOMPurify) {
     try {
-      // 確保 marked 支援所有需要的功能
-      const rawHtml = marked.parse(cleanedText, {
-        breaks: true,  // 單個換行符轉換為 <br>
-        gfm: true,     // GitHub Flavored Markdown
-        tables: true,  // 表格支援
-        headerIds: false, // 不生成標題 ID
-        mangle: false  // 不混淆 email
-      });
+      // 確保 marked 支援所有需要的功能（先設置選項，再解析）
+      if (typeof marked.setOptions === 'function') {
+        marked.setOptions({
+          breaks: true,  // 單個換行符轉換為 <br>
+          gfm: true,     // GitHub Flavored Markdown（支援表格）
+          headerIds: false, // 不生成標題 ID
+          mangle: false  // 不混淆 email
+        });
+      }
+      
+      const rawHtml = marked.parse(cleanedText);
       
       // 使用 DOMPurify 清理 Markdown 轉換後的 HTML
       const cleanHtml = window.DOMPurify.sanitize(rawHtml, {

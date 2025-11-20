@@ -2497,19 +2497,23 @@ function displayIpPlanningResultsForUserDB(results) {
           safeContent = window.safeRenderMarkdown(contentStr);
         } else if (typeof marked !== 'undefined') {
           // 確保 marked 支援表格和換行
-          if (!marked.getDefaults || !marked.getDefaults().gfm) {
+          if (typeof marked.setOptions === 'function') {
             marked.setOptions({ 
               gfm: true,  // GitHub Flavored Markdown（支援表格）
               breaks: true,  // 支援換行
-              tables: true  // 明確啟用表格支援
+              headerIds: false,
+              mangle: false
             });
           }
           const html = marked.parse(contentStr);
           // 使用 DOMPurify 清理（如果可用）
           if (typeof DOMPurify !== 'undefined') {
             safeContent = DOMPurify.sanitize(html, {
-              ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'],  // 允許表格標籤
-              ADD_ATTR: ['colspan', 'rowspan']  // 允許表格屬性
+              USE_PROFILES: { html: true },
+              FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed'],
+              ADD_TAGS: ['table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'strong', 'em', 'b', 'i', 'u', 'ul', 'ol', 'li', 'p', 'br', 'div', 'span', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre', 'code', 'a', 'img'],
+              ADD_ATTR: ['target', 'colspan', 'rowspan', 'class', 'href', 'src', 'alt', 'title'],
+              KEEP_CONTENT: true
             });
           } else {
             safeContent = html;
@@ -2943,19 +2947,23 @@ window.viewIpPlanningDetailForUserDB = async function(resultId) {
             safeContent = window.safeRenderMarkdown(contentStr);
           } else if (typeof marked !== 'undefined') {
             // 確保 marked 支援表格和換行
-            if (!marked.getDefaults || !marked.getDefaults().gfm) {
+            if (typeof marked.setOptions === 'function') {
               marked.setOptions({ 
                 gfm: true,  // GitHub Flavored Markdown（支援表格）
                 breaks: true,  // 支援換行
-                tables: true  // 明確啟用表格支援
+                headerIds: false,
+                mangle: false
               });
             }
             const html = marked.parse(contentStr);
             // 使用 DOMPurify 清理（如果可用）
             if (typeof DOMPurify !== 'undefined') {
               safeContent = DOMPurify.sanitize(html, {
-                ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-                ADD_ATTR: ['colspan', 'rowspan', 'style']
+                USE_PROFILES: { html: true },
+                FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed'],
+                ADD_TAGS: ['table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'strong', 'em', 'b', 'i', 'u', 'ul', 'ol', 'li', 'p', 'br', 'div', 'span', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre', 'code', 'a', 'img'],
+                ADD_ATTR: ['target', 'colspan', 'rowspan', 'class', 'href', 'src', 'alt', 'title'],
+                KEEP_CONTENT: true
               });
             } else {
               safeContent = html;
