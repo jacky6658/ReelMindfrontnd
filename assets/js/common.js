@@ -16,7 +16,16 @@
   // ===== 全域變數 =====
   let ipPlanningToken = null;
   let ipPlanningUser = null;
-  const API_BASE_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
+  // 確保使用正確的 API URL，優先使用 window.APP_CONFIG，否則使用新網域
+  const API_BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) 
+    ? window.APP_CONFIG.API_BASE 
+    : (window.API_BASE_URL || 'https://api.aijob.com.tw');
+  
+  // 調試：確認 API_BASE_URL 設定
+  if (typeof console !== 'undefined' && console.log) {
+    console.log('[Common.js] API_BASE_URL:', API_BASE_URL);
+    console.log('[Common.js] window.APP_CONFIG:', window.APP_CONFIG);
+  }
 
   // ===== 初始化：從 localStorage 載入狀態 =====
   function initGlobalState() {
@@ -885,32 +894,77 @@
    */
   async function goToLogin() {
     try {
+      // 確保 API_BASE_URL 是正確的
+      const currentApiBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) 
+        ? window.APP_CONFIG.API_BASE 
+        : (window.API_BASE_URL || 'https://api.aijob.com.tw');
+      
+      console.log('[goToLogin] 使用的 API_BASE_URL:', currentApiBase);
+      
       // 獲取當前頁面的 origin（用於 OAuth callback）
       const fbParam = encodeURIComponent(window.location.origin);
       
       // 從後端取得 Google 認證 URL
       let authUrl = null;
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/google?fb=${fbParam}`);
+        const apiUrl = `${currentApiBase}/api/auth/google?fb=${fbParam}`;
+        console.log('[goToLogin] 請求 URL:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
         authUrl = data && data.auth_url;
-      } catch (corsErr) {
-        console.warn('Fetch auth_url failed (likely CORS). Fallback to direct navigate.', corsErr);
-        // 如果 fetch 失敗（可能是 CORS），直接使用後端 URL
-        authUrl = `${API_BASE_URL}/api/auth/google?fb=${fbParam}`;
+        
+        if (!authUrl) {
+          throw new Error('auth_url not found in response');
+        }
+        
+        console.log('[goToLogin] 獲取到 auth_url:', authUrl);
+      } catch (fetchErr) {
+        console.error('[goToLogin] Fetch 失敗:', fetchErr);
+        console.error('[goToLogin] 錯誤詳情:', {
+          message: fetchErr.message,
+          stack: fetchErr.stack,
+          API_BASE_URL: currentApiBase
+        });
+        
+        // 如果 fetch 失敗，直接跳轉到後端 API 端點（讓後端處理重定向）
+        // 注意：這不是最佳做法，但作為 fallback
+        const fallbackUrl = `${currentApiBase}/api/auth/google?fb=${fbParam}`;
+        console.warn('[goToLogin] 使用 fallback URL:', fallbackUrl);
+        window.location.href = fallbackUrl;
+        return;
       }
       
-      if (authUrl) {
+      if (authUrl && authUrl.startsWith('http')) {
         // 跳轉到 Google OAuth 頁面
+        console.log('[goToLogin] 跳轉到 Google OAuth:', authUrl);
         window.location.href = authUrl;
       } else {
-        // 如果無法獲取 auth_url，跳轉到首頁讓用戶登入
-        window.location.href = 'index.html';
+        console.error('[goToLogin] auth_url 格式錯誤:', authUrl);
+        // 如果無法獲取有效的 auth_url，直接跳轉到後端 API
+        const fallbackUrl = `${currentApiBase}/api/auth/google?fb=${fbParam}`;
+        window.location.href = fallbackUrl;
       }
     } catch (error) {
-      console.error('登入錯誤:', error);
-      // 發生錯誤時，跳轉到首頁
-      window.location.href = 'index.html';
+      console.error('[goToLogin] 登入錯誤:', error);
+      // 發生錯誤時，嘗試使用後端 API 作為 fallback
+      const currentApiBase = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) 
+        ? window.APP_CONFIG.API_BASE 
+        : (window.API_BASE_URL || 'https://api.aijob.com.tw');
+      const fbParam = encodeURIComponent(window.location.origin);
+      const fallbackUrl = `${currentApiBase}/api/auth/google?fb=${fbParam}`;
+      console.warn('[goToLogin] 使用最終 fallback URL:', fallbackUrl);
+      window.location.href = fallbackUrl;
     }
   }
 
