@@ -986,6 +986,12 @@ async function checkUserLlmKey() {
 
 // 發送 Mode1 訊息
 async function sendMode1Message(message, conversationType = 'ip_planning') {
+  // 檢查訊息是否為空
+  if (!message || !message.trim()) {
+    console.warn('⚠️ 訊息為空，不發送');
+    return;
+  }
+  
   // 雙重檢查：如果正在發送，直接返回（防止重複調用）
   if (isMode1Sending) {
     console.log('⚠️ 訊息發送中，忽略重複調用');
@@ -997,7 +1003,7 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
   
   // 立即設置發送標誌（在異步操作之前）
   isMode1Sending = true;
-  console.log('✅ sendMode1Message 開始執行，設置 isMode1Sending = true');
+  console.log('✅ sendMode1Message 開始執行，設置 isMode1Sending = true', message);
   
   // 檢查用戶是否已綁定 LLM 金鑰
   const hasLlmKey = await checkUserLlmKey();
@@ -1017,7 +1023,7 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
   }
   
   currentMode1ConversationType = conversationType;
-  if (!message || !message.trim()) return;
+  // 訊息檢查已在函數開頭完成，這裡不需要重複檢查
   
   const messageInput = document.getElementById('mode1-messageInput');
   const chatMessages = document.getElementById('mode1-chatMessages');
@@ -2044,14 +2050,28 @@ function initMode1Chat() {
         
         const message = messageInput.value.trim();
         if (message) {
-          console.log('✅ 開始發送訊息（Enter 鍵觸發）');
+          console.log('✅ 開始發送訊息（Enter 鍵觸發）', message);
+          
+          // 如果 isMode1Sending 卡住了，強制重置
+          if (isMode1Sending) {
+            console.warn('⚠️ 檢測到 isMode1Sending 卡住，強制重置');
+            isMode1Sending = false;
+          }
           
           // 清空輸入框（防止重複發送）
           messageInput.value = '';
           messageInput.style.height = 'auto';
           
           // 發送訊息（sendMode1Message 會自己管理 isMode1Sending）
-          sendMode1Message(message);
+          sendMode1Message(message).catch(err => {
+            console.error('發送訊息錯誤:', err);
+            // 確保錯誤時也重置標誌
+            isMode1Sending = false;
+            const sendBtn = document.getElementById('mode1-sendBtn');
+            if (sendBtn) {
+              sendBtn.disabled = false;
+            }
+          });
         }
       }
     }, true); // 使用 capture 階段，優先處理
