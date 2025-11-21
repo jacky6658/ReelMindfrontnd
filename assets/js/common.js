@@ -785,7 +785,7 @@
         padding: 16px 24px;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 100002; /* 高於展開 modal (100001) 和生成結果彈跳視窗 (100000) */
+        z-index: 100005; /* 高於展開 modal (100001) 和生成結果彈跳視窗 (100000) */
         display: none;
         opacity: 0;
         transition: opacity 0.3s;
