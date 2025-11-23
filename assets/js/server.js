@@ -542,7 +542,7 @@ app.use(express.static('dist', {
 }));
 
 // SPA fallback：所有其他 GET 請求都返回 index.html（排除 API 路由和 Service Worker）
-app.get('*', (req, res, next) => {
+app.get('*', async (req, res, next) => {
   // 如果是 API 路由，返回 404
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'API 路由不存在' });
@@ -551,7 +551,29 @@ app.get('*', (req, res, next) => {
   if (req.path === '/sw.js') {
     return res.status(404).json({ error: 'Service Worker not found' });
   }
-  res.sendFile(path.join(__dirname, 'dist/index.html'));
+  
+  // 讀取 index.html 並注入環境變數 BACKEND_URL
+  try {
+    const indexPath = path.join(__dirname, 'dist/index.html');
+    let html = await fs.readFile(indexPath, 'utf8');
+    
+    // 從環境變數讀取 BACKEND_URL
+    const BACKEND_URL = process.env.BACKEND_URL || '';
+    
+    // 如果環境變數存在，注入到 HTML 中（替換 window.BACKEND_URL = null）
+    if (BACKEND_URL) {
+      html = html.replace(
+        /window\.BACKEND_URL\s*=\s*null;/g,
+        `window.BACKEND_URL = '${BACKEND_URL}';`
+      );
+    }
+    
+    res.send(html);
+  } catch (error) {
+    console.error('讀取 index.html 失敗:', error);
+    // 如果讀取失敗，嘗試直接發送文件（不注入環境變數）
+    res.sendFile(path.join(__dirname, 'dist/index.html'));
+  }
 });
 
 // 錯誤處理

@@ -9,9 +9,12 @@ if (typeof window.isLocalDev === 'undefined') {
 }
 
 if (typeof window.API_BASE_URL === 'undefined') {
-  window.API_BASE_URL = window.isLocalDev 
-    ? 'http://127.0.0.1:8000'  // 本地測試
-    : 'https://api.aijob.com.tw';  // 正式版後端
+  // 優先讀取 Zeabur 環境變數 BACKEND_URL（通過 window.BACKEND_URL 注入）
+  // 然後根據環境判斷，最後使用預設值
+  window.API_BASE_URL = window.BACKEND_URL || 
+    (window.isLocalDev 
+      ? 'http://127.0.0.1:8000'  // 本地測試
+      : 'https://api.aijob.com.tw');  // 正式版後端（fallback）
 }
 
 if (!window.APP_CONFIG) {

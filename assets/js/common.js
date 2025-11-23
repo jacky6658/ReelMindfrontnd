@@ -489,7 +489,7 @@
           if (errorData.activated_at) {
             isAlreadyActivated = true;
             const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW');
-            errorMessage = `此授權連結已使用（${activatedDate}）`;
+            errorMessage = `此授權連結已被使用（啟用時間：${activatedDate}）`;
             
             // 如果連結已使用，檢查用戶當前的訂閱狀態
             // 如果用戶已經有訂閱，這可能是成功的（用戶之前已經啟用過）
@@ -512,7 +512,12 @@
                   }
                   // 顯示成功訊息而不是錯誤
                   showToast(`✅ 您已擁有授權！此連結已於 ${activatedDate} 啟用`, 5000);
+                  // 清除 URL 參數
+                  window.history.replaceState({}, document.title, window.location.pathname);
                   return; // 提前返回，不顯示錯誤訊息
+                } else {
+                  // 用戶沒有訂閱，表示這是不同帳戶嘗試使用已使用的連結
+                  errorMessage = `此授權連結已被其他帳戶使用（啟用時間：${activatedDate}），無法重複啟用`;
                 }
               }
             } catch (e) {
@@ -521,20 +526,23 @@
             }
           } else if (errorData.expired_at) {
             const expiredDate = new Date(errorData.expired_at).toLocaleString('zh-TW');
-            errorMessage = `此授權連結已過期（${expiredDate}）`;
+            errorMessage = `此授權連結已過期（過期時間：${expiredDate}）`;
           }
         } catch (e) {
           // 如果無法解析 JSON，根據狀態碼顯示不同訊息
           if (response.status === 500) {
             errorMessage = '伺服器錯誤，請稍後再試或聯繫客服';
           } else if (response.status === 404) {
-            errorMessage = '授權連結無效或不存在';
+            errorMessage = '授權連結無效或不存在，請確認連結是否正確';
           } else if (response.status === 400) {
-            errorMessage = '授權連結格式錯誤';
+            // 400 錯誤可能是連結已使用或格式錯誤
+            errorMessage = '授權連結已使用或格式錯誤';
           } else {
             errorMessage = `啟用失敗（錯誤代碼：${response.status}）`;
           }
         }
+        // 清除 URL 參數，避免重複嘗試
+        window.history.replaceState({}, document.title, window.location.pathname);
         // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
         if (!isAlreadyActivated || !document.body.dataset.subscribed) {
           showToast(`❌ ${errorMessage}`, 5000);
@@ -570,6 +578,9 @@
       } catch (e) {
         console.warn('檢查訂閱狀態失敗:', e);
       }
+      
+      // 清除 URL 參數，避免重複嘗試
+      window.history.replaceState({}, document.title, window.location.pathname);
       
       // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
       showToast('⚠️ 啟用失敗，請稍後再試', 5000);
