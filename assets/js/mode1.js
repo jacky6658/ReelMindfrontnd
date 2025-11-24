@@ -573,52 +573,79 @@ window.updateSelectedSettingsDisplay = updateSelectedSettingsDisplay;
 // 選擇歷史結果
 async function selectHistoryResult(type, resultId) {
   try {
+    console.log('🔵 [selectHistoryResult] 開始選擇歷史結果:', { type, resultId });
+    
     const data = await fetchHistoryData();
     if (!data || !data.success || !data.results) {
+      console.error('❌ [selectHistoryResult] 無法獲取歷史數據:', data);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('無法選擇，找不到數據', 3000);
       }
       return;
     }
 
+    console.log('✅ [selectHistoryResult] 獲取到歷史數據，結果數量:', data.results.length);
+
     const result = data.results.find(r => String(r.id) === String(resultId));
     if (!result) {
+      console.error('❌ [selectHistoryResult] 找不到記錄:', { resultId, availableIds: data.results.map(r => r.id) });
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('無法選擇，找不到記錄', 3000);
       }
       return;
     }
 
+    console.log('✅ [selectHistoryResult] 找到記錄:', { id: result.id, type: result.type, title: result.title });
+
     // 根據 type 更新 selectedSettings（修正變數名：使用參數 type 而不是 resultType）
     if (type === 'profile') {
       selectedSettings.profile = result;
+      console.log('✅ [selectHistoryResult] 已設置 profile 設定');
     } else if (type === 'plan') {
       selectedSettings.plan = result;
+      console.log('✅ [selectHistoryResult] 已設置 plan 設定');
     } else if (type === 'scripts') {
       selectedSettings.scripts = result;
+      console.log('✅ [selectHistoryResult] 已設置 scripts 設定');
+    } else {
+      console.warn('⚠️ [selectHistoryResult] 未知的類型:', type);
     }
 
     // 更新 UI 顯示
+    console.log('🔄 [selectHistoryResult] 更新已選擇設定的顯示');
     updateSelectedSettingsDisplay();
     
-    // 重新載入當前類型，更新按鈕狀態 (已選擇 / 選擇)
-    loadMode1OneClickHistory(type, true);
+    // 重新載入當前類型，更新按鈕狀態 (已選擇 / 選擇) - 添加 await 確保異步操作完成
+    console.log('🔄 [selectHistoryResult] 重新載入歷史記錄，類型:', type);
+    await loadMode1OneClickHistory(type, true);
+    console.log('✅ [selectHistoryResult] 歷史記錄重新載入完成');
 
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-      const typeNames = {
-        'profile': '帳號定位',
-        'plan': '選題方向',
-        'scripts': '短影音腳本'
-      };
-      const typeName = typeNames[type] || type;
+    const typeNames = {
+      'profile': '帳號定位',
+      'plan': '選題方向',
+      'scripts': '短影音腳本'
+    };
+    const typeName = typeNames[type] || type;
+
+    if (window.ReelMindCommon && window.ReelMindCommon.showGreenToast) {
+      window.ReelMindCommon.showGreenToast(`✅ 已選擇「${typeName}」`, 2000);
+      console.log('✅ [selectHistoryResult] 顯示綠色通知:', typeName);
+    } else if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast(`✅ 已選擇「${typeName}」`, 3000);
+      console.log('✅ [selectHistoryResult] 顯示普通通知:', typeName);
     }
+    
+    console.log('✅ [selectHistoryResult] 選擇完成');
   } catch (error) {
+    console.error('❌ [selectHistoryResult] 選擇歷史結果時發生錯誤:', error);
+    console.error('❌ [selectHistoryResult] 錯誤堆疊:', error.stack);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('選擇失敗，請稍後再試', 3000);
     }
   }
-};
+}
+// 立即導出到 window，確保 onclick 可以找到函數
+window.selectHistoryResult = selectHistoryResult;
 
 // 移除選擇的設定
 function removeSelectedSetting(type) {
@@ -708,19 +735,47 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
 
 // 編輯歷史記錄標題
 function editMode1HistoryTitle(resultId) {
+  console.log('🔵 [editMode1HistoryTitle] 開始編輯標題:', resultId);
   const titleSpan = document.getElementById(`historyTitle-${resultId}`);
   const titleInput = document.getElementById(`historyTitleInput-${resultId}`);
-  const editIcon = titleSpan.nextElementSibling; // i.fas.fa-edit
-  const saveIcon = editIcon.nextElementSibling; // i.fas.fa-check
-  const cancelIcon = saveIcon.nextElementSibling; // i.fas.fa-times
+  // 修正：titleSpan.nextElementSibling 是 titleInput，不是 editIcon
+  const editIcon = titleInput ? titleInput.nextElementSibling : null; // i.fas.fa-edit
+  const saveIcon = editIcon ? editIcon.nextElementSibling : null; // i.fas.fa-check
+  const cancelIcon = saveIcon ? saveIcon.nextElementSibling : null; // i.fas.fa-times
+
+  console.log('🔍 [editMode1HistoryTitle] DOM 元素檢查:', {
+    titleSpan: !!titleSpan,
+    titleInput: !!titleInput,
+    editIcon: !!editIcon,
+    saveIcon: !!saveIcon,
+    cancelIcon: !!cancelIcon
+  });
 
   if (titleSpan && titleInput && editIcon && saveIcon && cancelIcon) {
     titleSpan.style.display = 'none';
     titleInput.style.display = 'inline-block';
-    titleInput.focus();
     editIcon.style.display = 'none';
     saveIcon.style.display = 'inline-block';
     cancelIcon.style.display = 'inline-block';
+    
+    // 聚焦並選擇所有文字，方便用戶快速編輯
+    titleInput.focus();
+    titleInput.select();
+    
+    // 添加 Enter 鍵保存、Escape 鍵取消的功能
+    const handleKeyDown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveMode1HistoryTitle(resultId);
+        titleInput.removeEventListener('keydown', handleKeyDown);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        const originalTitle = titleSpan.textContent.trim();
+        cancelMode1HistoryTitleEdit(resultId, originalTitle);
+        titleInput.removeEventListener('keydown', handleKeyDown);
+      }
+    };
+    titleInput.addEventListener('keydown', handleKeyDown);
   }
 }
 window.editMode1HistoryTitle = editMode1HistoryTitle;
@@ -728,32 +783,63 @@ window.editMode1HistoryTitle = editMode1HistoryTitle;
 
 // 保存歷史記錄標題
 async function saveMode1HistoryTitle(resultId) {
+  console.log('🔵 [saveMode1HistoryTitle] 開始保存標題:', resultId);
   const titleSpan = document.getElementById(`historyTitle-${resultId}`);
   const titleInput = document.getElementById(`historyTitleInput-${resultId}`);
-  const editIcon = titleSpan.nextElementSibling;
-  const saveIcon = editIcon.nextElementSibling;
-  const cancelIcon = saveIcon.nextElementSibling;
+  // 修正：titleSpan.nextElementSibling 是 titleInput，不是 editIcon
+  const editIcon = titleInput ? titleInput.nextElementSibling : null;
+  const saveIcon = editIcon ? editIcon.nextElementSibling : null;
+  const cancelIcon = saveIcon ? saveIcon.nextElementSibling : null;
+
+  console.log('🔍 [saveMode1HistoryTitle] DOM 元素檢查:', {
+    titleSpan: !!titleSpan,
+    titleInput: !!titleInput,
+    editIcon: !!editIcon,
+    saveIcon: !!saveIcon,
+    cancelIcon: !!cancelIcon
+  });
 
   if (titleSpan && titleInput && editIcon && saveIcon && cancelIcon) {
     const newTitle = titleInput.value.trim();
+    const originalTitle = titleSpan.textContent.trim(); // 儲存原始標題
+
+    console.log('📝 [saveMode1HistoryTitle] 標題資訊:', { originalTitle, newTitle, resultId });
+
     if (newTitle === '') {
+      console.warn('⚠️ [saveMode1HistoryTitle] 標題為空');
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('標題不能為空', 3000);
       }
+      titleInput.focus(); // 聚焦到輸入框，方便用戶重新輸入
       return;
-          }
-          
-          try {
+    }
+
+    // 如果標題沒有改變，不發送 API 請求，直接退出編輯模式
+    if (newTitle === originalTitle) {
+      console.log('ℹ️ [saveMode1HistoryTitle] 標題未更改，直接退出編輯模式');
+      titleSpan.style.display = 'inline-block';
+      titleInput.style.display = 'none';
+      editIcon.style.display = 'inline-block';
+      saveIcon.style.display = 'none';
+      cancelIcon.style.display = 'none';
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('標題未更改', 2000);
+      }
+      return;
+    }
+
+    try {
       const token = localStorage.getItem('ipPlanningToken');
       if (!token) {
+        console.error('❌ [saveMode1HistoryTitle] 沒有 token');
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast('請先登入', 3000);
         }
         return;
       }
 
-      // 注意：後端目前沒有標題更新端點，暫時只更新本地顯示
-      // 更新本地顯示（textContent 會自動轉義，不需要 safeSetText）
+      console.log('🔄 [saveMode1HistoryTitle] 開始樂觀更新 UI');
+      // 樂觀更新 UI（先更新 UI，再發送 API）
       if (window.safeSetText && titleSpan) {
         window.safeSetText(titleSpan, newTitle);
       } else {
@@ -764,23 +850,9 @@ async function saveMode1HistoryTitle(resultId) {
       editIcon.style.display = 'inline-block';
       saveIcon.style.display = 'none';
       cancelIcon.style.display = 'none';
-      
-      // 更新快取中的標題（如果存在）
-      if (cachedHistoryData && cachedHistoryData.results) {
-        const cachedResult = cachedHistoryData.results.find(r => r.id === resultId);
-        if (cachedResult) {
-          cachedResult.title = newTitle;
-        }
-      }
-      
-      updateSelectedSettingsDisplay(); // 更新已選擇設定中的標題
 
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('✅ 標題已更新（僅本地顯示，重新載入後會恢復）', 3000);
-      }
-      
-      // TODO: 當後端添加標題更新端點時，可以使用以下代碼：
-      /*
+      // 發送 API 請求更新標題
+      console.log('📡 [saveMode1HistoryTitle] 發送 API 請求:', `${API_URL}/api/ip-planning/results/${resultId}/title`);
       const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}/title`, {
         method: 'PUT',
         headers: {
@@ -790,19 +862,81 @@ async function saveMode1HistoryTitle(resultId) {
         body: JSON.stringify({ title: newTitle })
       });
 
+      console.log('📥 [saveMode1HistoryTitle] API 響應狀態:', response.status, response.statusText);
+      
       if (response.ok) {
-        clearHistoryCache(); // 清除快取以強制重新載入
-        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast('✅ 標題已更新', 3000);
-      }
-    } else {
-        const errorData = await response.json();
-        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast(`更新標題失敗: ${errorData.message || '未知錯誤'}`, 3000);
+        const responseData = await response.json().catch(() => ({}));
+        console.log('✅ [saveMode1HistoryTitle] API 請求成功:', responseData);
+        
+        // 更新快取中的標題
+        if (cachedHistoryData && cachedHistoryData.results) {
+          const cachedResult = cachedHistoryData.results.find(r => r.id == resultId || String(r.id) === String(resultId));
+          if (cachedResult) {
+            cachedResult.title = newTitle;
+            console.log('✅ [saveMode1HistoryTitle] 已更新快取中的標題');
+          }
         }
+        
+        updateSelectedSettingsDisplay(); // 更新已選擇設定中的標題
+        
+        // 清除快取以確保下次載入時顯示最新標題
+        clearHistoryCache();
+        console.log('✅ [saveMode1HistoryTitle] 已清除快取');
+
+        // 顯示成功通知
+        if (window.ReelMindCommon && window.ReelMindCommon.showGreenToast) {
+          window.ReelMindCommon.showGreenToast('✅ 標題已更新', 2000);
+          console.log('✅ [saveMode1HistoryTitle] 顯示綠色通知');
+        } else if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('✅ 標題已更新', 2000);
+          console.log('✅ [saveMode1HistoryTitle] 顯示普通通知');
+        }
+        console.log('✅ [saveMode1HistoryTitle] 保存完成');
+      } else {
+        // API 失敗，還原 UI
+        const errorData = await response.json().catch(() => ({ error: '未知錯誤' }));
+        console.error('❌ [saveMode1HistoryTitle] API 請求失敗:', response.status, errorData);
+        
+        if (window.safeSetText && titleSpan) {
+          window.safeSetText(titleSpan, originalTitle);
+        } else {
+          titleSpan.textContent = originalTitle;
+        }
+        titleInput.value = originalTitle; // 還原輸入框內容
+        
+        // 重新進入編輯模式，讓用戶可以重新編輯
+        titleSpan.style.display = 'none';
+        titleInput.style.display = 'inline-block';
+        titleInput.focus();
+        editIcon.style.display = 'none';
+        saveIcon.style.display = 'inline-block';
+        cancelIcon.style.display = 'inline-block';
+
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast(`更新標題失敗: ${errorData.error || '未知錯誤'}`, 3000);
+        }
+        console.log('🔄 [saveMode1HistoryTitle] 已還原 UI 並重新進入編輯模式');
       }
-      */
     } catch (error) {
+      console.error('❌ [saveMode1HistoryTitle] 更新標題時發生錯誤:', error);
+      console.error('❌ [saveMode1HistoryTitle] 錯誤堆疊:', error.stack);
+      
+      // 發生錯誤，還原 UI
+      if (window.safeSetText && titleSpan) {
+        window.safeSetText(titleSpan, originalTitle);
+      } else {
+        titleSpan.textContent = originalTitle;
+      }
+      titleInput.value = originalTitle; // 還原輸入框內容
+      
+      // 重新進入編輯模式，讓用戶可以重新編輯
+      titleSpan.style.display = 'none';
+      titleInput.style.display = 'inline-block';
+      titleInput.focus();
+      editIcon.style.display = 'none';
+      saveIcon.style.display = 'inline-block';
+      cancelIcon.style.display = 'inline-block';
+
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('更新標題失敗，請稍後再試', 3000);
       }
@@ -814,11 +948,21 @@ window.saveMode1HistoryTitle = saveMode1HistoryTitle;
 
 // 取消編輯歷史記錄標題
 function cancelMode1HistoryTitleEdit(resultId, originalTitle) {
+  console.log('🔵 [cancelMode1HistoryTitleEdit] 取消編輯標題:', resultId);
   const titleSpan = document.getElementById(`historyTitle-${resultId}`);
   const titleInput = document.getElementById(`historyTitleInput-${resultId}`);
-  const editIcon = titleSpan.nextElementSibling;
-  const saveIcon = editIcon.nextElementSibling;
-  const cancelIcon = saveIcon.nextElementSibling;
+  // 修正：titleSpan.nextElementSibling 是 titleInput，不是 editIcon
+  const editIcon = titleInput ? titleInput.nextElementSibling : null;
+  const saveIcon = editIcon ? editIcon.nextElementSibling : null;
+  const cancelIcon = saveIcon ? saveIcon.nextElementSibling : null;
+
+  console.log('🔍 [cancelMode1HistoryTitleEdit] DOM 元素檢查:', {
+    titleSpan: !!titleSpan,
+    titleInput: !!titleInput,
+    editIcon: !!editIcon,
+    saveIcon: !!saveIcon,
+    cancelIcon: !!cancelIcon
+  });
 
   if (titleSpan && titleInput && editIcon && saveIcon && cancelIcon) {
     titleInput.value = originalTitle; // 恢復原始標題
@@ -1518,7 +1662,11 @@ function createMode1Message(role, content, avatarUrl = '') {
       avatarEl.textContent = '👤';
     }
   } else {
-    avatarEl.textContent = 'AI';
+    // 使用 Font Awesome 機器人圖標
+    const robotIcon = document.createElement('i');
+    robotIcon.className = 'fas fa-robot';
+    robotIcon.setAttribute('aria-label', 'AI 助手');
+    avatarEl.appendChild(robotIcon);
   }
 
   const contentEl = document.createElement('div');

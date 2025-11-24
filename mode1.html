@@ -901,6 +901,71 @@
         font-size: 16px;
         font-weight: 600;
         color: #1f2937;
+        flex: 1;
+        min-width: 0;
+        word-break: break-word;
+      }
+      
+      .mode1-oneclick-history-item-title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+      }
+      
+      .mode1-oneclick-history-item-title-input {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+        background: #ffffff;
+        border: 2px solid #3b82f6;
+        border-radius: 6px;
+        padding: 4px 8px;
+        flex: 1;
+        min-width: 0;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      
+      .mode1-oneclick-history-item-title-input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      
+      .edit-title-icon,
+      .save-title-icon,
+      .cancel-title-icon {
+        font-size: 14px;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: color 0.2s, background-color 0.2s;
+        flex-shrink: 0;
+      }
+      
+      .edit-title-icon:hover {
+        color: #3b82f6;
+        background-color: #eff6ff;
+      }
+      
+      .save-title-icon {
+        color: #10b981;
+      }
+      
+      .save-title-icon:hover {
+        color: #059669;
+        background-color: #d1fae5;
+      }
+      
+      .cancel-title-icon {
+        color: #ef4444;
+      }
+      
+      .cancel-title-icon:hover {
+        color: #dc2626;
+        background-color: #fee2e2;
       }
       
       .mode1-oneclick-history-item-date {
