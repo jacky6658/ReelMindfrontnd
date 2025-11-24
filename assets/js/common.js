@@ -837,7 +837,7 @@
         padding: 16px 24px;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        z-index: 100006;
+        z-index: 100007;
         display: none;
         opacity: 0;
         transition: opacity 0.3s;

@@ -571,11 +571,15 @@ window.saveHistoryResultToUserDB = async function(resultId, resultType) {
     }
 
     if (response.ok) {
-      // 使用綠色通知顯示成功訊息
+      // 使用綠色通知顯示成功訊息，確保在 Modal 之上顯示
+      const successMessage = `✅ 已儲存到創作者資料庫的「${typeName}」`;
       if (window.ReelMindCommon && window.ReelMindCommon.showGreenToast) {
-        window.ReelMindCommon.showGreenToast(`✅ 已儲存到創作者資料庫的「${typeName}」`, 2000);
+        window.ReelMindCommon.showGreenToast(successMessage, 2000);
       } else if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast(`✅ 已儲存到創作者資料庫的「${typeName}」`, 3000);
+        window.ReelMindCommon.showToast(successMessage, 3000);
+      } else {
+        // 降級處理：如果都沒有，至少顯示一個提示
+        console.log('儲存成功:', successMessage);
       }
       // 儲存成功後清除快取，強制重新載入，以更新 userDB
       clearHistoryCache();
