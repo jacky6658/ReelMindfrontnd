@@ -489,7 +489,7 @@
           if (errorData.activated_at) {
             isAlreadyActivated = true;
             const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW');
-            errorMessage = `此授權連結已被使用（啟用時間：${activatedDate}）`;
+            errorMessage = `此授權連結已使用（${activatedDate}）`;
             
             // 如果連結已使用，檢查用戶當前的訂閱狀態
             // 如果用戶已經有訂閱，這可能是成功的（用戶之前已經啟用過）
@@ -512,12 +512,7 @@
                   }
                   // 顯示成功訊息而不是錯誤
                   showToast(`✅ 您已擁有授權！此連結已於 ${activatedDate} 啟用`, 5000);
-                  // 清除 URL 參數
-                  window.history.replaceState({}, document.title, window.location.pathname);
                   return; // 提前返回，不顯示錯誤訊息
-                } else {
-                  // 用戶沒有訂閱，表示這是不同帳戶嘗試使用已使用的連結
-                  errorMessage = `此授權連結已被其他帳戶使用（啟用時間：${activatedDate}），無法重複啟用`;
                 }
               }
             } catch (e) {
@@ -526,23 +521,20 @@
             }
           } else if (errorData.expired_at) {
             const expiredDate = new Date(errorData.expired_at).toLocaleString('zh-TW');
-            errorMessage = `此授權連結已過期（過期時間：${expiredDate}）`;
+            errorMessage = `此授權連結已過期（${expiredDate}）`;
           }
         } catch (e) {
           // 如果無法解析 JSON，根據狀態碼顯示不同訊息
           if (response.status === 500) {
             errorMessage = '伺服器錯誤，請稍後再試或聯繫客服';
           } else if (response.status === 404) {
-            errorMessage = '授權連結無效或不存在，請確認連結是否正確';
+            errorMessage = '授權連結無效或不存在';
           } else if (response.status === 400) {
-            // 400 錯誤可能是連結已使用或格式錯誤
-            errorMessage = '授權連結已使用或格式錯誤';
+            errorMessage = '授權連結格式錯誤';
           } else {
             errorMessage = `啟用失敗（錯誤代碼：${response.status}）`;
           }
         }
-        // 清除 URL 參數，避免重複嘗試
-        window.history.replaceState({}, document.title, window.location.pathname);
         // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
         if (!isAlreadyActivated || !document.body.dataset.subscribed) {
           showToast(`❌ ${errorMessage}`, 5000);
@@ -578,9 +570,6 @@
       } catch (e) {
         console.warn('檢查訂閱狀態失敗:', e);
       }
-      
-      // 清除 URL 參數，避免重複嘗試
-      window.history.replaceState({}, document.title, window.location.pathname);
       
       // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
       showToast('⚠️ 啟用失敗，請稍後再試', 5000);
@@ -875,15 +864,17 @@
       }
     }
     
-    // 檢查頁面權限（首頁 index.html 和體驗頁面 experience.html 不需要檢查，允許未登入用戶訪問）
+    // 檢查頁面權限（首頁 index.html、體驗頁面 experience.html 和指南頁面 guide.html 不需要檢查，允許未登入用戶訪問）
     const isHomePage = window.location.pathname === '/' || 
                        window.location.pathname.endsWith('/index.html') ||
                        window.location.pathname.endsWith('/');
     const isExperiencePage = window.location.pathname.endsWith('/experience.html') ||
                              window.location.pathname.includes('experience.html');
+    const isGuidePage = window.location.pathname.endsWith('/guide.html') ||
+                        window.location.pathname.includes('guide.html');
     
-    if (!isHomePage && !isExperiencePage) {
-      // 非首頁且非體驗頁面才需要檢查權限
+    if (!isHomePage && !isExperiencePage && !isGuidePage) {
+      // 非首頁、非體驗頁面、非指南頁面才需要檢查權限
       const hasPermission = await checkPagePermission();
       
       if (!hasPermission) {
@@ -891,7 +882,7 @@
         return;
       }
     } else {
-      // 首頁或體驗頁面：只檢查登入和訂閱狀態（不強制要求），用於更新 UI
+      // 首頁、體驗頁面或指南頁面：只檢查登入和訂閱狀態（不強制要求），用於更新 UI
       await checkLoginStatus();
       await checkSubscriptionStatus();
     }
