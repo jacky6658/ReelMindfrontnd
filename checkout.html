@@ -397,9 +397,9 @@ a{text-decoration:none;color:inherit}
         
         <!-- 方案摘要 -->
         <div class="plan-summary" id="planSummary">
-          <div class="plan-name" id="summaryPlanName">永久使用方案</div>
+          <div class="plan-name" id="summaryPlanName">Creator Pro 雙年方案</div>
           <div class="plan-price" id="summaryPlanPrice">NT$9,900</div>
-          <div class="plan-desc" id="summaryPlanDesc">一次購買，永久使用</div>
+          <div class="plan-desc" id="summaryPlanDesc">一次購買，兩年使用</div>
         </div>
 
         <div class="row">
@@ -440,7 +440,7 @@ a{text-decoration:none;color:inherit}
       <div class="body">
         <h2 class="h2">訂單摘要</h2>
         <div class="sum" aria-live="polite">
-          <div class="line"><span id="sumPlan">永久使用方案</span><b id="sumPrice">NT$9,900</b></div>
+          <div class="line"><span id="sumPlan">Creator Pro 雙年方案</span><b id="sumPrice">NT$9,900</b></div>
           <div class="line"><span>手續費</span><b id="fee">NT$0</b></div>
           <div class="line" style="border-top:1px dashed #334155;margin-top:8px;padding-top:8px">
             <span><b>應付金額</b></span><b id="total">NT$9,900</b>
@@ -477,8 +477,8 @@ a{text-decoration:none;color:inherit}
 
 <script>
   // 價格設定
-  const price = { lifetime: 9900, yearly: 4788 };
-  let currentPlan = 'lifetime';
+  const price = { yearly: 8280, two_year: 9900 };
+  let currentPlan = 'two_year';
   let testMode = false;  // 測試模式標記
   let testAmount = null;  // 測試金額
 
@@ -508,7 +508,7 @@ a{text-decoration:none;color:inherit}
       }
     }
     
-    if (plan === 'yearly' || plan === 'lifetime') {
+    if (plan === 'yearly' || plan === 'two_year') {
       currentPlan = plan;
       console.log('✅ 方案設定為:', currentPlan, '測試模式:', testMode, '測試金額:', testAmount);
       updatePlanDisplay();
@@ -527,12 +527,12 @@ a{text-decoration:none;color:inherit}
     
     // 更新方案摘要
     let planName, planDesc;
-    if (currentPlan === 'lifetime') {
-      planName = '永久使用方案';
-      planDesc = '一次購買，永久使用';
+    if (currentPlan === 'two_year') {
+      planName = 'Creator Pro 雙年方案';
+      planDesc = '一次購買，兩年使用';
     } else {  // yearly
-      planName = '年費方案 🔥';
-      planDesc = '最划算的長期方案';
+      planName = 'Script Lite 入門版';
+      planDesc = '以年計費（一次付清）';
     }
     
     document.getElementById('summaryPlanName').textContent = testMode 
@@ -544,7 +544,7 @@ a{text-decoration:none;color:inherit}
       : planDesc;
 
     // 更新訂單摘要
-    const displayPlanName = currentPlan === 'lifetime' ? '永久使用方案' : '年費方案';
+    const displayPlanName = currentPlan === 'two_year' ? 'Creator Pro 雙年方案' : 'Script Lite 入門版';
     document.getElementById('sumPlan').textContent = testMode 
       ? `${displayPlanName} (測試)` 
       : displayPlanName;
@@ -563,10 +563,10 @@ a{text-decoration:none;color:inherit}
       }
     }
 
-    // 年費方案顯示額外功能
+    // Creator Pro 方案顯示額外功能
     const extraFeature = document.getElementById('extraFeature');
     if (extraFeature) {
-      extraFeature.style.display = isYearly ? 'list-item' : 'none';
+      extraFeature.style.display = (currentPlan === 'two_year') ? 'list-item' : 'none';
     }
   }
 

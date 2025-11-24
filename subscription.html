@@ -488,14 +488,14 @@ a{text-decoration:none;color:inherit}
 <main class="wrap" style="padding:28px 0">
   <div class="safe grid" style="grid-template-columns: repeat(3, 1fr); gap: 16px;">
 
-    <!-- 第一：年費方案 -->
+    <!-- 第一：Script Lite 入門版 -->
     <section class="card">
       <div class="body" style="text-align: center; display: flex; flex-direction: column; height: 100%;">
         <div style="flex: 1;">
-          <h2 class="h2">年費方案</h2>
-          <div class="price" style="color: var(--ink); font-size: 34px; font-weight: 900;">NT$399元<span style="font-size: 0.6em;">/月</span></div>
+          <h2 class="h2">Script Lite 入門版</h2>
+          <div class="price" style="color: var(--ink); font-size: 34px; font-weight: 900;">NT$690元<span style="font-size: 0.6em;">/月</span></div>
           <div class="sub" style="margin: 8px 0; color: var(--ink);">
-            <div style="font-size: 14px; font-weight: 500;">以年計費</div>
+            <div style="font-size: 14px; font-weight: 500;">以年計費（一次付清）</div>
           </div>
           <div class="hr"></div>
           <div class="sub" style="margin: 12px 0; font-weight: 600;">一次付款、自動續約、可隨時取消</div>
@@ -506,29 +506,31 @@ a{text-decoration:none;color:inherit}
           </ul>
           <div class="hr"></div>
         </div>
-        <a href="#" onclick="handleSubscriptionClick('yearly'); return false;" class="btn blue" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none;">立即購買</a>
+        <a href="#" onclick="handleSubscriptionClick('yearly'); return false;" class="btn blue" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none;">立即開通使用權</a>
       </div>
     </section>
 
-    <!-- 第二：永久使用方案（優先推廣） -->
+    <!-- 第二：Creator Pro 雙年方案（優先推廣） -->
     <section class="card" style="border: 2px solid var(--blue); box-shadow: 0 20px 50px rgba(37,99,235,.15); position: relative;">
       <div style="position: absolute; top: -12px; left: 50%; right: auto; transform: translateX(-50%); background: var(--blue); color: white; padding: 4px 16px; border-radius: 999px; font-size: 12px; font-weight: 900; white-space: nowrap; display: inline-block;">🔥 最多人選擇</div>
       <div class="body" style="text-align: center; display: flex; flex-direction: column; height: 100%;">
         <div style="flex: 1;">
-          <h2 class="h2">永久使用方案</h2>
-          <div class="price" style="color: var(--blue); margin: 16px 0;">NT$9,900</div>
-          <div class="sub" style="margin-bottom: 16px;">一次購買，永久使用</div>
+          <h2 class="h2">Creator Pro 雙年方案</h2>
+          <div class="price" style="color: var(--blue); margin: 16px 0;">NT$9,900<span style="font-size: 0.6em;"> / 2 年</span></div>
+          <div class="sub" style="margin-bottom: 16px;">全功能創作者方案｜限時加贈 IP 人設規劃</div>
           <div class="hr"></div>
           <ul class="list" style="text-align: left; margin: 16px 0;">
             <li>IP人設規劃(包含套用設定與AI短影音顧問深度對談，自動生成帳號定位、14天選題規劃、今日腳本，支援歷史記錄管理與自由搭配設定)</li>
             <li>一鍵生成(無限制次數)</li>
             <li>創作者資料庫(PDF / CSV 下載)</li>
+            <li>實戰指南</li>
+            <li>所有未來更新功能</li>
             <li>客服支援</li>
           </ul>
           <div class="hr"></div>
-          <div class="small" style="margin-top: 0; text-align: center; margin-bottom: 12px;">一次付款，終身使用，無需續費</div>
+          <div class="small" style="margin-top: 0; text-align: center; margin-bottom: 12px;">一次付款，兩年使用，無需續費</div>
         </div>
-        <a href="#" onclick="handleSubscriptionClick('lifetime'); return false;" class="btn blue monthly-btn" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none; position: relative; z-index: 10000 !important; cursor: pointer !important; pointer-events: auto !important; background: var(--blue) !important; color: white !important; padding: 12px 24px; border-radius: 999px; font-weight: 900;">立即升級 永久使用方案</a>
+        <a href="#" onclick="handleSubscriptionClick('two_year'); return false;" class="btn blue monthly-btn" style="width: 100%; margin-top: auto; display: inline-flex; justify-content: center; text-decoration: none; position: relative; z-index: 10000 !important; cursor: pointer !important; pointer-events: auto !important; background: var(--blue) !important; color: white !important; padding: 12px 24px; border-radius: 999px; font-weight: 900;">立即升級為 Pro</a>
       </div>
     </section>
 
@@ -579,8 +581,8 @@ a{text-decoration:none;color:inherit}
 
 <script>
   // 價格設定（如未來調整，改這裡即可）
-  const price = { lifetime: 9900, yearly: 4788 };
-  let current = 'lifetime';
+  const price = { yearly: 8280, two_year: 9900 };
+  let current = 'two_year';
 
   function format(n){ return 'NT$' + n.toLocaleString('zh-Hant-TW'); }
 
@@ -730,9 +732,9 @@ a{text-decoration:none;color:inherit}
     checkout();
   }
 
-  // 初始化：從 URL 參數讀取方案，如果沒有則預設為永久使用
+  // 初始化：從 URL 參數讀取方案，如果沒有則預設為 Creator Pro 雙年方案
   const urlPlan = getUrlParam('plan');
-  const initialPlan = urlPlan === 'yearly' ? 'yearly' : (urlPlan === 'lifetime' ? 'lifetime' : 'lifetime');
+  const initialPlan = urlPlan === 'yearly' ? 'yearly' : (urlPlan === 'two_year' ? 'two_year' : 'two_year');
   setPlan(initialPlan);
 
   // 添加滾動到對應卡片的動畫
@@ -1046,7 +1048,7 @@ a{text-decoration:none;color:inherit}
         e.stopPropagation();
         e.stopImmediatePropagation();
         // 調用 handleSubscriptionClick 進行登入檢查
-        handleSubscriptionClick('lifetime');
+        handleSubscriptionClick('two_year');
         return false;
       }, true);
       

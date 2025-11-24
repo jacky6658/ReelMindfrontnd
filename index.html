@@ -175,15 +175,15 @@
       "offers": [
         {
           "@type": "Offer",
-          "name": "永久使用方案",
+          "name": "Creator Pro 雙年方案",
           "price": "9900",
           "priceCurrency": "TWD",
           "availability": "https://schema.org/InStock"
         },
         {
           "@type": "Offer",
-          "name": "年費方案",
-          "price": "4788",
+          "name": "Script Lite 入門版",
+          "price": "8280",
           "priceCurrency": "TWD",
           "availability": "https://schema.org/InStock"
         }
@@ -11718,26 +11718,26 @@
                   <div class="rm-pricing-cards" style="display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin-bottom: 60px; padding: 0 20px;">
                     <!-- 年費卡 -->
                     <div style="flex: 0 1 320px; max-width: 380px; padding: 40px; background: rgba(255,255,255,0.15); backdrop-filter: blur(20px); border-radius: 24px; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s; display: flex; flex-direction: column;">
-                      <div style="font-size: 1rem; color: rgba(255,255,255,0.9); margin-bottom: 12px; font-weight: 600;">年費方案</div>
+                      <div style="font-size: 1rem; color: rgba(255,255,255,0.9); margin-bottom: 12px; font-weight: 600;">Script Lite 入門版</div>
                       <div style="display: flex; align-items: flex-end; flex-wrap: nowrap; gap: 4px; margin-bottom: 8px;">
-                        <div style="font-size: 2.5rem; font-weight: 800; color: white; line-height: 1;">NT$399元<span style="font-size: 0.6em;">/月</span></div>
+                        <div style="font-size: 2.5rem; font-weight: 800; color: white; line-height: 1;">NT$690元<span style="font-size: 0.6em;">/月</span></div>
                       </div>
-                      <div style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin-bottom: 16px;">以年計費</div>
+                      <div style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin-bottom: 16px;">以年計費（一次付清）</div>
                       <a href="#" onclick="handleSubscriptionClick('yearly'); return false;" style="display: block; margin-top: auto; padding: 0 32px; background: white; color: #2563EB; border-radius: 12px; font-weight: 700; text-decoration: none; transition: all 0.3s; text-align: center; height: 56px; display: flex; align-items: center; justify-content: center;">
-                        立即購買
+                        立即開通使用權
                       </a>
                     </div>
                     
-                    <!-- 永久使用卡（優先推廣） -->
+                    <!-- Creator Pro 雙年方案（優先推廣） -->
                     <div style="flex: 0 1 320px; max-width: 380px; padding: 40px; background: rgba(255,255,255,0.95); border-radius: 24px; border: 2px solid rgba(255,255,255,0.5); box-shadow: 0 20px 60px rgba(0,0,0,0.2); position: relative; transition: all 0.3s; display: flex; flex-direction: column;">
                       <div style="position: absolute; top: -16px; left: 50%; right: auto; transform: translateX(-50%); padding: 8px 24px; background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%); color: white; border-radius: 20px; font-size: 0.9rem; font-weight: 700; box-shadow: 0 4px 12px rgba(251,191,36,0.3); white-space: nowrap; display: inline-block;">🔥 最多人選擇</div>
-                      <div style="font-size: 1rem; color: #64748B; margin-bottom: 12px; font-weight: 600; margin-top: 12px;">永久使用方案</div>
+                      <div style="font-size: 1rem; color: #64748B; margin-bottom: 12px; font-weight: 600; margin-top: 12px;">Creator Pro 雙年方案</div>
                       <div style="display: flex; align-items: flex-end; flex-wrap: nowrap; gap: 4px; margin-bottom: 8px;">
-                        <div style="font-size: 2.5rem; font-weight: 800; color: #2563EB; line-height: 1;">NT$9,900</div>
+                        <div style="font-size: 2.5rem; font-weight: 800; color: #2563EB; line-height: 1;">NT$9,900<span style="font-size: 0.5em;"> / 2 年</span></div>
                       </div>
-                      <div style="font-size: 0.9rem; color: #94A3B8; margin-bottom: 16px;">一次購買，永久使用</div>
-                      <a href="#" onclick="handleSubscriptionClick('lifetime'); return false;" style="display: block; margin-top: auto; padding: 0 32px; background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px rgba(59,130,246,0.3); transition: all 0.3s; text-align: center; height: 56px; display: flex; align-items: center; justify-content: center;">
-                        立即升級 永久使用方案
+                      <div style="font-size: 0.9rem; color: #94A3B8; margin-bottom: 16px;">全功能創作者方案｜限時加贈 IP 人設規劃</div>
+                      <a href="#" onclick="handleSubscriptionClick('two_year'); return false;" style="display: block; margin-top: auto; padding: 0 32px; background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px rgba(59,130,246,0.3); transition: all 0.3s; text-align: center; height: 56px; display: flex; align-items: center; justify-content: center;">
+                        立即升級為 Pro
                       </a>
                     </div>
                     
@@ -14280,8 +14280,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                               (finalUserInfo && finalUserInfo.is_subscribed);
             
             if (finalCheck) {
-            const planName = planType === 'lifetime' ? '永久使用' : (planType === 'yearly' ? '年費' : '年費');
-              const planDays = planType === 'lifetime' ? '永久' : (planType === 'yearly' ? '1年' : '1年');
+            const planName = planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'lifetime' ? '永久使用' : '年費'));
+              const planDays = planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'lifetime' ? '永久' : '1年'));
               showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
             } else {
               // 如果最終檢查還是沒有訂閱，可能是後端更新延遲，顯示提示而不是錯誤
@@ -14305,8 +14305,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                         ipPlanningUser.is_subscribed = latestUserInfo.is_subscribed;
                         localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                       }
-                      const planName = planType === 'lifetime' ? '永久使用' : (planType === 'yearly' ? '年費' : '年費');
-                      const planDays = planType === 'lifetime' ? '永久' : (planType === 'yearly' ? '1年' : '1年');
+                      const planName = planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'lifetime' ? '永久使用' : '年費'));
+                      const planDays = planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'lifetime' ? '永久' : '1年'));
                       showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
                       return;
                     }
@@ -14319,8 +14319,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 const recheck = document.body.dataset.subscribed === 'true' || 
                                localStorage.getItem('subscriptionStatus') === 'active';
                 if (recheck) {
-                  const planName = planType === 'lifetime' ? '永久使用' : (planType === 'yearly' ? '年費' : '年費');
-                  const planDays = planType === 'lifetime' ? '永久' : (planType === 'yearly' ? '1年' : '1年');
+                  const planName = planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'lifetime' ? '永久使用' : '年費'));
+                  const planDays = planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'lifetime' ? '永久' : '1年'));
                   showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
                 } else {
                   // 如果還是沒有，但後端已經授權成功（response.ok），顯示成功訊息而不是錯誤
@@ -14472,8 +14472,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 處理授權成功頁面（從後端 redirect 回來）
         if (activationSuccess === 'success') {
           const plan = urlParams.get('plan') || hashParams.get('plan') || 'yearly';
-          const planName = plan === 'lifetime' ? '永久使用' : (plan === 'yearly' ? '年費' : '年費');
-          const planDays = plan === 'lifetime' ? '永久' : (plan === 'yearly' ? '1年' : '1年');
+          const planName = plan === 'two_year' ? 'Creator Pro 雙年' : (plan === 'yearly' ? 'Script Lite 入門' : (plan === 'lifetime' ? '永久使用' : '年費'));
+          const planDays = plan === 'two_year' ? '2年' : (plan === 'yearly' ? '1年' : (plan === 'lifetime' ? '永久' : '1年'));
           showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
           // 重新檢查訂閱狀態
           checkSubscriptionStatus().then(() => {
@@ -15035,7 +15035,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           } else {
             // 降級處理：使用原有邏輯
             if (!isSubscribed()) {
-              // 預設導到訂閱頁（不帶方案；如需可改 'yearly' 或 'lifetime'）
+              // 預設導到訂閱頁（不帶方案；如需可改 'yearly' 或 'two_year'）
               return showSubscriptionPaywall();
             }
           }
@@ -19197,7 +19197,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                     ? '<span style="display: inline-block; padding: 4px 12px; background: #d1fae5; color: #065f46; border-radius: 12px; font-size: 12px; font-weight: 600;">✅ 已付款</span>'
                     : '<span style="display: inline-block; padding: 4px 12px; background: #fee2e2; color: #991b1b; border-radius: 12px; font-size: 12px; font-weight: 600;">⏳ 待付款</span>';
                   
-                  const planText = order.plan_type === 'lifetime' ? '永久使用方案' : order.plan_type === 'yearly' ? '年費方案' : order.plan_type || '-';
+                  const planText = order.plan_type === 'two_year' ? 'Creator Pro 雙年方案' : (order.plan_type === 'yearly' ? 'Script Lite 入門版' : (order.plan_type === 'lifetime' ? '永久使用方案' : order.plan_type || '-'));
                   
                   return `
                     <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s; cursor: pointer;" onclick="showOrderDetail('${order.order_id || order.id}')" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
@@ -19285,9 +19285,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }[order.payment_method] || order.payment_method || '-';
           
           // 方案顯示
-          const planText = order.plan_type === 'lifetime' ? '永久使用方案' : 
-                          order.plan_type === 'yearly' ? '年費方案' : 
-                          order.plan_type || '-';
+          const planText = order.plan_type === 'two_year' ? 'Creator Pro 雙年方案' : 
+                          (order.plan_type === 'yearly' ? 'Script Lite 入門版' : 
+                          (order.plan_type === 'lifetime' ? '永久使用方案' : 
+                          order.plan_type)) || '-';
           
           // 狀態顯示
           const statusText = order.payment_status === 'paid' ? '✅ 已付款' : 

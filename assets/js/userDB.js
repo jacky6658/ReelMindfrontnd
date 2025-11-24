@@ -3720,13 +3720,16 @@ function displayOrdersForUserDB(orders) {
               ? '<span style="display: inline-block; padding: 4px 12px; background: #d1fae5; color: #065f46; border-radius: 12px; font-size: 12px; font-weight: 600;">✅ 已付款</span>'
               : '<span style="display: inline-block; padding: 4px 12px; background: #fee2e2; color: #991b1b; border-radius: 12px; font-size: 12px; font-weight: 600;">⏳ 待付款</span>';
             
-            const planText = order.plan_type === 'lifetime' ? '永久使用方案' : order.plan_type === 'yearly' ? '年費方案' : order.plan_type || '-';
+            const planText = order.plan_type === 'two_year' ? 'Creator Pro 雙年方案' : 
+                             order.plan_type === 'yearly' ? 'Script Lite 入門版' : 
+                             order.plan_type === 'lifetime' ? '永久使用方案' : order.plan_type || '-';
             const orderId = order.order_id || order.id;
             
             // 操作按鈕：待付款訂單顯示「繼續付款」按鈕
             let actionButton = '';
             if (order.payment_status === 'pending') {
-              const planParam = order.plan_type === 'lifetime' ? 'lifetime' : 'yearly';
+              const planParam = order.plan_type === 'two_year' ? 'two_year' : 
+                                order.plan_type === 'lifetime' ? 'lifetime' : 'yearly';
               const amountParam = order.amount || '';
               actionButton = `<a href="/checkout.html?plan=${planParam}&amount=${amountParam}" style="display: inline-block; padding: 6px 12px; background: #3B82F6; color: white; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#2563EB'" onmouseout="this.style.background='#3B82F6'" onclick="event.stopPropagation()">繼續付款</a>`;
             } else {

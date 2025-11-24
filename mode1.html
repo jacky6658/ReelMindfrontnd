@@ -362,8 +362,8 @@
           max-height: none !important;
           padding: 16px 12px !important; /* 手機版減少左右內邊距，讓對話框更居中 */
           margin: 0 !important;
-          /* 動態計算底部 padding，為輸入欄位留出空間（考慮 safe-area-inset-bottom） */
-          padding-bottom: calc(200px + env(safe-area-inset-bottom, 0px)) !important;
+          /* 動態計算底部 padding，為輸入欄位和底部導航欄留出更多空間（考慮 safe-area-inset-bottom） */
+          padding-bottom: calc(280px + env(safe-area-inset-bottom, 0px)) !important;
           margin-bottom: 0 !important;
           scroll-behavior: smooth; /* 平滑滾動 */
         }
@@ -539,7 +539,7 @@
           overscroll-behavior-y: contain; /* 防止滾動穿透，但允許向上滾動到頂部 */
           overscroll-behavior-x: none; /* 禁止橫向滾動穿透 */
           padding-top: 16px !important; /* 為頁首留出空間，避免對話泡泡被擋到 */
-          padding-bottom: calc(200px + env(safe-area-inset-bottom, 0px)) !important; /* 為輸入欄位留出空間 */
+          padding-bottom: calc(280px + env(safe-area-inset-bottom, 0px)) !important; /* 為輸入欄位和底部導航欄留出更多空間 */
           scroll-behavior: smooth; /* 平滑滾動 */
         }
         
@@ -3678,6 +3678,6 @@
     <!-- Mode1 專用 JavaScript（IP人設規劃） -->
     <!-- 載入共用 JavaScript 檔案 -->
     <!-- config.js、auth.js、api.js 和 common.js 已在前面載入，這裡不需要重複載入 -->
-    <script src="assets/js/mode1.js?v=20251124-3"></script>
+    <script src="assets/js/mode1.js?v=20251124-4"></script>
   </body>
 </html>
