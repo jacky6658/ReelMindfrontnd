@@ -1340,7 +1340,13 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       
       // 詢問性關鍵字：如果包含這些，表示是詢問階段，不應該顯示按鈕
       const questionKeywords = ['您希望', '您想要', '您想', '請告訴我', '請選擇', '例如:', '例如：', '例如', '您希望這次', '您希望這次的', '聚焦在哪個', '聚焦在', '您希望這次的腳本聚焦', '您希望這次的腳本', '您希望這次的腳本聚焦在哪個具體的選題方向上呢'];
-      const isQuestion = questionKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
+      const hasQuestionKeywords = questionKeywords.some(keyword => plainText.includes(keyword.toLowerCase()));
+      
+      // 檢查是否包含明顯的結果內容標記（如果有這些標記，即使有詢問關鍵字也應該顯示按鈕）
+      const hasResultMarkers = /(?:台詞內容|畫面描述|資訊融入建議|字幕建議|音效建議|帳號定位|選題方向|腳本|hook|value|cta|開場|中場|結尾)/i.test(plainText);
+      
+      // 只有在是詢問階段且沒有明顯結果標記時，才不顯示按鈕
+      const isQuestion = hasQuestionKeywords && !hasResultMarkers;
       
       // 如果是詢問階段，不顯示按鈕
       if (isQuestion) {
@@ -1379,8 +1385,12 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
                                !isQuestion; // 確保不是詢問階段
         
         // 腳本關鍵字（優先級最低）- 必須包含明確的腳本結構或內容，且不能是帳號定位或選題方向
-        const scriptKeywords = ['開場', '中場', '結尾', 'hook', 'value', 'cta', '問題', '解決', '證明', 'after', 'before', '秘密揭露', '迷思', '原理', '要點', '行動', '起', '承', '轉', '合', '台詞內容', '畫面描述', '資訊融入建議', '字幕建議', '音效建議', '發佈文案', '資訊融入總覽', '腳本', 'script', '主題標題'];
-        const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) && 
+        const scriptKeywords = ['開場', '中場', '結尾', 'hook', 'value', 'cta', '問題', '解決', '證明', 'after', 'before', '秘密揭露', '迷思', '原理', '要點', '行動', '起', '承', '轉', '合', '台詞內容', '畫面描述', '資訊融入建議', '字幕建議', '音效建議', '發佈文案', '資訊融入總覽', '腳本', 'script', '主題標題', '短影音腳本', '短影音', 'reels', 'shorts', '秒', '工程師', '薪資', '談判', 'hr', '秘密'];
+        // 增強腳本檢測：檢查是否包含多個腳本相關關鍵字，或包含明顯的腳本結構標記
+        const scriptKeywordCount = scriptKeywords.filter(keyword => plainText.includes(keyword.toLowerCase())).length;
+        const hasScriptStructure = /(?:hook|value|cta|開場|中場|結尾|起|承|轉|合)/i.test(plainText);
+        const hasScriptDetails = /(?:台詞|畫面|字幕|音效|資訊融入)/i.test(plainText);
+        const hasScriptContent = (scriptKeywordCount >= 2 || hasScriptStructure || hasScriptDetails) && 
                                  !hasPositioningContent && // 確保不是帳號定位內容
                                  !hasPlanContent; // 確保不是選題方向內容
         
@@ -1398,12 +1408,14 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
       
       // 如果檢測到結果類型，添加按鈕（在清除 currentRequestType 之前）
       if (detectedType && aiMessageEl) {
+        console.log('✅ 檢測到結果類型:', detectedType, '類型名稱:', typeName);
         // 檢查是否已經有按鈕區域
         let actionsEl = aiMessageEl.querySelector('.message-actions');
         if (!actionsEl) {
           // 獲取訊息內容區域，將按鈕添加到內容結尾
           const contentDiv = aiMessageEl.querySelector('.message-content');
           if (!contentDiv) {
+            console.warn('⚠️ 找不到訊息內容區域，無法添加按鈕');
             // 清除記錄的類型，為下次請求做準備
             currentRequestType = null;
             return; // 如果沒有內容區域，不添加按鈕
@@ -1434,8 +1446,15 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
           aiMessageEl.dataset.resultType = detectedType;
           aiMessageEl.dataset.typeName = typeName;
           
+          console.log('✅ 按鈕已成功添加到訊息中');
           chatMessages.scrollTop = chatMessages.scrollHeight;
+        } else {
+          console.log('ℹ️ 按鈕區域已存在，跳過添加');
         }
+      } else {
+        console.warn('⚠️ 無法添加按鈕 - detectedType:', detectedType, 'aiMessageEl:', aiMessageEl);
+        console.log('📝 當前請求類型:', currentRequestType);
+        console.log('📝 內容長度:', aiResponseContent ? aiResponseContent.length : 0);
       }
       
       // 清除記錄的類型，為下次請求做準備（在按鈕添加之後）

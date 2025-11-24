@@ -413,6 +413,13 @@
           overflow: hidden;
           text-overflow: ellipsis;
           text-align: center;
+          position: absolute; /* 絕對定位，相對於 top-navbar */
+          left: 50%; /* 水平置中 */
+          top: 50%; /* 垂直置中 */
+          transform: translate(-50%, -50%); /* 精確置中（水平和垂直） */
+          max-width: calc(100% - 80px); /* 考慮左右按鈕留出空間 */
+          z-index: 1; /* 確保在按鈕之上 */
+          pointer-events: auto; /* 確保可以點擊 */
         }
         
         .navbar-tabs {
@@ -421,6 +428,8 @@
         
         .navbar-right {
           gap: 8px;
+          flex: 1;
+          justify-content: flex-end; /* 讓右側內容靠右 */
         }
         
         .user-info {

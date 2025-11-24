@@ -321,18 +321,6 @@
     <link rel="stylesheet" href="assets/css/animations.css" />
     <link rel="stylesheet" href="assets/css/styles.css" />
     <link rel="stylesheet" href="assets/css/main.css" />
-    <!-- 注入 Zeabur 環境變數 BACKEND_URL（在載入 config.js 之前） -->
-    <script>
-      // 從 Zeabur 環境變數注入 BACKEND_URL
-      // 注意：在 Zeabur 部署時，環境變數需要在構建時或運行時注入
-      // 如果使用 server.js，可以在服務器端注入此變數
-      // 如果環境變數未注入，config.js 會使用預設值
-      if (typeof window.BACKEND_URL === 'undefined') {
-        // 嘗試從可能的注入點讀取（如果服務器端有注入）
-        // 否則讓 config.js 使用預設值
-        window.BACKEND_URL = null; // 讓 config.js 使用預設值
-      }
-    </script>
     <script defer src="assets/js/config.js?v=20251120"></script>
     <script defer src="assets/js/common.js?v=20251120"></script>
     <script defer src="assets/js/auth.js?v=20251120"></script>
@@ -2316,7 +2304,8 @@
         font-size: 30px;
         font-weight: 600;
         color: var(--text-primary);
-        margin-right: auto;
+        text-align: center;
+        flex-grow: 1;
         transition: color 0.3s ease;
       }
       
@@ -3532,8 +3521,14 @@
         .user-avatar { margin: 0; }
         .logout-btn { margin: 0; }
         .top-navbar { justify-content: space-between; }
-        .navbar-left { flex: 1; }
-        .navbar-title { margin-left: auto; }
+        .navbar-left { flex: 1; position: relative; }
+        .navbar-title { 
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          max-width: calc(100% - 80px);
+          z-index: 1;
+        }
         /* 一鍵生成/IP人設卡片加寬 */
         .mode-cards { grid-template-columns: 1fr; }
         .mode-card { width: 100%; max-width: none; }
@@ -9210,6 +9205,7 @@
           gap: 16px;
           flex: 1;
           min-width: 0;
+          position: relative;
         }
         
         .navbar-title {
@@ -9217,6 +9213,12 @@
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          text-align: center;
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          max-width: calc(100% - 80px);
+          z-index: 1;
         }
         
         .navbar-tabs {
@@ -11235,8 +11237,8 @@
             <div class="navbar-title clickable-title" onclick="switchPage('homepage')">ReelMind</div>
             <div class="navbar-tabs">
               <a href="#homepage" class="navbar-tab" onclick="switchPage('homepage'); return false;">首頁</a>
-              <a href="mode1.html" class="navbar-tab" onclick="event.preventDefault(); (async function() { if(window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode1.html'; } } else { window.location.href = 'mode1.html'; } })(); return false;">IP人設規劃</a>
-              <a href="mode3.html" class="navbar-tab" onclick="event.preventDefault(); (async function() { if(window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode3.html'; } } else { window.location.href = 'mode3.html'; } })(); return false;">一鍵生成</a>
+              <a href="mode1.html" class="navbar-tab" onclick="event.preventDefault(); (async function() { try { if(window.ReelMindCommon && typeof window.ReelMindCommon.checkFeatureAccess === 'function') { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode1.html'; } } else { window.location.href = 'mode1.html'; } } catch(error) { console.error('檢查功能訪問失敗:', error); } })(); return false;">IP人設規劃</a>
+              <a href="mode3.html" class="navbar-tab" onclick="event.preventDefault(); (async function() { try { if(window.ReelMindCommon && typeof window.ReelMindCommon.checkFeatureAccess === 'function') { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode3.html'; } } else { window.location.href = 'mode3.html'; } } catch(error) { console.error('檢查功能訪問失敗:', error); } })(); return false;">一鍵生成</a>
               <a href="#forum" class="navbar-tab" onclick="switchPage('forum'); return false;">論壇介紹</a>
               <a href="guide.html" class="navbar-tab">實戰指南</a>
               <a href="#" id="userDBTab" class="navbar-tab" style="display:none;" onclick="handleUserDBClick(); return false;">創作者資料庫</a>
@@ -14125,9 +14127,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       async function handleActivationToken(token) {
         if (!token) return;
         
-        // 獲取 API_BASE_URL（優先使用配置，否則使用預設值）
-        const API_BASE_URL = window.APP_CONFIG?.API_BASE || window.API_BASE_URL || 'https://api.aijob.com.tw';
-        
         const currentToken = localStorage.getItem('ipPlanningToken');
         
         if (!currentToken) {
@@ -14146,7 +14145,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 已登入，直接驗證授權
         try {
-          const response = await fetch(`${API_BASE_URL}/api/user/license/verify?token=${token}`, {
+          const response = await fetch(`https://api.aijob.com.tw/api/user/license/verify?token=${token}`, {
             headers: {
               'Authorization': `Bearer ${currentToken}`
             },
@@ -14218,7 +14217,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const currentToken = localStorage.getItem('ipPlanningToken');
             if (currentToken) {
               try {
-                const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
                   headers: {
                     'Authorization': `Bearer ${currentToken}`
                   }
@@ -14256,7 +14255,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             // 先強制刷新一次用戶資訊
             let finalUserInfo = null;
             try {
-              const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+              const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
                 headers: {
                   'Authorization': `Bearer ${currentToken}`
                 }
@@ -14290,9 +14289,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               showToast('✅ 授權啟用成功！正在更新訂閱狀態...', 5000);
               // 再次嘗試刷新訂閱狀態（增加重試次數和延遲）
               setTimeout(async () => {
-                  // 再次強制刷新用戶資訊
-                  try {
-                    const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                // 再次強制刷新用戶資訊
+                try {
+                  const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
                     headers: {
                       'Authorization': `Bearer ${currentToken}`
                     }
@@ -14366,14 +14365,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               if (errorData.activated_at) {
                 isAlreadyActivated = true;
                 const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW');
-                errorDetails = `此授權連結已被使用（啟用時間：${activatedDate}）`;
+                errorDetails = `此連結已於 ${activatedDate} 使用`;
                 
                 // 如果連結已使用，檢查用戶當前的訂閱狀態
                 // 如果用戶已經有訂閱，這可能是成功的（用戶之前已經啟用過）
                 const currentToken = localStorage.getItem('ipPlanningToken');
                 if (currentToken) {
                   try {
-                    const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                    const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
                       headers: {
                         'Authorization': `Bearer ${currentToken}`
                       }
@@ -14391,12 +14390,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                         }
                         // 顯示成功訊息而不是錯誤
                         showToast(`✅ 您已擁有授權！此連結已於 ${activatedDate} 啟用`, 5000);
-                        // 清除 URL 參數
-                        window.history.replaceState({}, document.title, window.location.pathname);
                         return; // 提前返回，不顯示錯誤訊息
-                      } else {
-                        // 用戶沒有訂閱，表示這是不同帳戶嘗試使用已使用的連結
-                        errorDetails = `此授權連結已被其他帳戶使用（啟用時間：${activatedDate}），無法重複啟用`;
                       }
                     }
                   } catch (e) {
@@ -14406,7 +14400,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 }
               } else if (errorData.expired_at) {
                 const expiredDate = new Date(errorData.expired_at).toLocaleString('zh-TW');
-                errorDetails = `此授權連結已過期（過期時間：${expiredDate}）`;
+                errorDetails = `此連結已於 ${expiredDate} 過期`;
               }
               if (errorData.contact) {
                 errorDetails += (errorDetails ? '\n' : '') + errorData.contact;
@@ -14415,20 +14409,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 errorDetails += (errorDetails ? '\n' : '') + errorData.suggestion;
               }
             } catch (e) {
-              // 如果無法解析 JSON，根據狀態碼顯示不同訊息
-              if (response.status === 500) {
-                errorMessage = '伺服器錯誤，請稍後再試或聯繫客服';
-              } else if (response.status === 404) {
-                errorMessage = '授權連結無效或不存在，請確認連結是否正確';
-              } else if (response.status === 400) {
-                // 400 錯誤可能是連結已使用或格式錯誤
-                errorMessage = '授權連結已使用或格式錯誤';
-              } else {
-                errorMessage = `啟用失敗（錯誤代碼：${response.status}）`;
-              }
+              // 如果無法解析 JSON，使用預設錯誤訊息
             }
-            // 清除 URL 參數，避免重複嘗試
-            window.history.replaceState({}, document.title, window.location.pathname);
             // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
             if (!isAlreadyActivated || document.body.dataset.subscribed !== 'true') {
             // 顯示詳細錯誤訊息（支援多行）
@@ -14443,11 +14425,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           console.error('啟用失敗:', error);
           
           // 即使發生錯誤，也檢查一下用戶的訂閱狀態（可能後端已經授權成功）
-          const API_BASE_URL = window.APP_CONFIG?.API_BASE || window.API_BASE_URL || 'https://api.aijob.com.tw';
           const currentToken = localStorage.getItem('ipPlanningToken');
           if (currentToken) {
             try {
-              const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+              const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
                 headers: {
                   'Authorization': `Bearer ${currentToken}`
                 }
@@ -14470,9 +14451,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               console.warn('檢查訂閱狀態失敗:', e);
             }
           }
-          
-          // 清除 URL 參數，避免重複嘗試
-          window.history.replaceState({}, document.title, window.location.pathname);
           
           // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
           showToast('⚠️ 啟用失敗，請稍後再試', 5000);
@@ -26135,11 +26113,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           <span class="mobile-drawer-icon"><i class="fas fa-home"></i></span>
           <span class="mobile-drawer-text">首頁</span>
         </a>
-        <a href="mode1.html" class="mobile-drawer-item" onclick="closeMobileDrawer(); return true;">
+        <a href="mode1.html" class="mobile-drawer-item" onclick="event.preventDefault(); closeMobileDrawer(); (async function() { try { if(window.ReelMindCommon && typeof window.ReelMindCommon.checkFeatureAccess === 'function') { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode1.html'; } } else { window.location.href = 'mode1.html'; } } catch(error) { console.error('檢查功能訪問失敗:', error); } })(); return false;">
           <span class="mobile-drawer-icon"><i class="fas fa-user-tie"></i></span>
           <span class="mobile-drawer-text">IP人設規劃</span>
         </a>
-        <a href="mode3.html" class="mobile-drawer-item" onclick="closeMobileDrawer(); return true;">
+        <a href="mode3.html" class="mobile-drawer-item" onclick="event.preventDefault(); closeMobileDrawer(); (async function() { try { if(window.ReelMindCommon && typeof window.ReelMindCommon.checkFeatureAccess === 'function') { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode3.html'; } } else { window.location.href = 'mode3.html'; } } catch(error) { console.error('檢查功能訪問失敗:', error); } })(); return false;">
           <span class="mobile-drawer-icon"><i class="fas fa-magic"></i></span>
           <span class="mobile-drawer-text">一鍵生成</span>
         </a>

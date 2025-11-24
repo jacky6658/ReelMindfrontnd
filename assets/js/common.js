@@ -614,7 +614,17 @@
     const loggedIn = await checkLoginStatus();
     
     if (!loggedIn) {
-      window.ReelMindCommon.showGreenToast('請先登入才能使用此功能！');
+      // 直接調用 showGreenToast，因為它在同一個作用域中
+      if (typeof showGreenToast === 'function') {
+        showGreenToast('請先登入才能使用此功能！');
+      } else if (window.ReelMindCommon && typeof window.ReelMindCommon.showGreenToast === 'function') {
+        window.ReelMindCommon.showGreenToast('請先登入才能使用此功能！');
+      } else {
+        // 降級處理：使用普通 toast
+        if (typeof showToast === 'function') {
+          showToast('請先登入才能使用此功能！', 3000);
+        }
+      }
       setTimeout(() => {
         goToLogin();
       }, 1500); // 1.5 秒後跳轉
