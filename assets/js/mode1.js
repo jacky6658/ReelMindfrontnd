@@ -303,7 +303,7 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
         </div>
       </div>
       <div class="mode1-oneclick-history-item-actions">
-        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" type="button" data-result-id="${resultId}" data-result-type="${resultType}" onclick="selectHistoryResult('${resultType}', '${resultId}')">
+        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" type="button" data-result-id="${resultId}" data-result-type="${resultType}" onclick="console.log('🔵 [Button Click] 選擇按鈕被點擊:', '${resultType}', '${resultId}'); if (typeof selectHistoryResult === 'function') { selectHistoryResult('${resultType}', '${resultId}'); } else { console.error('❌ [Button Click] selectHistoryResult 函數不存在'); }">
           <i class="fas fa-check"></i> <span>${isSelected ? '已選擇' : '選擇'}</span>
         </button>
         <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${resultId}" data-result-type="${resultType}" onclick="openMode1ExpandModal('${resultId}', '${resultType}')">
@@ -685,12 +685,18 @@ window.useSelectedSettingsToChat = useSelectedSettingsToChat;
 
 // 刪除歷史結果
 window.deleteMode1HistoryResult = async function(resultId, resultType) {
+  console.log('🔵 [deleteMode1HistoryResult] 開始刪除歷史結果:', { resultId, resultType });
+  
   const confirmMessage = '確定要刪除此紀錄嗎？此操作無法復原。';
-  if (!confirm(confirmMessage)) return;
+  if (!confirm(confirmMessage)) {
+    console.log('ℹ️ [deleteMode1HistoryResult] 用戶取消刪除');
+    return;
+  }
 
   try {
     const token = localStorage.getItem('ipPlanningToken');
     if (!token) {
+      console.error('❌ [deleteMode1HistoryResult] 沒有 token');
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('請先登入', 3000);
       }
@@ -698,6 +704,8 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
     }
 
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
+    console.log('📡 [deleteMode1HistoryResult] 發送 DELETE 請求:', `${API_URL}/api/ip-planning/results/${resultId}`);
+    
     const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}`, {
       method: 'DELETE',
       headers: {
@@ -706,26 +714,46 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
       }
     });
 
+    console.log('📥 [deleteMode1HistoryResult] API 響應狀態:', response.status, response.statusText);
+
     if (response.ok) {
+      console.log('✅ [deleteMode1HistoryResult] 刪除成功');
+      
       // 從本地快取中移除
       if (cachedHistoryData && cachedHistoryData.results) {
+        const beforeCount = cachedHistoryData.results.length;
         cachedHistoryData.results = cachedHistoryData.results.filter(r => String(r.id) !== String(resultId));
+        const afterCount = cachedHistoryData.results.length;
+        console.log(`✅ [deleteMode1HistoryResult] 快取更新: ${beforeCount} -> ${afterCount}`);
       }
+      
       // 清除快取，強制重新載入
       clearHistoryCache();
+      console.log('✅ [deleteMode1HistoryResult] 已清除快取');
+      
       // 強制重新載入歷史記錄以更新 UI
+      console.log('🔄 [deleteMode1HistoryResult] 重新載入歷史記錄，類型:', resultType);
       await loadMode1OneClickHistory(resultType, true);
+      console.log('✅ [deleteMode1HistoryResult] 歷史記錄重新載入完成');
 
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      if (window.ReelMindCommon && window.ReelMindCommon.showGreenToast) {
+        window.ReelMindCommon.showGreenToast('✅ 記錄已刪除', 2000);
+        console.log('✅ [deleteMode1HistoryResult] 顯示綠色通知');
+      } else if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('✅ 記錄已刪除', 3000);
+        console.log('✅ [deleteMode1HistoryResult] 顯示普通通知');
       }
+      console.log('✅ [deleteMode1HistoryResult] 刪除完成');
     } else {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({ error: '未知錯誤' }));
+      console.error('❌ [deleteMode1HistoryResult] 刪除失敗:', response.status, errorData);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast(`刪除失敗: ${errorData.error || '未知錯誤'}`, 3000);
       }
     }
   } catch (error) {
+    console.error('❌ [deleteMode1HistoryResult] 刪除時發生錯誤:', error);
+    console.error('❌ [deleteMode1HistoryResult] 錯誤堆疊:', error.stack);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('刪除失敗，請稍後再試', 3000);
     }
@@ -2201,6 +2229,16 @@ if (typeof window !== 'undefined') {
   // exportHistoryResult 已直接定義為 window.exportHistoryResult，無需重複導出
   if (typeof selectHistoryResult === 'function') {
     window.selectHistoryResult = selectHistoryResult;
+    console.log('✅ [Init] selectHistoryResult 函數已導出到 window');
+  } else {
+    console.error('❌ [Init] selectHistoryResult 函數未定義！');
+  }
+  
+  // 驗證函數是否真的可用
+  if (typeof window.selectHistoryResult === 'function') {
+    console.log('✅ [Init] window.selectHistoryResult 可用');
+  } else {
+    console.error('❌ [Init] window.selectHistoryResult 不可用！');
   }
   if (typeof removeSelectedSetting === 'function') {
     window.removeSelectedSetting = removeSelectedSetting;
