@@ -572,8 +572,14 @@ window.updateSelectedSettingsDisplay = updateSelectedSettingsDisplay;
 
 // 選擇歷史結果
 async function selectHistoryResult(type, resultId) {
+  // 在最開始就輸出調試信息，確保即使出錯也能看到
+  console.log('🔵 [selectHistoryResult] ========== 函數被調用 ==========');
+  console.log('🔵 [selectHistoryResult] 參數:', { type, resultId });
+  console.log('🔵 [selectHistoryResult] 函數存在:', typeof selectHistoryResult === 'function');
+  console.log('🔵 [selectHistoryResult] window.selectHistoryResult 存在:', typeof window.selectHistoryResult === 'function');
+  
   try {
-    console.log('🔵 [selectHistoryResult] 開始選擇歷史結果:', { type, resultId });
+    console.log('🔵 [selectHistoryResult] 進入 try 區塊');
     
     const data = await fetchHistoryData();
     if (!data || !data.success || !data.results) {
@@ -685,7 +691,10 @@ window.useSelectedSettingsToChat = useSelectedSettingsToChat;
 
 // 刪除歷史結果
 window.deleteMode1HistoryResult = async function(resultId, resultType) {
-  console.log('🔵 [deleteMode1HistoryResult] 開始刪除歷史結果:', { resultId, resultType });
+  // 在最開始就輸出調試信息，確保即使出錯也能看到
+  console.log('🔵 [deleteMode1HistoryResult] ========== 函數被調用 ==========');
+  console.log('🔵 [deleteMode1HistoryResult] 參數:', { resultId, resultType });
+  console.log('🔵 [deleteMode1HistoryResult] 函數存在:', typeof window.deleteMode1HistoryResult === 'function');
   
   const confirmMessage = '確定要刪除此紀錄嗎？此操作無法復原。';
   if (!confirm(confirmMessage)) {
@@ -763,7 +772,11 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
 
 // 編輯歷史記錄標題
 function editMode1HistoryTitle(resultId) {
-  console.log('🔵 [editMode1HistoryTitle] 開始編輯標題:', resultId);
+  // 在最開始就輸出調試信息，確保即使出錯也能看到
+  console.log('🔵 [editMode1HistoryTitle] ========== 函數被調用 ==========');
+  console.log('🔵 [editMode1HistoryTitle] 參數:', { resultId });
+  console.log('🔵 [editMode1HistoryTitle] 函數存在:', typeof editMode1HistoryTitle === 'function');
+  console.log('🔵 [editMode1HistoryTitle] window.editMode1HistoryTitle 存在:', typeof window.editMode1HistoryTitle === 'function');
   const titleSpan = document.getElementById(`historyTitle-${resultId}`);
   const titleInput = document.getElementById(`historyTitleInput-${resultId}`);
   // 修正：titleSpan.nextElementSibling 是 titleInput，不是 editIcon
@@ -780,15 +793,26 @@ function editMode1HistoryTitle(resultId) {
   });
 
   if (titleSpan && titleInput && editIcon && saveIcon && cancelIcon) {
+    // 隱藏標題和編輯圖標
     titleSpan.style.display = 'none';
-    titleInput.style.display = 'inline-block';
     editIcon.style.display = 'none';
+    
+    // 顯示輸入框和操作按鈕
+    titleInput.style.display = 'block';
     saveIcon.style.display = 'inline-block';
     cancelIcon.style.display = 'inline-block';
     
+    // 設置輸入框寬度與標題一致
+    const titleWidth = titleSpan.offsetWidth || titleSpan.scrollWidth;
+    if (titleWidth > 0) {
+      titleInput.style.width = `${Math.min(titleWidth + 20, 400)}px`;
+    }
+    
     // 聚焦並選擇所有文字，方便用戶快速編輯
-    titleInput.focus();
-    titleInput.select();
+    setTimeout(() => {
+      titleInput.focus();
+      titleInput.select();
+    }, 10);
     
     // 添加 Enter 鍵保存、Escape 鍵取消的功能
     const handleKeyDown = (e) => {
@@ -811,7 +835,11 @@ window.editMode1HistoryTitle = editMode1HistoryTitle;
 
 // 保存歷史記錄標題
 async function saveMode1HistoryTitle(resultId) {
-  console.log('🔵 [saveMode1HistoryTitle] 開始保存標題:', resultId);
+  // 在最開始就輸出調試信息，確保即使出錯也能看到
+  console.log('🔵 [saveMode1HistoryTitle] ========== 函數被調用 ==========');
+  console.log('🔵 [saveMode1HistoryTitle] 參數:', { resultId });
+  console.log('🔵 [saveMode1HistoryTitle] 函數存在:', typeof saveMode1HistoryTitle === 'function');
+  console.log('🔵 [saveMode1HistoryTitle] window.saveMode1HistoryTitle 存在:', typeof window.saveMode1HistoryTitle === 'function');
   const titleSpan = document.getElementById(`historyTitle-${resultId}`);
   const titleInput = document.getElementById(`historyTitleInput-${resultId}`);
   // 修正：titleSpan.nextElementSibling 是 titleInput，不是 editIcon
@@ -845,7 +873,7 @@ async function saveMode1HistoryTitle(resultId) {
     // 如果標題沒有改變，不發送 API 請求，直接退出編輯模式
     if (newTitle === originalTitle) {
       console.log('ℹ️ [saveMode1HistoryTitle] 標題未更改，直接退出編輯模式');
-      titleSpan.style.display = 'inline-block';
+      titleSpan.style.display = '';
       titleInput.style.display = 'none';
       editIcon.style.display = 'inline-block';
       saveIcon.style.display = 'none';
@@ -873,7 +901,8 @@ async function saveMode1HistoryTitle(resultId) {
       } else {
         titleSpan.textContent = newTitle;
       }
-      titleSpan.style.display = 'inline-block';
+      // 恢復顯示狀態
+      titleSpan.style.display = '';
       titleInput.style.display = 'none';
       editIcon.style.display = 'inline-block';
       saveIcon.style.display = 'none';
@@ -934,8 +963,14 @@ async function saveMode1HistoryTitle(resultId) {
         
         // 重新進入編輯模式，讓用戶可以重新編輯
         titleSpan.style.display = 'none';
-        titleInput.style.display = 'inline-block';
-        titleInput.focus();
+        titleInput.style.display = 'block';
+        const titleWidth = titleSpan.offsetWidth || titleSpan.scrollWidth;
+        if (titleWidth > 0) {
+          titleInput.style.width = `${Math.min(titleWidth + 20, 400)}px`;
+        }
+        setTimeout(() => {
+          titleInput.focus();
+        }, 10);
         editIcon.style.display = 'none';
         saveIcon.style.display = 'inline-block';
         cancelIcon.style.display = 'inline-block';
@@ -959,8 +994,14 @@ async function saveMode1HistoryTitle(resultId) {
       
       // 重新進入編輯模式，讓用戶可以重新編輯
       titleSpan.style.display = 'none';
-      titleInput.style.display = 'inline-block';
-      titleInput.focus();
+      titleInput.style.display = 'block';
+      const titleWidth = titleSpan.offsetWidth || titleSpan.scrollWidth;
+      if (titleWidth > 0) {
+        titleInput.style.width = `${Math.min(titleWidth + 20, 400)}px`;
+      }
+      setTimeout(() => {
+        titleInput.focus();
+      }, 10);
       editIcon.style.display = 'none';
       saveIcon.style.display = 'inline-block';
       cancelIcon.style.display = 'inline-block';
@@ -976,7 +1017,11 @@ window.saveMode1HistoryTitle = saveMode1HistoryTitle;
 
 // 取消編輯歷史記錄標題
 function cancelMode1HistoryTitleEdit(resultId, originalTitle) {
-  console.log('🔵 [cancelMode1HistoryTitleEdit] 取消編輯標題:', resultId);
+  // 在最開始就輸出調試信息，確保即使出錯也能看到
+  console.log('🔵 [cancelMode1HistoryTitleEdit] ========== 函數被調用 ==========');
+  console.log('🔵 [cancelMode1HistoryTitleEdit] 參數:', { resultId, originalTitle });
+  console.log('🔵 [cancelMode1HistoryTitleEdit] 函數存在:', typeof cancelMode1HistoryTitleEdit === 'function');
+  console.log('🔵 [cancelMode1HistoryTitleEdit] window.cancelMode1HistoryTitleEdit 存在:', typeof window.cancelMode1HistoryTitleEdit === 'function');
   const titleSpan = document.getElementById(`historyTitle-${resultId}`);
   const titleInput = document.getElementById(`historyTitleInput-${resultId}`);
   // 修正：titleSpan.nextElementSibling 是 titleInput，不是 editIcon
@@ -994,11 +1039,12 @@ function cancelMode1HistoryTitleEdit(resultId, originalTitle) {
 
   if (titleSpan && titleInput && editIcon && saveIcon && cancelIcon) {
     titleInput.value = originalTitle; // 恢復原始標題
-    titleSpan.style.display = 'inline-block';
+    titleSpan.style.display = '';
     titleInput.style.display = 'none';
     editIcon.style.display = 'inline-block';
     saveIcon.style.display = 'none';
     cancelIcon.style.display = 'none';
+    console.log('✅ [cancelMode1HistoryTitleEdit] 已取消編輯並恢復原始標題');
   }
 }
 window.cancelMode1HistoryTitleEdit = cancelMode1HistoryTitleEdit;
