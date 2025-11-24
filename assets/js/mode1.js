@@ -734,6 +734,35 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
     if (response.ok) {
       console.log('✅ [deleteMode1HistoryResult] 刪除成功');
       
+      // 立即從 DOM 中移除該元素（樂觀更新，確保 UI 立即更新）
+      const historyItem = document.querySelector(`.mode1-oneclick-history-item[data-id="${resultId}"]`);
+      if (historyItem) {
+        console.log('🔄 [deleteMode1HistoryResult] 從 DOM 中移除元素:', resultId);
+        historyItem.style.transition = 'opacity 0.3s ease-out';
+        historyItem.style.opacity = '0';
+        setTimeout(() => {
+          historyItem.remove();
+          console.log('✅ [deleteMode1HistoryResult] DOM 元素已移除');
+          
+          // 檢查是否還有其他記錄，如果沒有則顯示空狀態
+          const historyContainer = document.getElementById('mode1OneClickHistoryContainer');
+          if (historyContainer) {
+            const remainingItems = historyContainer.querySelectorAll('.mode1-oneclick-history-item');
+            if (remainingItems.length === 0) {
+              historyContainer.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px; color: #9ca3af;">
+                  <p>目前沒有此類型的歷史紀錄。</p>
+                  <p style="margin-top: 10px;">請先與AI對話並儲存生成的內容。</p>
+                </div>
+              `;
+              console.log('ℹ️ [deleteMode1HistoryResult] 顯示空狀態');
+            }
+          }
+        }, 300);
+      } else {
+        console.warn('⚠️ [deleteMode1HistoryResult] 找不到要刪除的 DOM 元素:', resultId);
+      }
+      
       // 從本地快取中移除
       if (cachedHistoryData && cachedHistoryData.results) {
         const beforeCount = cachedHistoryData.results.length;
@@ -742,14 +771,20 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
         console.log(`✅ [deleteMode1HistoryResult] 快取更新: ${beforeCount} -> ${afterCount}`);
       }
       
-      // 清除快取，強制重新載入
+      // 清除快取，強制重新載入（在背景執行，不阻塞 UI）
       clearHistoryCache();
       console.log('✅ [deleteMode1HistoryResult] 已清除快取');
       
-      // 強制重新載入歷史記錄以更新 UI
-      console.log('🔄 [deleteMode1HistoryResult] 重新載入歷史記錄，類型:', resultType);
-      await loadMode1OneClickHistory(resultType, true);
-      console.log('✅ [deleteMode1HistoryResult] 歷史記錄重新載入完成');
+      // 在背景重新載入歷史記錄以確保數據同步（不阻塞 UI 更新）
+      setTimeout(async () => {
+        console.log('🔄 [deleteMode1HistoryResult] 背景重新載入歷史記錄，類型:', resultType);
+        try {
+          await loadMode1OneClickHistory(resultType, true);
+          console.log('✅ [deleteMode1HistoryResult] 歷史記錄重新載入完成');
+        } catch (error) {
+          console.error('❌ [deleteMode1HistoryResult] 重新載入歷史記錄失敗:', error);
+        }
+      }, 500);
 
       if (window.ReelMindCommon && window.ReelMindCommon.showGreenToast) {
         window.ReelMindCommon.showGreenToast('✅ 記錄已刪除', 2000);
