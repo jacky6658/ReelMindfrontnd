@@ -611,19 +611,14 @@
    * 返回：true = 可以訪問，false = 需要登入/訂閱
    */
   async function checkFeatureAccess(featureType = null) {
-    // 先檢查登入狀態
     const loggedIn = await checkLoginStatus();
     
     if (!loggedIn) {
-      // 未登入，觸發登入流程
-      // 保存目標功能到 sessionStorage，登入成功後使用
-      if (typeof goToLogin === 'function') {
+      window.ReelMindCommon.showGreenToast('請先登入才能使用此功能！');
+      setTimeout(() => {
         goToLogin();
-      } else {
-        // 如果 goToLogin 不存在，顯示提示
-        alert('請先登入以使用此功能！');
-      }
-      return false;
+      }, 1500); // 1.5 秒後跳轉
+      return false; // 阻止繼續執行
     }
     
     // 已登入，檢查訂閱狀態
@@ -815,6 +810,49 @@
     }, duration);
   }
 
+  function showGreenToast(message, duration = 3000) {
+    // 創建或獲取 toast 元素
+    let toastEl = document.getElementById('green-toast');
+    if (!toastEl) {
+      toastEl = document.createElement('div');
+      toastEl.id = 'green-toast';
+      toastEl.className = 'green-toast';
+      toastEl.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #10b981;
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        z-index: 100006;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: auto;
+        font-size: 16px;
+        font-weight: 500;
+        text-align: center;
+        min-width: 200px;
+        max-width: 90%;
+      `;
+      document.body.appendChild(toastEl);
+    }
+    
+    toastEl.textContent = message;
+    toastEl.style.display = 'block';
+    toastEl.style.opacity = '1';
+    
+    setTimeout(() => {
+      toastEl.style.opacity = '0';
+      setTimeout(() => {
+        toastEl.style.display = 'none';
+      }, 300);
+    }, duration);
+  }
+  
   // ===== 頁面初始化 =====
 
   /**
@@ -1125,6 +1163,7 @@
     
     // Toast 通知
     showToast,
+    showGreenToast,
     
     // 載入狀態管理
     showGlobalLoading,

@@ -1942,21 +1942,20 @@ async function handleModeNavigation(event, targetMode) {
     
     if (!loggedIn) {
       // 未登入，顯示通知並跳轉到登入頁面
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('請先登入以使用此功能', 3000);
-      }
-      // 使用 common.js 的登入函數
-      if (typeof goToLogin === 'function') {
-        goToLogin();
-      } else if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
-        window.ReelMindCommon.goToLogin();
+      if (window.ReelMindCommon && window.ReelMindCommon.showGreenToast) { // 改用 showGreenToast
+        window.ReelMindCommon.showGreenToast('請先登入才能使用此功能！');
+        setTimeout(() => {
+          window.ReelMindCommon.goToLogin();
+        }, 1500); // 1.5 秒後跳轉
+      } else if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('請先登入才能使用此功能！');
+        setTimeout(() => {
+          window.ReelMindCommon.goToLogin();
+        }, 1500);
       } else {
-        // 降級處理：直接跳轉到 Google 登入
-        const backendUrl = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
-        const redirectUri = encodeURIComponent(window.location.origin + '/' + (targetMode === 'mode1' ? 'mode1.html' : 'mode3.html'));
-        window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
+        window.ReelMindCommon.goToLogin();
       }
-      return false;
+      return;
     }
     
     // 已登入，檢查訂閱狀態
