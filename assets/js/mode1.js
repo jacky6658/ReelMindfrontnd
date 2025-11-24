@@ -1371,7 +1371,7 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
                                      !isQuestion; // 確保不是詢問階段
         
         // 選題方向關鍵字（優先級第二）- 必須包含表格或明確的配比內容
-        const planKeywords = ['影片類型配比', '內容策略矩陣', '策略矩陣', '對應目標', '心理階段', '建議比例'];
+        const planKeywords = ['影片類型配比', '內容策略矩陣', '策略矩陣', '對應目標', '心理階段', '建議比例', '14天', '14 天', '內容計劃', '選題方向'];
         const hasPlanContent = (planKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) || 
                                /影片類型.*配比|內容.*配比|策略矩陣/i.test(plainText) ||
                                (plainText.includes('表格') && (plainText.includes('比例') || plainText.includes('配比')))) &&
@@ -1379,9 +1379,8 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
                                !isQuestion; // 確保不是詢問階段
         
         // 腳本關鍵字（優先級最低）- 必須包含明確的腳本結構或內容，且不能是帳號定位或選題方向
-        const scriptKeywords = ['開場', '中場', '結尾', 'hook', 'value', 'cta', '問題', '解決', '證明', 'after', 'before', '秘密揭露', '迷思', '原理', '要點', '行動', '起', '承', '轉', '合', '台詞內容', '畫面描述', '資訊融入建議', '字幕建議', '音效建議', '發佈文案', '資訊融入總覽'];
+        const scriptKeywords = ['開場', '中場', '結尾', 'hook', 'value', 'cta', '問題', '解決', '證明', 'after', 'before', '秘密揭露', '迷思', '原理', '要點', '行動', '起', '承', '轉', '合', '台詞內容', '畫面描述', '資訊融入建議', '字幕建議', '音效建議', '發佈文案', '資訊融入總覽', '腳本', 'script', '主題標題'];
         const hasScriptContent = scriptKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) && 
-                                 (plainText.includes('腳本') || plainText.includes('script') || plainText.includes('主題標題')) &&
                                  !hasPositioningContent && // 確保不是帳號定位內容
                                  !hasPlanContent; // 確保不是選題方向內容
         
@@ -1397,17 +1396,18 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
         }
       }
       
-      // 清除記錄的類型，為下次請求做準備
-      currentRequestType = null;
-      
-      // 如果檢測到結果類型，添加按鈕
+      // 如果檢測到結果類型，添加按鈕（在清除 currentRequestType 之前）
       if (detectedType && aiMessageEl) {
         // 檢查是否已經有按鈕區域
         let actionsEl = aiMessageEl.querySelector('.message-actions');
         if (!actionsEl) {
           // 獲取訊息內容區域，將按鈕添加到內容結尾
           const contentDiv = aiMessageEl.querySelector('.message-content');
-          if (!contentDiv) return; // 如果沒有內容區域，不添加按鈕
+          if (!contentDiv) {
+            // 清除記錄的類型，為下次請求做準備
+            currentRequestType = null;
+            return; // 如果沒有內容區域，不添加按鈕
+          }
           
           actionsEl = document.createElement('div');
           actionsEl.className = 'message-actions';
@@ -1437,6 +1437,9 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
           chatMessages.scrollTop = chatMessages.scrollHeight;
         }
       }
+      
+      // 清除記錄的類型，為下次請求做準備（在按鈕添加之後）
+      currentRequestType = null;
     }
 
     // 自動儲存邏輯已移除，不再自動儲存到 userDB
