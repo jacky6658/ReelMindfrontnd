@@ -253,7 +253,20 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
     return;
   }
 
-  const filteredResults = data.results.filter(r => r.type === type).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  // 過濾出符合類型的結果，並排除已標記為刪除的記錄
+  let filteredResults = data.results.filter(r => r.type === type);
+  
+  // 過濾掉已標記為刪除的記錄
+  if (window.deletedHistoryIds && window.deletedHistoryIds.size > 0) {
+    const beforeCount = filteredResults.length;
+    filteredResults = filteredResults.filter(r => !window.deletedHistoryIds.has(String(r.id)));
+    if (beforeCount !== filteredResults.length) {
+      console.log(`🔄 [loadMode1OneClickHistory] 過濾掉已刪除的記錄: ${beforeCount} -> ${filteredResults.length}`);
+    }
+  }
+  
+  // 排序
+  filteredResults.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   
   if (filteredResults.length === 0) {
     historyContainer.innerHTML = `
@@ -735,9 +748,30 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
       console.log('✅ [deleteMode1HistoryResult] 刪除成功');
       
       // 立即從 DOM 中移除該元素（樂觀更新，確保 UI 立即更新）
-      const historyItem = document.querySelector(`.mode1-oneclick-history-item[data-id="${resultId}"]`);
+      console.log('🔍 [deleteMode1HistoryResult] 開始查找 DOM 元素，resultId:', resultId, '類型:', typeof resultId);
+      
+      // 嘗試多種選擇器方式
+      let historyItem = document.querySelector(`.mode1-oneclick-history-item[data-id="${resultId}"]`);
+      if (!historyItem) {
+        // 嘗試使用數字 ID
+        historyItem = document.querySelector(`.mode1-oneclick-history-item[data-id="${Number(resultId)}"]`);
+      }
+      if (!historyItem) {
+        // 嘗試查找所有元素並手動匹配
+        const allItems = document.querySelectorAll('.mode1-oneclick-history-item');
+        console.log('🔍 [deleteMode1HistoryResult] 找到所有歷史記錄元素:', allItems.length);
+        for (let item of allItems) {
+          const itemId = item.dataset.id;
+          console.log('🔍 [deleteMode1HistoryResult] 檢查元素 ID:', itemId, '類型:', typeof itemId, '匹配:', String(itemId) === String(resultId));
+          if (String(itemId) === String(resultId)) {
+            historyItem = item;
+            break;
+          }
+        }
+      }
+      
       if (historyItem) {
-        console.log('🔄 [deleteMode1HistoryResult] 從 DOM 中移除元素:', resultId);
+        console.log('✅ [deleteMode1HistoryResult] 找到 DOM 元素，準備移除:', resultId);
         historyItem.style.transition = 'opacity 0.3s ease-out';
         historyItem.style.opacity = '0';
         setTimeout(() => {
@@ -748,6 +782,7 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
           const historyContainer = document.getElementById('mode1OneClickHistoryContainer');
           if (historyContainer) {
             const remainingItems = historyContainer.querySelectorAll('.mode1-oneclick-history-item');
+            console.log('🔍 [deleteMode1HistoryResult] 剩餘記錄數量:', remainingItems.length);
             if (remainingItems.length === 0) {
               historyContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px 20px; color: #9ca3af;">
@@ -760,7 +795,12 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
           }
         }, 300);
       } else {
-        console.warn('⚠️ [deleteMode1HistoryResult] 找不到要刪除的 DOM 元素:', resultId);
+        console.error('❌ [deleteMode1HistoryResult] 找不到要刪除的 DOM 元素:', resultId);
+        console.error('❌ [deleteMode1HistoryResult] 嘗試查找所有元素:');
+        const allItems = document.querySelectorAll('.mode1-oneclick-history-item');
+        allItems.forEach((item, index) => {
+          console.error(`  [${index}] data-id:`, item.dataset.id, '類型:', typeof item.dataset.id);
+        });
       }
       
       // 從本地快取中移除
@@ -775,16 +815,45 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
       clearHistoryCache();
       console.log('✅ [deleteMode1HistoryResult] 已清除快取');
       
+      // 標記已刪除的 ID，防止重新載入時又加回來
+      if (!window.deletedHistoryIds) {
+        window.deletedHistoryIds = new Set();
+      }
+      window.deletedHistoryIds.add(String(resultId));
+      console.log('✅ [deleteMode1HistoryResult] 已標記刪除的 ID:', resultId);
+      
       // 在背景重新載入歷史記錄以確保數據同步（不阻塞 UI 更新）
+      // 延遲時間增加到 1000ms，確保後端已處理完刪除請求
       setTimeout(async () => {
         console.log('🔄 [deleteMode1HistoryResult] 背景重新載入歷史記錄，類型:', resultType);
         try {
           await loadMode1OneClickHistory(resultType, true);
           console.log('✅ [deleteMode1HistoryResult] 歷史記錄重新載入完成');
+          
+          // 重新載入後，再次確保已刪除的記錄不會顯示
+          const deletedItem = document.querySelector(`.mode1-oneclick-history-item[data-id="${resultId}"]`);
+          if (deletedItem) {
+            console.warn('⚠️ [deleteMode1HistoryResult] 重新載入後發現已刪除的記錄仍在，強制移除:', resultId);
+            deletedItem.remove();
+            
+            // 檢查是否還有其他記錄
+            const historyContainer = document.getElementById('mode1OneClickHistoryContainer');
+            if (historyContainer) {
+              const remainingItems = historyContainer.querySelectorAll('.mode1-oneclick-history-item');
+              if (remainingItems.length === 0) {
+                historyContainer.innerHTML = `
+                  <div style="text-align: center; padding: 40px 20px; color: #9ca3af;">
+                    <p>目前沒有此類型的歷史紀錄。</p>
+                    <p style="margin-top: 10px;">請先與AI對話並儲存生成的內容。</p>
+                  </div>
+                `;
+              }
+            }
+          }
         } catch (error) {
           console.error('❌ [deleteMode1HistoryResult] 重新載入歷史記錄失敗:', error);
         }
-      }, 500);
+      }, 1000);
 
       if (window.ReelMindCommon && window.ReelMindCommon.showGreenToast) {
         window.ReelMindCommon.showGreenToast('✅ 記錄已刪除', 2000);
