@@ -1947,45 +1947,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 頁面載入時初始化
       document.addEventListener('DOMContentLoaded', async function() {
-        // 檢查訪問權限（未登入或未訂閱用戶直接導向）
-        if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
-          const loggedIn = await window.ReelMindCommon.checkLoginStatus();
-          
-          if (!loggedIn) {
-            // 未登入：導向登入頁
-            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-              window.ReelMindCommon.showToast('請先登入以查看實戰指南', 3000);
-            }
-            if (typeof goToLogin === 'function') {
-              goToLogin();
-            } else if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
-              window.ReelMindCommon.goToLogin();
-            } else {
-              const backendUrl = 'https://api.aijob.com.tw';
-              const redirectUri = encodeURIComponent(window.location.origin + '/guide.html');
-              window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
-            }
-            return;
-          }
-          
-          // 檢查訂閱狀態
-          let isSubscribed = false;
-          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkSubscriptionStatus === 'function') {
-            await window.ReelMindCommon.checkSubscriptionStatus();
-            isSubscribed = window.ReelMindCommon.isSubscribed();
-          }
-          
-          if (!isSubscribed) {
-            // 未訂閱：導向訂閱頁
-            if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-              window.ReelMindCommon.showToast('請先訂閱以查看實戰指南', 3000);
-            }
-            window.location.href = '/subscription.html';
-            return;
-          }
-        }
+        // 移除強制登入檢查，允許公開訪問實戰指南
+        // 只有在用戶點擊需要登入的功能時才檢查登入狀態
         
-        // 已登入且已訂閱，繼續初始化
+        // 更新用戶資訊（如果已登入）
         updateUserInfo();
         updateGuideButtonTexts();
         handleHashNavigation();
