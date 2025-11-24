@@ -272,41 +272,47 @@ async function loadMode1OneClickHistory(type, forceRefresh = false) {
     const historyItem = document.createElement('div');
     historyItem.className = 'mode1-oneclick-history-item';
     historyItem.dataset.id = result.id;
-    historyItem.dataset.type = result.type;
+    
+    // 確保 result.type 有值，避免 undefined 導致 onclick 失敗
+    const resultType = result.type || type || 'profile';
+    historyItem.dataset.type = resultType;
 
-    const titleText = result.title || `未命名${typeNames[result.type] || ''}`;
+    const titleText = result.title || `未命名${typeNames[resultType] || ''}`;
     const formattedDate = new Date(result.created_at).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
     // 使用 escapeHtml 轉義 HTML，而不是 safeSetText（safeSetText 需要 DOM 元素）
     const escapedTitle = window.escapeHtml ? window.escapeHtml(titleText) : titleText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     
+    // 確保 result.id 是字符串，避免 undefined
+    const resultId = String(result.id || '');
+    
     historyItem.innerHTML = `
       <div class="mode1-oneclick-history-item-header">
         <div class="mode1-oneclick-history-item-title-wrapper">
-          <span class="mode1-oneclick-history-item-title" id="historyTitle-${result.id}">${escapedTitle}</span>
-          <input type="text" class="mode1-oneclick-history-item-title-input" id="historyTitleInput-${result.id}" value="${escapedTitle}" style="display: none;">
-          <i class="fas fa-edit edit-title-icon" onclick="editMode1HistoryTitle('${result.id}')"></i>
-          <i class="fas fa-check save-title-icon" onclick="saveMode1HistoryTitle('${result.id}')" style="display: none;"></i>
-          <i class="fas fa-times cancel-title-icon" onclick="cancelMode1HistoryTitleEdit('${result.id}', '${escapedTitle}')" style="display: none;"></i>
+          <span class="mode1-oneclick-history-item-title" id="historyTitle-${resultId}">${escapedTitle}</span>
+          <input type="text" class="mode1-oneclick-history-item-title-input" id="historyTitleInput-${resultId}" value="${escapedTitle}" style="display: none;">
+          <i class="fas fa-edit edit-title-icon" onclick="editMode1HistoryTitle('${resultId}')"></i>
+          <i class="fas fa-check save-title-icon" onclick="saveMode1HistoryTitle('${resultId}')" style="display: none;"></i>
+          <i class="fas fa-times cancel-title-icon" onclick="cancelMode1HistoryTitleEdit('${resultId}', '${escapedTitle.replace(/'/g, "\\'")}')" style="display: none;"></i>
         </div>
         <span class="mode1-oneclick-history-item-date">${formattedDate}</span>
       </div>
-      <div class="mode1-oneclick-history-item-content-wrapper" id="contentWrapper-${result.id}">
-        <div class="mode1-oneclick-history-item-content" id="content-${result.id}">
+      <div class="mode1-oneclick-history-item-content-wrapper" id="contentWrapper-${resultId}">
+        <div class="mode1-oneclick-history-item-content" id="content-${resultId}">
           ${renderMode1Markdown(result.content)}
         </div>
       </div>
       <div class="mode1-oneclick-history-item-actions">
-        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" type="button" data-result-id="${result.id}" data-result-type="${result.type}" onclick="selectHistoryResult('${result.type}', '${result.id}')">
+        <button class="mode1-oneclick-history-item-btn primary ${isSelected ? 'selected' : ''}" type="button" data-result-id="${resultId}" data-result-type="${resultType}" onclick="selectHistoryResult('${resultType}', '${resultId}')">
           <i class="fas fa-check"></i> <span>${isSelected ? '已選擇' : '選擇'}</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${result.id}" data-result-type="${result.type}" onclick="openMode1ExpandModal('${result.id}', '${result.type}')">
+        <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${resultId}" data-result-type="${resultType}" onclick="openMode1ExpandModal('${resultId}', '${resultType}')">
           <i class="fas fa-expand"></i> <span>展開</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${result.id}" data-result-type="${result.type}" onclick="saveHistoryResultToUserDB('${result.id}', '${result.type}')">
+        <button class="mode1-oneclick-history-item-btn" type="button" data-result-id="${resultId}" data-result-type="${resultType}" onclick="saveHistoryResultToUserDB('${resultId}', '${resultType}')">
           <i class="fas fa-database"></i> <span>儲存到創作者資料庫</span>
         </button>
-        <button class="mode1-oneclick-history-item-btn danger" data-action="delete" data-type="${result.type}" data-id="${result.id}" type="button" onclick="deleteMode1HistoryResult('${result.id}', '${result.type}')">
+        <button class="mode1-oneclick-history-item-btn danger" data-action="delete" data-type="${resultType}" data-id="${resultId}" type="button" onclick="deleteMode1HistoryResult('${resultId}', '${resultType}')">
           <i class="fas fa-trash-alt"></i> <span>刪除</span>
         </button>
       </div>
@@ -1837,17 +1843,13 @@ async function saveMode1Result(resultType, messageEl = null) {
     
     // 映射 resultType 到後端期望的格式
     // ip_planning -> profile, plan -> plan, scripts -> scripts
-    let resultTypeForBackend = resultType;
-    if (resultType === 'ip_planning') {
+    let resultTypeForBackend = 'profile'; // 預設值
+    if (resultType === 'ip_planning' || resultType === 'profile') {
       resultTypeForBackend = 'profile';
     } else if (resultType === 'plan') {
       resultTypeForBackend = 'plan';
     } else if (resultType === 'scripts') {
       resultTypeForBackend = 'scripts';
-    }
-    // 如果 resultType 已經是 'profile'，直接使用
-    if (resultType === 'profile') {
-      resultTypeForBackend = 'profile';
     }
     
     const response = await fetch(`${API_URL}/api/ip-planning/save`, {
