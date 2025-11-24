@@ -1,10 +1,16 @@
 // mode1.js - IP人設規劃模式專用函數
 // 從 mode1.html 提取的所有 JavaScript 代碼
-// 版本: 2025-11-13 (修復 checkLoginStatus, getCSRFToken 錯誤)
+// 版本: 2025-11-24 (添加詳細調試信息)
+
+// ========== 文件載入確認 ==========
+console.log('🚀 [mode1.js] ========== 文件已載入 ==========');
+console.log('🚀 [mode1.js] 載入時間:', new Date().toISOString());
+console.log('🚀 [mode1.js] 版本: 2025-11-24');
 
 // API_BASE_URL 已在 config.js 中定義為全局變數
 // 這裡直接使用 window.APP_CONFIG，避免重複聲明
 const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
+console.log('🚀 [mode1.js] API_URL:', API_URL);
 let ipPlanningToken = localStorage.getItem('ipPlanningToken') || '';
 let ipPlanningUser = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
 let isMode1Sending = false;
@@ -2273,6 +2279,7 @@ if (typeof window !== 'undefined') {
     window.deleteMode1HistoryResult = deleteMode1HistoryResult;
   }
   // exportHistoryResult 已直接定義為 window.exportHistoryResult，無需重複導出
+  console.log('🔍 [Init] ========== 開始檢查函數導出 ==========');
   if (typeof selectHistoryResult === 'function') {
     window.selectHistoryResult = selectHistoryResult;
     console.log('✅ [Init] selectHistoryResult 函數已導出到 window');
@@ -2286,6 +2293,13 @@ if (typeof window !== 'undefined') {
   } else {
     console.error('❌ [Init] window.selectHistoryResult 不可用！');
   }
+  
+  // 驗證其他函數
+  console.log('🔍 [Init] deleteMode1HistoryResult:', typeof window.deleteMode1HistoryResult === 'function');
+  console.log('🔍 [Init] editMode1HistoryTitle:', typeof window.editMode1HistoryTitle === 'function');
+  console.log('🔍 [Init] saveMode1HistoryTitle:', typeof window.saveMode1HistoryTitle === 'function');
+  console.log('🔍 [Init] cancelMode1HistoryTitleEdit:', typeof window.cancelMode1HistoryTitleEdit === 'function');
+  console.log('🔍 [Init] ========== 函數檢查完成 ==========');
   if (typeof removeSelectedSetting === 'function') {
     window.removeSelectedSetting = removeSelectedSetting;
   }
