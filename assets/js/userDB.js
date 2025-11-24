@@ -2799,13 +2799,14 @@ window.editIpPlanningItemTitle = function(resultId, event) {
 }
 
 // 保存 IP 人設規劃項目標題
-window.saveIpPlanningItemTitle = function(resultId) {
+window.saveIpPlanningItemTitle = async function(resultId) {
   const titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${resultId}"]`);
   const inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${resultId}"]`);
   const editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${resultId}"]`);
   
   if (titleElement && inputElement) {
     const newTitle = inputElement.value.trim();
+    const originalTitle = titleElement.textContent.trim(); // 保存原始標題
     
     const item = document.querySelector(`.ip-planning-item[data-result-id="${resultId}"]`);
     let defaultTitle = 'IP Profile';
@@ -2821,24 +2822,77 @@ window.saveIpPlanningItemTitle = function(resultId) {
     }
     
     const finalTitle = newTitle || defaultTitle;
+    
+    // 先更新 UI
     titleElement.textContent = finalTitle;
-    
-    if (ipPlanningUser && ipPlanningUser.user_id) {
-      localStorage.setItem(`ip-planning-item-title-${ipPlanningUser.user_id}-${resultId}`, finalTitle);
-    }
-    
-    if (newTitle) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-        window.ReelMindCommon.showToast('✅ 標題已更新', 2000);
-      }
-    }
-    
     titleElement.style.display = '';
     if (editIcon) {
       editIcon.style.display = 'none';
       editIcon.style.opacity = '0.6';
     }
     inputElement.style.display = 'none';
+    
+    // 如果標題有變更，更新到後端
+    if (newTitle && newTitle !== originalTitle) {
+      try {
+        const token = localStorage.getItem('ipPlanningToken');
+        if (!token) {
+          // 如果沒有 token，只更新 localStorage
+          if (ipPlanningUser && ipPlanningUser.user_id) {
+            localStorage.setItem(`ip-planning-item-title-${ipPlanningUser.user_id}-${resultId}`, finalTitle);
+          }
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('請先登入', 3000);
+          }
+          return;
+        }
+        
+        const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
+        const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}/title`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: finalTitle
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          // 更新成功，同時更新 localStorage
+          if (ipPlanningUser && ipPlanningUser.user_id) {
+            localStorage.setItem(`ip-planning-item-title-${ipPlanningUser.user_id}-${resultId}`, finalTitle);
+          }
+          // 使用綠色通知顯示成功訊息
+          if (window.ReelMindCommon && window.ReelMindCommon.showGreenToast) {
+            window.ReelMindCommon.showGreenToast('✅ 標題已更新');
+          } else if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast('✅ 標題已更新', 2000);
+          }
+        } else {
+          const errorData = await response.json();
+          // 更新失敗，恢復原標題
+          titleElement.textContent = originalTitle;
+          if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+            window.ReelMindCommon.showToast(`更新標題失敗: ${errorData.error || '未知錯誤'}`, 3000);
+          }
+        }
+      } catch (error) {
+        console.error('更新標題失敗:', error);
+        // 更新失敗，恢復原標題
+        titleElement.textContent = originalTitle;
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('更新標題失敗，請稍後再試', 3000);
+        }
+      }
+    } else {
+      // 如果沒有變更，只更新 localStorage
+      if (ipPlanningUser && ipPlanningUser.user_id) {
+        localStorage.setItem(`ip-planning-item-title-${ipPlanningUser.user_id}-${resultId}`, finalTitle);
+      }
+    }
   }
 }
 

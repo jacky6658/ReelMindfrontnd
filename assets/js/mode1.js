@@ -487,7 +487,10 @@ window.saveHistoryResultToUserDB = async function(resultId, resultType) {
     });
 
     if (response.ok) {
-      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      // 使用綠色通知顯示成功訊息
+      if (window.ReelMindCommon && window.ReelMindCommon.showGreenToast) {
+        window.ReelMindCommon.showGreenToast(`✅ 已儲存到創作者資料庫的「${typeName}」`);
+      } else if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast(`✅ 已儲存到創作者資料庫的「${typeName}」`, 3000);
       }
       // 儲存成功後清除快取，強制重新載入，以更新 userDB
@@ -586,12 +589,12 @@ async function selectHistoryResult(type, resultId) {
       return;
     }
 
-    // 根據 resultType 更新 selectedSettings
-    if (resultType === 'profile') {
+    // 根據 type 更新 selectedSettings（修正變數名：使用參數 type 而不是 resultType）
+    if (type === 'profile') {
       selectedSettings.profile = result;
-    } else if (resultType === 'plan') {
+    } else if (type === 'plan') {
       selectedSettings.plan = result;
-    } else if (resultType === 'scripts') {
+    } else if (type === 'scripts') {
       selectedSettings.scripts = result;
     }
 
@@ -599,7 +602,7 @@ async function selectHistoryResult(type, resultId) {
     updateSelectedSettingsDisplay();
     
     // 重新載入當前類型，更新按鈕狀態 (已選擇 / 選擇)
-    loadMode1OneClickHistory(resultType, true);
+    loadMode1OneClickHistory(type, true);
 
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       const typeNames = {
@@ -607,7 +610,7 @@ async function selectHistoryResult(type, resultId) {
         'plan': '選題方向',
         'scripts': '短影音腳本'
       };
-      const typeName = typeNames[resultType] || resultType;
+      const typeName = typeNames[type] || type;
       window.ReelMindCommon.showToast(`✅ 已選擇「${typeName}」`, 3000);
     }
   } catch (error) {
@@ -681,8 +684,10 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
       if (cachedHistoryData && cachedHistoryData.results) {
         cachedHistoryData.results = cachedHistoryData.results.filter(r => String(r.id) !== String(resultId));
       }
+      // 清除快取，強制重新載入
+      clearHistoryCache();
       // 強制重新載入歷史記錄以更新 UI
-      loadMode1OneClickHistory(resultType, true);
+      await loadMode1OneClickHistory(resultType, true);
 
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('✅ 記錄已刪除', 3000);
@@ -1020,18 +1025,27 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
   
   isMode1Sending = true;
   
-  // 根據用戶訊息判斷請求類型（優先於關鍵字檢測）
-  const messageLower = message.toLowerCase();
-  if (messageLower.includes('ip profile') || messageLower.includes('個人品牌定位') || messageLower.includes('帳號定位') || messageLower.includes('重新定位')) {
-    currentRequestType = 'ip_planning';
-  } else if (messageLower.includes('14天') || messageLower.includes('14 天') || messageLower.includes('選題方向') || messageLower.includes('內容計劃') || messageLower.includes('內容計劃')) {
-    currentRequestType = 'plan';
-  } else if (messageLower.includes('腳本') || messageLower.includes('script') || messageLower.includes('今日腳本')) {
-    currentRequestType = 'scripts';
+  // 如果 sendMode1Message 被調用時已經有 currentRequestType，則優先使用它
+  const initialRequestType = currentRequestType; // 記錄初始值
+  
+  // 根據用戶訊息判斷請求類型（優先於關鍵字檢測），但只在 initialRequestType 為 null 時執行
+  if (initialRequestType === null) {
+    const messageLower = message.toLowerCase();
+    if (messageLower.includes('ip profile') || messageLower.includes('個人品牌定位') || messageLower.includes('帳號定位') || messageLower.includes('重新定位')) {
+      currentRequestType = 'ip_planning';
+    } else if (messageLower.includes('14天') || messageLower.includes('14 天') || messageLower.includes('選題方向') || messageLower.includes('內容計劃')) {
+      currentRequestType = 'plan';
+    } else if (messageLower.includes('腳本') || messageLower.includes('script') || messageLower.includes('今日腳本')) {
+      currentRequestType = 'scripts';
+    } else {
+      // 如果無法從訊息判斷，設為 null，後續使用關鍵字檢測
+      currentRequestType = null;
+    }
   } else {
-    // 如果無法從訊息判斷，設為 null，後續使用關鍵字檢測
-    currentRequestType = null;
+    currentRequestType = initialRequestType; // 恢復初始值
   }
+  
+  console.log('📝 sendMode1Message 內部判斷的 currentRequestType:', currentRequestType); // 添加日誌便於調試
   
   const hasLlmKey = await checkUserLlmKey();
   if (!hasLlmKey) {
@@ -1377,7 +1391,7 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
                                      !isQuestion; // 確保不是詢問階段
         
         // 選題方向關鍵字（優先級第二）- 必須包含表格或明確的配比內容
-        const planKeywords = ['影片類型配比', '內容策略矩陣', '策略矩陣', '對應目標', '心理階段', '建議比例', '14天', '14 天', '內容計劃', '選題方向'];
+        const planKeywords = ['影片類型配比', '內容策略矩陣', '策略矩陣', '對應目標', '心理階段', '建議比例', '14天', '14 天', '內容計劃', '選題方向', '週期', '天數', '主題', '發佈頻率', '內容支柱'];
         const hasPlanContent = (planKeywords.some(keyword => plainText.includes(keyword.toLowerCase())) || 
                                /影片類型.*配比|內容.*配比|策略矩陣/i.test(plainText) ||
                                (plainText.includes('表格') && (plainText.includes('比例') || plainText.includes('配比')))) &&
@@ -1385,7 +1399,8 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
                                !isQuestion; // 確保不是詢問階段
         
         // 腳本關鍵字（優先級最低）- 必須包含明確的腳本結構或內容，且不能是帳號定位或選題方向
-        const scriptKeywords = ['開場', '中場', '結尾', 'hook', 'value', 'cta', '問題', '解決', '證明', 'after', 'before', '秘密揭露', '迷思', '原理', '要點', '行動', '起', '承', '轉', '合', '台詞內容', '畫面描述', '資訊融入建議', '字幕建議', '音效建議', '發佈文案', '資訊融入總覽', '腳本', 'script', '主題標題', '短影音腳本', '短影音', 'reels', 'shorts', '秒', '工程師', '薪資', '談判', 'hr', '秘密'];
+        // 移除特定內容關鍵字：'秒', '工程師', '薪資', '談判', 'hr', '秘密'（這些只是特定腳本內容，不是通用腳本結構）
+        const scriptKeywords = ['開場', '中場', '結尾', 'hook', 'value', 'cta', '問題', '解決', '證明', 'after', 'before', '秘密揭露', '迷思', '原理', '要點', '行動', '起', '承', '轉', '合', '台詞內容', '畫面描述', '資訊融入建議', '字幕建議', '音效建議', '發佈文案', '資訊融入總覽', '腳本', 'script', '主題標題', '短影音腳本', '短影音', 'reels', 'shorts'];
         // 增強腳本檢測：檢查是否包含多個腳本相關關鍵字，或包含明顯的腳本結構標記
         const scriptKeywordCount = scriptKeywords.filter(keyword => plainText.includes(keyword.toLowerCase())).length;
         const hasScriptStructure = /(?:hook|value|cta|開場|中場|結尾|起|承|轉|合)/i.test(plainText);
