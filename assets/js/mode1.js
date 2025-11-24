@@ -1252,9 +1252,11 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
   // 如果 sendMode1Message 被調用時已經有 currentRequestType，則優先使用它
   const initialRequestType = currentRequestType; // 記錄初始值
   
+  // 將 messageLower 聲明在條件塊外，確保後續代碼可以使用
+  const messageLower = message.toLowerCase();
+  
   // 根據用戶訊息判斷請求類型（優先於關鍵字檢測），但只在 initialRequestType 為 null 時執行
   if (initialRequestType === null) {
-    const messageLower = message.toLowerCase();
     if (messageLower.includes('ip profile') || messageLower.includes('個人品牌定位') || messageLower.includes('帳號定位') || messageLower.includes('重新定位')) {
       currentRequestType = 'ip_planning';
     } else if (messageLower.includes('14天') || messageLower.includes('14 天') || messageLower.includes('選題方向') || messageLower.includes('內容計劃')) {
