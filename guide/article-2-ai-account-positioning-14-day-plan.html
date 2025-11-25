@@ -79,7 +79,19 @@
       "keywords": "AI帳號定位,IP人設規劃,短影音內容策略,內容支柱,影片類型配比,14天計畫",
       "timeRequired": "PT8M",
       "inLanguage": "zh-Hant",
-      "isAccessibleForFree": true
+      "isAccessibleForFree": true,
+      "about": {
+        "@type": "Thing",
+        "name": "AI 帳號定位",
+        "description": "個人品牌定位與短影音內容策略規劃"
+      },
+      "mentions": [
+        {
+          "@type": "SoftwareApplication",
+          "name": "ReelMind AI 短影音智能體",
+          "url": "https://reelmind.aijob.com.tw/"
+        }
+      ]
     }
     </script>
     
@@ -702,7 +714,7 @@
       </div>
       <div class="navbar-right">
         <div class="user-info" id="userInfo" style="display: none;" onclick="window.location.href='../userDB.html'">
-          <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像">
+          <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" loading="lazy">
           <span id="userName" class="user-name"></span>
         </div>
         <div class="auth-buttons" id="authButtons" style="display: none;">
@@ -799,7 +811,7 @@
           <section class="article-section" id="start">
             <h2>一、開始對話：使用快速按鈕或自由輸入</h2>
             <p>
-              進入「IP人設規劃」頁面後，你可以使用以下方式開始與 AI 對話：
+              進入<a href="../mode1.html">「IP人設規劃」</a>頁面後，你可以使用以下方式開始與 AI 對話：
             </p>
             <div style="display:grid; gap:14px; grid-template-columns:1fr;">
               <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">
@@ -808,7 +820,7 @@
                   <li><b>IP Profile</b>：快速建立個人品牌檔案，AI 會詢問你的背景、專長、價值觀</li>
                   <li><b>14天規劃</b>：直接生成 14 天短影音發布計畫</li>
                   <li><b>今日腳本</b>：生成今天可以拍攝的 3 支腳本</li>
-                  <li><b>換腳本結構</b>：改變腳本的敘事結構（A/B/C/D/E）</li>
+                  <li><b>換腳本結構</b>：改變腳本的敘事結構（A/B/C/D/E）。了解各結構差異請參考<a href="article-4-script-structure-selection-guide.html">腳本結構選擇指南</a></li>
                   <li><b>重新定位</b>：完全重置對話，開始全新的帳號定位</li>
                 </ul>
               </div>
@@ -840,7 +852,7 @@
           <section class="article-section" id="generate">
             <h2>三、生成內容：帳號定位、選題方向、一週腳本</h2>
             <p>
-              對話完成後，點擊右上角的「生成結果」按鈕，開啟彈出視窗。視窗中有兩個標籤：
+              對話完成後，點擊右上角的「生成結果」按鈕，開啟彈出視窗。視窗中有兩個標籤。如需快速生成腳本，也可以使用<a href="../mode3.html">一鍵生成</a>功能：
             </p>
             <div style="display:grid; gap:14px; grid-template-columns:1fr;">
               <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;">

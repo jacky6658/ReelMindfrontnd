@@ -4,6 +4,8 @@
 User-agent: *
 Allow: /
 Allow: /guide.html
+Allow: /guide/
+Allow: /guide/*.html
 Allow: /experience.html
 Allow: /subscription.html
 Allow: /mode1.html

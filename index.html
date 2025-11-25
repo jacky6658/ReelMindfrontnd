@@ -93,6 +93,13 @@
     <meta name="revisit-after" content="7 days" />
     <link rel="canonical" href="https://reelmind.aijob.com.tw/" />
     
+    <!-- Resource Hints for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://www.youtube.com" />
+    
     <!-- GEO / Location Meta Tags -->
     <meta name="geo.region" content="TW" />
     <meta name="geo.placename" content="台灣" />
@@ -305,6 +312,34 @@
         "contactType": "customer service",
         "areaServed": "TW",
         "availableLanguage": ["zh-Hant", "zh-Hans"]
+      }
+    }
+    </script>
+    
+    <!-- WebSite 結構化資料 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "ReelMind AI 短影音智能體",
+      "url": "https://reelmind.aijob.com.tw/",
+      "description": "AI 短影音智能體平台，提供 AI 生成腳本、AI 帳號定位、AI 智能體一鍵生成爆款短影音服務",
+      "inLanguage": "zh-Hant",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://reelmind.aijob.com.tw/search?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "ReelMind AI",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://reelmind.aijob.com.tw/assets/images/logo.png"
+        }
       }
     }
     </script>
@@ -11265,7 +11300,7 @@
           </div>
           <div class="navbar-right">
             <div class="user-info" id="userInfo" style="display: none;" onclick="handleUserDBClick()">
-              <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: center;">
+              <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" loading="lazy" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: center;">
             <span id="userName" class="user-name"></span>
           </div>
           <div class="auth-buttons">
@@ -13139,7 +13174,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           <!-- 左側選單 -->
           <div class="user-drawer-sidebar">
             <div class="user-profile">
-              <img id="drawerAvatar" class="user-drawer-avatar" src="" alt="用戶頭像">
+              <img id="drawerAvatar" class="user-drawer-avatar" src="" alt="用戶頭像" loading="lazy">
               <div class="user-drawer-info">
                 <h3 id="drawerName">用戶名稱</h3>
                 <p id="drawerEmail">user@example.com</p>
