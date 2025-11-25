@@ -117,10 +117,10 @@
     <meta property="og:url" content="https://reelmind.aijob.com.tw/" />
     <meta property="og:title" content="ReelMind | AI 短影音智能體 - AI 生成腳本 × AI 帳號定位" />
     <meta property="og:description" content="AI 短影音智能體：每天不到 NT$66，全年 AI 幫你帳號定位、生成靈感選題與爆款腳本。支援 IG、TikTok、YouTube Shorts。" />
-    <meta property="og:image" content="https://reelmind.aijob.com.tw/assets/images/og-image.jpg" />
+    <meta property="og:image" content="https://reelmind.aijob.com.tw/assets/images/reelmind-logo-og.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="ReelMind AI 短影音智能體" />
+    <meta property="og:image:alt" content="ReelMind AI 短影音智能體 - 相機與AI智能結合的標誌" />
     <meta property="og:locale" content="zh_TW" />
     <meta property="og:site_name" content="ReelMind" />
     <meta property="og:video" content="https://www.youtube.com/embed/Pw1_MRIJ9GA" />
@@ -134,8 +134,8 @@
     <meta name="twitter:url" content="https://reelmind.aijob.com.tw/" />
     <meta name="twitter:title" content="ReelMind | AI 短影音智能體 - AI 生成腳本 × AI 帳號定位" />
     <meta name="twitter:description" content="AI 短影音智能體：每天不到 NT$66，全年 AI 幫你帳號定位、生成靈感選題與爆款腳本。" />
-    <meta name="twitter:image" content="https://reelmind.aijob.com.tw/assets/images/og-image.jpg" />
-    <meta name="twitter:image:alt" content="ReelMind AI 短影音智能體" />
+    <meta name="twitter:image" content="https://reelmind.aijob.com.tw/assets/images/reelmind-logo-og.jpg" />
+    <meta name="twitter:image:alt" content="ReelMind AI 短影音智能體 - 相機與AI智能結合的標誌" />
     
     <!-- Additional SEO -->
     <meta name="theme-color" content="#2563EB" />
@@ -148,8 +148,13 @@
     <meta http-equiv="Cache-Control" content="public, max-age=3600">
     <meta http-equiv="Expires" content="3600">
     
-    <!-- Favicon: 使用 SVG data URI，避免 404 錯誤 -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E" />
+    <!-- Favicon: ReelMind Logo -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/android-chrome-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/android-chrome-512x512.png" />
+    <link rel="shortcut icon" href="assets/images/favicon.ico" />
     
     <!-- SEO 結構化資料 -->
     <script type="application/ld+json">
@@ -301,7 +306,7 @@
       "@type": "Organization",
       "name": "ReelMind AI",
       "url": "https://reelmind.aijob.com.tw/",
-      "logo": "https://reelmind.aijob.com.tw/assets/images/logo.png",
+        "logo": "https://reelmind.aijob.com.tw/assets/images/reelmind-logo.png",
       "description": "AI 短影音智能體平台，提供 AI 生成腳本、AI 帳號定位等服務",
       "address": {
         "@type": "PostalAddress",
@@ -344,7 +349,7 @@
         "name": "ReelMind AI",
         "logo": {
           "@type": "ImageObject",
-          "url": "https://reelmind.aijob.com.tw/assets/images/logo.png"
+          "url": "https://reelmind.aijob.com.tw/assets/images/reelmind-logo.png"
         }
       }
     }
@@ -14512,13 +14517,97 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             } catch (e) {
               // 如果無法解析 JSON，使用預設錯誤訊息
             }
+            
+            // 在顯示錯誤訊息之前，先檢查用戶的實際訂閱狀態（可能後端已經成功授權）
+            // 不僅檢查 is_subscribed，還要檢查 licenses 表中的有效授權（包括 trial）
+            let hasSubscription = false;
+            let planType = null;
+            const currentToken = localStorage.getItem('ipPlanningToken');
+            if (currentToken) {
+              // 先檢查訂閱狀態 API（會返回 tier 資訊，包括 trial）
+              try {
+                const subResponse = await fetch(`https://api.aijob.com.tw/api/user/subscription`, {
+                  headers: {
+                    'Authorization': `Bearer ${currentToken}`
+                  }
+                });
+                if (subResponse.ok) {
+                  const subData = await subResponse.json();
+                  // 如果有有效的 tier（包括 trial），表示授權成功
+                  if (subData.tier && subData.tier !== 'none' && subData.status === 'active') {
+                    hasSubscription = true;
+                    planType = subData.tier;
+                    // 更新本地狀態
+                    document.body.dataset.subscribed = 'true';
+                    localStorage.setItem('subscriptionStatus', 'active');
+                    if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                      ipPlanningUser.is_subscribed = true; // 即使 trial 也視為已授權
+                      localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                    }
+                    const planName = planType === 'lifetime' ? '永久使用' : (planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'trial' ? '7天體驗' : '年費')));
+                    const planDays = planType === 'lifetime' ? '永久' : (planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'trial' ? '7天' : '1年')));
+                    showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+                    return; // 提前返回，不顯示錯誤訊息
+                  }
+                }
+              } catch (e) {
+                console.warn('無法獲取訂閱詳情:', e);
+              }
+              
+              // 如果訂閱 API 沒有返回有效授權，再檢查用戶基本資訊
+              try {
+                const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
+                  headers: {
+                    'Authorization': `Bearer ${currentToken}`
+                  }
+                });
+                if (userResponse.ok) {
+                  const userInfo = await userResponse.json();
+                  if (userInfo.is_subscribed) {
+                    hasSubscription = true;
+                    // 更新本地狀態
+                    document.body.dataset.subscribed = 'true';
+                    localStorage.setItem('subscriptionStatus', 'active');
+                    if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                      ipPlanningUser.is_subscribed = userInfo.is_subscribed;
+                      localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                    }
+                    // 再次嘗試獲取方案類型
+                    if (!planType) {
+                      try {
+                        const subResponse = await fetch(`https://api.aijob.com.tw/api/user/subscription`, {
+                          headers: {
+                            'Authorization': `Bearer ${currentToken}`
+                          }
+                        });
+                        if (subResponse.ok) {
+                          const subData = await subResponse.json();
+                          if (subData.tier) {
+                            planType = subData.tier;
+                          }
+                        }
+                      } catch (e) {
+                        console.warn('無法獲取訂閱詳情:', e);
+                      }
+                    }
+                    const planName = planType === 'lifetime' ? '永久使用' : (planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'trial' ? '7天體驗' : '年費')));
+                    const planDays = planType === 'lifetime' ? '永久' : (planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'trial' ? '7天' : '1年')));
+                    showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+                    return; // 提前返回，不顯示錯誤訊息
+                  }
+                }
+              } catch (e) {
+                console.warn('檢查訂閱狀態失敗:', e);
+              }
+            }
+            
             // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
-            if (!isAlreadyActivated || document.body.dataset.subscribed !== 'true') {
-            // 顯示詳細錯誤訊息（支援多行）
-            if (errorDetails) {
-              showToast(`${errorMessage}\n${errorDetails}`, 8000);
-            } else {
-              showToast(errorMessage, 5000);
+            if (!isAlreadyActivated && !hasSubscription) {
+              // 顯示詳細錯誤訊息（支援多行）
+              if (errorDetails) {
+                showToast(`${errorMessage}\n${errorDetails}`, 8000);
+              } else {
+                showToast(errorMessage, 5000);
               }
             }
           }
@@ -14526,8 +14615,40 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           console.error('啟用失敗:', error);
           
           // 即使發生錯誤，也檢查一下用戶的訂閱狀態（可能後端已經授權成功）
+          // 不僅檢查 is_subscribed，還要檢查 licenses 表中的有效授權（包括 trial）
           const currentToken = localStorage.getItem('ipPlanningToken');
           if (currentToken) {
+            // 先檢查訂閱狀態 API（會返回 tier 資訊，包括 trial）
+            let planType = null;
+            try {
+              const subResponse = await fetch(`https://api.aijob.com.tw/api/user/subscription`, {
+                headers: {
+                  'Authorization': `Bearer ${currentToken}`
+                }
+              });
+              if (subResponse.ok) {
+                const subData = await subResponse.json();
+                // 如果有有效的 tier（包括 trial），表示授權成功
+                if (subData.tier && subData.tier !== 'none' && subData.status === 'active') {
+                  planType = subData.tier;
+                  // 更新本地狀態
+                  document.body.dataset.subscribed = 'true';
+                  localStorage.setItem('subscriptionStatus', 'active');
+                  if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
+                    ipPlanningUser.is_subscribed = true; // 即使 trial 也視為已授權
+                    localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  }
+                  const planName = planType === 'lifetime' ? '永久使用' : (planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'trial' ? '7天體驗' : '年費')));
+                  const planDays = planType === 'lifetime' ? '永久' : (planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'trial' ? '7天' : '1年')));
+                  showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+                  return; // 提前返回，不顯示錯誤
+                }
+              }
+            } catch (e) {
+              console.warn('無法獲取訂閱詳情:', e);
+            }
+            
+            // 如果訂閱 API 沒有返回有效授權，再檢查用戶基本資訊
             try {
               const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
                 headers: {
@@ -14544,7 +14665,27 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                     ipPlanningUser.is_subscribed = userInfo.is_subscribed;
                     localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                   }
-                  showToast('✅ 授權啟用成功！', 5000);
+                  // 再次嘗試獲取方案類型
+                  if (!planType) {
+                    try {
+                      const subResponse = await fetch(`https://api.aijob.com.tw/api/user/subscription`, {
+                        headers: {
+                          'Authorization': `Bearer ${currentToken}`
+                        }
+                      });
+                      if (subResponse.ok) {
+                        const subData = await subResponse.json();
+                        if (subData.tier) {
+                          planType = subData.tier;
+                        }
+                      }
+                    } catch (e) {
+                      console.warn('無法獲取訂閱詳情:', e);
+                    }
+                  }
+                  const planName = planType === 'lifetime' ? '永久使用' : (planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'trial' ? '7天體驗' : '年費')));
+                  const planDays = planType === 'lifetime' ? '永久' : (planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'trial' ? '7天' : '1年')));
+                  showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
                   return; // 提前返回，不顯示錯誤
                 }
               }
@@ -14554,7 +14695,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }
           
           // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
-          showToast('⚠️ 啟用失敗，請稍後再試', 5000);
+          // 再次檢查本地狀態（可能在其他地方已經更新）
+          const finalCheck = document.body.dataset.subscribed === 'true' || 
+                            localStorage.getItem('subscriptionStatus') === 'active';
+          if (!finalCheck) {
+            showToast('⚠️ 啟用失敗，請稍後再試', 5000);
+          } else {
+            // 如果本地狀態顯示已訂閱，顯示成功訊息
+            showToast('✅ 授權啟用成功！', 5000);
+          }
         }
       }
       

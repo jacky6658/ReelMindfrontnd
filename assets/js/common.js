@@ -557,8 +557,92 @@
             errorMessage = `啟用失敗（錯誤代碼：${response.status}）`;
           }
         }
+        
+        // 在顯示錯誤訊息之前，先檢查用戶的實際訂閱狀態（可能後端已經成功授權）
+        // 不僅檢查 is_subscribed，還要檢查 licenses 表中的有效授權（包括 trial）
+        let hasSubscription = false;
+        let planType = null;
+        try {
+          const currentToken = localStorage.getItem('ipPlanningToken');
+          if (currentToken) {
+            // 先檢查訂閱狀態 API（會返回 tier 資訊，包括 trial）
+            try {
+              const subResponse = await fetch(`${API_BASE_URL}/api/user/subscription`, {
+                headers: {
+                  'Authorization': `Bearer ${currentToken}`
+                }
+              });
+              if (subResponse.ok) {
+                const subData = await subResponse.json();
+                // 如果有有效的 tier（包括 trial），表示授權成功
+                if (subData.tier && subData.tier !== 'none' && subData.status === 'active') {
+                  hasSubscription = true;
+                  planType = subData.tier;
+                  // 更新本地狀態
+                  document.body.dataset.subscribed = 'true';
+                  localStorage.setItem('subscriptionStatus', 'active');
+                  if (ipPlanningUser) {
+                    ipPlanningUser.is_subscribed = true; // 即使 trial 也視為已授權
+                    localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  }
+                  const planName = planType === 'lifetime' ? '永久使用' : (planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'trial' ? '7天體驗' : '年費')));
+                  const planDays = planType === 'lifetime' ? '永久' : (planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'trial' ? '7天' : '1年')));
+                  showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+                  return; // 提前返回，不顯示錯誤訊息
+                }
+              }
+            } catch (e) {
+              console.warn('無法獲取訂閱詳情:', e);
+            }
+            
+            // 如果訂閱 API 沒有返回有效授權，再檢查用戶基本資訊
+            const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+              headers: {
+                'Authorization': `Bearer ${currentToken}`
+              }
+            });
+            if (userResponse.ok) {
+              const userInfo = await userResponse.json();
+              if (userInfo.is_subscribed) {
+                hasSubscription = true;
+                // 更新本地狀態
+                document.body.dataset.subscribed = 'true';
+                localStorage.setItem('subscriptionStatus', 'active');
+                if (ipPlanningUser) {
+                  ipPlanningUser.is_subscribed = userInfo.is_subscribed;
+                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                }
+                // 再次嘗試獲取方案類型
+                if (!planType) {
+                  try {
+                    const subResponse = await fetch(`${API_BASE_URL}/api/user/subscription`, {
+                      headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                      }
+                    });
+                    if (subResponse.ok) {
+                      const subData = await subResponse.json();
+                      if (subData.tier) {
+                        planType = subData.tier;
+                      }
+                    }
+                  } catch (e) {
+                    console.warn('無法獲取訂閱詳情:', e);
+                  }
+                }
+                const planName = planType === 'lifetime' ? '永久使用' : (planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'trial' ? '7天體驗' : '年費')));
+                const planDays = planType === 'lifetime' ? '永久' : (planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'trial' ? '7天' : '1年')));
+                showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+                return; // 提前返回，不顯示錯誤訊息
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('檢查訂閱狀態失敗:', e);
+        }
+        
         // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
-        if (!isAlreadyActivated || !document.body.dataset.subscribed) {
+        if (!isAlreadyActivated && !hasSubscription) {
           showToast(`❌ ${errorMessage}`, 5000);
         }
       }
@@ -566,9 +650,41 @@
       console.error('啟用失敗:', error);
       
       // 即使發生錯誤，也檢查一下用戶的訂閱狀態（可能後端已經授權成功）
+      // 不僅檢查 is_subscribed，還要檢查 licenses 表中的有效授權（包括 trial）
       try {
         const currentToken = localStorage.getItem('ipPlanningToken');
         if (currentToken) {
+          // 先檢查訂閱狀態 API（會返回 tier 資訊，包括 trial）
+          let planType = null;
+          try {
+            const subResponse = await fetch(`${API_BASE_URL}/api/user/subscription`, {
+              headers: {
+                'Authorization': `Bearer ${currentToken}`
+              }
+            });
+            if (subResponse.ok) {
+              const subData = await subResponse.json();
+              // 如果有有效的 tier（包括 trial），表示授權成功
+              if (subData.tier && subData.tier !== 'none' && subData.status === 'active') {
+                planType = subData.tier;
+                // 更新本地狀態
+                document.body.dataset.subscribed = 'true';
+                localStorage.setItem('subscriptionStatus', 'active');
+                if (ipPlanningUser) {
+                  ipPlanningUser.is_subscribed = true; // 即使 trial 也視為已授權
+                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                }
+                const planName = planType === 'lifetime' ? '永久使用' : (planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'trial' ? '7天體驗' : '年費')));
+                const planDays = planType === 'lifetime' ? '永久' : (planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'trial' ? '7天' : '1年')));
+                showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
+                return; // 提前返回，不顯示錯誤
+              }
+            }
+          } catch (e) {
+            console.warn('無法獲取訂閱詳情:', e);
+          }
+          
+          // 如果訂閱 API 沒有返回有效授權，再檢查用戶基本資訊
           const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
             headers: {
               'Authorization': `Bearer ${currentToken}`
@@ -584,7 +700,27 @@
                 ipPlanningUser.is_subscribed = userInfo.is_subscribed;
                 localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
               }
-              showToast('✅ 授權啟用成功！', 5000);
+              // 再次嘗試獲取方案類型
+              if (!planType) {
+                try {
+                  const subResponse = await fetch(`${API_BASE_URL}/api/user/subscription`, {
+                    headers: {
+                      'Authorization': `Bearer ${currentToken}`
+                    }
+                  });
+                  if (subResponse.ok) {
+                    const subData = await subResponse.json();
+                    if (subData.tier) {
+                      planType = subData.tier;
+                    }
+                  }
+                } catch (e) {
+                  console.warn('無法獲取訂閱詳情:', e);
+                }
+              }
+              const planName = planType === 'lifetime' ? '永久使用' : (planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'trial' ? '7天體驗' : '年費')));
+              const planDays = planType === 'lifetime' ? '永久' : (planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'trial' ? '7天' : '1年')));
+              showToast(`✅ 您已開通${planDays}授權！方案：${planName}`, 8000);
               return; // 提前返回，不顯示錯誤
             }
           }
@@ -594,7 +730,15 @@
       }
       
       // 只有在確認用戶沒有訂閱時才顯示錯誤訊息
-      showToast('⚠️ 啟用失敗，請稍後再試', 5000);
+      // 再次檢查本地狀態（可能在其他地方已經更新）
+      const finalCheck = document.body.dataset.subscribed === 'true' || 
+                        localStorage.getItem('subscriptionStatus') === 'active';
+      if (!finalCheck) {
+        showToast('⚠️ 啟用失敗，請稍後再試', 5000);
+      } else {
+        // 如果本地狀態顯示已訂閱，顯示成功訊息
+        showToast('✅ 授權啟用成功！', 5000);
+      }
     }
   }
 
