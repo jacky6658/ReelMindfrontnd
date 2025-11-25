@@ -1084,8 +1084,7 @@
                        window.location.pathname.endsWith('/');
     const isExperiencePage = window.location.pathname.endsWith('/experience.html') ||
                              window.location.pathname.includes('experience.html');
-    const isGuidePage = window.location.pathname.endsWith('/guide.html') ||
-                        window.location.pathname.includes('guide.html');
+    const isGuidePage = window.location.pathname.includes('/guide');
     
     if (!isHomePage && !isExperiencePage && !isGuidePage) {
       // 非首頁、非體驗頁面、非指南頁面才需要檢查權限
