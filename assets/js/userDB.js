@@ -3152,22 +3152,42 @@ async function updateIpPlanningItemTitleForUserDB(resultId, newTitle) {
     const originalResultId = String(resultId);
     const safeResultId = originalResultId.replace(/[^a-zA-Z0-9_-]/g, '');
     
-    // 查找標題元素
-    let titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${originalResultId}"]`);
+    // 查找所有標題元素（因為有手機版和桌面版兩個標題）
+    let titleElements = document.querySelectorAll(`.ip-planning-item-title[data-result-id="${originalResultId}"]`);
     
     // 如果找不到，嘗試使用 safeResultId
-    if (!titleElement && safeResultId && safeResultId !== originalResultId) {
-      titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${safeResultId}"]`);
+    if (titleElements.length === 0 && safeResultId && safeResultId !== originalResultId) {
+      titleElements = document.querySelectorAll(`.ip-planning-item-title[data-result-id="${safeResultId}"]`);
     }
     
     // 如果還是找不到，嘗試使用 escapeHtml 轉義後的 ID
-    if (!titleElement) {
+    if (titleElements.length === 0) {
       const escapedResultId = escapeHtml(originalResultId);
-      titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${escapedResultId}"]`);
+      titleElements = document.querySelectorAll(`.ip-planning-item-title[data-result-id="${escapedResultId}"]`);
     }
     
-    if (titleElement) {
+    // 更新所有找到的標題元素（手機版和桌面版）
+    titleElements.forEach(titleElement => {
       titleElement.textContent = newTitle;
+    });
+    
+    // 更新快取中的數據（window.currentIpPlanningResults）
+    if (window.currentIpPlanningResults && Array.isArray(window.currentIpPlanningResults)) {
+      const result = window.currentIpPlanningResults.find(r => {
+        const rId = String(r.id || '');
+        return rId === originalResultId || r.id == resultId;
+      });
+      if (result) {
+        result.title = newTitle;
+        // 同時更新 metadata 中的標題（如果有的話）
+        try {
+          const metadata = typeof result.metadata === 'string' ? JSON.parse(result.metadata) : (result.metadata || {});
+          metadata.title = newTitle;
+          result.metadata = JSON.stringify(metadata);
+        } catch (e) {
+          // 如果 metadata 解析失敗，忽略
+        }
+      }
     }
     
     // 更新 localStorage
