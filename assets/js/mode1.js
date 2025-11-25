@@ -85,17 +85,17 @@ function closeMode1InstructionsDrawer() {
 // ===== 生成結果 Modal 相關函數 =====
 
 // 開啟生成結果 Modal
-function openMode1OneClickModal() {
+function openMode1OneClickModal(type = 'profile') {
   const overlay = document.getElementById('mode1OneClickModalOverlay');
   if (overlay) {
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden'; // 禁止背景滾動
-    // 預設顯示帳號定位
-    switchMode1HistoryType('profile');
+    // 切換到指定的標籤頁（預設為帳號定位）
+    switchMode1HistoryType(type);
     // 強制更新一次選取狀態
     updateSelectedSettingsDisplay();
     // 載入歷史記錄（強制刷新）
-    loadMode1OneClickHistory('profile', true); 
+    loadMode1OneClickHistory(type, true); 
   }
 }
 window.openMode1OneClickModal = openMode1OneClickModal; // 導出到全局，以便 HTML 可以直接調用
@@ -704,11 +704,11 @@ async function selectHistoryResult(type, resultId) {
     // 重新載入當前類型，更新按鈕狀態 (已選擇 / 選擇) - 添加 await 確保異步操作完成
     await loadMode1OneClickHistory(type, true);
 
-    const typeNames = {
-      'profile': '帳號定位',
-      'plan': '選題方向',
-      'scripts': '短影音腳本'
-    };
+      const typeNames = {
+        'profile': '帳號定位',
+        'plan': '選題方向',
+        'scripts': '短影音腳本'
+      };
     const typeName = typeNames[type] || type;
 
     if (window.ReelMindCommon && window.ReelMindCommon.showGreenToast) {
@@ -843,7 +843,7 @@ window.deleteMode1HistoryResult = async function(resultId, resultType) {
       setTimeout(async () => {
         try {
           await loadMode1OneClickHistory(resultType, true);
-          
+
           // 重新載入後，再次確保已刪除的記錄不會顯示
           const deletedItem = document.querySelector(`.mode1-oneclick-history-item[data-id="${resultId}"]`);
           if (deletedItem) {
@@ -1000,9 +1000,9 @@ async function saveMode1HistoryTitle(resultId) {
         window.ReelMindCommon.showToast('標題未更改', 2000);
       }
       return;
-    }
-
-    try {
+          }
+          
+          try {
       const token = localStorage.getItem('ipPlanningToken');
       if (!token) {
         console.error('❌ [saveMode1HistoryTitle] 沒有 token');
@@ -1025,7 +1025,7 @@ async function saveMode1HistoryTitle(resultId) {
       editIcon.style.display = 'inline-block';
       saveIcon.style.display = 'none';
       cancelIcon.style.display = 'none';
-
+      
       // 發送 API 請求更新標題
       console.log('📡 [saveMode1HistoryTitle] 發送 API 請求:', `${API_URL}/api/ip-planning/results/${resultId}/title`);
       const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}/title`, {
@@ -1038,7 +1038,7 @@ async function saveMode1HistoryTitle(resultId) {
       });
 
       console.log('📥 [saveMode1HistoryTitle] API 響應狀態:', response.status, response.statusText);
-      
+
       if (response.ok) {
         const responseData = await response.json().catch(() => ({}));
         console.log('✅ [saveMode1HistoryTitle] API 請求成功:', responseData);
@@ -1067,7 +1067,7 @@ async function saveMode1HistoryTitle(resultId) {
           console.log('✅ [saveMode1HistoryTitle] 顯示普通通知');
         }
         console.log('✅ [saveMode1HistoryTitle] 保存完成');
-      } else {
+    } else {
         // API 失敗，還原 UI
         const errorData = await response.json().catch(() => ({ error: '未知錯誤' }));
         console.error('❌ [saveMode1HistoryTitle] API 請求失敗:', response.status, errorData);
@@ -1369,15 +1369,15 @@ async function sendMode1Message(message, conversationType = 'ip_planning') {
   
   // 根據用戶訊息判斷請求類型（優先於關鍵字檢測），但只在 initialRequestType 為 null 時執行
   if (initialRequestType === null) {
-    if (messageLower.includes('ip profile') || messageLower.includes('個人品牌定位') || messageLower.includes('帳號定位') || messageLower.includes('重新定位')) {
-      currentRequestType = 'ip_planning';
+  if (messageLower.includes('ip profile') || messageLower.includes('個人品牌定位') || messageLower.includes('帳號定位') || messageLower.includes('重新定位')) {
+    currentRequestType = 'ip_planning';
     } else if (messageLower.includes('14天') || messageLower.includes('14 天') || messageLower.includes('選題方向') || messageLower.includes('內容計劃')) {
-      currentRequestType = 'plan';
-    } else if (messageLower.includes('腳本') || messageLower.includes('script') || messageLower.includes('今日腳本')) {
-      currentRequestType = 'scripts';
-    } else {
-      // 如果無法從訊息判斷，設為 null，後續使用關鍵字檢測
-      currentRequestType = null;
+    currentRequestType = 'plan';
+  } else if (messageLower.includes('腳本') || messageLower.includes('script') || messageLower.includes('今日腳本')) {
+    currentRequestType = 'scripts';
+  } else {
+    // 如果無法從訊息判斷，設為 null，後續使用關鍵字檢測
+    currentRequestType = null;
     }
   } else {
     currentRequestType = initialRequestType; // 恢復初始值
@@ -2317,23 +2317,14 @@ async function handleMode1MessageSave(detectedType, typeName, messageEl) {
     
     // 打開生成結果彈跳視窗並切換到對應標籤頁
     if (window.openMode1OneClickModal) {
-      window.openMode1OneClickModal();
-      setTimeout(() => {
-        const typeMap = {
-          'ip_planning': 'profile',
-          'plan': 'plan',
-          'scripts': 'scripts'
-        };
-        const targetType = typeMap[detectedType] || 'profile';
-        if (window.switchMode1HistoryType) {
-          window.switchMode1HistoryType(targetType);
-        }
-        setTimeout(() => {
-          if (window.loadMode1OneClickHistory) {
-            window.loadMode1OneClickHistory(targetType, true);
-          }
-        }, 200);
-      }, 100);
+      const typeMap = {
+        'ip_planning': 'profile',
+        'plan': 'plan',
+        'scripts': 'scripts'
+      };
+      const targetType = typeMap[detectedType] || 'profile';
+      // 直接傳入正確的標籤頁類型，避免先切到 profile 再切換
+      window.openMode1OneClickModal(targetType);
     }
   } catch (error) {
     // 恢復按鈕狀態

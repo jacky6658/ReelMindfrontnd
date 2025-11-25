@@ -2743,6 +2743,7 @@ function displayIpPlanningResultsForUserDB(results) {
     
     // 轉義 result.id 以防止 XSS
     const safeResultId = String(result.id || '').replace(/[^a-zA-Z0-9_-]/g, '');
+    const displayResultId = safeResultId || String(result.id || '');
     
     // 處理 result.content：統一使用與 mode1.js 相同的 Markdown 渲染函數
     // 由於儲存時已經是 HTML 格式，直接使用 DOMPurify 清理即可
