@@ -34,16 +34,64 @@
     <meta name="twitter:title" content="AI短影音教學指南 | ReelMind 實戰指南" />
     <meta name="twitter:description" content="完整AI短影音教學，包含腳本生成技巧、IG Reels/TikTok/YouTube Shorts平台差異、5種腳本結構選擇指南。" />
     
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data (JSON-LD) - CollectionPage -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": "AI短影音教學指南 | ReelMind 實戰指南",
+      "@type": "CollectionPage",
+      "name": "AI短影音教學指南 | ReelMind 實戰指南",
       "description": "完整AI短影音教學，包含腳本生成技巧、IG Reels/TikTok/YouTube Shorts平台差異、5種腳本結構選擇指南。適合新手到進階創作者。",
-      "author": {
-        "@type": "Organization",
-        "name": "ReelMind AI"
+      "url": "https://reelmind.aijob.com.tw/guide.html",
+      "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": 5,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "item": {
+              "@type": "Article",
+              "headline": "三步生成 30 秒短影音腳本",
+              "url": "https://reelmind.aijob.com.tw/guide/article-1-three-steps-to-generate-30-second-script.html"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "item": {
+              "@type": "Article",
+              "headline": "AI 帳號定位：內容支柱與 14 天計畫",
+              "url": "https://reelmind.aijob.com.tw/guide/article-2-ai-account-positioning-14-day-plan.html"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "item": {
+              "@type": "Article",
+              "headline": "Reels / Shorts / TikTok 腳本差異",
+              "url": "https://reelmind.aijob.com.tw/guide/article-3-reels-shorts-tiktok-script-differences.html"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "item": {
+              "@type": "Article",
+              "headline": "腳本結構選擇指南",
+              "url": "https://reelmind.aijob.com.tw/guide/article-4-script-structure-selection-guide.html"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "item": {
+              "@type": "Article",
+              "headline": "如何拿到自己的LLM金鑰",
+              "url": "https://reelmind.aijob.com.tw/guide/article-5-how-to-get-llm-api-key.html"
+            }
+          }
+        ]
       },
       "publisher": {
         "@type": "Organization",
@@ -55,11 +103,6 @@
       },
       "datePublished": "2025-11-24",
       "dateModified": "2025-11-24",
-      "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": "https://reelmind.aijob.com.tw/guide.html"
-      },
-      "articleSection": "教學指南",
       "keywords": "AI短影音教學,短影音腳本寫作,短影音教學指南,IG Reels教學,TikTok短影音教學,YouTube Shorts教學"
     }
     </script>
@@ -735,7 +778,7 @@
         <!-- 基礎教學文章列表 -->
         <div id="basicArticles" class="guide-articles-grid">
           <!-- 文章 1 -->
-          <div class="guide-article-card" onclick="showGuideArticle('article1')">
+          <a href="guide/article-1-three-steps-to-generate-30-second-script.html" class="guide-article-card" style="text-decoration: none; color: inherit; display: block;">
             <div class="guide-article-card-content">
               <div class="guide-article-card-title">三步生成 30 秒短影音腳本</div>
               <div class="guide-article-card-description">
@@ -745,10 +788,10 @@
             <div class="guide-article-card-footer">
               <span>閱讀更多 →</span>
             </div>
-          </div>
+          </a>
           
           <!-- 文章 2 -->
-          <div class="guide-article-card" onclick="showGuideArticle('article2')">
+          <a href="guide/article-2-ai-account-positioning-14-day-plan.html" class="guide-article-card" style="text-decoration: none; color: inherit; display: block;">
             <div class="guide-article-card-content">
               <div class="guide-article-card-title">AI 帳號定位：內容支柱與 14 天計畫</div>
               <div class="guide-article-card-description">
@@ -758,10 +801,10 @@
             <div class="guide-article-card-footer">
               <span>閱讀更多 →</span>
             </div>
-          </div>
+          </a>
           
           <!-- 文章 3 -->
-          <div class="guide-article-card" onclick="showGuideArticle('article3')">
+          <a href="guide/article-3-reels-shorts-tiktok-script-differences.html" class="guide-article-card" style="text-decoration: none; color: inherit; display: block;">
             <div class="guide-article-card-content">
               <div class="guide-article-card-title">Reels / Shorts / TikTok<br>腳本差異</div>
               <div class="guide-article-card-description">
@@ -771,10 +814,10 @@
             <div class="guide-article-card-footer">
               <span>閱讀更多 →</span>
             </div>
-          </div>
+          </a>
           
           <!-- 文章 4 -->
-          <div class="guide-article-card" onclick="showGuideArticle('article4')">
+          <a href="guide/article-4-script-structure-selection-guide.html" class="guide-article-card" style="text-decoration: none; color: inherit; display: block;">
             <div class="guide-article-card-content">
               <div class="guide-article-card-title">腳本結構選擇指南</div>
               <div class="guide-article-card-description">
@@ -784,10 +827,10 @@
             <div class="guide-article-card-footer">
               <span>閱讀更多 →</span>
             </div>
-          </div>
+          </a>
           
           <!-- 文章 5：如何拿到自己的LLM金鑰 -->
-          <div class="guide-article-card" onclick="showGuideArticle('article5')">
+          <a href="guide/article-5-how-to-get-llm-api-key.html" class="guide-article-card" style="text-decoration: none; color: inherit; display: block;">
             <div class="guide-article-card-content">
               <div class="guide-article-card-title">如何拿到自己的LLM金鑰</div>
               <div class="guide-article-card-description">
@@ -797,7 +840,7 @@
             <div class="guide-article-card-footer">
               <span>閱讀更多 →</span>
             </div>
-          </div>
+          </a>
         </div>
 
         <!-- 進階教學文章列表（暫時為空） -->
