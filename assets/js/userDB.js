@@ -403,7 +403,7 @@ window.editScriptNameForUserDB = function(scriptId, event) {
   if (event) event.stopPropagation();
   
   // 驗證和清理 scriptId 參數以防止 XSS
-  if (!scriptId || typeof scriptId !== 'string' && typeof scriptId !== 'number') {
+  if (!scriptId || (typeof scriptId !== 'string' && typeof scriptId !== 'number')) {
     console.error('無效的 scriptId:', scriptId);
     return;
   }
@@ -421,11 +421,23 @@ window.editScriptNameForUserDB = function(scriptId, event) {
     scriptNameElement = document.querySelector(`[data-script-id="${safeScriptId}"] h4`);
   }
   
+  // 如果還是找不到，嘗試使用 scriptId 直接查找（不轉義）
   if (!scriptNameElement) {
-    console.error('找不到腳本名稱元素:', safeScriptId);
+    scriptNameElement = document.querySelector(`[data-script-id="${scriptId}"] h4`);
+  }
+  
+  if (!scriptNameElement) {
+    console.error('找不到腳本名稱元素:', safeScriptId, '嘗試查找的元素:', `[data-script-id="${safeScriptId}"]`);
+    // 調試：列出所有可能的元素
+    const allScriptItems = document.querySelectorAll('[data-script-id]');
+    console.log('所有腳本項目:', Array.from(allScriptItems).map(el => ({
+      id: el.getAttribute('data-script-id'),
+      hasH4: !!el.querySelector('h4'),
+      hasScriptName: !!el.querySelector('.script-name')
+    })));
     return;
   }
-  const currentName = scriptNameElement.textContent;
+  const currentName = scriptNameElement.textContent.trim();
   
   const newName = prompt('請輸入新的腳本名稱:', currentName);
   if (newName && newName.trim() !== '' && newName !== currentName) {
@@ -442,11 +454,18 @@ async function updateScriptNameForUserDB(scriptId, newName) {
       scriptNameElement.textContent = newName;
     }
     
-    // 更新一鍵生成腳本列表中的標題（h4）
-    if (!scriptNameElement) {
-      scriptNameElement = document.querySelector(`[data-script-id="${scriptId}"] h4`);
-      if (scriptNameElement) {
-        scriptNameElement.textContent = newName;
+    // 更新一鍵生成腳本列表中的標題（h4）- 同時更新，不依賴條件
+    const h4Element = document.querySelector(`[data-script-id="${scriptId}"] h4`);
+    if (h4Element) {
+      h4Element.textContent = newName;
+    }
+    
+    // 如果還是找不到，嘗試不轉義的 ID
+    if (!scriptNameElement && !h4Element) {
+      const directElement = document.querySelector(`[data-script-id="${String(scriptId)}"] h4`) || 
+                           document.querySelector(`[data-script-id="${String(scriptId)}"] .script-name`);
+      if (directElement) {
+        directElement.textContent = newName;
       }
     }
     
@@ -589,10 +608,11 @@ window.viewScriptDetailForUserDB = function(scriptId) {
 // 從 API 獲取腳本詳細
 async function viewScriptDetailFromAPI(scriptId) {
   try {
+    console.log('🔍 開始從 API 獲取腳本詳細，ID:', scriptId);
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     
-    // 先嘗試使用單個腳本 API
-    let response = await fetch(`${API_URL}/api/scripts/${scriptId}`, {
+    // 先嘗試從列表 API 獲取（更可靠）
+    let response = await fetch(`${API_URL}/api/scripts/my`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
         'Content-Type': 'application/json'
@@ -602,10 +622,17 @@ async function viewScriptDetailFromAPI(scriptId) {
     let script = null;
     if (response.ok) {
       const data = await response.json();
-      script = data.script || data;
-    } else if (response.status === 404) {
-      // 如果單個腳本 API 不存在，嘗試從列表 API 獲取
-      response = await fetch(`${API_URL}/api/scripts/my`, {
+      console.log('📋 獲取到的腳本列表:', data);
+      script = data.scripts?.find(s => String(s.id) === String(scriptId));
+      console.log('✅ 找到腳本:', script ? '是' : '否');
+    } else {
+      console.warn('⚠️ 列表 API 失敗，狀態碼:', response.status);
+    }
+    
+    // 如果列表 API 沒找到，嘗試單個腳本 API
+    if (!script) {
+      console.log('🔄 嘗試單個腳本 API...');
+      response = await fetch(`${API_URL}/api/scripts/${scriptId}`, {
         headers: {
           'Authorization': `Bearer ${ipPlanningToken}`,
           'Content-Type': 'application/json'
@@ -614,23 +641,35 @@ async function viewScriptDetailFromAPI(scriptId) {
       
       if (response.ok) {
         const data = await response.json();
-        script = data.scripts?.find(s => String(s.id) === String(scriptId));
+        script = data.script || data;
+        console.log('✅ 從單個 API 找到腳本:', script ? '是' : '否');
+      } else {
+        console.warn('⚠️ 單個腳本 API 失敗，狀態碼:', response.status);
       }
     }
     
     if (script) {
+      console.log('📝 處理腳本數據:', script);
       // 轉換格式
-      const scriptData = typeof script.script_data === 'string' 
-        ? JSON.parse(script.script_data) 
-        : (script.script_data || {});
+      let scriptData = {};
+      try {
+        scriptData = typeof script.script_data === 'string' 
+          ? JSON.parse(script.script_data) 
+          : (script.script_data || {});
+      } catch (e) {
+        console.error('❌ 解析 script_data 失敗:', e);
+        scriptData = {};
+      }
       
       const formattedScript = {
         id: script.id,
         name: script.script_name || script.name || script.title || '未命名腳本',
-        created_at: script.created_at ? formatTaiwanTime(script.created_at) : '',
+        created_at: script.created_at || '',
         script_data: scriptData,
-        content: script.content
+        content: script.content || ''
       };
+      
+      console.log('✅ 格式化後的腳本:', formattedScript);
       
       // 臨時添加到本地儲存以便 viewFullScriptForUserDB 可以找到
       const localScripts = getLocalScripts();
@@ -641,22 +680,26 @@ async function viewScriptDetailFromAPI(scriptId) {
         localScripts.push(formattedScript);
       }
       localStorage.setItem('user_scripts', JSON.stringify(localScripts));
+      console.log('💾 已保存到本地儲存');
       
       // 顯示腳本詳細
       if (window.viewFullScriptForUserDB) {
+        console.log('📖 調用 viewFullScriptForUserDB');
         window.viewFullScriptForUserDB(scriptId);
       } else {
+        console.error('❌ viewFullScriptForUserDB 函數不存在');
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast('找不到腳本數據', 3000);
         }
       }
     } else {
+      console.error('❌ 找不到腳本，ID:', scriptId);
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('找不到腳本數據', 3000);
       }
     }
   } catch (error) {
-    console.error('獲取腳本詳細錯誤:', error);
+    console.error('❌ 獲取腳本詳細錯誤:', error);
     if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('載入失敗，請稍後再試', 3000);
     }
@@ -1338,6 +1381,7 @@ async function renderPersonalInfoContent() {
           daysLeft = Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24));
           
           expiresAtText = expiresAt.toLocaleString('zh-TW', {
+            hour12: false,
             timeZone: 'Asia/Taipei',
             year: 'numeric',
             month: '2-digit',
@@ -3843,6 +3887,7 @@ function displayOrdersForUserDB(orders) {
             const orderDate = formatTaiwanTime(order.created_at);
             const paidDate = order.paid_at ? formatTaiwanTime(order.paid_at) : '-';
             const expiresDate = order.expires_at ? new Date(order.expires_at).toLocaleString('zh-TW', {
+              hour12: false,
               timeZone: 'Asia/Taipei',
               year: 'numeric',
               month: '2-digit',
