@@ -3,6 +3,9 @@
 
 // ===== 工具函數 =====
 
+// 預設腳本標題
+const DEFAULT_SCRIPT_TITLE = '點我編輯腳本標題';
+
 // 獲取本地腳本
 function getLocalScripts() {
   try {
@@ -217,7 +220,7 @@ function displayScriptsForUserDB(scripts) {
       <div class="script-header" onclick="toggleScriptForUserDB('${safeScriptId.replace(/'/g, "\\'")}')">
         <div class="script-info">
           <span class="script-number">編號${String(index + 1).padStart(2, '0')}</span>
-          <span class="script-name" onclick="editScriptNameForUserDB('${safeScriptId.replace(/'/g, "\\'")}', event)">${escapeHtml(script.name || script.title || '未命名腳本')}</span>
+          <span class="script-name" onclick="editScriptNameForUserDB('${safeScriptId.replace(/'/g, "\\'")}', event)">${escapeHtml(script.name || script.title || DEFAULT_SCRIPT_TITLE)}</span>
           <span class="script-date">${formatTaiwanTime(script.created_at)}</span>
         </div>
         <div class="script-toggle">
@@ -669,7 +672,9 @@ window.editIpPlanningTitleForUserDB = function(resultId, event) {
 // 更新 IP Planning 標題
 async function updateIpPlanningTitleForUserDB(resultId, newTitle) {
   try {
-    const titleElement = document.querySelector(`[data-result-id="${resultId}"] h4`);
+    const safeResultId = String(resultId).replace(/[^a-zA-Z0-9_-]/g, '');
+    const titleElement = document.querySelector(`[data-result-id="${safeResultId}"] h4`) ||
+      document.querySelector(`[data-result-id="${resultId}"] h4`);
     if (titleElement) {
       titleElement.textContent = newTitle;
     }
@@ -788,7 +793,7 @@ async function viewScriptDetailFromAPI(scriptId) {
       
       const formattedScript = {
         id: script.id,
-        name: script.script_name || script.name || script.title || '未命名腳本',
+        name: script.script_name || script.name || script.title || DEFAULT_SCRIPT_TITLE,
         created_at: script.created_at || '',
         script_data: scriptData,
         content: script.content || ''
@@ -839,7 +844,7 @@ window.viewFullScriptForUserDB = function(scriptId) {
   if (!script) {
     const scriptItem = document.querySelector(`[data-script-id="${scriptId}"]`);
     if (scriptItem) {
-      const scriptName = scriptItem.querySelector('.script-name')?.textContent || '未命名腳本';
+      const scriptName = scriptItem.querySelector('.script-name')?.textContent || DEFAULT_SCRIPT_TITLE;
       const scriptDate = scriptItem.querySelector('.script-date')?.textContent || '';
       const scriptTable = scriptItem.querySelector('table');
       
@@ -909,7 +914,7 @@ window.viewFullScriptForUserDB = function(scriptId) {
   let fullContent = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 16px; flex-wrap: wrap; gap: 12px;">
       <div>
-        <h2 style="margin: 0; color: #1f2937; font-size: 20px; font-weight: 600;">${escapeHtml(script.name || '未命名腳本')}</h2>
+        <h2 style="margin: 0; color: #1f2937; font-size: 20px; font-weight: 600;">${escapeHtml(script.name || DEFAULT_SCRIPT_TITLE)}</h2>
         ${script.created_at ? `<p style="margin: 4px 0 0 0; color: #6b7280; font-size: 14px;">${escapeHtml(script.created_at)}</p>` : ''}
       </div>
       <button onclick="this.closest('.script-modal-overlay').remove()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #6b7280; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">×</button>
@@ -1157,7 +1162,7 @@ window.downloadScriptPDF = function(scriptId) {
   if (!script) {
     const scriptItem = document.querySelector(`[data-script-id="${scriptId}"]`);
     if (scriptItem) {
-      const scriptName = scriptItem.querySelector('.script-name')?.textContent || '未命名腳本';
+      const scriptName = scriptItem.querySelector('.script-name')?.textContent || DEFAULT_SCRIPT_TITLE;
       const scriptDate = scriptItem.querySelector('.script-date')?.textContent || '';
       const scriptTable = scriptItem.querySelector('table');
       
@@ -1199,7 +1204,7 @@ window.downloadScriptPDF = function(scriptId) {
     <html>
     <head>
       <meta charset="UTF-8">
-      <title>${escapeHtml(script.name || '未命名腳本')}</title>
+      <title>${escapeHtml(script.name || DEFAULT_SCRIPT_TITLE)}</title>
       <style>
         @media print {
           body { margin: 0; padding: 20px; }
@@ -1215,7 +1220,7 @@ window.downloadScriptPDF = function(scriptId) {
       </style>
     </head>
     <body>
-      <h1>${escapeHtml(script.name || '未命名腳本')}</h1>
+      <h1>${escapeHtml(script.name || DEFAULT_SCRIPT_TITLE)}</h1>
       ${script.created_at ? `<div class="meta">建立時間：${escapeHtml(script.created_at)}</div>` : ''}
   `;
   
@@ -1289,7 +1294,7 @@ window.downloadScriptPDF = function(scriptId) {
       printWindow.print();
       // 記錄下載事件
       recordUsageEvent('download_pdf', 'script', scriptId, 'script', {
-        script_name: script.name || '未命名腳本',
+        script_name: script.name || DEFAULT_SCRIPT_TITLE,
         script_created_at: script.created_at
       });
       if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1307,7 +1312,7 @@ window.downloadScriptCSV = function(scriptId) {
   if (!script) {
     const scriptItem = document.querySelector(`[data-script-id="${scriptId}"]`);
     if (scriptItem) {
-      const scriptName = scriptItem.querySelector('.script-name')?.textContent || '未命名腳本';
+      const scriptName = scriptItem.querySelector('.script-name')?.textContent || DEFAULT_SCRIPT_TITLE;
       const scriptDate = scriptItem.querySelector('.script-date')?.textContent || '';
       const scriptTable = scriptItem.querySelector('table');
       
@@ -1345,7 +1350,7 @@ window.downloadScriptCSV = function(scriptId) {
   }
   
   let csvContent = '\uFEFF';
-  csvContent += `腳本名稱,${escapeHtml(script.name || '未命名腳本')}\n`;
+  csvContent += `腳本名稱,${escapeHtml(script.name || DEFAULT_SCRIPT_TITLE)}\n`;
   csvContent += `建立時間,${escapeHtml(script.created_at || '-')}\n`;
   csvContent += '\n';
   csvContent += '時間,段落,鏡頭/畫面,台詞 (演員口白),字幕文字 (可動畫),音效與轉場\n';
@@ -1395,7 +1400,7 @@ window.downloadScriptCSV = function(scriptId) {
   URL.revokeObjectURL(url);
   // 記錄下載事件
   recordUsageEvent('download_csv', 'script', scriptId, 'script', {
-    script_name: script.name || '未命名腳本',
+    script_name: script.name || DEFAULT_SCRIPT_TITLE,
     script_created_at: script.created_at
   });
   if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1813,7 +1818,12 @@ function showDbSection(sectionName) {
       loadIpPlanningResultsForUserDB();
       break;
     case 'oneClickGeneration':
-      loadOneClickGenerationForUserDB();
+      {
+        const defaultType = window.currentOneClickType || 'profile';
+        window.currentOneClickType = defaultType;
+        setOneClickTabActive(defaultType);
+        loadOneClickGenerationForUserDB();
+      }
       break;
     case 'myOrders':
       loadMyOrdersForUserDB();
@@ -2732,8 +2742,7 @@ function displayIpPlanningResultsForUserDB(results) {
     const title = escapeHtml(finalTitle);
     
     // 轉義 result.id 以防止 XSS
-    const safeResultId = String(result.id || '').replace(/['"\\]/g, '');
-    const escapedResultId = escapeHtml(safeResultId);
+    const safeResultId = String(result.id || '').replace(/[^a-zA-Z0-9_-]/g, '');
     
     // 處理 result.content：統一使用與 mode1.js 相同的 Markdown 渲染函數
     // 由於儲存時已經是 HTML 格式，直接使用 DOMPurify 清理即可
@@ -2822,23 +2831,23 @@ function displayIpPlanningResultsForUserDB(results) {
     }
     
     return `
-      <div class="ip-planning-item" data-result-id="${escapedResultId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: hidden; box-sizing: border-box;">
+      <div class="ip-planning-item" data-result-id="${displayResultId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: hidden; box-sizing: border-box;">
         <!-- 手機版：標題在上方 -->
         <div class="ip-planning-header-mobile" style="display: none; flex-direction: column; gap: 8px; margin-bottom: 12px; width: 100%; box-sizing: border-box;">
           <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-            <h4 class="ip-planning-item-title" data-result-id="${escapedResultId}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; flex: 1; padding-right: 24px; word-break: break-word; overflow-wrap: break-word;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="點擊編輯標題">${title}</h4>
-            <span class="ip-planning-item-edit-icon" data-result-id="${escapedResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none; flex-shrink: 0;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fas fa-edit"></i></span>
+            <h4 class="ip-planning-item-title" data-result-id="${displayResultId}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; flex: 1; padding-right: 24px; word-break: break-word; overflow-wrap: break-word;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="點擊編輯標題">${title}</h4>
+            <span class="ip-planning-item-edit-icon" data-result-id="${displayResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none; flex-shrink: 0;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fas fa-edit"></i></span>
           </div>
-          <input type="text" class="ip-planning-item-title-input" data-result-id="${escapedResultId}" style="display: none; width: 100%; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; box-sizing: border-box;" onblur="saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')">
+          <input type="text" class="ip-planning-item-title-input" data-result-id="${displayResultId}" style="display: none; width: 100%; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; box-sizing: border-box;" onblur="saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')">
           <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
         </div>
         
         <!-- 桌面版：標題和日期在同一行 -->
         <div class="ip-planning-header-desktop" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-            <h4 class="ip-planning-item-title" data-result-id="${escapedResultId}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; position: relative; padding-right: 24px; word-break: break-word; overflow-wrap: break-word;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="點擊編輯標題">${title}</h4>
-            <span class="ip-planning-item-edit-icon" data-result-id="${escapedResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fas fa-edit"></i></span>
-            <input type="text" class="ip-planning-item-title-input" data-result-id="${escapedResultId}" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; max-width: 300px; box-sizing: border-box;" onblur="saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')">
+            <h4 class="ip-planning-item-title" data-result-id="${displayResultId}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; position: relative; padding-right: 24px; word-break: break-word; overflow-wrap: break-word;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="點擊編輯標題">${title}</h4>
+            <span class="ip-planning-item-edit-icon" data-result-id="${displayResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fas fa-edit"></i></span>
+            <input type="text" class="ip-planning-item-title-input" data-result-id="${displayResultId}" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; max-width: 300px; box-sizing: border-box;" onblur="saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')">
           </div>
           <div style="display: flex; align-items: center; gap: 12px;">
             <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
@@ -3662,7 +3671,7 @@ function displayOneClickGenerationResults(mode3Results, scripts) {
     
     content.innerHTML = sortedScripts.map((script, index) => {
       const date = script.created_at ? formatTaiwanTime(script.created_at) : (script.created_at || '');
-      const scriptName = escapeHtml(script.script_name || script.name || script.title || '未命名腳本');
+      const scriptName = escapeHtml(script.script_name || script.name || script.title || DEFAULT_SCRIPT_TITLE);
       const scriptId = String(script.id || '');
       // 使用原始 ID，不進行過度轉義，確保查找時能匹配
       const safeScriptId = scriptId.replace(/['"\\]/g, '');
@@ -3712,8 +3721,8 @@ function displayOneClickGenerationResults(mode3Results, scripts) {
     content.innerHTML = sortedResults.map((result, index) => {
       const date = formatTaiwanTime(result.created_at);
       const title = escapeHtml(result.title || (currentType === 'profile' ? '帳號定位' : '選題方向'));
-      const safeResultId = String(result.id || '').replace(/['"\\]/g, '');
-      const escapedResultId = escapeHtml(safeResultId);
+      const safeResultId = String(result.id || '').replace(/[^a-zA-Z0-9_-]/g, '');
+      const displayResultId = safeResultId || String(result.id || '');
       
       let safeContent = '';
       if (result.content) {
@@ -3802,7 +3811,7 @@ function displayOneClickGenerationResults(mode3Results, scripts) {
       }
       
       return `
-        <div class="one-click-item" data-result-id="${escapedResultId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div class="one-click-item" data-result-id="${displayResultId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <h4 style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;" 
                 onclick="editIpPlanningTitleForUserDB('${safeResultId.replace(/'/g, "\\'")}', event)"
@@ -3825,8 +3834,7 @@ function displayOneClickGenerationResults(mode3Results, scripts) {
   }
 }
 
-// 切換一鍵生成類型
-window.showOneClickType = function(type) {
+function setOneClickTabActive(type) {
   document.querySelectorAll('.one-click-tab').forEach(tab => {
     tab.classList.remove('active');
     tab.style.borderBottom = 'none';
@@ -3850,9 +3858,12 @@ window.showOneClickType = function(type) {
     targetTab.style.color = '#3B82F6';
     targetTab.style.fontWeight = '600';
   }
-  
-  // 保存當前類型並重新載入資料
+}
+
+// 切換一鍵生成類型
+window.showOneClickType = function(type) {
   window.currentOneClickType = type;
+  setOneClickTabActive(type);
   loadOneClickGenerationForUserDB();
 };
 
