@@ -14,20 +14,64 @@
     <meta name="language" content="zh-Hant" />
     <link rel="canonical" href="https://reelmind.aijob.com.tw/experience.html" />
     
+    <!-- Resource Hints for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://reelmind.aijob.com.tw/experience.html" />
     <meta property="og:title" content="免費體驗 - ReelMind AI 短影音智能體" />
     <meta property="og:description" content="無需登入，立即體驗 AI 生成短影音腳本、帳號定位分析、選題靈感。" />
+    <meta property="og:image" content="https://reelmind.aijob.com.tw/assets/images/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="ReelMind AI 短影音智能體免費體驗" />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:site_name" content="ReelMind" />
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="免費體驗 - ReelMind AI 短影音智能體" />
     <meta name="twitter:description" content="無需登入，立即體驗 AI 生成短影音腳本。" />
+    <meta name="twitter:image" content="https://reelmind.aijob.com.tw/assets/images/og-image.jpg" />
+    <meta name="twitter:image:alt" content="ReelMind AI 短影音智能體免費體驗" />
     
     <!-- HTTP 快取標頭 -->
     <meta http-equiv="Cache-Control" content="public, max-age=3600">
     <meta http-equiv="Expires" content="3600">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "免費體驗 - ReelMind AI 短影音智能體",
+      "description": "無需登入，立即體驗 AI 生成短影音腳本、帳號定位分析、選題靈感。支援 IG、TikTok、YouTube Shorts。",
+      "url": "https://reelmind.aijob.com.tw/experience.html",
+      "inLanguage": "zh-Hant",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "ReelMind AI 短影音智能體",
+        "url": "https://reelmind.aijob.com.tw/"
+      },
+      "about": {
+        "@type": "Thing",
+        "name": "AI 短影音免費體驗",
+        "description": "免費體驗 AI 生成短影音腳本功能"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "ReelMind AI",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://reelmind.aijob.com.tw/assets/images/logo.png"
+        }
+      }
+    }
+    </script>
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E" />
@@ -1595,7 +1639,7 @@
       <div class="navbar-title clickable-title" onclick="window.location.href='index.html'">ReelMind</div>
       <div class="navbar-right">
         <div class="user-info" id="userInfo" style="display: none;" onclick="window.location.href='userDB.html'">
-          <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+          <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" loading="lazy" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
           <span id="userName" class="user-name"></span>
         </div>
         <div class="auth-buttons" id="authButtons" style="display: none;">
