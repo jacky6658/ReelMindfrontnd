@@ -247,6 +247,106 @@
         color: var(--text-primary);
       }
       
+      /* ===== Mobile Drawer 樣式 ===== */
+      .mobile-drawer-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none; /* 預設隱藏 */
+      }
+
+      .mobile-drawer-overlay.active {
+        display: block; /* 打開時顯示 */
+      }
+
+      .mobile-drawer {
+        position: fixed;
+        top: 0;
+        left: -300px; /* 預設隱藏在左側 */
+        width: 280px;
+        height: 100%;
+        background: white;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+      }
+
+      .mobile-drawer.open {
+        left: 0; /* 打開時滑入 */
+      }
+
+      .mobile-drawer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f8fafc;
+      }
+
+      .mobile-drawer-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .mobile-drawer-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+
+      .mobile-drawer-close:hover {
+        background-color: #e5e7eb;
+      }
+
+      .mobile-drawer-content {
+        padding: 20px 0;
+      }
+
+      .mobile-drawer-item {
+        display: flex;
+        align-items: center;
+        padding: 16px 20px;
+        color: #374151;
+        text-decoration: none;
+        transition: background-color 0.2s;
+        border-left: 3px solid transparent;
+      }
+
+      .mobile-drawer-item:hover {
+        background-color: #f8fafc;
+        color: #1f2937;
+      }
+
+      .mobile-drawer-item.active {
+        background-color: #eff6ff;
+        color: #3b82f6;
+        border-left-color: #3b82f6;
+      }
+
+      .mobile-drawer-icon {
+        margin-right: 12px;
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+      }
+
+      .mobile-drawer-text {
+        flex: 1;
+      }
+      
       /* ===== 文章內容樣式 ===== */
       .article-page {
         min-height: 100vh;
