@@ -402,45 +402,56 @@ window.toggleScriptForUserDB = function(scriptId) {
 window.editScriptNameForUserDB = function(scriptId, event) {
   if (event) event.stopPropagation();
   
-  // 驗證和清理 scriptId 參數以防止 XSS
-  if (!scriptId || (typeof scriptId !== 'string' && typeof scriptId !== 'number')) {
-    console.error('無效的 scriptId:', scriptId);
-    return;
-  }
-  const safeScriptId = String(scriptId).replace(/[^a-zA-Z0-9_-]/g, '');
-  if (!safeScriptId) {
-    console.error('清理後的 scriptId 為空:', scriptId);
+  console.log('🔍 editScriptNameForUserDB 被調用，scriptId:', scriptId, '類型:', typeof scriptId);
+  
+  // 驗證 scriptId
+  if (!scriptId && scriptId !== 0) {
+    console.error('❌ 無效的 scriptId:', scriptId);
     return;
   }
   
-  // 先嘗試查找 .script-name（我的腳本列表）
-  let scriptNameElement = document.querySelector(`[data-script-id="${safeScriptId}"] .script-name`);
+  const scriptIdStr = String(scriptId);
+  console.log('📝 轉換為字符串:', scriptIdStr);
   
-  // 如果找不到，嘗試查找 h4（一鍵生成的腳本列表）
+  // 先嘗試使用原始 ID 查找（一鍵生成列表使用原始 ID）
+  let scriptNameElement = document.querySelector(`[data-script-id="${scriptIdStr}"] h4`);
+  
+  // 如果找不到，嘗試查找 .script-name（我的腳本列表）
   if (!scriptNameElement) {
-    scriptNameElement = document.querySelector(`[data-script-id="${safeScriptId}"] h4`);
+    scriptNameElement = document.querySelector(`[data-script-id="${scriptIdStr}"] .script-name`);
   }
   
-  // 如果還是找不到，嘗試使用 scriptId 直接查找（不轉義）
+  // 如果還是找不到，嘗試清理後的 ID
   if (!scriptNameElement) {
-    scriptNameElement = document.querySelector(`[data-script-id="${scriptId}"] h4`);
+    const safeScriptId = scriptIdStr.replace(/[^a-zA-Z0-9_-]/g, '');
+    scriptNameElement = document.querySelector(`[data-script-id="${safeScriptId}"] h4`) ||
+                       document.querySelector(`[data-script-id="${safeScriptId}"] .script-name`);
   }
   
   if (!scriptNameElement) {
-    console.error('找不到腳本名稱元素:', safeScriptId, '嘗試查找的元素:', `[data-script-id="${safeScriptId}"]`);
+    console.error('❌ 找不到腳本名稱元素，scriptId:', scriptIdStr);
     // 調試：列出所有可能的元素
     const allScriptItems = document.querySelectorAll('[data-script-id]');
-    console.log('所有腳本項目:', Array.from(allScriptItems).map(el => ({
+    console.log('📋 所有腳本項目:', Array.from(allScriptItems).map(el => ({
       id: el.getAttribute('data-script-id'),
+      idType: typeof el.getAttribute('data-script-id'),
       hasH4: !!el.querySelector('h4'),
-      hasScriptName: !!el.querySelector('.script-name')
+      hasScriptName: !!el.querySelector('.script-name'),
+      h4Text: el.querySelector('h4')?.textContent?.substring(0, 20)
     })));
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('無法找到標題元素，請刷新頁面後再試', 3000);
+    }
     return;
   }
+  
+  console.log('✅ 找到標題元素:', scriptNameElement);
   const currentName = scriptNameElement.textContent.trim();
+  console.log('📝 當前標題:', currentName);
   
   const newName = prompt('請輸入新的腳本名稱:', currentName);
   if (newName && newName.trim() !== '' && newName !== currentName) {
+    console.log('💾 更新標題為:', newName.trim());
     updateScriptNameForUserDB(scriptId, newName.trim());
   }
 }
@@ -448,25 +459,38 @@ window.editScriptNameForUserDB = function(scriptId, event) {
 // 更新腳本名稱
 async function updateScriptNameForUserDB(scriptId, newName) {
   try {
-    // 更新我的腳本列表中的標題
-    let scriptNameElement = document.querySelector(`[data-script-id="${scriptId}"] .script-name`);
-    if (scriptNameElement) {
-      scriptNameElement.textContent = newName;
-    }
+    console.log('💾 updateScriptNameForUserDB 被調用，scriptId:', scriptId, 'newName:', newName);
+    const scriptIdStr = String(scriptId);
     
-    // 更新一鍵生成腳本列表中的標題（h4）- 同時更新，不依賴條件
-    const h4Element = document.querySelector(`[data-script-id="${scriptId}"] h4`);
+    // 更新一鍵生成腳本列表中的標題（h4）- 優先更新
+    let h4Element = document.querySelector(`[data-script-id="${scriptIdStr}"] h4`);
     if (h4Element) {
+      console.log('✅ 更新 h4 標題');
       h4Element.textContent = newName;
     }
     
-    // 如果還是找不到，嘗試不轉義的 ID
-    if (!scriptNameElement && !h4Element) {
-      const directElement = document.querySelector(`[data-script-id="${String(scriptId)}"] h4`) || 
-                           document.querySelector(`[data-script-id="${String(scriptId)}"] .script-name`);
-      if (directElement) {
-        directElement.textContent = newName;
+    // 更新我的腳本列表中的標題
+    let scriptNameElement = document.querySelector(`[data-script-id="${scriptIdStr}"] .script-name`);
+    if (scriptNameElement) {
+      console.log('✅ 更新 .script-name 標題');
+      scriptNameElement.textContent = newName;
+    }
+    
+    // 如果都找不到，嘗試清理後的 ID
+    if (!h4Element && !scriptNameElement) {
+      const safeScriptId = scriptIdStr.replace(/[^a-zA-Z0-9_-]/g, '');
+      h4Element = document.querySelector(`[data-script-id="${safeScriptId}"] h4`);
+      scriptNameElement = document.querySelector(`[data-script-id="${safeScriptId}"] .script-name`);
+      if (h4Element) {
+        h4Element.textContent = newName;
       }
+      if (scriptNameElement) {
+        scriptNameElement.textContent = newName;
+      }
+    }
+    
+    if (!h4Element && !scriptNameElement) {
+      console.warn('⚠️ 找不到要更新的元素');
     }
     
     // 更新本地儲存
@@ -3538,14 +3562,16 @@ function displayOneClickGenerationResults(mode3Results, scripts) {
     content.innerHTML = sortedScripts.map((script, index) => {
       const date = script.created_at ? formatTaiwanTime(script.created_at) : (script.created_at || '');
       const scriptName = escapeHtml(script.script_name || script.name || script.title || '未命名腳本');
-      const safeScriptId = String(script.id || '').replace(/['"\\]/g, '');
-      const escapedScriptId = escapeHtml(safeScriptId);
+      const scriptId = String(script.id || '');
+      // 使用原始 ID，不進行過度轉義，確保查找時能匹配
+      const safeScriptId = scriptId.replace(/['"\\]/g, '');
+      const escapedScriptId = escapeHtml(scriptId);
       
       return `
-        <div class="script-item" data-script-id="${escapedScriptId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div class="script-item" data-script-id="${scriptId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <h4 style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;" 
-                onclick="editScriptNameForUserDB('${safeScriptId.replace(/'/g, "\\'")}', event)"
+                onclick="editScriptNameForUserDB('${scriptId.replace(/'/g, "\\'")}', event)"
                 onmouseover="this.style.background='#f3f4f6'"
                 onmouseout="this.style.background='transparent'"
                 title="點擊編輯標題">${scriptName}</h4>
