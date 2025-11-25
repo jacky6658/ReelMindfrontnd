@@ -2854,19 +2854,19 @@ function displayIpPlanningResultsForUserDB(results) {
         <!-- 手機版：標題在上方 -->
         <div class="ip-planning-header-mobile" style="display: none; flex-direction: column; gap: 8px; margin-bottom: 12px; width: 100%; box-sizing: border-box;">
           <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-            <h4 class="ip-planning-item-title" data-result-id="${displayResultId}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; flex: 1; padding-right: 24px; word-break: break-word; overflow-wrap: break-word;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="點擊編輯標題">${title}</h4>
-            <span class="ip-planning-item-edit-icon" data-result-id="${displayResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none; flex-shrink: 0;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fas fa-edit"></i></span>
+            <h4 class="ip-planning-item-title" data-result-id="${displayResultId}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; flex: 1; padding-right: 24px; word-break: break-word; overflow-wrap: break-word;" onclick="window.editIpPlanningItemTitle && window.editIpPlanningItemTitle('${displayResultId.replace(/'/g, "\\'")}', event)" title="點擊編輯標題">${title}</h4>
+            <span class="ip-planning-item-edit-icon" data-result-id="${displayResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none; flex-shrink: 0;" onclick="window.editIpPlanningItemTitle && window.editIpPlanningItemTitle('${displayResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fas fa-edit"></i></span>
           </div>
-          <input type="text" class="ip-planning-item-title-input" data-result-id="${displayResultId}" style="display: none; width: 100%; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; box-sizing: border-box;" onblur="saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')">
+          <input type="text" class="ip-planning-item-title-input" data-result-id="${displayResultId}" style="display: none; width: 100%; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; box-sizing: border-box;" onblur="window.saveIpPlanningItemTitle && window.saveIpPlanningItemTitle('${displayResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter' && window.saveIpPlanningItemTitle) window.saveIpPlanningItemTitle('${displayResultId.replace(/'/g, "\\'")}')">
           <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
         </div>
         
         <!-- 桌面版：標題和日期在同一行 -->
         <div class="ip-planning-header-desktop" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-            <h4 class="ip-planning-item-title" data-result-id="${displayResultId}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; position: relative; padding-right: 24px; word-break: break-word; overflow-wrap: break-word;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="點擊編輯標題">${title}</h4>
-            <span class="ip-planning-item-edit-icon" data-result-id="${displayResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none;" onclick="editIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fas fa-edit"></i></span>
-            <input type="text" class="ip-planning-item-title-input" data-result-id="${displayResultId}" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; max-width: 300px; box-sizing: border-box;" onblur="saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter') saveIpPlanningItemTitle('${safeResultId.replace(/'/g, "\\'")}')">
+            <h4 class="ip-planning-item-title" data-result-id="${displayResultId}" style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; position: relative; padding-right: 24px; word-break: break-word; overflow-wrap: break-word;" onclick="window.editIpPlanningItemTitle && window.editIpPlanningItemTitle('${displayResultId.replace(/'/g, "\\'")}', event)" title="點擊編輯標題">${title}</h4>
+            <span class="ip-planning-item-edit-icon" data-result-id="${displayResultId}" style="cursor: pointer; color: #6B7280; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; display: none;" onclick="window.editIpPlanningItemTitle && window.editIpPlanningItemTitle('${displayResultId.replace(/'/g, "\\'")}', event)" title="編輯標題" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fas fa-edit"></i></span>
+            <input type="text" class="ip-planning-item-title-input" data-result-id="${displayResultId}" style="display: none; flex: 1; padding: 6px 12px; border: 2px solid #3B82F6; border-radius: 6px; font-size: 1.1rem; font-weight: 600; outline: none; max-width: 300px; box-sizing: border-box;" onblur="window.saveIpPlanningItemTitle && window.saveIpPlanningItemTitle('${displayResultId.replace(/'/g, "\\'")}')" onkeypress="if(event.key === 'Enter' && window.saveIpPlanningItemTitle) window.saveIpPlanningItemTitle('${displayResultId.replace(/'/g, "\\'")}')">
           </div>
           <div style="display: flex; align-items: center; gap: 12px;">
             <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
@@ -3100,56 +3100,122 @@ window.deleteIpPlanningResultForUserDB = async function(resultId) {
 
 // 編輯 IP 人設規劃項目標題
 window.editIpPlanningItemTitle = function(resultId, event) {
-  if (event) event.stopPropagation();
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
   
   // 驗證和清理 resultId 參數以防止 XSS
   if (!resultId || (typeof resultId !== 'string' && typeof resultId !== 'number')) {
     console.error('無效的 resultId:', resultId);
     return;
   }
-  const safeResultId = String(resultId).replace(/[^a-zA-Z0-9_-]/g, '');
+  
   const originalResultId = String(resultId);
+  const safeResultId = originalResultId.replace(/[^a-zA-Z0-9_-]/g, '');
   
-  // 先嘗試使用 safeResultId 查找（如果 safeResultId 不為空）
-  let titleElement = null;
-  let inputElement = null;
-  let editIcon = null;
+  // 查找標題元素以獲取當前標題
+  let titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${originalResultId}"]`);
   
-  if (safeResultId) {
+  // 如果找不到，嘗試使用 safeResultId
+  if (!titleElement && safeResultId && safeResultId !== originalResultId) {
     titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${safeResultId}"]`);
-    inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${safeResultId}"]`);
-    editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${safeResultId}"]`);
-  }
-  
-  // 如果找不到，嘗試使用原始 ID（因為 displayResultId 可能是原始 ID）
-  if (!titleElement || !inputElement) {
-    titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${originalResultId}"]`);
-    inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${originalResultId}"]`);
-    editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${originalResultId}"]`);
   }
   
   // 如果還是找不到，嘗試使用 escapeHtml 轉義後的 ID
-  if (!titleElement || !inputElement) {
+  if (!titleElement) {
     const escapedResultId = escapeHtml(originalResultId);
     titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${escapedResultId}"]`);
-    inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${escapedResultId}"]`);
-    editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${escapedResultId}"]`);
   }
   
-  if (titleElement && inputElement) {
-    const currentTitle = titleElement.textContent.trim();
-    inputElement.value = currentTitle;
-    titleElement.style.display = 'none';
-    if (editIcon) editIcon.style.display = 'none';
-    inputElement.style.display = 'block';
-    inputElement.focus();
-    inputElement.select();
-  } else {
-    console.error('找不到標題元素或輸入框:', { resultId, safeResultId, originalResultId });
+  if (!titleElement) {
+    console.error('找不到標題元素:', { resultId, safeResultId, originalResultId });
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('找不到標題元素', 3000);
+    }
+    return;
+  }
+  
+  const currentTitle = titleElement.textContent.trim();
+  
+  // 使用 showEditTitleModal 顯示編輯彈窗
+  showEditTitleModal('標題', currentTitle, (newTitle) => {
+    if (newTitle && newTitle.trim() !== '' && newTitle !== currentTitle) {
+      updateIpPlanningItemTitleForUserDB(originalResultId, newTitle.trim());
+    }
+  });
+}
+
+// 更新 IP 人設規劃項目標題（用於 modal 編輯）
+async function updateIpPlanningItemTitleForUserDB(resultId, newTitle) {
+  try {
+    const originalResultId = String(resultId);
+    const safeResultId = originalResultId.replace(/[^a-zA-Z0-9_-]/g, '');
+    
+    // 查找標題元素
+    let titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${originalResultId}"]`);
+    
+    // 如果找不到，嘗試使用 safeResultId
+    if (!titleElement && safeResultId && safeResultId !== originalResultId) {
+      titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${safeResultId}"]`);
+    }
+    
+    // 如果還是找不到，嘗試使用 escapeHtml 轉義後的 ID
+    if (!titleElement) {
+      const escapedResultId = escapeHtml(originalResultId);
+      titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${escapedResultId}"]`);
+    }
+    
+    if (titleElement) {
+      titleElement.textContent = newTitle;
+    }
+    
+    // 更新 localStorage
+    if (ipPlanningUser && ipPlanningUser.user_id) {
+      localStorage.setItem(`ip-planning-item-title-${ipPlanningUser.user_id}-${resultId}`, newTitle);
+    }
+    
+    // 嘗試更新後端
+    try {
+      const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
+      const response = await fetch(`${API_URL}/api/ip-planning/results/${resultId}/title`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${ipPlanningToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: newTitle
+        })
+      });
+      
+      if (response.ok) {
+        if (window.ReelMindCommon && window.ReelMindCommon.showGreenToast) {
+          window.ReelMindCommon.showGreenToast('✅ 標題已更新');
+        } else if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('✅ 標題已更新', 2000);
+        }
+      } else {
+        console.log('後端更新失敗，但本地已更新');
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('標題已更新（本地）', 3000);
+        }
+      }
+    } catch (apiError) {
+      console.log('API不存在或網路錯誤，但本地已更新');
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('標題已更新（本地）', 3000);
+      }
+    }
+  } catch (error) {
+    console.error('Update IP planning item title error:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('更新失敗，請稍後再試', 3000);
+    }
   }
 }
 
-// 保存 IP 人設規劃項目標題
+// 保存 IP 人設規劃項目標題（保留此函數以向後兼容，但現在主要使用 updateIpPlanningItemTitleForUserDB）
 window.saveIpPlanningItemTitle = async function(resultId) {
   if (!resultId) {
     console.error('無效的 resultId:', resultId);
