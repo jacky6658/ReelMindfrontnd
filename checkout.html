@@ -456,12 +456,8 @@ a{text-decoration:none;color:inherit}
         <div class="hr"></div>
 
         <h3 class="h3">方案內容</h3>
-        <ul class="list">
-          <li>AI 顧問對話：定位 / 節奏 / 變現 Q&A</li>
-          <li>AI 一鍵生成：Hook、口播、分鏡、CTA</li>
-          <li>IP 人設規劃：Profile + 14 天內容規劃</li>
-          <li>創作者資料庫：PDF / CSV 下載、版本重生</li>
-          <li id="extraFeature" style="display:none;">優先客服支援</li>
+        <ul class="list" id="planFeatures">
+          <!-- 內容將由 JavaScript 動態生成 -->
         </ul>
 
         <div class="hr"></div>
@@ -569,10 +565,27 @@ a{text-decoration:none;color:inherit}
       }
     }
 
-    // Creator Pro 方案顯示額外功能
-    const extraFeature = document.getElementById('extraFeature');
-    if (extraFeature) {
-      extraFeature.style.display = (currentPlan === 'two_year') ? 'list-item' : 'none';
+    // 動態更新方案內容列表
+    const planFeaturesList = document.getElementById('planFeatures');
+    if (planFeaturesList) {
+      if (currentPlan === 'yearly') {
+        // Script Lite 入門版的功能
+        planFeaturesList.innerHTML = `
+          <li>AI 一鍵生成：Hook、口播、分鏡、CTA</li>
+          <li>創作者資料庫：PDF / CSV 下載、版本重生</li>
+          <li>實戰指南：腳本生成技巧、平台差異、結構選擇指南</li>
+          <li>客服支援</li>
+        `;
+      } else {
+        // Creator Pro 雙年方案的功能
+        planFeaturesList.innerHTML = `
+          <li>IP 人設規劃：Profile + 14 天內容規劃</li>
+          <li>AI 一鍵生成：Hook、口播、分鏡、CTA</li>
+          <li>創作者資料庫：PDF / CSV 下載、版本重生</li>
+          <li>實戰指南：腳本生成技巧、平台差異、結構選擇指南</li>
+          <li>客服支援</li>
+        `;
+      }
     }
   }
 
