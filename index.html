@@ -15909,12 +15909,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 綜合判斷訂閱狀態（任一為 true 即視為已訂閱）
         const isSubscribed = userSubscribed || backendSubscribed || localSubscribed;
-          userSubscribed,
-          backendSubscribed,
-          localSubscribed,
-          isSubscribed,
-          '所有狀態': { userSubscribed, backendSubscribed, localSubscribed, isSubscribed }
-        });
         
         // 獲取視圖元素
         const unsubscribedView = document.getElementById('homepage-unsubscribed');
@@ -15992,33 +15986,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         const chatContainer = document.querySelector('#chatContainer');
         
         
-        if (quickButtons) {
-            display: getComputedStyle(quickButtons).display,
-            visibility: getComputedStyle(quickButtons).visibility,
-            opacity: getComputedStyle(quickButtons).opacity,
-            height: getComputedStyle(quickButtons).height,
-            position: getComputedStyle(quickButtons).position,
-            zIndex: getComputedStyle(quickButtons).zIndex
-          });
-        }
+        // quickButtons 和 inputRow 的樣式檢查已移除（原為調試用）
         
-        if (inputRow) {
-            display: getComputedStyle(inputRow).display,
-            visibility: getComputedStyle(inputRow).visibility,
-            opacity: getComputedStyle(inputRow).opacity,
-            height: getComputedStyle(inputRow).height,
-            position: getComputedStyle(inputRow).position,
-            zIndex: getComputedStyle(inputRow).zIndex
-          });
-        }
-        
-        if (chatContainer) {
-            display: getComputedStyle(chatContainer).display,
-            height: getComputedStyle(chatContainer).height,
-            overflow: getComputedStyle(chatContainer).overflow,
-            flexDirection: getComputedStyle(chatContainer).flexDirection
-          });
-        }
+        // chatContainer 樣式檢查已移除（原為調試用）
       }
       
       // 移動現有內容到新容器
@@ -16545,11 +16515,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (userNameDetail) userNameDetail.textContent = ipPlanningUser.name || ipPlanningUser.displayName || '未設定';
           if (userEmailDetail) userEmailDetail.textContent = ipPlanningUser.email || '未設定';
           if (userIdDetail) userIdDetail.textContent = ipPlanningUser.user_id || '未生成';
-          
-            name: ipPlanningUser.name,
-            email: ipPlanningUser.email,
-            user_id: ipPlanningUser.user_id
-          });
         }
       }
       
@@ -22401,13 +22366,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 定義認證訊息處理函數
           const authMessageHandler = function(event) {
-            // 先記錄所有收到的訊息（用於調試）
-              origin: event.origin,
-              source: event.source ? 'window' : 'null',
-              data: event.data,
-              dataType: typeof event.data,
-              currentOrigin: window.location.origin
-            });
+            // 先記錄所有收到的訊息（用於調試）- 已移除調試日誌
             
             // 檢查訊息類型是否為認證相關
             const isAuthMessage = event.data && typeof event.data === 'object' && (
@@ -22563,11 +22522,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 處理 localStorage 更新的函數（作為 postMessage 的備用方案）
           const storageHandler = function(event) {
-              key: event.key,
-              newValue: event.newValue,
-              oldValue: event.oldValue,
-              url: event.url
-            });
+            // 調試日誌已移除
             
             // 檢查是否是 token 更新
             if (event.key === 'ipPlanningTokenUpdated' && event.newValue) {
@@ -22848,14 +22803,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         const name = urlParams.get('name');
         const picture = urlParams.get('picture');
         const error = urlParams.get('error');
-        
-          token: token ? 'present' : 'missing',
-          userId: userId ? 'present' : 'missing',
-          email: email ? 'present' : 'missing',
-          name: name ? 'present' : 'missing',
-          picture: picture ? 'present' : 'missing',
-          error: error || 'none'
-        });
+        // 調試日誌已移除
         
         // 處理錯誤
         if (error) {
@@ -23826,12 +23774,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             return;
           }
           
-          // 調試：記錄 token 獲取情況
-            conversationType,
-            role,
-            hasToken: !!token,
-            tokenPrefix: token ? token.substring(0, 20) + '...' : '無'
-          });
+          // 調試：記錄 token 獲取情況（已移除調試日誌）
           
           // 同步更新全局變數（確保一致性）
           if (token !== ipPlanningToken) {
@@ -23913,14 +23856,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             })
           });
           
-          // 調試：記錄 API 請求詳情
-            url: 'https://api.aijob.com.tw/api/memory/long-term',
-            conversationType,
-            role,
-            sessionId,
-            user_id: user.user_id,
-            contentLength: content.length
-          });
+          // 調試：記錄 API 請求詳情（已移除調試日誌）
           
           if (!res.ok && res.status !== 422) {
             // 不處理 422（重複記錄），其他錯誤嘗試處理
@@ -23953,12 +23889,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               console.error('長期記憶儲存失敗：伺服器錯誤 (500+)');
             }
           } else if (res.ok) {
-            // 成功儲存
-              conversationType,
-              role,
-              user_id: user.user_id,
-              sessionId
-            });
+            // 成功儲存（調試日誌已移除）
           } else if (res.status === 422) {
             // 422 表示重複記錄，這是正常的
           }
@@ -24361,11 +24292,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         const hasAnyScriptContent = hasStructureMarkers || scriptElementCount >= 3 || hasTimeMarkers || hasVideoContent;
         
         if (!hasAnyScriptContent) {
-            hasStructureMarkers,
-            scriptElementCount,
-            hasTimeMarkers,
-            hasVideoContent
-          });
+          // 調試日誌已移除
           return false;
         }
         
