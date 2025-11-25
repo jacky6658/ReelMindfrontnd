@@ -60,6 +60,14 @@
     <priority>0.8</priority>
   </url>
   
+  <!-- 文章 6：什麼是人生曲線？用故事曲線打造爆款短影音 - 高優先級（進階教學） -->
+  <url>
+    <loc>https://reelmind.aijob.com.tw/guide/article-6-what-is-life-curve.html</loc>
+    <lastmod>2025-11-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  
   <!-- 免費體驗頁面 - 高優先級（吸引新用戶） -->
   <url>
     <loc>https://reelmind.aijob.com.tw/experience.html</loc>
