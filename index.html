@@ -43,14 +43,11 @@
           const token = urlParams.get('token');
           
           if (token) {
-            console.log('🔗 檢測到授權連結 token:', token.substring(0, 20) + '...');
-            
             // 檢查是否已登入
             const currentToken = localStorage.getItem('ipPlanningToken');
             
             if (!currentToken) {
               // 未登入，先顯示 popup-callback.html 動畫，然後跳轉到 Google 登入
-              console.log('🔐 未登入，顯示動畫後跳轉到登入頁');
               // 保存 activation_token 到 sessionStorage，供 popup-callback.html 使用
               sessionStorage.setItem('pendingActivationToken', token);
               // 跳轉到 popup-callback.html，它會自動處理登入流程
@@ -59,7 +56,6 @@
             } else {
               // 已登入，標記需要處理授權（等 DOMContentLoaded 時處理）
               sessionStorage.setItem('pendingActivationToken', token);
-              console.log('✅ 已登入，標記待處理授權');
             }
           }
           
@@ -13658,7 +13654,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       }
       
       async function switchPage(pageId) {
-        console.log('switchPage called with:', pageId);
         
         // mode1/mode2/mode3 已分離到獨立頁面，不應通過 switchPage 訪問
         if (['mode1', 'mode2', 'mode3'].includes(pageId)) {
@@ -13744,14 +13739,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 顯示選中的頁面
           targetPage.classList.add('active');
-          console.log('✅ Switched to page:', pageId);
           
           // 滾動到頁面頂部（確保從其他頁面跳轉時能正確顯示）
           window.scrollTo({ top: 0, behavior: 'instant' });
           
           // 如果切換到首頁，更新首頁視圖（確保訂閱狀態正確顯示）
           if (pageId === 'homepage') {
-            console.log('🏠 切換到首頁，更新首頁視圖...');
             setTimeout(() => {
               updateHomepageView();
             }, 100);
@@ -13769,7 +13762,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 如果是 forum 或 guide，確保頁面正確顯示
           if (pageId === 'forum' || pageId === 'guide') {
-            console.log('✅', pageId === 'forum' ? '論壇介紹' : '實戰指南', '頁面已激活');
             // 滾動到頂部
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }
@@ -13795,11 +13787,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             
             if (pageId === 'forum' && forumPage) {
               forumPage.classList.add('active');
-              console.log('✅ Forum page activated (fallback)');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (pageId === 'guide' && guidePage) {
               guidePage.classList.add('active');
-              console.log('✅ Guide page activated (fallback)');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
               console.error('❌ 找不到頁面元素:', pageId, 'forum:', !!forumPage, 'guide:', !!guidePage);
@@ -14218,8 +14208,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           });
           
           // 記錄響應狀態以便調試
-          console.log('授權驗證響應狀態:', response.status, response.statusText);
-          console.log('授權驗證響應 headers:', Object.fromEntries(response.headers.entries()));
           
           // 檢查響應類型
           const contentType = response.headers.get('content-type') || '';
@@ -14233,7 +14221,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             if (isJson && response.ok) {
               try {
                 responseData = await response.json();
-                console.log('授權驗證成功響應數據:', responseData);
             } catch (e) {
                 console.warn('無法解析 JSON 響應:', e);
               }
@@ -14738,7 +14725,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         if (pendingToken) {
           sessionStorage.removeItem('pendingActivationToken');
           activationToken = pendingToken;
-          console.log('✅ 從 sessionStorage 獲取待處理授權 token');
         }
         
         if (activationToken) {
@@ -14754,13 +14740,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const currentToken = localStorage.getItem('ipPlanningToken');
             if (!currentToken) {
               // 未登入，立即跳轉到登入頁（不執行其他初始化）
-              console.log('🔐 檢測到授權連結但未登入，立即跳轉到登入頁');
               // 使用 replace 而不是 href，避免歷史記錄問題
               window.location.replace(`/#login?activation_token=${activationToken}`);
               return; // 停止執行後續初始化
             } else {
               // 已登入，處理授權
-              console.log('✅ 檢測到授權連結且已登入，開始驗證授權');
               if (typeof handleActivationToken === 'function') {
               handleActivationToken(activationToken);
               } else {
@@ -14801,34 +14785,26 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 監聽登入事件（從 common.js 或 auth.js 觸發）
         window.addEventListener('auth:logged-in', async function() {
-          console.log('🔔 ========== 收到登入事件 ==========');
-          console.log('🔔 開始更新用戶資訊...');
           
           // 重新載入用戶資訊
           const storedToken = localStorage.getItem('ipPlanningToken');
           const storedUserStr = localStorage.getItem('ipPlanningUser');
           
-          console.log('🔑 Token 存在:', !!storedToken);
-          console.log('👤 用戶資料存在:', !!storedUserStr);
           
           if (storedToken) {
             ipPlanningToken = storedToken;
-            console.log('✅ Token 已更新');
           }
           if (storedUserStr) {
             try {
               ipPlanningUser = JSON.parse(storedUserStr);
-              console.log('✅ 用戶資料已更新:', ipPlanningUser);
             } catch (e) {
               console.warn('❌ 無法解析用戶資料:', e);
             }
           }
           
           // 更新用戶資訊顯示
-          console.log('🔄 調用 updateUserInfo...');
           await updateUserInfo();
           
-          console.log('✅ ========== 登入事件處理完成 ==========');
         });
         
         // 啟動 token 監控（每分鐘檢查一次）
@@ -14843,7 +14819,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             // 只處理已知的頁面 ID
             const validPages = ['homepage', 'forum', 'guide', 'userDB', 'guide-article1', 'guide-article2', 'guide-article3'];
             if (validPages.includes(pageId)) {
-              console.log('🔗 檢測到 hash 導航:', pageId);
               // 立即執行，避免先顯示首頁
               // 先隱藏所有頁面
               document.querySelectorAll('.page').forEach(page => {
@@ -14855,13 +14830,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               return true; // 表示已處理 hash 導航
               } else {
                 // 如果 switchPage 還未定義，等待它定義後再執行
-                console.log('⏳ switchPage 函數尚未定義，等待載入...');
                 let retryCount = 0;
                 const maxRetries = 50; // 最多重試 50 次（約 5 秒）
                 const checkInterval = setInterval(() => {
                   if (typeof switchPage === 'function') {
                     clearInterval(checkInterval);
-                    console.log('✅ switchPage 函數已載入，執行導航');
                     switchPage(pageId);
                   } else if (retryCount++ >= maxRetries) {
                     clearInterval(checkInterval);
@@ -14885,7 +14858,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const pageId = currentHash.replace('#', '');
           const validPages = ['homepage', 'forum', 'guide', 'userDB', 'guide-article1', 'guide-article2', 'guide-article3'];
           if (validPages.includes(pageId)) {
-            console.log('🔗 頁面載入時檢測到 hash 導航:', pageId);
             // 立即隱藏所有頁面（如果 DOM 已準備好）
             if (document.readyState !== 'loading') {
               document.querySelectorAll('.page').forEach(page => {
@@ -14912,7 +14884,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const pageId = window.location.hash.replace('#', '');
             const validPages = ['homepage', 'forum', 'guide', 'userDB', 'guide-article1', 'guide-article2', 'guide-article3'];
             if (validPages.includes(pageId) && typeof switchPage === 'function') {
-              console.log('🔗 延遲處理 hash 導航:', pageId);
               document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
               });
@@ -14924,13 +14895,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 監聽 hashchange 事件（處理從其他頁面跳轉過來的情況）
         window.addEventListener('hashchange', function() {
-          console.log('🔗 Hash 改變:', window.location.hash);
           const hash = window.location.hash;
           if (hash) {
             const pageId = hash.replace('#', '');
             const validPages = ['homepage', 'forum', 'guide', 'userDB', 'guide-article1', 'guide-article2', 'guide-article3'];
             if (validPages.includes(pageId) && typeof switchPage === 'function') {
-              console.log('🔗 Hashchange 觸發導航:', pageId);
               document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
               });
@@ -14945,7 +14914,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (homepage) {
             homepage.classList.add('active');
           }
-          console.log('🏠 初始化時更新首頁視圖...');
           setTimeout(() => {
             updateHomepageView();
             // 檢查 LLM Key 綁定狀態並顯示通知
@@ -15090,7 +15058,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 檢查 URL 參數中是否有 token（OAuth callback fallback）
         const tokenParam = urlParams.get('token');
         if (tokenParam && !activationToken) {  // 避免與授權 token 衝突
-          console.log('DEBUG: Found token in URL params, processing OAuth callback...');
           const userId = urlParams.get('user_id');
           const email = urlParams.get('email');
           const name = urlParams.get('name');
@@ -15110,14 +15077,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             // 清除 URL 參數
             window.history.replaceState({}, document.title, window.location.pathname);
             
-            console.log('✅ DEBUG: Token processed from URL params, updating UI');
-            console.log('👤 用戶資訊:', ipPlanningUser);
             updateAuthUI(true);
             showMainApp();
             // 立即更新用戶資訊顯示
-            updateUserInfo().then(() => {
-              console.log('✅ 用戶資訊更新完成');
-            }).catch(err => {
+            updateUserInfo().catch(err => {
               console.error('❌ 更新用戶資訊失敗:', err);
             });
           }
@@ -15137,8 +15100,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const isNewToken = !currentToken || storedToken !== currentToken;
           
           if (isNewToken) {
-            console.log('DEBUG: ✅ New token found in localStorage (likely from mobile redirect)');
-            console.log('DEBUG: Token updated flag timestamp:', tokenUpdatedFlag);
             
             // 更新全域變數
             ipPlanningToken = storedToken;
@@ -15154,8 +15115,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             localStorage.removeItem('ipPlanningTokenUpdated');
             
             // 更新 UI
-            console.log('✅ 從 localStorage 更新登入狀態');
-            console.log('👤 用戶資訊:', ipPlanningUser);
             updateAuthUI(true);
             // 立即更新用戶資訊顯示
             updateUserInfo().then(async () => {
@@ -15172,7 +15131,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               }
               
               showMainApp();
-              console.log('✅ DEBUG: Login state updated from localStorage');
             }).catch(err => {
               console.error('❌ 更新用戶資訊失敗:', err);
             });
@@ -15180,15 +15138,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         // 檢查是否已經登入
-        console.log('🚀 開始初始化頁面...');
         checkLoginStatus().then(() => {
-          console.log('✅ 登入狀態檢查完成');
           
           // 注意：updateUserInfo() 中已經調用了 checkSubscriptionStatus() 和 updateHomepageView()
           // 這裡不需要重複調用，避免重複執行
           // 如果已登入，確保載入用戶歷史資訊（updateUserInfo 中已有，但這裡作為備用）
           if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
-            console.log('📚 備用：載入用戶歷史資訊...');
             // 延遲執行，確保訂閱狀態已更新
             setTimeout(() => {
               loadUserHistory();
@@ -15199,7 +15154,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 確保 Highlight.js 載入後初始化（因為使用了 defer）
         function initializeHighlightJS() {
           if (typeof hljs !== 'undefined') {
-            console.log('DEBUG: Highlight.js loaded, initializing...');
             try {
               hljs.highlightAll();
               // 初始化 Markdown 渲染器
@@ -15298,7 +15252,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
 
       // 處理 mode-card 點擊
       async function handleModeCardClick(modeId) {
-        console.log('Mode card clicked:', modeId);
         
         // 先檢查登入狀態
         const isLoggedIn = ipPlanningToken && ipPlanningUser;
@@ -15455,7 +15408,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       window.incrementFreeTrialUsageCount = incrementFreeTrialUsageCount;
       
       async function handleSubscriptionClick(plan) {
-        console.log('Subscription button clicked:', plan);
         
         // 檢查登入狀態
         let loggedIn = false;
@@ -15596,7 +15548,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 檢查 token 是否已過期
           if (isTokenExpired(ipPlanningToken)) {
             // Token 已過期，嘗試刷新
-            console.log('Token 已過期，嘗試刷新...');
             const refreshed = await tryRefreshTokenSafe();
             if (!refreshed) {
               // 刷新失敗，已自動登出（在 tryRefreshTokenSafe 中處理）
@@ -15616,11 +15567,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               ipPlanningToken = newToken;
             }
           }
-          console.log('👤 更新用戶資訊顯示...');
           await updateUserInfo(); // 修復：添加 await 確保異步操作完成
         } else {
           // 未登入時顯示登入按鈕
-          console.log('🔐 未登入，顯示登入按鈕');
           showLoginButton();
         }
       }
@@ -15650,9 +15599,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 顯示用戶資訊
       async function updateUserInfo() {
-        console.log('🔄 更新用戶資訊...');
-        console.log('Token:', ipPlanningToken ? '存在' : '不存在');
-        console.log('用戶:', ipPlanningUser ? (ipPlanningUser.name || '無名稱') : '不存在');
         
         const authButtons = document.querySelector('.auth-buttons');
         const userInfo = document.getElementById('userInfo');
@@ -15660,7 +15606,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 檢查登入狀態
         const isLoggedIn = !!(ipPlanningToken && ipPlanningUser);
-        console.log('登入狀態:', isLoggedIn);
         
         if (isLoggedIn) {
           // 已登入：顯示用戶資訊，隱藏登入按鈕
@@ -15671,18 +15616,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const userAvatarEl = document.getElementById('userAvatar');
             if (userNameEl) {
               userNameEl.textContent = ipPlanningUser.name || ipPlanningUser.displayName || '用戶';
-              console.log('✅ 更新用戶名稱:', userNameEl.textContent);
             }
             if (userAvatarEl) {
               if (ipPlanningUser.picture || ipPlanningUser.avatar) {
                 userAvatarEl.src = ipPlanningUser.picture || ipPlanningUser.avatar;
                 userAvatarEl.alt = ipPlanningUser.name || '用戶';
-                console.log('✅ 更新用戶頭像:', userAvatarEl.src);
               } else {
                 // 如果沒有頭像，使用預設頭像或首字母
                 userAvatarEl.src = 'https://via.placeholder.com/32';
                 userAvatarEl.alt = ipPlanningUser.name || '用戶';
-                console.log('⚠️ 用戶沒有頭像，使用預設頭像');
               }
             }
             // 確保點擊用戶資訊可以打開創作者資料庫
@@ -15698,20 +15640,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (loginBtn) loginBtn.style.display = 'block';
         }
         // 更新用戶資訊後，檢查訂閱狀態
-        console.log('📊 檢查訂閱狀態...');
         await checkSubscriptionStatus();
         // 注意：checkSubscriptionStatus() 中已經調用了 updateHomepageView()
         // 但為了確保訂閱狀態已完全更新，再次調用 updateHomepageView()
         setTimeout(() => {
-          console.log('🏠 確認首頁視圖（訂閱狀態已更新）...');
           updateHomepageView();
         }, 200);
         
         // 如果已登入，載入用戶歷史資訊（對話記錄、生成記錄、記憶等）
         if (isLoggedIn && ipPlanningUser && ipPlanningUser.user_id) {
-          console.log('📚 載入用戶歷史資訊（對話記錄、生成記錄、記憶等）...');
-          console.log('👤 用戶ID:', ipPlanningUser.user_id);
-          console.log('🔑 Token:', ipPlanningToken ? '存在' : '不存在');
           // 延遲執行，確保訂閱狀態和首頁視圖已更新
           setTimeout(() => {
             if (typeof loadUserHistory === 'function') {
@@ -15722,9 +15659,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }, 1000);
         } else {
           console.warn('⚠️ 未登入或缺少用戶資訊，跳過載入歷史');
-          console.log('登入狀態:', isLoggedIn);
-          console.log('用戶存在:', !!ipPlanningUser);
-          console.log('用戶ID:', ipPlanningUser?.user_id);
         }
       }
       
@@ -15738,30 +15672,22 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 檢查訂閱狀態並更新浮層
       async function checkSubscriptionStatus() {
-        console.log('🔍 開始檢查訂閱狀態...');
-        console.log('Token 存在:', !!ipPlanningToken);
-        console.log('用戶存在:', !!ipPlanningUser);
-        console.log('用戶ID:', ipPlanningUser?.user_id);
         
         // 如果有登入資訊，從後端 API 獲取訂閱狀態
         if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
           try {
-            console.log('📡 發送 API 請求獲取用戶資訊...');
             let response = await fetch('https://api.aijob.com.tw/api/auth/me', {
               headers: {
                 'Authorization': `Bearer ${ipPlanningToken}`
               }
             });
             
-            console.log('API 響應狀態:', response.status);
             
             // 如果收到 401，嘗試刷新 token 後重試
             if (response.status === 401) {
-              console.log('⚠️ Token 已過期，嘗試刷新...');
               const refreshed = await tryRefreshTokenSafe();
               if (refreshed) {
                 // Token 刷新成功，使用新 token 重試
-                console.log('✅ Token 刷新成功，重新獲取用戶資訊...');
                 // 重新獲取最新的 token（刷新後可能已更新）
                 const refreshedToken = localStorage.getItem('ipPlanningToken');
                 if (refreshedToken) {
@@ -15772,17 +15698,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                     'Authorization': `Bearer ${ipPlanningToken}`
                   }
                 });
-                console.log('重新請求後的響應狀態:', response.status);
               }
             }
             
             if (response.ok) {
               const userInfo = await response.json();
-              console.log('✅ ========== 用戶資訊獲取成功 ==========');
-              console.log('✅ 完整用戶資訊:', JSON.stringify(userInfo, null, 2));
-              console.log('📊 訂閱狀態:', userInfo.is_subscribed);
-              console.log('👤 用戶名稱:', userInfo.name || userInfo.displayName);
-              console.log('🖼️ 用戶頭像:', userInfo.picture || userInfo.avatar);
               
               // 更新全局用戶資訊（從 API 獲取的最新資訊）
               if (userInfo.user_id) {
@@ -15802,8 +15722,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   is_subscribed: isSubscribed // 確保訂閱狀態被正確設置
                 };
                 localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
-                console.log('✅ 更新全局用戶資訊:', ipPlanningUser);
-                console.log('✅ 用戶訂閱狀態已更新到全局變數:', ipPlanningUser.is_subscribed);
                 
                 // 立即更新 UI 顯示（用戶頭像和名稱）
                 const userNameEl = document.getElementById('userName');
@@ -15819,19 +15737,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 
                 if (userNameEl) {
                   userNameEl.textContent = ipPlanningUser.name || ipPlanningUser.displayName || '用戶';
-                  console.log('✅ UI 更新用戶名稱:', userNameEl.textContent);
                 }
                 if (userAvatarEl) {
                   if (ipPlanningUser.picture || ipPlanningUser.avatar) {
                     userAvatarEl.src = ipPlanningUser.picture || ipPlanningUser.avatar;
                     userAvatarEl.alt = ipPlanningUser.name || '用戶';
-                    console.log('✅ UI 更新用戶頭像:', userAvatarEl.src);
                   } else {
                     // 如果沒有頭像，使用 Google 預設頭像生成器
                     const name = ipPlanningUser.name || ipPlanningUser.displayName || 'User';
                     userAvatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=32&bold=true`;
                     userAvatarEl.alt = name;
-                    console.log('⚠️ 用戶沒有頭像，使用生成頭像');
                   }
                 }
               }
@@ -15846,23 +15761,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               if (isSubscribed) {
                 document.body.dataset.subscribed = 'true';
                 localStorage.setItem('subscriptionStatus', 'active');
-                console.log('✅ 設為已訂閱，訂閱狀態:', ipPlanningUser?.is_subscribed);
-                console.log('✅ document.body.dataset.subscribed 已設置為:', document.body.dataset.subscribed);
                 
                 // 確保用戶資料中的訂閱狀態正確（已在上面設置，這裡再次確認）
                 if (ipPlanningUser) {
                   ipPlanningUser.is_subscribed = true;
                   localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
-                  console.log('✅ 確認用戶資料中的訂閱狀態已更新:', ipPlanningUser.is_subscribed);
                 }
                 
                 // 立即更新首頁視圖
-                console.log('🏠 調用 updateHomepageView() 顯示已訂閱視圖...');
                 updateHomepageView();
               } else {
                 document.body.dataset.subscribed = 'false';
                 localStorage.setItem('subscriptionStatus', 'inactive');
-                console.log('⚠️ 設為未訂閱，訂閱狀態:', ipPlanningUser?.is_subscribed);
                 
                 // 更新用戶資料中的訂閱狀態
                 if (ipPlanningUser) {
@@ -15881,7 +15791,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               if (localSubscriptionStatus === 'active' || localIsSubscribed) {
                 document.body.dataset.subscribed = 'true';
                 localStorage.setItem('subscriptionStatus', 'active');
-                console.log('⚠️ API 失敗，使用本地儲存狀態: 已訂閱');
                 
                 // 更新用戶資料中的訂閱狀態
                 if (ipPlanningUser) {
@@ -15894,7 +15803,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               } else {
                 document.body.dataset.subscribed = 'false';
                 localStorage.setItem('subscriptionStatus', 'inactive');
-                console.log('⚠️ API 失敗，使用本地儲存狀態: 未訂閱');
                 
                 // 更新用戶資料中的訂閱狀態
                 if (ipPlanningUser) {
@@ -15915,7 +15823,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             if (localSubscriptionStatus === 'active' || localIsSubscribed) {
               document.body.dataset.subscribed = 'true';
               localStorage.setItem('subscriptionStatus', 'active');
-              console.log('⚠️ 網路錯誤，使用本地儲存狀態: 已訂閱');
               
               // 更新用戶資料中的訂閱狀態
               if (ipPlanningUser) {
@@ -15928,7 +15835,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             } else {
               document.body.dataset.subscribed = 'false';
               localStorage.setItem('subscriptionStatus', 'inactive');
-              console.log('⚠️ 網路錯誤，使用本地儲存狀態: 未訂閱');
               
               // 更新用戶資料中的訂閱狀態
               if (ipPlanningUser) {
@@ -15951,8 +15857,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }
         }
         
-        console.log('當前訂閱狀態:', document.body.dataset.subscribed);
-        console.log('登入狀態:', ipPlanningToken && ipPlanningUser ? '已登入' : '未登入');
         
         // 更新鎖定浮層
         updateSubscriptionLock();
@@ -15963,11 +15867,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 根據用戶權限顯示對應的首頁視圖
       function updateHomepageView() {
-        console.log('🏠 ========== 更新首頁視圖 ==========');
         
         // 檢查登入狀態（優先使用全局變數，如果沒有則從 localStorage 讀取）
         const isLoggedIn = !!(ipPlanningToken && ipPlanningUser) || !!(localStorage.getItem('ipPlanningToken') && localStorage.getItem('ipPlanningUser'));
-        console.log('🔐 登入狀態:', isLoggedIn, 'token存在:', !!ipPlanningToken, 'user存在:', !!ipPlanningUser);
         
         // 檢查訂閱狀態（多個來源，優先使用全局變數）
         let userSubscribed = false;
@@ -15978,7 +15880,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                              ipPlanningUser.is_subscribed === 1 || 
                              ipPlanningUser.is_subscribed === '1' ||
                              ipPlanningUser.is_subscribed === 'true');
-          console.log('👤 從全局變數檢查訂閱狀態:', userSubscribed, 'is_subscribed:', ipPlanningUser.is_subscribed);
         }
         
         // 如果全局變數沒有，再從 localStorage 讀取
@@ -15993,7 +15894,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 user.is_subscribed === '1' ||
                 user.is_subscribed === 'true'
               ));
-              console.log('👤 從 localStorage 用戶資料檢查訂閱狀態:', userSubscribed, 'is_subscribed:', user.is_subscribed);
             } catch (e) {
               console.warn('❌ 無法解析用戶資料:', e);
             }
@@ -16002,16 +15902,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 檢查 document.body.dataset.subscribed（從後端 API 獲取的狀態）
         const backendSubscribed = document.body.dataset.subscribed === 'true';
-        console.log('📡 從後端 API 檢查訂閱狀態:', backendSubscribed, 'dataset.subscribed:', document.body.dataset.subscribed);
         
         // 檢查 localStorage 中的訂閱狀態
         const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
         const localSubscribed = localSubscriptionStatus === 'active';
-        console.log('💾 從 localStorage subscriptionStatus 檢查訂閱狀態:', localSubscribed, 'status:', localSubscriptionStatus);
         
         // 綜合判斷訂閱狀態（任一為 true 即視為已訂閱）
         const isSubscribed = userSubscribed || backendSubscribed || localSubscribed;
-        console.log('✅ 最終訂閱狀態判斷:', {
           userSubscribed,
           backendSubscribed,
           localSubscribed,
@@ -16037,23 +15934,17 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 未登入用戶 → 顯示未訂閱視圖
           unsubscribedView.style.display = 'block';
           subscribedView.style.display = 'none';
-          console.log('✅ 顯示未登入視圖');
         } else if (isLoggedIn && !isSubscribed) {
           // 已登入但未訂閱 → 顯示未訂閱視圖
           unsubscribedView.style.display = 'block';
           subscribedView.style.display = 'none';
-          console.log('✅ 顯示已登入未訂閱視圖');
         } else if (isLoggedIn && isSubscribed) {
           // 已登入且已訂閱 → 顯示已訂閱視圖（包含「介紹如何開始」等區塊）
           unsubscribedView.style.display = 'none';
           subscribedView.style.display = 'block';
-          console.log('✅ 顯示已登入已訂閱視圖（包含「介紹如何開始」等區塊）');
-          console.log('✅ subscribedView 元素存在:', !!subscribedView);
-          console.log('✅ subscribedView display 樣式:', subscribedView.style.display);
           // 驗證視圖是否真的顯示
           setTimeout(() => {
             const computedDisplay = window.getComputedStyle(subscribedView).display;
-            console.log('✅ subscribedView computed display:', computedDisplay);
             if (computedDisplay === 'none') {
               console.error('❌ 錯誤：subscribedView 的 computed display 仍然是 none！');
             }
@@ -16065,14 +15956,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           console.warn('⚠️ 未匹配到任何條件，顯示未訂閱視圖。isLoggedIn:', isLoggedIn, 'isSubscribed:', isSubscribed);
         }
         
-        console.log('🏠 ========== 首頁視圖更新完成 ==========');
         
         // 首頁顯示後，重新啟動打字機動畫（確保視圖已顯示）
         setTimeout(() => {
           // 檢查當前顯示的視圖
           const currentView = unsubscribedView.style.display === 'block' ? unsubscribedView : subscribedView;
           if (currentView && currentView.style.display === 'block') {
-            console.log('🎬 啟動打字機動畫（視圖已顯示）');
             if (typeof initTypewriterAnimation === 'function') {
               initTypewriterAnimation();
             } else {
@@ -16093,23 +15982,17 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         event.target.classList.add('active');
         
         // 這裡可以添加語言切換邏輯
-        console.log('Language set to:', lang);
       }
       
       // 調試函數：檢查AI顧問模式元素狀態
       function debugAIConsultantElements() {
-        console.log('=== 調試AI顧問模式元素 ===');
         
         const quickButtons = document.querySelector('.quick-buttons');
         const inputRow = document.querySelector('.input-row');
         const chatContainer = document.querySelector('#chatContainer');
         
-        console.log('快速按鈕元素:', quickButtons);
-        console.log('輸入區域元素:', inputRow);
-        console.log('聊天容器元素:', chatContainer);
         
         if (quickButtons) {
-          console.log('快速按鈕樣式:', {
             display: getComputedStyle(quickButtons).display,
             visibility: getComputedStyle(quickButtons).visibility,
             opacity: getComputedStyle(quickButtons).opacity,
@@ -16120,7 +16003,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         if (inputRow) {
-          console.log('輸入區域樣式:', {
             display: getComputedStyle(inputRow).display,
             visibility: getComputedStyle(inputRow).visibility,
             opacity: getComputedStyle(inputRow).opacity,
@@ -16131,7 +16013,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         }
         
         if (chatContainer) {
-          console.log('聊天容器樣式:', {
             display: getComputedStyle(chatContainer).display,
             height: getComputedStyle(chatContainer).height,
             overflow: getComputedStyle(chatContainer).overflow,
@@ -16336,7 +16217,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             user.user_id = generateUserId();
             ipPlanningUser = user; // 更新當前用戶
             localStorage.setItem('ipPlanningUser', JSON.stringify(user));
-            console.log('在updateUserDrawer中為用戶生成新ID:', user.user_id);
           }
           
           // 更新抽屜內的資訊
@@ -16358,7 +16238,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
 
       // 載入用戶歷史資訊
       async function loadUserHistory() {
-        console.log('📚 ========== 開始載入用戶歷史資訊 ==========');
         
         // 確保用戶有ID
         if (!ipPlanningUser?.user_id) {
@@ -16366,70 +16245,56 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (ipPlanningUser) {
             ipPlanningUser.user_id = generateUserId();
             localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
-            console.log('✅ 為用戶生成新ID:', ipPlanningUser.user_id);
           } else {
             console.error('❌ 沒有當前用戶，跳過載入歷史');
             return;
           }
         }
         
-        console.log('👤 用戶ID:', ipPlanningUser.user_id);
-        console.log('🔑 Token:', ipPlanningToken ? '存在' : '不存在');
         
         try {
           // 載入對話記錄
-          console.log('📝 [1/4] 正在載入對話記錄...');
           const conversationsResponse = await fetch(`https://api.aijob.com.tw/api/user/conversations/${ipPlanningUser.user_id}`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
             }
           });
-          console.log('📝 對話記錄響應狀態:', conversationsResponse.status);
           if (conversationsResponse.ok) {
             const conversationsData = await conversationsResponse.json();
-            console.log('✅ 對話記錄數據:', conversationsData);
             updateConversationsDisplay(conversationsData.conversations);
           } else {
             console.error('❌ 載入對話記錄失敗:', conversationsResponse.status, conversationsResponse.statusText);
           }
           
           // 載入生成記錄
-          console.log('📄 [2/4] 正在載入生成記錄...');
           const generationsResponse = await fetch(`https://api.aijob.com.tw/api/user/generations/${ipPlanningUser.user_id}`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
             }
           });
-          console.log('📄 生成記錄響應狀態:', generationsResponse.status);
           if (generationsResponse.ok) {
             const generationsData = await generationsResponse.json();
-            console.log('✅ 生成記錄數據:', generationsData);
             updateGenerationsDisplay(generationsData.generations);
           } else {
             console.error('❌ 載入生成記錄失敗:', generationsResponse.status, generationsResponse.statusText);
           }
           
           // 載入帳號定位記錄
-          console.log('🎯 [3/4] 正在載入帳號定位記錄...');
           await loadPositioningRecords();
           
           // 載入用戶記憶
-          console.log('🧠 [4/4] 正在載入用戶記憶...');
           const memoryResponse = await fetch(`https://api.aijob.com.tw/api/user/memory/${ipPlanningUser.user_id}`, {
             headers: {
               'Authorization': `Bearer ${ipPlanningToken}`
             }
           });
-          console.log('🧠 用戶記憶響應狀態:', memoryResponse.status);
           if (memoryResponse.ok) {
             const memoryData = await memoryResponse.json();
-            console.log('✅ 用戶記憶數據:', memoryData);
             updateMemoryDisplay(memoryData.memory);
           } else {
             console.error('❌ 載入用戶記憶失敗:', memoryResponse.status, memoryResponse.statusText);
           }
           
-          console.log('✅ ========== 用戶歷史資訊載入完成 ==========');
         } catch (error) {
           console.error('❌ 載入用戶歷史資訊時出錯:', error);
         }
@@ -16671,7 +16536,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (!ipPlanningUser.user_id) {
             ipPlanningUser.user_id = generateUserId();
             localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
-            console.log('在updatePersonalInfo中為用戶生成新ID:', ipPlanningUser.user_id);
           }
           
           const userNameDetail = document.getElementById('userNameDetail');
@@ -16682,7 +16546,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (userEmailDetail) userEmailDetail.textContent = ipPlanningUser.email || '未設定';
           if (userIdDetail) userIdDetail.textContent = ipPlanningUser.user_id || '未生成';
           
-          console.log('更新個人資料:', {
             name: ipPlanningUser.name,
             email: ipPlanningUser.email,
             user_id: ipPlanningUser.user_id
@@ -16705,7 +16568,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (userInfo) {
             userInfo.style.display = 'flex';
           }
-          console.log('用戶資訊已更新:', ipPlanningUser);
         }
       }
       
@@ -16840,12 +16702,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 登出功能
       async function logout() {
-        console.log('🚪 開始登出流程...');
         
         // 如果有 token，先調用後端登出 API
         if (ipPlanningToken) {
           try {
-            console.log('📡 調用後端登出 API...');
             const response = await fetch('https://api.aijob.com.tw/api/auth/logout', {
               method: 'POST',
               headers: {
@@ -16855,7 +16715,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             });
             
             if (response.ok) {
-              console.log('✅ 後端登出成功');
             } else {
               console.warn('⚠️ 後端登出失敗，但繼續本地登出:', response.status);
             }
@@ -16902,7 +16761,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           updateHomepageView();
         }, 100);
         
-        console.log('✅ 登出流程完成');
       }
       // 更新個人資料庫用戶資訊
       function updateDbUserInfo() {
@@ -17193,19 +17051,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 顯示載入動畫
         showLoadingAnimation(content, '載入腳本記錄中...');
         
-        console.log('正在載入腳本列表...', {
           ipPlanningToken: ipPlanningToken ? 'present' : 'missing',
           userId: ipPlanningUser.user_id
         });
         
         // 先檢查本地儲存的腳本（僅用於快速顯示，仍會從後端獲取最新資料）
         const localScripts = getLocalScripts();
-        console.log('本地腳本數量:', localScripts.length);
-        console.log('本地腳本內容:', localScripts);
         
         // 如果有本地腳本，短暫延遲後顯示，讓用戶看到載入動畫
         if (localScripts.length > 0) {
-          console.log('先顯示本地腳本:', localScripts);
           setTimeout(() => {
           displayScriptsForUserDB(localScripts);
           }, 300);
@@ -17221,11 +17075,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             }
           });
           
-          console.log('腳本列表響應狀態:', response.status);
           
           if (response.ok) {
             const data = await response.json();
-            console.log('腳本列表數據:', data);
             const serverScripts = data.scripts || [];
             
             // 合併本地和後端腳本，避免覆蓋
@@ -17252,7 +17104,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             
             // 轉換為陣列並顯示
             const mergedScripts = Array.from(scriptMap.values());
-            console.log('合併後的腳本數量:', mergedScripts.length);
             
             if (mergedScripts.length > 0) {
               displayScriptsForUserDB(mergedScripts);
@@ -17260,7 +17111,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               content.innerHTML = '<div class="loading-text">還沒有儲存的腳本，請先使用一鍵生成功能創建腳本</div>';
             }
           } else if (response.status === 401) {
-            console.log('腳本載入失敗: 認證錯誤');
             // 如果沒有本地腳本，顯示錯誤；否則保持顯示本地腳本
             if (localScripts.length === 0) {
               // 嘗試刷新 token 後重試
@@ -17274,7 +17124,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               console.warn('API 認證失敗，但已有本地腳本，繼續使用本地腳本');
             }
           } else if (response.status === 404) {
-            console.log('腳本載入失敗: API不存在');
             // 如果沒有本地腳本，顯示錯誤；否則保持顯示本地腳本
             if (localScripts.length === 0) {
               content.innerHTML = '<div class="loading-text">腳本功能即將上線，請稍後再試</div>';
@@ -17283,7 +17132,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             }
           } else {
             const errorData = await response.json().catch(() => ({}));
-            console.log('腳本載入失敗:', errorData);
             // 如果沒有本地腳本，顯示錯誤；否則保持顯示本地腳本
             if (localScripts.length === 0) {
               content.innerHTML = '<div class="loading-text">載入失敗，請稍後再試</div>';
@@ -17439,7 +17287,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         const userMessage = createChatGPTMessage('user', message);
         chatMessages.appendChild(userMessage);
         // 記錄長期記憶
-        console.log('📝 準備儲存長期記憶 (IP 人設規劃 - user)');
         try { 
           await recordConversationMessage('ip_planning', 'user', message); 
         } catch (error) {
@@ -17521,7 +17368,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                     checkIfScriptRequest(fullContent);
                   }
                   // 記錄長期記憶
-                  console.log('📝 準備儲存長期記憶 (IP 人設規劃 - assistant)');
                   try { 
                     await recordConversationMessage('ip_planning', 'assistant', fullContent); 
                   } catch (error) {
@@ -17711,12 +17557,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         chatMessages.appendChild(userMessage);
         
         // 記錄長期記憶（用戶訊息）
-        console.log('📝📝📝 準備儲存長期記憶 (AI 顧問 - user) - sendMessage 函數 📝📝📝');
-        console.log('📝 訊息內容:', message);
-        console.log('📝 調用 recordConversationMessage...');
         try { 
           await recordConversationMessage('ai_advisor', 'user', message); 
-          console.log('📝 recordConversationMessage 調用完成');
         } catch (error) {
           console.error('❌❌❌ 長期記憶儲存異常 (AI 顧問 - user) ❌❌❌', error);
           console.error('錯誤堆疊:', error.stack);
@@ -17800,12 +17642,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 const data = line.slice(6);
                 if (data === '[DONE]') {
                   // 記錄長期記憶（AI 回覆）
-                  console.log('📝📝📝 準備儲存長期記憶 (AI 顧問 - assistant) - sendMessage 函數 📝📝📝');
-                  console.log('📝 AI 回覆內容長度:', fullContent.length);
-                  console.log('📝 調用 recordConversationMessage...');
                   try { 
                     await recordConversationMessage('ai_advisor', 'assistant', fullContent); 
-                    console.log('📝 recordConversationMessage 調用完成');
                   } catch (error) {
                     console.error('❌❌❌ 長期記憶儲存異常 (AI 顧問 - assistant) ❌❌❌', error);
                     console.error('錯誤堆疊:', error.stack);
@@ -18078,11 +17916,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             if (response.ok) {
               showToast('腳本名稱已更新', 3000);
             } else {
-              console.log('後端更新失敗，但本地已更新');
               showToast('腳本名稱已更新（本地）', 3000);
             }
           } catch (apiError) {
-            console.log('API不存在或網路錯誤，但本地已更新');
             showToast('腳本名稱已更新（本地）', 3000);
           }
           
@@ -18461,7 +18297,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         try {
           // 使用正確的 API 端點：/api/user/positioning/{recordId}
           const url = `https://api.aijob.com.tw/api/user/positioning/${cleanRecordId}`;
-          console.log('刪除請求 URL:', url);
           
           const response = await fetch(url, {
             method: 'DELETE',
@@ -18570,7 +18405,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               }
             }
           } catch (e) {
-            console.log('無法獲取帳號定位名稱，使用預設值:', e);
           }
           
           // 主標題已改為固定「IP人設規劃」，不再需要編輯功能
@@ -21095,7 +20929,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               
               if (saveResponse.ok) {
                 const saveData = await saveResponse.json();
-                console.log('選題已自動儲存:', saveData);
                 // 重新載入選題內容列表（如果用戶在創作者資料庫頁面）
                 const topicRecordsSection = document.querySelector('#db-topicRecords');
                 if (topicRecordsSection && topicRecordsSection.style.display !== 'none') {
@@ -21189,7 +21022,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        console.log('開始儲存腳本...', {
           userId: ipPlanningUser.user_id,
           contentLength: content.length
         });
@@ -21197,7 +21029,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         try {
           // 提取腳本內容的結構化數據
           const scriptData = extractScriptData(content);
-          console.log('提取的腳本數據:', scriptData);
           
           const response = await fetch('https://api.aijob.com.tw/api/scripts/save', {
             method: 'POST',
@@ -21215,11 +21046,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             })
           });
           
-          console.log('腳本儲存響應狀態:', response.status);
           
           if (response.ok) {
             const result = await response.json();
-            console.log('腳本儲存成功:', result);
             
             // 同時儲存到本地
             const localScriptData = {
@@ -21240,10 +21069,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               loadMyScriptsForUserDB(); // 同時載入資料庫頁面的腳本
             }, 1000);
           } else if (response.status === 401) {
-            console.log('腳本儲存失敗: 認證錯誤');
             showToast('請先登入', 3000);
           } else if (response.status === 404) {
-            console.log('腳本儲存失敗: API不存在，使用本地儲存');
             // 後端API不存在時，使用本地儲存
             const localScriptData = {
               name: scriptData.title || '未命名腳本',
@@ -21262,13 +21089,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             }, 500);
           } else {
             const errorData = await response.json();
-            console.log('腳本儲存失敗:', errorData);
             throw new Error(errorData.error || '儲存失敗');
           }
         } catch (error) {
           console.error('Save script error:', error);
           // 網路錯誤時，也使用本地儲存
-          console.log('網路錯誤，使用本地儲存');
           const localScriptData = {
             name: scriptData.title || '未命名腳本',
             title: scriptData.title || '',
@@ -21289,16 +21114,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 提取腳本數據 - 按照規範格式解析
       function extractScriptData(content) {
-        console.log('開始解析腳本內容:', content);
         
         try {
           // 清理內容，移除HTML標籤
           const cleanContent = content.replace(/<[^>]*>/g, '').trim();
-          console.log('清理後的內容:', cleanContent);
           
           // 按照規範解析腳本
           const scriptData = parseScriptToJSON(cleanContent);
-          console.log('解析結果:', scriptData);
           return scriptData;
           
         } catch (error) {
@@ -21462,7 +21284,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-        console.log('正在載入腳本列表...', {
           ipPlanningToken: ipPlanningToken ? 'present' : 'missing',
           userId: ipPlanningUser.user_id
         });
@@ -21470,7 +21291,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 先檢查本地儲存的腳本
         const localScripts = getLocalScripts();
         if (localScripts.length > 0) {
-          console.log('載入本地腳本:', localScripts);
           displayScripts(localScripts);
           return;
         }
@@ -21483,21 +21303,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             }
           });
           
-          console.log('腳本列表響應狀態:', response.status);
           
           if (response.ok) {
             const data = await response.json();
-            console.log('腳本列表數據:', data);
             displayScripts(data.scripts || []);
           } else if (response.status === 401) {
-            console.log('腳本載入失敗: 認證錯誤');
             document.getElementById('generationsList').innerHTML = '<div class="loading-text">請先登入</div>';
           } else if (response.status === 404) {
-            console.log('腳本載入失敗: API不存在');
             document.getElementById('generationsList').innerHTML = '<div class="loading-text">腳本功能即將上線，請稍後再試</div>';
           } else {
             const errorData = await response.json();
-            console.log('腳本載入失敗:', errorData);
             throw new Error(errorData.error || '載入失敗');
           }
         } catch (error) {
@@ -21537,15 +21352,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (existingIndex === -1) {
             // 新腳本，添加到開頭
           scripts.unshift(newScript);
-            console.log('新腳本已添加到本地:', newScript);
           } else {
             // 如果已存在（不太可能），更新它
             scripts[existingIndex] = newScript;
-            console.log('腳本已更新到本地:', newScript);
           }
           
           localStorage.setItem('user_scripts', JSON.stringify(scripts));
-          console.log('本地腳本總數:', scripts.length);
         } catch (error) {
           console.error('Error saving script locally:', error);
         }
@@ -21754,11 +21566,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       
       // 生成腳本表格
       function generateScriptTable(scriptData) {
-        console.log('生成腳本表格，數據:', scriptData);
         
         // 檢查是否有錯誤
         if (scriptData && scriptData.error) {
-          console.log('腳本數據有錯誤:', scriptData.message);
           return `<tr><td colspan="6">解析失敗: ${scriptData.message}</td></tr>`;
         }
         
@@ -21787,7 +21597,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             `;
           });
           
-          console.log('生成的表格行:', tableRows);
           return tableRows || '<tr><td colspan="6">無數據</td></tr>';
         }
         
@@ -21804,11 +21613,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (hasVisualData) {
             // 解析畫面感內容，按行分割
             visualLines = scriptData.visual.split('\n').map(line => line.trim()).filter(line => line);
-            console.log('畫面感資料:', visualLines);
           }
           
           scriptData.sections.forEach((section, sectionIndex) => {
-            console.log(`處理段落 ${sectionIndex}:`, section);
             
             // 如果段落有內容
             if (section.content && section.content.length > 0) {
@@ -21872,12 +21679,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             }
         });
         
-          console.log('生成的表格行:', tableRows);
         return tableRows || '<tr><td colspan="6">無數據</td></tr>';
         }
         
         // 如果都沒有，返回無數據
-        console.log('沒有腳本數據，返回無數據行');
         return '<tr><td colspan="6">無數據</td></tr>';
       }
       
@@ -22412,11 +22217,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         const mode3ChatMessages = document.getElementById('mode3-chatMessages');
         if (chatMessages) {
           chatMessages.innerHTML = '';
-          console.log('頁面重新整理：已清空 AI 顧問聊天區域');
         }
         if (mode3ChatMessages) {
           mode3ChatMessages.innerHTML = '';
-          console.log('頁面重新整理：已清空 IP 人設規劃聊天區域');
         }
         
         // 確保抽屜初始狀態為關閉
@@ -22572,17 +22375,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       // 登入功能
       async function login() {
         try {
-          console.log('DEBUG: Login function called');
           
           // 從後端取得 Google 認證 URL（需要後端 CORS 允許 http://localhost:5173）
-          console.log('DEBUG: Fetching auth URL from backend...');
           let authUrl = null;
           const fbParam = encodeURIComponent(window.location.origin);
           try {
             const response = await fetch(`https://api.aijob.com.tw/api/auth/google?fb=${fbParam}`);
             const data = await response.json();
             authUrl = data && data.auth_url;
-            console.log('DEBUG: Auth URL received:', authUrl);
           } catch (corsErr) {
             console.warn('DEBUG: Fetch auth_url failed (likely CORS). Fallback to direct navigate.', corsErr);
             authUrl = `https://api.aijob.com.tw/api/auth/google?fb=${fbParam}`;
@@ -22592,7 +22392,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
           
           // 一律採用主視窗跳轉（避免彈窗被擋與體驗不一致）
-          console.log('DEBUG: Redirecting to Google auth (main window)');
           window.location.href = authUrl;
           return;
 
@@ -22603,7 +22402,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 定義認證訊息處理函數
           const authMessageHandler = function(event) {
             // 先記錄所有收到的訊息（用於調試）
-            console.log('DEBUG: 📥 Received ANY message event:', {
               origin: event.origin,
               source: event.source ? 'window' : 'null',
               data: event.data,
@@ -22618,14 +22416,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             );
             
             if (!isAuthMessage) {
-              console.log('DEBUG: ⏭️ Ignoring non-auth message. Type:', event.data?.type, 'Data:', event.data);
               return;
             }
             
-            console.log('DEBUG: ✅ Auth message detected! Type:', event.data.type);
-            console.log('DEBUG: Message origin:', event.origin);
-            console.log('DEBUG: Current window origin:', window.location.origin);
-            console.log('DEBUG: Full message data:', JSON.stringify(event.data, null, 2));
             
             // 接受來自所有 origin 的認證訊息（因為使用 '*' targetOrigin）
             // 但記錄 origin 以調試
@@ -22644,7 +22437,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               console.warn('DEBUG: Allowed origins:', allowedOrigins);
               console.warn('DEBUG: But processing anyway since it is auth message with targetOrigin "*"');
             } else {
-              console.log('DEBUG: ✅ Origin check passed:', event.origin);
             }
             
             // 清除逾時
@@ -22676,8 +22468,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               window.removeEventListener('storage', storageHandler);
             
             if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
-              console.log('DEBUG: Auth success message received');
-              console.log('DEBUG: Full event.data:', JSON.stringify(event.data, null, 2));
               
               // 認證成功，更新 UI
               // 後端發送的是 accessToken，需要映射到 ipPlanningToken
@@ -22701,30 +22491,24 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 };
               }
               
-              console.log('DEBUG: Processed user data:', ipPlanningUser);
               
               // 保存到本地存儲
               if (ipPlanningToken) {
                 localStorage.setItem('ipPlanningToken', ipPlanningToken);
-                console.log('DEBUG: Token saved to localStorage');
               }
               if (ipPlanningUser) {
                 localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
-                console.log('DEBUG: User data saved to localStorage');
               }
               
               // 隱藏彈窗覆蓋層
               hidePopupOverlay();
-              console.log('DEBUG: Popup overlay hidden');
               
               // 更新認證 UI（強制更新）
               updateAuthUI(true);
-              console.log('DEBUG: Auth UI updated');
               
               // 重新檢查登入狀態（確保全域變數同步）
               ipPlanningToken = localStorage.getItem('ipPlanningToken');
               ipPlanningUser = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
-              console.log('DEBUG: Global variables synced, token:', ipPlanningToken ? 'present' : 'missing');
               
               // 檢查並更新訂閱狀態（先更新訂閱狀態，再顯示主應用程式）
               checkSubscriptionStatus().then(async () => {
@@ -22767,15 +22551,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   showMainApp();
                   updateHomepageView();
                 }
-                console.log('DEBUG: Main app shown after subscription status updated');
               });
-              console.log('DEBUG: Subscription status check initiated');
               
               // 顯示成功提示
               showToast('登入成功！', 2000);
-              console.log('DEBUG: Login success flow completed');
             } else if (event.data.type === 'GOOGLE_AUTH_ERROR') {
-              console.log('DEBUG: Auth error message received:', event.data.error);
               hidePopupOverlay();
               showToast('認證失敗：' + (event.data.error || '未知錯誤'), 5000);
             }
@@ -22783,7 +22563,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 處理 localStorage 更新的函數（作為 postMessage 的備用方案）
           const storageHandler = function(event) {
-            console.log('DEBUG: 📦 Storage event received:', {
               key: event.key,
               newValue: event.newValue,
               oldValue: event.oldValue,
@@ -22792,14 +22571,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             
             // 檢查是否是 token 更新
             if (event.key === 'ipPlanningTokenUpdated' && event.newValue) {
-              console.log('DEBUG: ✅ Token updated in localStorage detected!');
               
               // 從 localStorage 讀取 token 和用戶資訊
               const newToken = localStorage.getItem('ipPlanningToken');
               const newUserStr = localStorage.getItem('ipPlanningUser');
               
               if (newToken && newToken !== ipPlanningToken) {
-                console.log('DEBUG: New token found in localStorage, processing...');
                 
                 // 清除逾時
                 if (popupTimeout) {
@@ -22829,32 +22606,26 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 
                 // 隱藏彈窗覆蓋層
                 hidePopupOverlay();
-                console.log('DEBUG: Popup overlay hidden');
                 
                 // 更新認證 UI
                 updateAuthUI(true);
-                console.log('DEBUG: Auth UI updated');
                 
                 // 顯示主應用程式
                 showMainApp();
-                console.log('DEBUG: Main app shown');
                 
               // 先強制 refresh 一次，確保服務端與前端 token 完全同步，再讀取 me
               (async () => {
                 try {
-                  console.log('DEBUG: Forcing one refresh after login to sync token...');
                   const t0 = localStorage.getItem('ipPlanningToken') || '';
                   await fetch('https://api.aijob.com.tw/api/auth/refresh', { method: 'POST', headers: t0 ? { 'Authorization': `Bearer ${t0}` } : {} });
                 } catch (e) { console.warn('DEBUG: refresh after login failed (can ignore if CORS):', e); }
                 try {
-                  console.log('DEBUG: Probing /api/auth/me after refresh...');
                   const currentToken = localStorage.getItem('ipPlanningToken') || '';
                   const meRes = await fetch('https://api.aijob.com.tw/api/auth/me', {
                     headers: {
                       'Authorization': `Bearer ${currentToken}`
                     }
                   });
-                  console.log('DEBUG: /api/auth/me status:', meRes.status);
                 } catch (e) { console.warn('DEBUG: me probe failed:', e); }
                 // 檢查並更新訂閱狀態（再略微延遲）
                 setTimeout(() => { 
@@ -22882,7 +22653,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   } catch(_){} 
                 }, 150);
               })();
-                console.log('DEBUG: Subscription status checked');
                 
                 // 檢查是否有待處理的訂閱方案
                 const pendingPlan = sessionStorage.getItem('pendingSubscriptionPlan');
@@ -22896,13 +22666,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 
                 // 顯示成功提示
                 showToast('登入成功！', 2000);
-                console.log('DEBUG: Login success flow completed (via localStorage)');
               }
             }
           };
           
           // 先註冊監聽器（關鍵：在開彈窗前註冊，確保不會遺漏訊息）
-          console.log('DEBUG: Registering message and storage listeners before opening popup');
           window.addEventListener('message', authMessageHandler, false);
           window.addEventListener('storage', storageHandler, false);
           
@@ -22912,7 +22680,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const checkUpdatedFlag = localStorage.getItem('ipPlanningTokenUpdated');
             
             if (checkToken && checkUpdatedFlag && checkToken !== ipPlanningToken) {
-              console.log('DEBUG: ✅ Token found in localStorage via polling check');
               clearInterval(localStorageCheckInterval);
               
               // 觸發與 storageHandler 相同的處理邏輯
@@ -22948,7 +22715,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               showMainApp();
               checkSubscriptionStatus();
               showToast('登入成功！', 2000);
-              console.log('DEBUG: Login success flow completed (via localStorage polling)');
             }
           }, 500);
           
@@ -22964,7 +22730,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const finalUserStr = localStorage.getItem('ipPlanningUser');
             
             if (finalToken && finalToken !== ipPlanningToken) {
-              console.log('DEBUG: Found token in localStorage during timeout, processing...');
               
               // 處理 token（與 storageHandler 相同的邏輯）
               ipPlanningToken = finalToken;
@@ -22981,7 +22746,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               showMainApp();
               checkSubscriptionStatus();
               showToast('登入成功！', 2000);
-              console.log('DEBUG: Login success flow completed (via localStorage timeout check)');
             } else {
               showPopupError('登入逾時，請重試', true);
             }
@@ -22999,7 +22763,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           }, 90000);
           
           // 現在才打開彈窗
-          console.log('DEBUG: Opening popup window with URL:', authUrl);
           popup = window.open(
             authUrl,
             'googleAuth',
@@ -23007,7 +22770,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           );
           window.__loginWindow = popup;
           
-          console.log('DEBUG: Popup window object:', popup);
           
           if (!popup) {
             console.error('DEBUG: Popup window blocked or failed to open');
@@ -23021,7 +22783,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             return;
           }
           
-          console.log('DEBUG: Popup window opened successfully');
           
           // 更新覆蓋層訊息
           updatePopupMessage('請在彈跳視窗中完成 Google 登入...');
@@ -23073,7 +22834,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (!ipPlanningUser.user_id) {
             ipPlanningUser.user_id = generateUserId();
             localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
-            console.log('頁面載入時為用戶生成新ID:', ipPlanningUser.user_id);
           }
           
           updateAuthUI(true);
@@ -23089,7 +22849,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         const picture = urlParams.get('picture');
         const error = urlParams.get('error');
         
-        console.log('DEBUG: Checking auth callback parameters:', {
           token: token ? 'present' : 'missing',
           userId: userId ? 'present' : 'missing',
           email: email ? 'present' : 'missing',
@@ -23110,7 +22869,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 處理成功認證
         if (token && userId && email && name) {
-          console.log('DEBUG: Auth success parameters received');
           
           // 構建用戶物件
           ipPlanningUser = {
@@ -23149,7 +22907,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 清除 URL 中的認證參數
           window.history.replaceState({}, document.title, window.location.pathname);
           
-          console.log('DEBUG: Auth completed successfully');
         }
       }
 
@@ -23163,7 +22920,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           // 如果收到 401，嘗試刷新 token 後重試
           if (response.status === 401) {
-            console.log('收到 401，嘗試刷新 token...');
             const refreshed = await tryRefreshTokenSafe();
             if (refreshed) {
               // Token 刷新成功，使用新 token 重試
@@ -23198,7 +22954,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 為用戶生成隨機ID（如果沒有）
           if (!ipPlanningUser.user_id) {
             ipPlanningUser.user_id = generateUserId();
-            console.log('為用戶生成新ID:', ipPlanningUser.user_id);
           }
           
           localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
@@ -23397,12 +23152,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         lastMessage = message;
         const userNode = append('user', message);
         // 記錄長期記憶
-        console.log('📝📝📝 準備儲存長期記憶 (AI 顧問 - user) 📝📝📝');
-        console.log('📝 訊息內容:', message);
-        console.log('📝 調用 recordConversationMessage...');
         try { 
           await recordConversationMessage('ai_advisor', 'user', message); 
-          console.log('📝 recordConversationMessage 調用完成');
         } catch (error) {
           console.error('❌❌❌ 長期記憶儲存異常 (AI 顧問 - user) ❌❌❌', error);
           console.error('錯誤堆疊:', error.stack);
@@ -23441,10 +23192,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             endpoint = 'https://api.aijob.com.tw/api/chat/stream';
           }
           // 添加調試信息
-          console.log('API 端點:', endpoint);
-          console.log('當前位置:', window.location.href);
-          console.log('Hostname:', window.location.hostname);
-          console.log('Port:', window.location.port);
           
           // 準備請求頭
           const headers = { 'Content-Type': 'application/json' };
@@ -23520,12 +23267,8 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   history.push({ role: 'user', content: message });
                   history.push({ role: 'assistant', content: aiText });
                   // 記錄長期記憶
-                  console.log('📝📝📝 準備儲存長期記憶 (AI 顧問 - assistant) 📝📝📝');
-                  console.log('📝 AI 回覆內容長度:', aiText.length);
-                  console.log('📝 調用 recordConversationMessage...');
                   try { 
                     await recordConversationMessage('ai_advisor', 'assistant', aiText); 
-                    console.log('📝 recordConversationMessage 調用完成');
                   } catch (error) {
                     console.error('❌❌❌ 長期記憶儲存異常 (AI 顧問 - assistant) ❌❌❌', error);
                     console.error('錯誤堆疊:', error.stack);
@@ -23654,69 +23397,50 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
 
       // 添加全局測試函數（用於調試）
       window.testDOM = function() {
-        console.log('=== DOM元素測試 ===');
-        console.log('resultTitleEl:', resultTitleEl);
-        console.log('resultScriptEl:', resultScriptEl);
-        console.log('resultVisualEl:', resultVisualEl);
-        console.log('resultCopyEl:', resultCopyEl);
         
         if (resultTitleEl) {
           resultTitleEl.innerHTML = '測試標題';
-          console.log('測試標題設置成功');
         }
         if (resultScriptEl) {
           resultScriptEl.innerHTML = '測試腳本內容';
-          console.log('測試腳本內容設置成功');
         }
         if (resultVisualEl) {
           resultVisualEl.innerHTML = '測試畫面感';
-          console.log('測試畫面感設置成功');
         }
         if (resultCopyEl) {
           resultCopyEl.innerHTML = '測試發佈文案';
-          console.log('測試發佈文案設置成功');
         }
       };
       
       // 添加AI內容測試函數
       window.testAIContent = function(aiText) {
-        console.log('=== AI內容測試 ===');
-        console.log('測試文本:', aiText);
         
         const isScript = detectScriptContent(aiText);
-        console.log('是否為腳本內容:', isScript);
         
         if (isScript) {
           const sections = parseAIContent(aiText);
-          console.log('解析結果:', sections);
           
           // 更新DOM元素
           if (sections.title && resultTitleEl) {
             resultTitleEl.innerHTML = safeRenderMarkdown(sections.title);
-            console.log('✅ 主題標題已設置');
           }
           if (sections.script && resultScriptEl) {
             resultScriptEl.innerHTML = safeRenderMarkdown(sections.script);
-            console.log('✅ 腳本內容已設置');
           }
           if (sections.visual && resultVisualEl) {
             resultVisualEl.innerHTML = safeRenderMarkdown(sections.visual);
-            console.log('✅ 畫面感已設置');
           }
           if (sections.copy && resultCopyEl) {
             resultCopyEl.innerHTML = safeRenderMarkdown(sections.copy);
-            console.log('✅ 發佈文案已設置');
           }
           
           // 顯示結果區塊
           resultsEl.style.display = 'block';
-          console.log('✅ 結果區塊已顯示');
         }
       };
       
       // 添加強制更新函數
       window.forceUpdateResults = function() {
-        console.log('=== 強制更新結果區塊 ===');
         
         // 從聊天記錄中獲取最後一條AI回應
         const chatMessages = document.querySelectorAll('.message.ai');
@@ -23724,47 +23448,36 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const lastAIMessage = chatMessages[chatMessages.length - 1];
           const aiText = lastAIMessage.textContent || lastAIMessage.innerText;
           
-          console.log('獲取AI文本:', aiText.substring(0, 200) + '...');
           
           const isScript = detectScriptContent(aiText);
-          console.log('是否為腳本內容:', isScript);
           
           if (isScript) {
             const sections = parseAIContent(aiText);
-            console.log('解析結果:', sections);
             
             // 強制更新DOM元素
             if (resultTitleEl) {
               resultTitleEl.innerHTML = safeRenderMarkdown(sections.title || '未找到主題標題');
-              console.log('✅ 主題標題已強制設置');
             }
             if (resultScriptEl) {
               resultScriptEl.innerHTML = safeRenderMarkdown(sections.script || '未找到腳本內容');
-              console.log('✅ 腳本內容已強制設置');
             }
             if (resultVisualEl) {
               resultVisualEl.innerHTML = safeRenderMarkdown(sections.visual || '未找到畫面感');
-              console.log('✅ 畫面感已強制設置');
             }
             if (resultCopyEl) {
               resultCopyEl.innerHTML = safeRenderMarkdown(sections.copy || '未找到發佈文案');
-              console.log('✅ 發佈文案已強制設置');
             }
             
             // 顯示結果區塊
             resultsEl.style.display = 'block';
-            console.log('✅ 結果區塊已強制顯示');
           } else {
-            console.log('❌ 檢測失敗，不是腳本內容');
           }
         } else {
-          console.log('❌ 未找到AI回應');
         }
       };
       
       // 添加簡單測試函數
       window.testCurrentContent = function() {
-        console.log('=== 測試當前內容 ===');
         
         // 從聊天記錄中獲取最後一條AI回應
         const chatMessages = document.querySelectorAll('.message.ai');
@@ -23772,54 +23485,41 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const lastAIMessage = chatMessages[chatMessages.length - 1];
           const aiText = lastAIMessage.textContent || lastAIMessage.innerText;
           
-          console.log('AI文本長度:', aiText.length);
-          console.log('AI文本前500字符:', aiText.substring(0, 500));
           
           // 測試主題標題提取
           const titleMatch = aiText.match(/主題標題[：:]\s*([^\n]+)/i);
-          console.log('主題標題匹配結果:', titleMatch);
           
           // 測試腳本內容提取
           const scriptMatch = aiText.match(/腳本內容[：:]\s*([\s\S]*?)(?=\n\s*(?:畫面感|發佈文案|$))/i);
-          console.log('腳本內容匹配結果:', scriptMatch ? '匹配' : '無匹配');
           
           // 測試畫面感提取
           const visualMatch = aiText.match(/畫面感[：:]\s*([\s\S]*?)(?=\n\s*(?:發佈文案|$))/i);
-          console.log('畫面感匹配結果:', visualMatch ? '匹配' : '無匹配');
           
           // 測試發佈文案提取
           const copyMatch = aiText.match(/發佈文案[：:]\s*([\s\S]*?)$/i);
-          console.log('發佈文案匹配結果:', copyMatch ? '匹配' : '無匹配');
           
           // 直接更新結果區塊
           if (titleMatch && titleMatch[1]) {
             resultTitleEl.innerHTML = cleanMarkdownFormat(titleMatch[1].trim());
-            console.log('✅ 直接設置主題標題');
           }
           if (scriptMatch && scriptMatch[1]) {
             resultScriptEl.innerHTML = cleanMarkdownFormat(scriptMatch[1].trim());
-            console.log('✅ 直接設置腳本內容');
           }
           if (visualMatch && visualMatch[1]) {
             resultVisualEl.innerHTML = cleanMarkdownFormat(visualMatch[1].trim());
-            console.log('✅ 直接設置畫面感');
           }
           if (copyMatch && copyMatch[1]) {
             resultCopyEl.innerHTML = cleanMarkdownFormat(copyMatch[1].trim());
-            console.log('✅ 直接設置發佈文案');
           }
           
           // 顯示結果區塊
           resultsEl.style.display = 'block';
-          console.log('✅ 結果區塊已顯示');
         } else {
-          console.log('❌ 未找到AI回應');
         }
       };
       
       // 添加超強力測試函數
       window.forceExtractContent = function() {
-        console.log('=== 超強力內容提取 ===');
         
         // 從聊天記錄中獲取最後一條AI回應
         const chatMessages = document.querySelectorAll('.message.ai');
@@ -23827,8 +23527,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const lastAIMessage = chatMessages[chatMessages.length - 1];
           const aiText = lastAIMessage.textContent || lastAIMessage.innerText;
           
-          console.log('AI文本長度:', aiText.length);
-          console.log('AI文本前1000字符:', aiText.substring(0, 1000));
           
           // 強制提取主題標題
           let title = '';
@@ -23843,7 +23541,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const match = aiText.match(pattern);
             if (match && match[1]) {
               title = cleanMarkdownFormat(match[1].trim());
-              console.log('✅ 找到主題標題:', title);
               break;
             }
           }
@@ -23861,7 +23558,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const match = aiText.match(pattern);
             if (match && match[1]) {
               script = cleanMarkdownFormat(match[1].trim());
-              console.log('✅ 找到腳本內容:', script.substring(0, 100) + '...');
               break;
             }
           }
@@ -23879,7 +23575,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const match = aiText.match(pattern);
             if (match && match[1]) {
               visual = cleanMarkdownFormat(match[1].trim());
-              console.log('✅ 找到畫面感:', visual.substring(0, 100) + '...');
               break;
             }
           }
@@ -23897,7 +23592,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const match = aiText.match(pattern);
             if (match && match[1]) {
               copy = cleanMarkdownFormat(match[1].trim());
-              console.log('✅ 找到發佈文案:', copy.substring(0, 100) + '...');
               break;
             }
           }
@@ -23905,40 +23599,32 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 強制更新結果區塊
           if (title) {
             resultTitleEl.innerHTML = title;
-            console.log('✅ 強制設置主題標題');
           }
           if (script) {
             resultScriptEl.innerHTML = script;
-            console.log('✅ 強制設置腳本內容');
           }
           if (visual) {
             resultVisualEl.innerHTML = visual;
-            console.log('✅ 強制設置畫面感');
           }
           if (copy) {
             resultCopyEl.innerHTML = copy;
-            console.log('✅ 強制設置發佈文案');
           }
           
           // 顯示結果區塊
           resultsEl.style.display = 'block';
-          console.log('✅ 結果區塊已強制顯示');
           
           // 如果還是沒有內容，顯示原始文本
           if (!title && !script && !visual && !copy) {
-            console.log('⚠️ 所有提取都失敗，顯示原始文本');
             resultTitleEl.innerHTML = escapeHtml('原始AI回應');
             resultScriptEl.innerHTML = escapeHtml(aiText.substring(0, 500) + '...');
             resultVisualEl.innerHTML = escapeHtml('請檢查控制台日誌');
             resultCopyEl.innerHTML = escapeHtml('解析失敗');
           }
         } else {
-          console.log('❌ 未找到AI回應');
         }
       };
       // 添加終極解決方案：直接從頁面提取
       window.extractFromPage = function() {
-        console.log('=== 終極解決方案：從頁面直接提取 ===');
         
         // 方法1：從聊天記錄中提取
         const chatMessages = document.querySelectorAll('.message.ai');
@@ -23946,11 +23632,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const lastAIMessage = chatMessages[chatMessages.length - 1];
           const aiText = lastAIMessage.textContent || lastAIMessage.innerText;
           
-          console.log('從聊天記錄提取，文本長度:', aiText.length);
           
           // 簡單粗暴的提取方法
           const lines = aiText.split('\n').filter(line => line.trim().length > 0);
-          console.log('總行數:', lines.length);
           
           let title = '';
           let script = '';
@@ -23966,7 +23650,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               const match = line.match(/主題標題[：:]\s*(.+)/i);
               if (match && match[1]) {
                 title = cleanMarkdownFormat(match[1].trim());
-                console.log('✅ 找到主題標題:', title);
               }
             }
             
@@ -23984,7 +23667,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               }
               if (scriptLines.length > 0) {
                 script = cleanMarkdownFormat(scriptLines.join('\n'));
-                console.log('✅ 找到腳本內容:', script.substring(0, 100) + '...');
               }
             }
             
@@ -24002,7 +23684,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               }
               if (visualLines.length > 0) {
                 visual = cleanMarkdownFormat(visualLines.join('\n'));
-                console.log('✅ 找到畫面感:', visual.substring(0, 100) + '...');
               }
             }
             
@@ -24017,7 +23698,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               }
               if (copyLines.length > 0) {
                 copy = cleanMarkdownFormat(copyLines.join('\n'));
-                console.log('✅ 找到發佈文案:', copy.substring(0, 100) + '...');
               }
             }
           }
@@ -24025,35 +23705,28 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           // 更新結果區塊
           if (title) {
             resultTitleEl.innerHTML = title;
-            console.log('✅ 設置主題標題');
           }
           if (script) {
             resultScriptEl.innerHTML = script;
-            console.log('✅ 設置腳本內容');
           }
           if (visual) {
             resultVisualEl.innerHTML = visual;
-            console.log('✅ 設置畫面感');
           }
           if (copy) {
             resultCopyEl.innerHTML = copy;
-            console.log('✅ 設置發佈文案');
           }
           
           // 顯示結果區塊
           resultsEl.style.display = 'block';
-          console.log('✅ 結果區塊已顯示');
           
           // 如果還是沒有內容，顯示原始文本
           if (!title && !script && !visual && !copy) {
-            console.log('⚠️ 所有提取都失敗，顯示原始文本');
             resultTitleEl.innerHTML = escapeHtml('原始AI回應');
             resultScriptEl.innerHTML = escapeHtml(aiText.substring(0, 500) + '...');
             resultVisualEl.innerHTML = escapeHtml('請檢查控制台日誌');
             resultCopyEl.innerHTML = escapeHtml('解析失敗');
           }
         } else {
-          console.log('❌ 未找到AI回應');
         }
       };
 
@@ -24061,7 +23734,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
 
       // 檢查用戶是否要求生成腳本
       function checkIfScriptRequest(aiText) {
-        console.log('=== 檢查是否為腳本生成請求 ===');
         
         // 檢查AI回應中是否包含腳本生成相關的關鍵詞
         const scriptRequestKeywords = [
@@ -24103,9 +23775,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         const isScriptRequest = hasScriptKeywords || hasScriptStructure;
         
-        console.log('包含腳本關鍵詞:', hasScriptKeywords);
-        console.log('包含腳本結構:', hasScriptStructure);
-        console.log('判斷為腳本請求:', isScriptRequest);
         
         return isScriptRequest;
       }
@@ -24123,14 +23792,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
 
       async function recordConversationMessage(conversationType, role, content) {
         // 強制輸出日誌，確保函數被調用時一定會看到
-        console.log('🔍🔍🔍 recordConversationMessage 函數被調用 🔍🔍🔍');
-        console.log('📋 參數:', { conversationType, role, hasContent: !!content, contentLength: content?.length || 0 });
-        console.log('📋 內容預覽:', content ? content.substring(0, 50) + '...' : '無內容');
         
         try {
           if (!content) {
             console.warn('⚠️ 長期記憶儲存跳過：內容為空');
-            console.log('❌ 函數提前返回：內容為空');
             return;
           }
           
@@ -24158,12 +23823,10 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               windowAuth: typeof window.Auth !== 'undefined',
               globalToken: !!ipPlanningToken
             });
-            console.log('❌ 函數提前返回：沒有 token');
             return;
           }
           
           // 調試：記錄 token 獲取情況
-          console.log('長期記憶儲存開始:', {
             conversationType,
             role,
             hasToken: !!token,
@@ -24195,20 +23858,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           if (!user.user_id) {
             if (user.id) {
               user.user_id = user.id;
-              console.log('從 user.id 獲取 user_id:', user.user_id);
             } else {
               // 嘗試從 token 中解析 user_id（JWT payload）
               try {
                 const parts = token.split('.');
                 if (parts.length === 3) {
                   const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-                  console.log('JWT Payload:', payload);
                   if (payload.sub) {
                     user.user_id = payload.sub;
-                    console.log('從 payload.sub 獲取 user_id:', user.user_id);
                   } else if (payload.user_id) {
                     user.user_id = payload.user_id;
-                    console.log('從 payload.user_id 獲取 user_id:', user.user_id);
                   } else {
                     console.warn('JWT payload 中沒有找到 user_id，payload keys:', Object.keys(payload));
                   }
@@ -24235,7 +23894,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               localStorage.setItem('ipPlanningUser', JSON.stringify(user));
             } catch (_) {}
           } else {
-            console.log('使用現有的 user_id:', user.user_id);
           }
           
           const sessionId = getCurrentSessionId(conversationType);
@@ -24256,7 +23914,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           });
           
           // 調試：記錄 API 請求詳情
-          console.log('長期記憶 API 請求:', {
             url: 'https://api.aijob.com.tw/api/memory/long-term',
             conversationType,
             role,
@@ -24279,14 +23936,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             
             if (res.status === 401) {
               // Token 可能已過期，嘗試刷新
-              console.log('長期記憶儲存失敗：Token 可能已過期，嘗試刷新...');
               const ok = await tryRefreshTokenSafe();
               if (ok) {
                 // 刷新成功後重新獲取最新的 token 並重試
                 const newToken = localStorage.getItem('ipPlanningToken') || 
                                (window.Auth && window.Auth.getToken ? window.Auth.getToken() : null);
                 if (newToken) {
-                  console.log('Token 刷新成功，重新嘗試儲存長期記憶...');
                   return recordConversationMessage(conversationType, role, content);
                 }
               } else {
@@ -24299,7 +23954,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             }
           } else if (res.ok) {
             // 成功儲存
-            console.log('✅ 長期記憶儲存成功:', {
               conversationType,
               role,
               user_id: user.user_id,
@@ -24307,7 +23961,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             });
           } else if (res.status === 422) {
             // 422 表示重複記錄，這是正常的
-            console.log('長期記憶儲存：重複記錄 (422)，已跳過');
           }
         } catch (error) {
           // 記錄錯誤但不影響使用者體驗
@@ -24390,7 +24043,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 更新訂閱狀態
         document.body.dataset.subscribed = 'false';
         
-        console.log('已自動登出:', reason);
       }
 
       // 主動刷新 token（在頁面載入時調用）
@@ -24402,7 +24054,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return false; // token 還有效，不需要刷新
         }
         
-        console.log('Token 即將過期或已過期，嘗試刷新...');
         return await tryRefreshTokenSafe();
       }
 
@@ -24584,28 +24235,21 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       });
 
       function checkAndUpdateResults(aiText) {
-        console.log('=== 開始解析AI回應 ===');
-        console.log('AI回應長度:', aiText.length);
-        console.log('AI回應前300字符:', aiText.substring(0, 300));
         
         // 檢查用戶是否要求生成腳本（只有這種情況才顯示腳本結果區塊）
         const isScriptRequest = checkIfScriptRequest(aiText);
-        console.log('是否為腳本生成請求:', isScriptRequest);
         
         if (!isScriptRequest) {
-          console.log('❌ 不是腳本生成請求，不顯示腳本結果區塊');
           return;
         }
         
         // 更精確的腳本內容檢測
         const isScriptContent = detectScriptContent(aiText);
         
-        console.log('是否為腳本內容:', isScriptContent);
         
         if (isScriptContent) {
           // 顯示結果區塊
           resultsEl.style.display = 'block';
-          console.log('結果區塊已顯示，開始解析內容...');
           
           // 確保DOM元素存在
           if (!resultTitleEl || !resultScriptEl || !resultVisualEl || !resultCopyEl) {
@@ -24626,49 +24270,36 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             if (sections.title) {
               // 使用安全的 Markdown 渲染
               resultTitleEl.innerHTML = safeRenderMarkdown(sections.title);
-              console.log('✅ 主題標題已設置:', sections.title);
             }
             
             if (sections.script) {
               // 使用安全的 Markdown 渲染
               resultScriptEl.innerHTML = safeRenderMarkdown(sections.script);
-              console.log('✅ 腳本內容已設置:', sections.script.substring(0, 100) + '...');
             }
             
             if (sections.visual) {
               // 使用安全的 Markdown 渲染
               resultVisualEl.innerHTML = safeRenderMarkdown(sections.visual);
-              console.log('✅ 畫面感已設置:', sections.visual.substring(0, 100) + '...');
             }
             
             if (sections.copy) {
               // 使用安全的 Markdown 渲染
               resultCopyEl.innerHTML = safeRenderMarkdown(sections.copy);
-              console.log('✅ 發佈文案已設置:', sections.copy.substring(0, 100) + '...');
             }
             
             // 延遲檢查內容是否正確設置
             setTimeout(() => {
-              console.log('=== 延遲檢查DOM內容 ===');
-              console.log('主題標題:', resultTitleEl.innerHTML);
-              console.log('腳本內容:', resultScriptEl.innerHTML.substring(0, 100) + '...');
-              console.log('畫面感:', resultVisualEl.innerHTML.substring(0, 100) + '...');
-              console.log('發佈文案:', resultCopyEl.innerHTML.substring(0, 100) + '...');
             }, 500);
             
           } catch (e) {
             console.error('解析結果時出錯:', e);
           }
         } else {
-          console.log('未檢測到腳本內容，不顯示結果區塊');
         }
       }
       
       // 新增：精確的腳本內容檢測函數
       function detectScriptContent(aiText) {
-        console.log('=== 開始腳本內容檢測 ===');
-        console.log('檢測文本長度:', aiText.length);
-        console.log('檢測文本前200字符:', aiText.substring(0, 200));
         
         // 1. 檢查是否包含腳本相關的結構標記（更靈活的檢測）
         const structureMarkers = [
@@ -24686,7 +24317,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         ];
         
         const hasStructureMarkers = structureMarkers.some(pattern => pattern.test(aiText));
-        console.log('是否包含腳本結構標記:', hasStructureMarkers);
         
         // 2. 檢查是否包含短影音腳本的關鍵元素
         const scriptElements = [
@@ -24704,7 +24334,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         ];
         
         const scriptElementCount = scriptElements.filter(pattern => pattern.test(aiText)).length;
-        console.log('腳本元素數量:', scriptElementCount);
         
         // 檢查是否包含時間標記（Hook、Value、CTA格式）
         const timeMarkersPatterns = [
@@ -24716,7 +24345,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           /CTA\s*\(\d+-\d+秒\)/i
         ];
         const hasTimeMarkers = timeMarkersPatterns.some(pattern => pattern.test(aiText));
-        console.log('是否包含時間標記:', hasTimeMarkers);
         
         // 檢查是否包含短影音相關內容
         const videoContent = [
@@ -24728,15 +24356,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           /字幕[：:]/i
         ];
         const hasVideoContent = videoContent.some(pattern => pattern.test(aiText));
-        console.log('是否包含短影音內容:', hasVideoContent);
         
         // 更靈活的判斷條件
         const hasAnyScriptContent = hasStructureMarkers || scriptElementCount >= 3 || hasTimeMarkers || hasVideoContent;
-        console.log('是否有任何腳本內容:', hasAnyScriptContent);
         
         if (!hasAnyScriptContent) {
-          console.log('❌ 未包含足夠的腳本內容標記，不顯示結果區塊');
-          console.log('檢測結果詳情:', {
             hasStructureMarkers,
             scriptElementCount,
             hasTimeMarkers,
@@ -24748,7 +24372,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 2. 檢查是否包含腳本相關的關鍵詞組合
         const scriptKeywords = ['主題標題', '腳本內容', '畫面感', '發佈文案', 'Hook', 'Value', 'CTA'];
         const keywordCount = scriptKeywords.filter(keyword => aiText.includes(keyword)).length;
-        console.log('腳本關鍵詞數量:', keywordCount);
         
         // 3. 檢查是否包含短影音相關的內容指示詞
         const videoIndicators = [
@@ -24765,16 +24388,13 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           '腳本'
         ];
         const hasVideoIndicators = videoIndicators.some(indicator => aiText.includes(indicator));
-        console.log('是否包含短影音指示詞:', hasVideoIndicators);
         
         // 4. 檢查文本長度（腳本內容通常較長）
         const isLongEnough = aiText.length > 300; // 提高長度要求
-        console.log('文本是否足夠長:', isLongEnough);
         
         // 5. 檢查是否包含多個段落（腳本通常有多個部分）
         const paragraphCount = aiText.split('\n\n').filter(p => p.trim().length > 0).length;
         const hasMultipleParagraphs = paragraphCount >= 4; // 提高段落要求
-        console.log('段落數量:', paragraphCount, '是否多段落:', hasMultipleParagraphs);
         
         // 6. 排除明顯的非腳本內容
         const nonScriptIndicators = [
@@ -24811,7 +24431,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         const hasNonScriptIndicators = nonScriptIndicators.some(indicator => 
           aiText.toLowerCase().includes(indicator.toLowerCase())
         );
-        console.log('是否包含非腳本指示詞:', hasNonScriptIndicators);
         
         // 7. 檢查是否包含完整的腳本結構（至少包含3個區塊）
         const requiredStructureMarkers = [
@@ -24826,7 +24445,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         ];
         const structureCount = requiredStructureMarkers.filter(pattern => pattern.test(aiText)).length;
         const hasCompleteStructure = structureCount >= 3;
-        console.log('結構區塊數量:', structureCount, '是否完整結構:', hasCompleteStructure);
         
         // 8. 檢查是否包含時間標記（腳本通常有時間標記）
         const timeMarkersGeneral = [
@@ -24836,7 +24454,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           /\d+-\d+\s*秒/i
         ];
         const hasTimeMarkersGeneral = timeMarkersGeneral.some(pattern => pattern.test(aiText));
-        console.log('是否包含一般時間標記:', hasTimeMarkersGeneral);
         
         // 綜合判斷
         const score = {
@@ -24855,19 +24472,14 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         const totalScore = Object.values(score).reduce((sum, val) => sum + val, 0);
         
-        console.log('腳本檢測評分:', score);
-        console.log('總分:', totalScore);
         
         // 更靈活的判斷條件
         const isScriptContent = totalScore >= 4 && (hasStructureMarkers || scriptElementCount >= 3);
         
         // 如果包含非腳本指示詞，降低評分但不完全拒絕
         if (hasNonScriptIndicators) {
-          console.log('⚠️ 包含非腳本指示詞，但內容結構完整，仍視為腳本內容');
         }
         
-        console.log('是否為腳本內容:', isScriptContent);
-        console.log('=== 腳本內容檢測結束 ===');
         
         return isScriptContent;
       }
@@ -24880,9 +24492,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           copy: ''
         };
         
-        console.log('開始解析AI內容...');
-        console.log('原始AI文本長度:', aiText.length);
-        console.log('原始AI文本前500字符:', aiText.substring(0, 500));
         
         // 使用正則表達式精確提取每個區塊的內容
         try {
@@ -24896,36 +24505,28 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             const contentSections = dashSections.slice(1);
             scriptContent = contentSections.join('---').trim();
             extractionMethod = 'dash-separated';
-            console.log('✅ 使用 --- 分隔策略');
           }
           // 策略2: 檢查是否有明確的結構標記
           else if (aiText.includes('主題標題') || aiText.includes('腳本內容') || aiText.includes('畫面感') || aiText.includes('發佈文案')) {
             scriptContent = aiText;
             extractionMethod = 'structured';
-            console.log('✅ 使用結構化標記策略');
           }
           // 策略3: 檢查是否有 Hook/Value/CTA 結構
           else if (aiText.includes('Hook') || aiText.includes('Value') || aiText.includes('CTA')) {
             scriptContent = aiText;
             extractionMethod = 'hook-value-cta';
-            console.log('✅ 使用 Hook/Value/CTA 策略');
           }
           // 策略4: 檢查是否有時間標記
           else if (aiText.match(/\d+-\d+秒/) || aiText.match(/\d+秒/)) {
             scriptContent = aiText;
             extractionMethod = 'time-marked';
-            console.log('✅ 使用時間標記策略');
           }
           // 策略5: 默認使用完整內容
           else {
             scriptContent = aiText;
             extractionMethod = 'full';
-            console.log('✅ 使用完整內容策略');
           }
           
-          console.log('提取方法:', extractionMethod);
-            console.log('腳本內容長度:', scriptContent.length);
-            console.log('腳本內容前200字符:', scriptContent.substring(0, 200));
           
           // 超級智能主題標題提取器 - 應對所有可能的AI格式
           function extractTitle(scriptContent) {
@@ -24993,7 +24594,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               if (match[1] && match[1].trim()) {
                   const title = cleanMarkdownFormat(match[1].trim());
                   if (title.length > 5 && title.length < 100) { // 合理的標題長度
-                    console.log('✅ 找到主題標題(有前綴):', title);
                     return title;
                   }
               }
@@ -25001,7 +24601,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               else if (match[0] && match[0].trim()) {
                   const title = cleanMarkdownFormat(match[0].trim());
                   if (title.length > 5 && title.length < 100) {
-                    console.log('✅ 找到主題標題(無前綴):', title);
                     return title;
                   }
                 }
@@ -25018,7 +24617,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               }
               // 檢查是否為合理的標題
               if (trimmedLine.length > 5 && trimmedLine.length < 100 && !trimmedLine.includes('：') && !trimmedLine.includes(':')) {
-                console.log('使用第一行作為主題標題:', trimmedLine);
                 return cleanMarkdownFormat(trimmedLine);
               }
             }
@@ -25091,14 +24689,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 }
                 
                 if (scriptText && scriptText.length > 10) {
-                  console.log('✅ 找到腳本內容:', scriptText.substring(0, 100) + '...');
                   return cleanMarkdownFormat(scriptText);
                 }
             }
           }
           
           // 如果沒有找到明確的腳本內容標記，嘗試提取 Hook、Value、CTA 部分
-            console.log('嘗試提取 Hook/Value/CTA 內容...');
             
             // 支援多種時間標記格式
             const hookPatterns = [
@@ -25123,7 +24719,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             for (const pattern of hookPatterns) {
               const match = scriptContent.match(pattern);
               if (match) {
-                console.log('找到 Hook:', match[0].substring(0, 100) + '...');
                 extractedScriptContent += match[0] + '\n\n';
                 break;
               }
@@ -25133,7 +24728,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             for (const pattern of valuePatterns) {
               const matches = scriptContent.match(new RegExp(pattern.source, 'gi'));
               if (matches) {
-                console.log('找到 Value 數量:', matches.length);
                 extractedScriptContent += matches.join('\n\n');
                 break;
               }
@@ -25143,14 +24737,12 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             for (const pattern of ctaPatterns) {
               const match = scriptContent.match(pattern);
               if (match) {
-                console.log('找到 CTA:', match[0].substring(0, 100) + '...');
                 extractedScriptContent += '\n\n' + match[0];
                 break;
               }
             }
             
             if (extractedScriptContent.trim()) {
-              console.log('使用 Hook/Value/CTA 作為腳本內容:', extractedScriptContent.substring(0, 100) + '...');
               return cleanMarkdownFormat(extractedScriptContent.trim());
             }
             
@@ -25207,11 +24799,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             if (match && match[1] && match[1].trim()) {
               // 檢查是否為「尚未生成」
               if (match[1].trim() === '尚未生成' || match[1].trim().includes('尚未生成')) {
-                console.log('⚠️ 畫面感標記為「尚未生成」');
                   return 'AI 未生成畫面感內容';
               } else {
                   const visual = cleanMarkdownFormat(match[1].trim());
-                  console.log('✅ 找到畫面感:', visual.substring(0, 100) + '...');
                   return visual;
                 }
               }
@@ -25271,11 +24861,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             if (match && match[1] && match[1].trim()) {
               // 檢查是否為「尚未生成」
               if (match[1].trim() === '尚未生成' || match[1].trim().includes('尚未生成')) {
-                console.log('⚠️ 發佈文案標記為「尚未生成」');
                   return 'AI 未生成發佈文案內容';
               } else {
                   const copy = cleanMarkdownFormat(match[1].trim());
-                  console.log('✅ 找到發佈文案:', copy.substring(0, 100) + '...');
                   return copy;
                 }
               }
@@ -25288,16 +24876,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           sections.copy = extractCopy(scriptContent);
           
           // 最終調試輸出
-          console.log('=== 超級智能解析結果 ===');
-          console.log('提取方法:', extractionMethod);
-          console.log('主題標題:', sections.title ? '✅ 有內容' : '❌ 無內容');
-          console.log('腳本內容:', sections.script ? '✅ 有內容' : '❌ 無內容');
-          console.log('畫面感:', sections.visual ? '✅ 有內容' : '❌ 無內容');
-          console.log('發佈文案:', sections.copy ? '✅ 有內容' : '❌ 無內容');
           
           // 如果任何欄位為空，嘗試最後的強制提取
           if (!sections.title || !sections.script || !sections.visual || !sections.copy) {
-            console.log('🔄 啟動最後的強制提取機制...');
             
             // 強制提取主題標題
             if (!sections.title) {
@@ -25305,7 +24886,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               for (const line of lines) {
                 if (line.length > 10 && line.length < 100 && !line.includes('：') && !line.includes(':')) {
                   sections.title = cleanMarkdownFormat(line.trim());
-                    console.log('強制提取主題標題:', sections.title);
                   break;
                 }
               }
@@ -25316,7 +24896,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               const scriptMatch = scriptContent.match(/(?:Hook|Value|CTA)[\s\S]*?(?=畫面感|發佈文案|$)/i);
               if (scriptMatch) {
                 sections.script = cleanMarkdownFormat(scriptMatch[0].trim());
-                console.log('強制提取腳本內容:', sections.script.substring(0, 100) + '...');
               }
             }
             
@@ -25329,7 +24908,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 } else {
                   sections.visual = cleanMarkdownFormat(visualMatch[1].trim());
                 }
-                  console.log('強制提取畫面感:', sections.visual.substring(0, 100) + '...');
               }
             }
             
@@ -25342,7 +24920,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                 } else {
                   sections.copy = cleanMarkdownFormat(copyMatch[1].trim());
                 }
-                  console.log('強制提取發佈文案:', sections.copy.substring(0, 100) + '...');
               }
             }
           }
@@ -25351,46 +24928,35 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           console.error('解析AI內容時出錯:', error);
         }
         
-        console.log('=== 最終解析結果 ===');
-        console.log('主題標題:', sections.title ? '✅ 有內容' : '❌ 無內容');
-        console.log('腳本內容:', sections.script ? '✅ 有內容' : '❌ 無內容');
-        console.log('畫面感:', sections.visual ? '✅ 有內容' : '❌ 無內容');
-        console.log('發佈文案:', sections.copy ? '✅ 有內容' : '❌ 無內容');
         
         // 如果所有內容都為空，嘗試強制提取
         if (!sections.title && !sections.script && !sections.visual && !sections.copy) {
-          console.log('⚠️ 所有內容都為空，嘗試強制提取...');
           
           // 強制提取主題標題
           const titleMatch = aiText.match(/主題標題[：:]\s*([^\n]+)/i);
           if (titleMatch && titleMatch[1]) {
             sections.title = cleanMarkdownFormat(titleMatch[1].trim());
-            console.log('強制提取主題標題:', sections.title);
           }
           
           // 強制提取腳本內容
           const scriptMatch = aiText.match(/腳本內容[：:]\s*([\s\S]*?)(?=\n\s*(?:畫面感|發佈文案|$))/i);
           if (scriptMatch && scriptMatch[1]) {
             sections.script = cleanMarkdownFormat(scriptMatch[1].trim());
-            console.log('強制提取腳本內容:', sections.script.substring(0, 100) + '...');
           }
           
           // 強制提取畫面感
           const visualMatch = aiText.match(/畫面感[：:]\s*([\s\S]*?)(?=\n\s*(?:發佈文案|$))/i);
           if (visualMatch && visualMatch[1]) {
             sections.visual = cleanMarkdownFormat(visualMatch[1].trim());
-            console.log('強制提取畫面感:', sections.visual.substring(0, 100) + '...');
           }
           
           // 強制提取發佈文案
           const copyMatch = aiText.match(/發佈文案[：:]\s*([\s\S]*?)$/i);
           if (copyMatch && copyMatch[1]) {
             sections.copy = cleanMarkdownFormat(copyMatch[1].trim());
-            console.log('強制提取發佈文案:', sections.copy.substring(0, 100) + '...');
           }
         }
         
-        console.log('完整解析結果:', sections);
         return sections;
       }
 
@@ -25923,7 +25489,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           const data = await response.json();
           if (data.success) {
             showToast('✅ 結果已儲存到個人資料庫', 3000);
-            console.log('儲存成功:', data);
           } else {
             showToast('❌ ' + (data.error || '儲存失敗'), 3000);
             console.error('儲存失敗:', data);
@@ -26031,11 +25596,9 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       async function loadMode3History() {
         // 檢查是否已登入
         if (!ipPlanningUser?.user_id || !ipPlanningToken) {
-          console.log('未登入，跳過載入歷史對話');
           return;
         }
         
-        console.log('開始載入IP人設規劃歷史對話，用戶ID:', ipPlanningUser.user_id);
         
         try {
           // 載入對話記錄
@@ -26043,7 +25606,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           
           if (conversationsResponse.ok) {
             const conversationsData = await conversationsResponse.json();
-            console.log('載入的對話記錄:', conversationsData);
             
             // 顯示歷史對話到聊天區域
             if (conversationsData.conversations && conversationsData.conversations.length > 0) {
@@ -26084,18 +25646,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
       async function loadMode2History() {
         // 檢查是否已登入
         if (!ipPlanningUser?.user_id || !ipPlanningToken) {
-          console.log('未登入，跳過載入AI顧問歷史對話');
           return;
         }
         
-        console.log('開始載入AI顧問歷史對話，用戶ID:', ipPlanningUser.user_id);
         
         const messagesContainer = document.getElementById('chatMessages');
         if (!messagesContainer) return;
         
         // 重新整理時不自動載入歷史對話（聊天區域已在 DOMContentLoaded 時清空）
         // 用戶可以通過「🔄 載入本會話」按鈕主動載入歷史對話
-        console.log('注意：重新整理後聊天區域已清空，如需查看歷史對話，請點擊「🔄 載入本會話」按鈕');
       }
       
       // 顯示歷史對話到AI顧問聊天區域
@@ -26105,7 +25664,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         
         // 如果已經有訊息，不要清空
         if (messagesContainer.children.length > 0) {
-          console.log('聊天區域已有訊息，不顯示歷史對話');
           return;
         }
         
@@ -26492,7 +26050,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
     async function sendMode3Message(message, conversationType = 'ip_planning') {
       // 防止重複發送
       if (isMode3Sending) {
-        console.log('訊息發送中，請稍候...');
         return;
       }
       
@@ -26865,19 +26422,16 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
     // 如果上面的函數未定義，則使用佔位函數
     if (typeof generateMode3IPProfile === 'undefined') {
       window.generateMode3IPProfile = function() {
-        console.log('生成IP Profile - 函數未定義');
       };
     }
     
     if (typeof generateMode314DayPlan === 'undefined') {
       window.generateMode314DayPlan = function() {
-        console.log('生成14天規劃 - 函數未定義');
       };
     }
     
     if (typeof generateMode3TodayScripts === 'undefined') {
       window.generateMode3TodayScripts = function() {
-        console.log('生成今日腳本 - 函數未定義');
       };
     }
     
@@ -26885,7 +26439,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
     // 如果上面的函數未定義，則使用佔位函數
     if (typeof saveMode3Result === 'undefined') {
       window.saveMode3Result = function() {
-        console.log('儲存結果 - 函數未定義');
       };
     }
     
@@ -26942,13 +26495,11 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
     
     if (typeof regenerateMode3Result === 'undefined') {
       window.regenerateMode3Result = function() {
-        console.log('重新生成 - 函數未定義');
       };
     }
     
     if (typeof exportMode3Result === 'undefined') {
       window.exportMode3Result = function() {
-        console.log('匯出結果 - 函數未定義');
       };
     }
     
@@ -26980,7 +26531,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
   
   // 打字機動畫函數
   function initTypewriterAnimation() {
-    console.log('🎬 initTypewriterAnimation 被調用');
     const heroTitles = [
       { id: 'hero-title-1', text: 'ReelMind 打造你的爆款短影音!' },
       { id: 'hero-title-2', text: 'ReelMind 打造你的爆款短影音!' }
@@ -27013,7 +26563,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         return;
       }
       
-      console.log(`✅ 開始打字機動畫: ${id}, 文字: ${text}`);
       
       // 清除之前的動畫（如果存在）
       if (textSpan.dataset.animationId) {
@@ -27069,7 +26618,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               // 所有文字完成
               isTyping = false;
               delete textSpan.dataset.animationId;
-              console.log(`✅ 打字機動畫完成: ${id}`);
             }
           }
         }
