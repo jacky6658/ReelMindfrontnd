@@ -449,11 +449,98 @@ window.editScriptNameForUserDB = function(scriptId, event) {
   const currentName = scriptNameElement.textContent.trim();
   console.log('📝 當前標題:', currentName);
   
-  const newName = prompt('請輸入新的腳本名稱:', currentName);
-  if (newName && newName.trim() !== '' && newName !== currentName) {
-    console.log('💾 更新標題為:', newName.trim());
-    updateScriptNameForUserDB(scriptId, newName.trim());
+  // 使用自定義輸入框代替 prompt()
+  showEditTitleModal('腳本名稱', currentName, (newName) => {
+    if (newName && newName.trim() !== '' && newName !== currentName) {
+      console.log('💾 更新標題為:', newName.trim());
+      updateScriptNameForUserDB(scriptId, newName.trim());
+    }
+  });
+}
+
+// 顯示編輯標題的 Modal
+function showEditTitleModal(titleLabel, currentValue, onConfirm) {
+  // 移除現有的 modal（如果存在）
+  const existingModal = document.getElementById('edit-title-modal');
+  if (existingModal) {
+    existingModal.remove();
   }
+  
+  // 創建 modal
+  const modal = document.createElement('div');
+  modal.id = 'edit-title-modal';
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100000;
+    animation: fadeIn 0.2s ease;
+  `;
+  
+  const modalContent = document.createElement('div');
+  modalContent.style.cssText = `
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    min-width: 400px;
+    max-width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+  `;
+  
+  modalContent.innerHTML = `
+    <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600; color: #1F2937;">編輯${titleLabel}</h3>
+    <input type="text" id="edit-title-input" value="${escapeHtml(currentValue)}" style="width: 100%; padding: 10px 12px; border: 2px solid #E5E7EB; border-radius: 8px; font-size: 14px; margin-bottom: 16px; box-sizing: border-box; outline: none;" 
+           onkeypress="if(event.key === 'Enter') { document.getElementById('edit-title-confirm-btn').click(); }">
+    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+      <button id="edit-title-cancel-btn" style="padding: 8px 16px; border: 1px solid #D1D5DB; background: white; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; color: #374151;">取消</button>
+      <button id="edit-title-confirm-btn" style="padding: 8px 16px; border: none; background: #3B82F6; color: white; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">確認</button>
+    </div>
+  `;
+  
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+  
+  // 聚焦輸入框
+  const input = document.getElementById('edit-title-input');
+  input.focus();
+  input.select();
+  
+  // 確認按鈕
+  document.getElementById('edit-title-confirm-btn').onclick = () => {
+    const newValue = input.value.trim();
+    modal.remove();
+    if (onConfirm) {
+      onConfirm(newValue);
+    }
+  };
+  
+  // 取消按鈕
+  document.getElementById('edit-title-cancel-btn').onclick = () => {
+    modal.remove();
+  };
+  
+  // 點擊背景關閉
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  };
+  
+  // ESC 鍵關閉
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      modal.remove();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
 }
 
 // 更新腳本名稱
@@ -554,15 +641,29 @@ window.editIpPlanningTitleForUserDB = function(resultId, event) {
   
   const titleElement = document.querySelector(`[data-result-id="${safeResultId}"] h4`);
   if (!titleElement) {
-    console.error('找不到標題元素:', safeResultId);
+    // 嘗試使用原始 ID
+    const titleElement2 = document.querySelector(`[data-result-id="${resultId}"] h4`);
+    if (!titleElement2) {
+      console.error('找不到標題元素:', safeResultId);
+      return;
+    }
+    const currentTitle = titleElement2.textContent.trim();
+    showEditTitleModal('標題', currentTitle, (newTitle) => {
+      if (newTitle && newTitle.trim() !== '' && newTitle !== currentTitle) {
+        updateIpPlanningTitleForUserDB(resultId, newTitle.trim());
+      }
+    });
     return;
   }
-  const currentTitle = titleElement.textContent;
   
-  const newTitle = prompt('請輸入新的標題:', currentTitle);
-  if (newTitle && newTitle.trim() !== '' && newTitle !== currentTitle) {
-    updateIpPlanningTitleForUserDB(resultId, newTitle.trim());
-  }
+  const currentTitle = titleElement.textContent.trim();
+  
+  // 使用自定義輸入框代替 prompt()
+  showEditTitleModal('標題', currentTitle, (newTitle) => {
+    if (newTitle && newTitle.trim() !== '' && newTitle !== currentTitle) {
+      updateIpPlanningTitleForUserDB(resultId, newTitle.trim());
+    }
+  });
 }
 
 // 更新 IP Planning 標題
