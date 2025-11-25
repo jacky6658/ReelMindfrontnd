@@ -1945,7 +1945,7 @@ async function handleModeNavigation(event, targetMode) {
       if (window.ReelMindCommon && window.ReelMindCommon.showGreenToast) { // 改用 showGreenToast
         window.ReelMindCommon.showGreenToast('請先登入才能使用此功能！');
         setTimeout(() => {
-          window.ReelMindCommon.goToLogin();
+        window.ReelMindCommon.goToLogin();
         }, 1500); // 1.5 秒後跳轉
       } else if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
         window.ReelMindCommon.showToast('請先登入才能使用此功能！');

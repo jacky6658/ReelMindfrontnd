@@ -1025,13 +1025,19 @@ window.deleteScriptForUserDB = async function(scriptId) {
       container.innerHTML = '<div class="loading-text">還沒有儲存的腳本，請先使用一鍵生成功能創建腳本</div>';
     }
     
+    // 清除一鍵生成快取，確保數據一致性
+    if (window.cachedOneClickScripts) {
+      window.cachedOneClickScripts = window.cachedOneClickScripts.filter(s => String(s.id) !== String(scriptId));
+    }
+    
     // 同時更新一鍵生成分類的顯示（如果當前在該分類）
     const oneClickContent = document.getElementById('one-click-content');
     if (oneClickContent) {
       // 檢查當前是否在腳本標籤頁
       const activeTab = document.querySelector('.one-click-tab.active');
       if (activeTab && activeTab.textContent.includes('腳本')) {
-        // 重新載入一鍵生成分類的數據
+        // 清除快取後重新載入
+        window.cachedOneClickScripts = null;
         await loadOneClickGenerationForUserDB();
       }
     }
@@ -1057,6 +1063,8 @@ window.deleteScriptForUserDB = async function(scriptId) {
     
       if (response.ok) {
         console.log('後端腳本刪除成功');
+        // 清除快取後重新載入
+        window.cachedOneClickScripts = null;
         // 重新載入以同步後端數據
         await loadMyScriptsForUserDB();
         // 如果在一鍵生成分類，也重新載入
@@ -1072,6 +1080,8 @@ window.deleteScriptForUserDB = async function(scriptId) {
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast('腳本已刪除', 3000);
         }
+        // 清除快取後重新載入
+        window.cachedOneClickScripts = null;
         // 重新載入以同步後端數據
         await loadMyScriptsForUserDB();
         // 如果在一鍵生成分類，也重新載入
@@ -1085,6 +1095,8 @@ window.deleteScriptForUserDB = async function(scriptId) {
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
           window.ReelMindCommon.showToast('腳本已從本地刪除', 3000);
         }
+        // 清除快取後重新載入
+        window.cachedOneClickScripts = null;
         // 重新載入以同步後端數據
         await loadMyScriptsForUserDB();
         // 如果在一鍵生成分類，也重新載入
@@ -2618,7 +2630,12 @@ async function loadIpPlanningResultsForUserDB() {
     return;
   }
   
-  if (content) {
+  // 先檢查是否有快取數據，如果有就先顯示（提升響應速度）
+  if (window.currentIpPlanningResults && window.currentIpPlanningResults.length > 0) {
+    if (content) {
+      displayIpPlanningResultsForUserDB(window.currentIpPlanningResults);
+    }
+  } else if (content) {
     showLoadingAnimation(content, '載入 IP 人設規劃結果中...');
   }
   
@@ -2646,6 +2663,7 @@ async function loadIpPlanningResultsForUserDB() {
             return false;
           }
         });
+        // 更新快取數據，供下次使用
         window.currentIpPlanningResults = mode1Results;
         displayIpPlanningResultsForUserDB(mode1Results);
       } else {
@@ -3041,6 +3059,11 @@ window.deleteIpPlanningResultForUserDB = async function(resultId) {
         window.currentIpPlanningResults = window.currentIpPlanningResults.filter(r => String(r.id) !== String(safeResultId));
       }
       
+      // 清除一鍵生成快取，確保數據一致性
+      if (window.cachedOneClickResults) {
+        window.cachedOneClickResults = window.cachedOneClickResults.filter(r => String(r.id) !== String(safeResultId));
+      }
+      
       // 重新顯示結果
       if (window.currentIpPlanningResults) {
         displayIpPlanningResultsForUserDB(window.currentIpPlanningResults);
@@ -3053,6 +3076,9 @@ window.deleteIpPlanningResultForUserDB = async function(resultId) {
       if (oneClickContent && oneClickContent.style.display !== 'none') {
         const activeTab = document.querySelector('.one-click-tab.active');
         if (activeTab && (activeTab.textContent.includes('選題方向') || activeTab.textContent.includes('帳號定位'))) {
+          // 清除快取後重新載入
+          window.cachedOneClickResults = null;
+          window.cachedOneClickScripts = null;
           await loadOneClickGenerationForUserDB();
         }
       }
@@ -3553,20 +3579,33 @@ async function loadOneClickGenerationForUserDB() {
     return;
   }
   
-  if (content) {
+  // 先檢查是否有快取數據，如果有就先顯示（提升響應速度）
+  if (window.cachedOneClickResults && window.cachedOneClickScripts) {
+    if (content) {
+      displayOneClickGenerationResults(window.cachedOneClickResults, window.cachedOneClickScripts);
+    }
+  } else if (content) {
     showLoadingAnimation(content, '載入一鍵生成結果中...');
   }
   
   try {
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
     
-    // 獲取所有 ip_planning_results（只顯示 source='mode3' 的結果）
-    const response = await fetch(`${API_URL}/api/ip-planning/my`, {
-      headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    // 並行執行兩個 API 請求，而不是順序執行（減少等待時間）
+    const [response, scriptsResponse] = await Promise.all([
+      fetch(`${API_URL}/api/ip-planning/my`, {
+        headers: {
+          'Authorization': `Bearer ${ipPlanningToken}`,
+          'Content-Type': 'application/json'
+        }
+      }),
+      fetch(`${API_URL}/api/scripts/my`, {
+        headers: {
+          'Authorization': `Bearer ${ipPlanningToken}`,
+          'Content-Type': 'application/json'
+        }
+      })
+    ]);
     
     if (response.ok) {
       const data = await response.json();
@@ -3579,14 +3618,6 @@ async function loadOneClickGenerationForUserDB() {
           } catch (e) {
             // 如果 metadata 解析失敗，檢查是否為舊的 positioning_records 遷移資料
             return false;
-          }
-        });
-        
-        // 同時獲取 user_scripts（mode3 的腳本）
-        const scriptsResponse = await fetch(`${API_URL}/api/scripts/my`, {
-          headers: {
-            'Authorization': `Bearer ${ipPlanningToken}`,
-            'Content-Type': 'application/json'
           }
         });
         
@@ -3605,6 +3636,10 @@ async function loadOneClickGenerationForUserDB() {
             });
           }
         }
+        
+        // 更新快取數據，供下次使用
+        window.cachedOneClickResults = mode3Results;
+        window.cachedOneClickScripts = scripts;
         
         displayOneClickGenerationResults(mode3Results, scripts);
       } else {
@@ -3865,7 +3900,14 @@ function setOneClickTabActive(type) {
 window.showOneClickType = function(type) {
   window.currentOneClickType = type;
   setOneClickTabActive(type);
-  loadOneClickGenerationForUserDB();
+  
+  // 如果有快取數據，直接顯示（提升響應速度）
+  if (window.cachedOneClickResults && window.cachedOneClickScripts) {
+    displayOneClickGenerationResults(window.cachedOneClickResults, window.cachedOneClickScripts);
+  } else {
+    // 沒有快取時才載入
+    loadOneClickGenerationForUserDB();
+  }
 };
 
 // 匯出一鍵生成結果
