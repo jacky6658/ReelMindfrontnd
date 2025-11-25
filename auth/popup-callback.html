@@ -433,12 +433,19 @@
       
       // 獲取 Google 登入 URL（後端返回 JSON 格式）
       var fbParam = encodeURIComponent(window.location.origin);
-      var apiUrl = 'https://aivideobackend.zeabur.app/api/auth/google?fb=' + fbParam;
+      // 確保使用正確的 API 基礎 URL
+      var apiBaseUrl = 'https://api.aijob.com.tw';
+      var apiUrl = apiBaseUrl + '/api/auth/google?fb=' + fbParam;
       
       console.log('DEBUG: 準備獲取 Google 登入 URL:', apiUrl);
       
       // 先獲取授權 URL，然後跳轉
-      fetch(apiUrl)
+      fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
         .then(function(response) {
           if (!response.ok) {
             throw new Error('獲取授權 URL 失敗: ' + response.status);
@@ -452,6 +459,11 @@
           }
           console.log('DEBUG: 獲取到授權 URL，準備跳轉:', authUrl);
           
+          // 驗證 auth_url 格式（必須是 https://accounts.google.com 開頭）
+          if (!authUrl.startsWith('https://accounts.google.com')) {
+            throw new Error('授權 URL 格式不正確: ' + authUrl);
+          }
+          
           // 跳轉到 Google 登入
           setTimeout(function() {
             window.location.href = authUrl;
@@ -461,10 +473,13 @@
           console.error('DEBUG: 獲取授權 URL 失敗:', error);
           updateStatus('⚠️ 無法連接到登入服務，請稍後再試', false, true);
           
-          // 如果 fetch 失敗，嘗試直接使用 API URL（後端可能會重定向）
+          // 如果 fetch 失敗，顯示錯誤訊息並提供手動登入選項
           setTimeout(function() {
-            console.log('DEBUG: 嘗試直接跳轉到 API URL');
-            window.location.href = apiUrl;
+            updateStatus('⚠️ 無法自動登入，請手動前往首頁登入', false, true);
+            // 3 秒後跳轉到首頁
+            setTimeout(function() {
+              window.location.href = window.location.origin + '/';
+            }, 3000);
           }, 2000);
         });
     }, 2000); // 顯示動畫 2 秒後跳轉

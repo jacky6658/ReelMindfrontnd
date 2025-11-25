@@ -281,8 +281,10 @@
     const currentToken = localStorage.getItem('ipPlanningToken');
     
     if (!currentToken) {
-      // 未登入，導向首頁登入頁（帶上 activation_token）
-      window.location.href = `/?token=${token}`;
+      // 未登入，導向 popup-callback.html 處理登入流程（帶上 activation_token）
+      // 這樣可以確保登入後自動處理授權
+      sessionStorage.setItem('pendingActivationToken', token);
+      window.location.replace('/auth/popup-callback.html?activation_token=' + encodeURIComponent(token));
       return;
     }
     
