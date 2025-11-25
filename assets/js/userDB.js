@@ -3108,14 +3108,33 @@ window.editIpPlanningItemTitle = function(resultId, event) {
     return;
   }
   const safeResultId = String(resultId).replace(/[^a-zA-Z0-9_-]/g, '');
-  if (!safeResultId) {
-    console.error('清理後的 resultId 為空:', resultId);
-    return;
+  const originalResultId = String(resultId);
+  
+  // 先嘗試使用 safeResultId 查找（如果 safeResultId 不為空）
+  let titleElement = null;
+  let inputElement = null;
+  let editIcon = null;
+  
+  if (safeResultId) {
+    titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${safeResultId}"]`);
+    inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${safeResultId}"]`);
+    editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${safeResultId}"]`);
   }
   
-  const titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${safeResultId}"]`);
-  const inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${safeResultId}"]`);
-  const editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${safeResultId}"]`);
+  // 如果找不到，嘗試使用原始 ID（因為 displayResultId 可能是原始 ID）
+  if (!titleElement || !inputElement) {
+    titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${originalResultId}"]`);
+    inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${originalResultId}"]`);
+    editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${originalResultId}"]`);
+  }
+  
+  // 如果還是找不到，嘗試使用 escapeHtml 轉義後的 ID
+  if (!titleElement || !inputElement) {
+    const escapedResultId = escapeHtml(originalResultId);
+    titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${escapedResultId}"]`);
+    inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${escapedResultId}"]`);
+    editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${escapedResultId}"]`);
+  }
   
   if (titleElement && inputElement) {
     const currentTitle = titleElement.textContent.trim();
@@ -3125,20 +3144,64 @@ window.editIpPlanningItemTitle = function(resultId, event) {
     inputElement.style.display = 'block';
     inputElement.focus();
     inputElement.select();
+  } else {
+    console.error('找不到標題元素或輸入框:', { resultId, safeResultId, originalResultId });
   }
 }
 
 // 保存 IP 人設規劃項目標題
 window.saveIpPlanningItemTitle = async function(resultId) {
-  const titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${resultId}"]`);
-  const inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${resultId}"]`);
-  const editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${resultId}"]`);
+  if (!resultId) {
+    console.error('無效的 resultId:', resultId);
+    return;
+  }
+  
+  const safeResultId = String(resultId).replace(/[^a-zA-Z0-9_-]/g, '');
+  const originalResultId = String(resultId);
+  
+  // 先嘗試使用 safeResultId 查找（如果 safeResultId 不為空）
+  let titleElement = null;
+  let inputElement = null;
+  let editIcon = null;
+  
+  if (safeResultId) {
+    titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${safeResultId}"]`);
+    inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${safeResultId}"]`);
+    editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${safeResultId}"]`);
+  }
+  
+  // 如果找不到，嘗試使用原始 ID
+  if (!titleElement || !inputElement) {
+    titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${originalResultId}"]`);
+    inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${originalResultId}"]`);
+    editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${originalResultId}"]`);
+  }
+  
+  // 如果還是找不到，嘗試使用 escapeHtml 轉義後的 ID
+  if (!titleElement || !inputElement) {
+    const escapedResultId = escapeHtml(originalResultId);
+    titleElement = document.querySelector(`.ip-planning-item-title[data-result-id="${escapedResultId}"]`);
+    inputElement = document.querySelector(`.ip-planning-item-title-input[data-result-id="${escapedResultId}"]`);
+    editIcon = document.querySelector(`.ip-planning-item-edit-icon[data-result-id="${escapedResultId}"]`);
+  }
   
   if (titleElement && inputElement) {
     const newTitle = inputElement.value.trim();
     const originalTitle = titleElement.textContent.trim(); // 保存原始標題
     
-    const item = document.querySelector(`.ip-planning-item[data-result-id="${resultId}"]`);
+    // 查找 item 元素（使用相同的邏輯）
+    let item = null;
+    if (safeResultId) {
+      item = document.querySelector(`.ip-planning-item[data-result-id="${safeResultId}"]`);
+    }
+    if (!item) {
+      item = document.querySelector(`.ip-planning-item[data-result-id="${originalResultId}"]`);
+    }
+    if (!item) {
+      const escapedResultId = escapeHtml(originalResultId);
+      item = document.querySelector(`.ip-planning-item[data-result-id="${escapedResultId}"]`);
+    }
+    
     let defaultTitle = 'IP Profile';
     if (item) {
       const activeTab = document.querySelector('.ip-planning-tab.active');
