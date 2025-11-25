@@ -723,7 +723,7 @@
     <script src="assets/js/security.js?v=20251120"></script>
     <script src="assets/js/auth.js?v=20251120"></script>
     <script src="assets/js/api.js?v=20251120"></script>
-    <script src="assets/js/common.js?v=20251124"></script>
+    <script src="assets/js/common.js?v=20251125"></script>
   </head>
   <body>
     <!-- 導航欄 -->
@@ -884,8 +884,8 @@
               <div class="guide-article-card-title">什麼是人生曲線？用故事曲線打造爆款短影音</div>
               <div class="guide-article-card-description">
                 人生曲線（故事曲線）是短影音最強的故事結構。學會 Before→After、起承轉合、三幕劇結構，用 ReelMind AI 自動生成符合人生曲線的爆款腳本。適用 IG Reels、TikTok、YouTube Shorts...
-              </div>
-            </div>
+          </div>
+        </div>
             <div class="guide-article-card-footer">
               <span>閱讀更多 →</span>
             </div>
@@ -1002,15 +1002,15 @@
             showGreenToast('請先登入以使用此功能', 3000);
             // 延遲跳轉，讓用戶看到通知
             setTimeout(() => {
-              if (typeof goToLogin === 'function') {
-                goToLogin();
-              } else if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
-                window.ReelMindCommon.goToLogin();
-              } else {
-                const backendUrl = 'https://api.aijob.com.tw';
-                const redirectUri = encodeURIComponent(window.location.origin + '/');
-                window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
-              }
+            if (typeof goToLogin === 'function') {
+              goToLogin();
+            } else if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+              window.ReelMindCommon.goToLogin();
+            } else {
+              const backendUrl = 'https://api.aijob.com.tw';
+              const redirectUri = encodeURIComponent(window.location.origin + '/');
+              window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
+            }
             }, 1000);
             return;
           }
@@ -2031,15 +2031,15 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
             }
             // 延遲跳轉，讓用戶看到通知
             setTimeout(() => {
-              if (typeof goToLogin === 'function') {
-                goToLogin();
-              } else if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
-                window.ReelMindCommon.goToLogin();
-              } else {
-                const backendUrl = 'https://api.aijob.com.tw';
-                const redirectUri = encodeURIComponent(window.location.origin + '/');
-                window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
-              }
+            if (typeof goToLogin === 'function') {
+              goToLogin();
+            } else if (window.ReelMindCommon && typeof window.ReelMindCommon.goToLogin === 'function') {
+              window.ReelMindCommon.goToLogin();
+            } else {
+              const backendUrl = 'https://api.aijob.com.tw';
+              const redirectUri = encodeURIComponent(window.location.origin + '/');
+              window.location.href = `${backendUrl}/api/auth/google?redirect_uri=${redirectUri}`;
+            }
             }, 1000);
             return;
           }
