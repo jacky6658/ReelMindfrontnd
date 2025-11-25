@@ -28,7 +28,8 @@ function formatTaiwanTime(dateString) {
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: false  // 使用 24 小時制
     });
   } catch (error) {
     console.error('格式化台灣時區時間錯誤:', error);
@@ -412,7 +413,14 @@ window.editScriptNameForUserDB = function(scriptId, event) {
     return;
   }
   
-  const scriptNameElement = document.querySelector(`[data-script-id="${safeScriptId}"] .script-name`);
+  // 先嘗試查找 .script-name（我的腳本列表）
+  let scriptNameElement = document.querySelector(`[data-script-id="${safeScriptId}"] .script-name`);
+  
+  // 如果找不到，嘗試查找 h4（一鍵生成的腳本列表）
+  if (!scriptNameElement) {
+    scriptNameElement = document.querySelector(`[data-script-id="${safeScriptId}"] h4`);
+  }
+  
   if (!scriptNameElement) {
     console.error('找不到腳本名稱元素:', safeScriptId);
     return;
@@ -428,9 +436,18 @@ window.editScriptNameForUserDB = function(scriptId, event) {
 // 更新腳本名稱
 async function updateScriptNameForUserDB(scriptId, newName) {
   try {
-    const scriptNameElement = document.querySelector(`[data-script-id="${scriptId}"] .script-name`);
+    // 更新我的腳本列表中的標題
+    let scriptNameElement = document.querySelector(`[data-script-id="${scriptId}"] .script-name`);
     if (scriptNameElement) {
       scriptNameElement.textContent = newName;
+    }
+    
+    // 更新一鍵生成腳本列表中的標題（h4）
+    if (!scriptNameElement) {
+      scriptNameElement = document.querySelector(`[data-script-id="${scriptId}"] h4`);
+      if (scriptNameElement) {
+        scriptNameElement.textContent = newName;
+      }
     }
     
     // 更新本地儲存
@@ -478,56 +495,164 @@ async function updateScriptNameForUserDB(scriptId, newName) {
   }
 }
 
+// 編輯 IP Planning 標題（帳號定位/選題方向）
+window.editIpPlanningTitleForUserDB = function(resultId, event) {
+  if (event) event.stopPropagation();
+  
+  if (!resultId || (typeof resultId !== 'string' && typeof resultId !== 'number')) {
+    console.error('無效的 resultId:', resultId);
+    return;
+  }
+  const safeResultId = String(resultId).replace(/[^a-zA-Z0-9_-]/g, '');
+  if (!safeResultId) {
+    console.error('清理後的 resultId 為空:', resultId);
+    return;
+  }
+  
+  const titleElement = document.querySelector(`[data-result-id="${safeResultId}"] h4`);
+  if (!titleElement) {
+    console.error('找不到標題元素:', safeResultId);
+    return;
+  }
+  const currentTitle = titleElement.textContent;
+  
+  const newTitle = prompt('請輸入新的標題:', currentTitle);
+  if (newTitle && newTitle.trim() !== '' && newTitle !== currentTitle) {
+    updateIpPlanningTitleForUserDB(resultId, newTitle.trim());
+  }
+}
+
+// 更新 IP Planning 標題
+async function updateIpPlanningTitleForUserDB(resultId, newTitle) {
+  try {
+    const titleElement = document.querySelector(`[data-result-id="${resultId}"] h4`);
+    if (titleElement) {
+      titleElement.textContent = newTitle;
+    }
+    
+    // 嘗試更新後端
+    try {
+      const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
+      const response = await fetch(`${API_URL}/api/ip-planning/${resultId}/title`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${ipPlanningToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ title: newTitle })
+      });
+      
+      if (response.ok) {
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('標題已更新', 3000);
+        }
+      } else {
+        console.log('後端更新失敗，但本地已更新');
+        if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+          window.ReelMindCommon.showToast('標題已更新（本地）', 3000);
+        }
+      }
+    } catch (apiError) {
+      console.log('API不存在或網路錯誤，但本地已更新');
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('標題已更新（本地）', 3000);
+      }
+    }
+  } catch (error) {
+    console.error('Update IP planning title error:', error);
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('更新失敗，請稍後再試', 3000);
+    }
+  }
+}
+
 // 查看腳本詳細（一鍵生成分類使用）
 window.viewScriptDetailForUserDB = function(scriptId) {
-  // 調用現有的查看完整腳本函數
-  if (window.viewFullScriptForUserDB) {
-    window.viewFullScriptForUserDB(scriptId);
-  } else {
-    // 如果函數不存在，從 API 獲取腳本並顯示
-    viewScriptDetailFromAPI(scriptId);
+  console.log('查看腳本詳細，ID:', scriptId);
+  
+  // 先嘗試從本地儲存查找
+  const localScripts = getLocalScripts();
+  let script = localScripts.find(s => String(s.id) === String(scriptId));
+  
+  if (script) {
+    // 如果本地有，直接使用
+    if (window.viewFullScriptForUserDB) {
+      window.viewFullScriptForUserDB(scriptId);
+      return;
+    }
   }
+  
+  // 如果本地沒有，從 API 獲取
+  viewScriptDetailFromAPI(scriptId);
 };
 
 // 從 API 獲取腳本詳細
 async function viewScriptDetailFromAPI(scriptId) {
   try {
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
-    const response = await fetch(`${API_URL}/api/scripts/my`, {
+    
+    // 先嘗試使用單個腳本 API
+    let response = await fetch(`${API_URL}/api/scripts/${scriptId}`, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
         'Content-Type': 'application/json'
       }
     });
     
+    let script = null;
     if (response.ok) {
       const data = await response.json();
-      const script = data.scripts?.find(s => String(s.id) === String(scriptId));
-      if (script) {
-        // 轉換格式並顯示
-        const formattedScript = {
-          id: script.id,
-          name: script.name || script.title || '未命名腳本',
-          created_at: script.created_at ? formatTaiwanTime(script.created_at) : '',
-          script_data: script.script_data || {},
-          content: script.content
-        };
-        if (window.viewFullScriptForUserDB) {
-          // 臨時添加到本地儲存以便 viewFullScriptForUserDB 可以找到
-          const localScripts = getLocalScripts();
-          const existingIndex = localScripts.findIndex(s => s.id == scriptId);
-          if (existingIndex !== -1) {
-            localScripts[existingIndex] = formattedScript;
-          } else {
-            localScripts.push(formattedScript);
-          }
-          localStorage.setItem('user_scripts', JSON.stringify(localScripts));
-          window.viewFullScriptForUserDB(scriptId);
+      script = data.script || data;
+    } else if (response.status === 404) {
+      // 如果單個腳本 API 不存在，嘗試從列表 API 獲取
+      response = await fetch(`${API_URL}/api/scripts/my`, {
+        headers: {
+          'Authorization': `Bearer ${ipPlanningToken}`,
+          'Content-Type': 'application/json'
         }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        script = data.scripts?.find(s => String(s.id) === String(scriptId));
+      }
+    }
+    
+    if (script) {
+      // 轉換格式
+      const scriptData = typeof script.script_data === 'string' 
+        ? JSON.parse(script.script_data) 
+        : (script.script_data || {});
+      
+      const formattedScript = {
+        id: script.id,
+        name: script.script_name || script.name || script.title || '未命名腳本',
+        created_at: script.created_at ? formatTaiwanTime(script.created_at) : '',
+        script_data: scriptData,
+        content: script.content
+      };
+      
+      // 臨時添加到本地儲存以便 viewFullScriptForUserDB 可以找到
+      const localScripts = getLocalScripts();
+      const existingIndex = localScripts.findIndex(s => String(s.id) === String(scriptId));
+      if (existingIndex !== -1) {
+        localScripts[existingIndex] = formattedScript;
+      } else {
+        localScripts.push(formattedScript);
+      }
+      localStorage.setItem('user_scripts', JSON.stringify(localScripts));
+      
+      // 顯示腳本詳細
+      if (window.viewFullScriptForUserDB) {
+        window.viewFullScriptForUserDB(scriptId);
       } else {
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
-          window.ReelMindCommon.showToast('找不到腳本', 3000);
+          window.ReelMindCommon.showToast('找不到腳本數據', 3000);
         }
+      }
+    } else {
+      if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+        window.ReelMindCommon.showToast('找不到腳本數據', 3000);
       }
     }
   } catch (error) {
@@ -3375,7 +3500,11 @@ function displayOneClickGenerationResults(mode3Results, scripts) {
       return `
         <div class="script-item" data-script-id="${escapedScriptId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <h4 style="margin: 0; color: #1F2937; font-size: 1.1rem;">${scriptName}</h4>
+            <h4 style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;" 
+                onclick="editScriptNameForUserDB('${safeScriptId.replace(/'/g, "\\'")}', event)"
+                onmouseover="this.style.background='#f3f4f6'"
+                onmouseout="this.style.background='transparent'"
+                title="點擊編輯標題">${scriptName}</h4>
             <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -3504,7 +3633,11 @@ function displayOneClickGenerationResults(mode3Results, scripts) {
       return `
         <div class="one-click-item" data-result-id="${escapedResultId}" style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <h4 style="margin: 0; color: #1F2937; font-size: 1.1rem;">${title}</h4>
+            <h4 style="margin: 0; color: #1F2937; font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;" 
+                onclick="editIpPlanningTitleForUserDB('${safeResultId.replace(/'/g, "\\'")}', event)"
+                onmouseover="this.style.background='#f3f4f6'"
+                onmouseout="this.style.background='transparent'"
+                title="點擊編輯標題">${title}</h4>
             <span style="color: #6B7280; font-size: 0.9rem;">${date}</span>
           </div>
           <div style="color: #374151; line-height: 1.6; max-height: 300px; overflow-y: auto; margin-bottom: 12px;">
