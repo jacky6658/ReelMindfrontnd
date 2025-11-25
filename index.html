@@ -17016,10 +17016,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
         // 顯示載入動畫
         showLoadingAnimation(content, '載入腳本記錄中...');
         
-          ipPlanningToken: ipPlanningToken ? 'present' : 'missing',
-          userId: ipPlanningUser.user_id
-        });
-        
         // 先檢查本地儲存的腳本（僅用於快速顯示，仍會從後端獲取最新資料）
         const localScripts = getLocalScripts();
         
@@ -20987,10 +20983,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           return;
         }
         
-          userId: ipPlanningUser.user_id,
-          contentLength: content.length
-        });
-        
         try {
           // 提取腳本內容的結構化數據
           const scriptData = extractScriptData(content);
@@ -21248,10 +21240,6 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           document.getElementById('generationsList').innerHTML = '<div class="loading-text">請先登入</div>';
           return;
         }
-        
-          ipPlanningToken: ipPlanningToken ? 'present' : 'missing',
-          userId: ipPlanningUser.user_id
-        });
         
         // 先檢查本地儲存的腳本
         const localScripts = getLocalScripts();
