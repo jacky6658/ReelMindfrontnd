@@ -14410,8 +14410,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                 }
                 // 顯示友好訊息
+                // 使用台灣時區格式化時間
                 const activatedDate = errorData.activated_at ? 
-                  new Date(errorData.activated_at).toLocaleString('zh-TW') : '';
+                  new Date(errorData.activated_at).toLocaleString('zh-TW', {
+                    timeZone: 'Asia/Taipei',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                  }) : '';
                 const message = activatedDate ? 
                   `✅ ${errorData.message}（啟用時間：${activatedDate}）` : 
                   `✅ ${errorData.message}`;
@@ -14424,7 +14434,17 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
               // 如果有詳細資訊，顯示給用戶
               if (errorData.activated_at) {
                 isAlreadyActivated = true;
-                const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW');
+                // 使用台灣時區格式化時間
+                const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW', {
+                  timeZone: 'Asia/Taipei',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: false
+                });
                 errorDetails = `此連結已於 ${activatedDate} 使用`;
                 
                 // 如果連結已使用，檢查用戶當前的訂閱狀態
@@ -14449,7 +14469,18 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                           localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                         }
                         // 顯示成功訊息而不是錯誤
-                        showToast(`✅ 您已擁有授權！此連結已於 ${activatedDate} 啟用`, 5000);
+                        // 使用台灣時區格式化時間
+                        const activatedDateTW = new Date(errorData.activated_at).toLocaleString('zh-TW', {
+                          timeZone: 'Asia/Taipei',
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                          hour12: false
+                        });
+                        showToast(`✅ 您已擁有授權！此連結已於 ${activatedDateTW} 啟用`, 5000);
                         return; // 提前返回，不顯示錯誤訊息
                       }
                     }
@@ -14459,7 +14490,17 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
                   }
                 }
               } else if (errorData.expired_at) {
-                const expiredDate = new Date(errorData.expired_at).toLocaleString('zh-TW');
+                // 使用台灣時區格式化時間
+                const expiredDate = new Date(errorData.expired_at).toLocaleString('zh-TW', {
+                  timeZone: 'Asia/Taipei',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: false
+                });
                 errorDetails = `此連結已於 ${expiredDate} 過期`;
               }
               if (errorData.contact) {

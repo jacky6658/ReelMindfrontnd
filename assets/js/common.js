@@ -488,7 +488,17 @@
           // 如果有詳細資訊，顯示給用戶
           if (errorData.activated_at) {
             isAlreadyActivated = true;
-            const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW');
+            // 使用台灣時區格式化時間
+            const activatedDate = new Date(errorData.activated_at).toLocaleString('zh-TW', {
+              timeZone: 'Asia/Taipei',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+            });
             errorMessage = `此授權連結已使用（${activatedDate}）`;
             
             // 如果連結已使用，檢查用戶當前的訂閱狀態
@@ -510,8 +520,18 @@
                     ipPlanningUser.is_subscribed = userInfo.is_subscribed;
                     localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                   }
-                  // 顯示成功訊息而不是錯誤
-                  showToast(`✅ 您已擁有授權！此連結已於 ${activatedDate} 啟用`, 5000);
+                  // 顯示成功訊息而不是錯誤（使用台灣時區格式化時間）
+                  const activatedDateTW = new Date(errorData.activated_at).toLocaleString('zh-TW', {
+                    timeZone: 'Asia/Taipei',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                  });
+                  showToast(`✅ 您已擁有授權！此連結已於 ${activatedDateTW} 啟用`, 5000);
                   return; // 提前返回，不顯示錯誤訊息
                 }
               }
