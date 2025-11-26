@@ -4071,10 +4071,27 @@ window.exportOneClickGenerationResults = function() {
 // 檢查 IP 人設規劃權限並顯示/隱藏選單
 async function checkIpPlanningPermission() {
   console.log('[checkIpPlanningPermission] 函數開始執行');
-  console.log('[checkIpPlanningPermission] ipPlanningUser:', ipPlanningUser);
-  console.log('[checkIpPlanningPermission] ipPlanningToken:', ipPlanningToken ? '已設定' : '未設定');
   
-  if (!ipPlanningUser?.user_id) {
+  // 從全局作用域獲取最新的 token 和 user 資訊
+  let currentToken = window.ipPlanningToken || (window.Auth && window.Auth.getToken && window.Auth.getToken()) || localStorage.getItem('ipPlanningToken') || '';
+  let currentUser = window.ipPlanningUser || (window.ReelMindCommon && window.ReelMindCommon.getUser && window.ReelMindCommon.getUser()) || null;
+  
+  // 如果還是沒有，嘗試從 localStorage 讀取
+  if (!currentUser) {
+    const userStr = localStorage.getItem('ipPlanningUser');
+    if (userStr) {
+      try {
+        currentUser = JSON.parse(userStr);
+      } catch (e) {
+        console.warn('[checkIpPlanningPermission] 解析 localStorage 中的 ipPlanningUser 失敗:', e);
+      }
+    }
+  }
+  
+  console.log('[checkIpPlanningPermission] ipPlanningUser:', currentUser);
+  console.log('[checkIpPlanningPermission] ipPlanningToken:', currentToken ? '已設定' : '未設定');
+  
+  if (!currentUser?.user_id) {
     console.log('[checkIpPlanningPermission] 未獲取到用戶ID，隱藏 IP人設規劃');
     // 未登入，隱藏 IP 人設規劃選單
     const menuItem = document.getElementById('menu-ipPlanning');
@@ -4086,7 +4103,7 @@ async function checkIpPlanningPermission() {
     return;
   }
   
-  console.log('[checkIpPlanningPermission] 用戶ID:', ipPlanningUser.user_id);
+  console.log('[checkIpPlanningPermission] 用戶ID:', currentUser.user_id);
   
   try {
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
@@ -4095,7 +4112,7 @@ async function checkIpPlanningPermission() {
     
     const response = await fetch(permissionUrl, {
       headers: {
-        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Authorization': `Bearer ${currentToken}`,
         'Content-Type': 'application/json'
       }
     });

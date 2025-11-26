@@ -2116,17 +2116,21 @@
 
     <!-- 載入共用 JavaScript 檔案（統一使用 defer 屬性，確保按順序執行且不阻塞 HTML 解析） -->
     <script defer src="assets/js/config.js?v=20251126"></script>
-    <script defer src="assets/js/auth.js?v=20251125"></script>
-    <script defer src="assets/js/api.js?v=20251125"></script>
+    <script defer src="assets/js/auth.js?v=20251126"></script>
+    <script defer src="assets/js/api.js?v=20251126"></script>
     <script defer src="assets/js/common.js?v=20251126"></script>
-    <script defer src="assets/js/userDB.js?v=20251130"></script>
+    <script defer src="assets/js/userDB.js?v=20251126"></script>
     
     <script>
       // API_BASE_URL 已在 config.js 中定義為全局變數
       // 這裡直接使用 window.APP_CONFIG，避免重複聲明
       const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
-      let ipPlanningToken = localStorage.getItem('ipPlanningToken') || '';
-      let ipPlanningUser = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
+      // 將變數設置為 window 對象的屬性，以便 userDB.js 可以訪問
+      window.ipPlanningToken = localStorage.getItem('ipPlanningToken') || '';
+      window.ipPlanningUser = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
+      // 保持局部變數以向後兼容
+      let ipPlanningToken = window.ipPlanningToken;
+      let ipPlanningUser = window.ipPlanningUser;
 
       // 手機版抽屜切換
       function toggleMobileDrawer() {
@@ -2841,13 +2845,16 @@
         // 載入用戶資訊
         if (window.Auth && window.Auth.getToken()) {
           ipPlanningToken = window.Auth.getToken();
+          window.ipPlanningToken = ipPlanningToken; // 同步到 window 對象
         }
         
         if (window.ReelMindCommon && window.ReelMindCommon.getUser) {
           ipPlanningUser = window.ReelMindCommon.getUser();
+          window.ipPlanningUser = ipPlanningUser; // 同步到 window 對象
         } else {
           const userStr = localStorage.getItem('ipPlanningUser');
           ipPlanningUser = userStr ? JSON.parse(userStr) : null;
+          window.ipPlanningUser = ipPlanningUser; // 同步到 window 對象
         }
         
         // 更新用戶資訊顯示

@@ -1,142 +1,180 @@
-# ReelMind Logo 圖片設定說明
+# ReelMindfrontnd – 前端效能優化任務說明（給 AI）
 
-## 📋 需要準備的圖片文件
+## 0. 角色與目標
 
-請將您的 ReelMind Logo 圖片（結合相機鏡頭和電路板大腦的圓形標誌）準備以下尺寸，並上傳到 `assets/images/` 目錄：
+你是一位 **Senior Frontend Engineer（React / SPA / 靜態站優化專家）**，  
+任務是幫我在 **不破壞既有功能、不影響其他使用者** 的前提下，  
+針對這個專案做 **漸進式、可回溯** 的效能優化。
 
-### 1. Favicon 文件（瀏覽器標籤頁圖示）
+專案重點：
 
-- **favicon.ico** - 16x16, 32x32, 48x48 多尺寸 ICO 文件
-- **favicon-16x16.png** - 16x16 像素 PNG
-- **favicon-32x32.png** - 32x32 像素 PNG
+- 專案名稱：`ReelMindfrontnd`
+- 架構：前端 SPA / 多頁 HTML，放在 Cloudflare + Zeabur
+- 後端 API 已在另一個網域上，**本任務禁止改動後端 / API 行為**
+- 我只會透過「你給的建議」去修改或讓你改檔案，所以請確保
+  - 每一步都有清楚說明
+  - 修改是「可分階段」而不是一次大重構
 
-### 2. Apple Touch Icon（iOS 設備）
+---
 
-- **apple-touch-icon.png** - 180x180 像素 PNG
+## 1. 總原則（很重要）
 
-### 3. Android Chrome Icons（Android 設備）
+1. **不能破壞功能**
+   - 不改 API 路徑與 request payload / response 結構
+   - 不移除目前有在用的 event handler、button、表單行為
+   - 不改動使用者看得到的文案與版面（除非只是加屬性如 `loading="lazy"`）
 
-- **android-chrome-192x192.png** - 192x192 像素 PNG
-- **android-chrome-512x512.png** - 512x512 像素 PNG
+2. **修改要「可局部 rollback」**
+   - 每一類調整（例如：首頁 script 清理、圖片 lazy load）要集中在小範圍檔案
+   - 同一個 commit / patch 只處理一小組問題，方便我回退
 
-### 4. Open Graph 圖片（社交媒體分享）
+3. **優化方向的優先順序**
+   1. **首屏載入時間（首頁 / 主要導流頁）**
+   2. **JS bundle 過重：錯頁載入的 JS 先移除**
+   3. **圖片體積 & lazy loading**
+   4. 其他（第三方 library 按需載入、程式結構整理）
 
-- **reelmind-logo-og.jpg** - 1200x630 像素 JPG（用於 Facebook、LinkedIn 等分享）
+---
 
-### 5. Logo 圖片（結構化數據和一般使用）
+## 2. Phase 1 – 安全且高 CP 值的優化
 
-- **reelmind-logo.png** - 建議 512x512 或更大尺寸的 PNG（用於 Google 搜尋結果顯示）
+> **Phase 1 的所有修改，都必須在不改 UI、不改後端行為的前提下完成。**
 
-## 🎨 圖片規格建議
+### 2.1 每頁只載「自己的 JS」（Script 引用清理）
 
-### Favicon 規格
-- **格式**：PNG（透明背景）或 ICO
-- **尺寸**：16x16, 32x32（必須）
-- **背景**：建議透明或單色背景
-- **設計**：簡化版本，確保在小尺寸下清晰可見
+**目標：**  
+避免首頁或其他頁面一次載入 `userDB.js`、`mode1.js` 等大型 JS 檔。
 
-### Open Graph 圖片規格
-- **格式**：JPG 或 PNG
-- **尺寸**：1200x630 像素（必須）
-- **檔案大小**：建議 < 1MB
-- **內容**：可以包含 Logo + 文字標題
+**請你依照以下流程操作：**
 
-### Logo 圖片規格
-- **格式**：PNG（透明背景）
-- **尺寸**：至少 512x512 像素
-- **用途**：Google 搜尋結果、結構化數據
+1. 在 repo 中搜尋所有 HTML 檔（例如：`index.html`, `userDB.html`, `mode1.html`, `mode2.html`, `mode3.html` 等）。
+2. 對每一個 HTML 檔，建立一個表格（可以寫在回覆裡）：
 
-## 📁 文件結構
+   - 頁面名稱
+   - 目前引入的 `<script>` 檔案清單
+   - 此頁實際需要的 JS（你依照程式邏輯判斷）
 
-```
-ReelMindfrontnd-main/
-└── assets/
-    └── images/
-        ├── favicon.ico
-        ├── favicon-16x16.png
-        ├── favicon-32x32.png
-        ├── apple-touch-icon.png
-        ├── android-chrome-192x192.png
-        ├── android-chrome-512x512.png
-        ├── reelmind-logo-og.jpg
-        └── reelmind-logo.png
-```
+3. 根據判斷結果：
+   - **首頁（landing / 導流頁）**：只保留通用設定檔（例如 `config.js`, `common.js` 等）  
+     移除只在 userDB 或其他 mode 用到的 heavy JS。
+   - **`userDB.html`**：僅引入與 userDB 有關的 JS（例如 `userDB.js` + 共用 `config/common`），不要載其他 mode 的 JS。
+   - **`mode1.html`、`mode2.html`、`mode3.html`…**：各自只載自己的 JS 檔 + 共用檔。
 
-## ✅ 已完成的設定
+4. 修改方式要求：
+   - 只調整 `<script src="...">` 的增減與順序
+   - 不直接改 JS 內容（Phase 1 不 refactor 邏輯）
+   - 修改後，請在回覆中清楚列出「每個頁面前後對照」。
 
-所有 HTML 文件已經更新為使用新的 Logo 路徑：
+> 如果判斷某支 JS 是否有用時有疑慮，請優先保留並在註解中標記 TODO，不要貿然刪除。
 
-### 主要頁面
-- ✅ `index.html` - 已更新 favicon、og:image 和 logo
-- ✅ `guide.html` - 已更新 favicon、og:image 和 logo
-- ✅ `experience.html` - 已更新 favicon、og:image 和 logo
-- ✅ `contact.html` - 已更新 favicon、og:image 和 logo
-- ✅ `subscription.html` - 已更新 favicon
+---
 
-### 功能頁面
-- ✅ `mode1.html` - 已更新 favicon
-- ✅ `mode2.html` - 已更新 favicon
-- ✅ `mode3.html` - 已更新 favicon
-- ✅ `userDB.html` - 已更新 favicon
-- ✅ `checkout.html` - 已更新 favicon
-- ✅ `payment-result.html` - 已更新 favicon
-- ✅ `404.html` - 已更新 favicon
-- ✅ `auth/popup-callback.html` - 已更新 favicon
+### 2.2 圖片優化 – 先處理「首頁 + 主導流頁」
 
-### 文章頁面（所有 6 篇文章）
-- ✅ `guide/article-1-three-steps-to-generate-30-second-script.html` - 已更新 favicon、og:image 和 logo
-- ✅ `guide/article-2-ai-account-positioning-14-day-plan.html` - 已更新 favicon、og:image 和 logo
-- ✅ `guide/article-3-reels-shorts-tiktok-script-differences.html` - 已更新 favicon、og:image 和 logo
-- ✅ `guide/article-4-script-structure-selection-guide.html` - 已更新 favicon、og:image 和 logo
-- ✅ `guide/article-5-how-to-get-llm-api-key.html` - 已更新 favicon、og:image 和 logo
-- ✅ `guide/article-6-what-is-life-curve.html` - 已更新 favicon、og:image 和 logo
+**目標：**  
+在不改設計的前提下，先讓首頁與主導流頁的圖片「瘦身＋lazy load」。
 
-### 更新的內容
-1. **Favicon**：所有頁面已從 SVG emoji 改為使用 PNG favicon 文件
-2. **Open Graph 圖片**：所有頁面已更新為 `reelmind-logo-og.jpg`
-3. **Logo（結構化數據）**：所有頁面已更新為 `reelmind-logo.png`
+**請你：**
 
-## 🔧 圖片生成工具建議
+1. 找出以下頁面：
+   - 首頁（通常是 `index.html` 或等同角色的頁面）
+   - 廣告導流/體驗頁（若專案中有明顯的 landing / trial / checkout 頁面）
 
-如果您需要將原始圖片轉換為多種尺寸，可以使用：
+2. 在這些頁面中，列出所有 `<img>`：
+   - 檔名與路徑
+   - 是否在**首屏**出現（不用捲動就看得到）
+   - 當前檔案格式與大致用途（Hero 圖、icon、截圖等）
 
-1. **線上工具**：
-   - [Favicon Generator](https://realfavicongenerator.net/)
-   - [Favicon.io](https://favicon.io/)
+3. 給出「分級建議」：
 
-2. **圖片編輯軟體**：
-   - Photoshop
-   - GIMP（免費）
-   - Figma
+   - **必須保持非 lazy（首屏關鍵圖）**
+     - 建議：壓縮檔案體積、改用 `.webp`，但不要加 `loading="lazy"`。
+   - **可以 lazy 的圖片**
+     - 建議：加上 `loading="lazy"` 屬性
+     - 若沒有瀏覽器兼容問題，建議改成 WebP 或使用 `<picture>` 做雙格式 fallback
 
-3. **命令列工具**（如果已安裝 ImageMagick）：
-   ```bash
-   # 生成不同尺寸
-   convert original-logo.png -resize 16x16 favicon-16x16.png
-   convert original-logo.png -resize 32x32 favicon-32x32.png
-   convert original-logo.png -resize 180x180 apple-touch-icon.png
-   convert original-logo.png -resize 192x192 android-chrome-192x192.png
-   convert original-logo.png -resize 512x512 android-chrome-512x512.png
-   convert original-logo.png -resize 1200x630 reelmind-logo-og.jpg
-   ```
+4. 幫我對每個頁面產生「建議修改版本」的 HTML 片段：
+   - 直接示範修改前 / 修改後
+   - 修改後的版本需：
+     - 保留原本的 `class`、`id`、`data-*` 屬性
+     - 只新增 `loading="lazy"` 或 `<picture>` 包裝
+     - 不改變現有的 layout 結構
 
-## 📝 注意事項
+---
 
-1. **檔案命名**：請確保檔案名稱完全符合上述列表（大小寫敏感）
-2. **路徑**：所有圖片必須放在 `assets/images/` 目錄
-3. **測試**：上傳後請測試：
-   - 瀏覽器標籤頁是否顯示正確的 favicon
-   - 使用 [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) 測試 og:image
-   - 使用 [Twitter Card Validator](https://cards-dev.twitter.com/validator) 測試 Twitter Card
-4. **Google 搜尋結果**：Logo 可能需要幾天時間才會在 Google 搜尋結果中更新
+### 2.3 第三方 Library（Chart / 重量級套件）改成「按需載入」
 
-## 🚀 上傳後檢查
+**前提：如果你在專案中確實找到這類套件才執行，找不到就略過。**
 
-上傳所有圖片後，請確認以下 URL 可以正常訪問：
+1. 搜尋專案中是否有：
+   - `Chart.js`
+   - 其他體積較大的圖表或富文字編輯器 library
+2. 若有，請針對使用到這些 library 的檔案：
+   - 確認目前是否在一載入頁面時就立即載入整個 library。
+3. 給出「按需載入」的改寫建議：
+   - 使用動態 `import()` 或等價方案（視目前使用環境而定）
+   - 僅在使用者觸發（例如點擊「顯示圖表」、切到某個 Tab）時才載入 library
+4. 針對每一處使用，提供：
+   - 修改前程式關鍵片段
+   - 修改後程式片段（包含如何避免重複載入）
 
-- `https://reelmind.aijob.com.tw/assets/images/favicon.ico`
-- `https://reelmind.aijob.com.tw/assets/images/favicon-32x32.png`
-- `https://reelmind.aijob.com.tw/assets/images/reelmind-logo.png`
-- `https://reelmind.aijob.com.tw/assets/images/reelmind-logo-og.jpg`
+> 這一階段仍以「不改 UI 與功能」為前提，只改載入時機。
 
+---
 
+## 3. Phase 2 – 輕量 Refactor（只在 Phase 1 穩定後進行）
+
+> Phase 2 要在 Phase 1 完成且確認功能沒問題後才做。  
+> 若我沒有明確要求，請只先完成 Phase 1。
+
+### 3.1 `common.js` 分拆（只拆邏輯，不改行為）
+
+1. 掃描 `common.js`：
+   - 將其中的函式依用途標記：  
+     - **真正全站共用**（header/nav、token 管理、共用工具）  
+     - **只被特定頁面使用**（例如只在 userDB 或某個 mode 使用）
+2. 對於只被單一頁面使用的函式：
+   - 建議搬移到對應的 `userDB.js` 或 `modeX.js`
+   - 在回覆中列出：「函式名稱 → 建議目標檔案」
+3. 實際修改時：
+   - 優先搬移「最明顯的頁面專用函式」
+   - 每次修改只搬幾個，並在檔案內加註解說明
+
+---
+
+## 4. 回覆格式要求
+
+每一輪你給我的回覆，請遵循這個結構：
+
+1. **摘要**
+   - 用 3–5 行文字說明這一輪你做了什麼（或建議我做什麼）
+
+2. **變更列表（按檔案分）**
+   - 例如：
+     - `index.html`
+       - 移除不必要 script：`userDB.js`, `mode1.js`
+       - 保留：`config.js`, `common.js`
+     - `userDB.html`
+       - 只保留：`userDB.js`, `config.js`, `common.js`
+
+3. **程式碼片段示例**
+   - 對於有修改的地方，提供「修改前 / 修改後」片段
+   - 不需要貼整支檔案，除非我要求
+
+4. **風險與檢查建議**
+   - 列出可能要手動測試的功能（例如：某按鈕是否正常、某頁是否能正確載入）
+   - 若有任何你不確定是否會破壞功能的部分，請在這裡標註並提出保守方案
+
+---
+
+## 5. 你可以主動要求我提供的資訊
+
+如果你需要更多 context 才能判斷，請主動告訴我你要什麼，例如：
+
+- 某個頁面完整 HTML / JS
+- 使用者流程（例如：體驗頁 → 填單 → 導向哪頁）
+- Lighthouse / PageSpeed 的最新報告截圖
+
+我會依照你的需求，分批提供。
+
+---
