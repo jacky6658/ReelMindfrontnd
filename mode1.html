@@ -3348,7 +3348,7 @@
           <a href="index.html" class="navbar-tab">首頁</a>
           <a href="mode1.html" class="navbar-tab active">IP人設規劃</a>
           <a href="mode3.html" class="navbar-tab" onclick="handleModeNavigation(event, 'mode3')">一鍵生成</a>
-          <a href="index.html#forum" class="navbar-tab" onclick="event.preventDefault(); window.location.href='index.html#forum'; return false;">論壇介紹</a>
+          <a href="forum.html" class="navbar-tab">論壇介紹</a>
           <a href="guide.html" class="navbar-tab">實戰指南</a>
           <a href="userDB.html" id="userDBTab" class="navbar-tab" style="display:none;">創作者資料庫</a>
         </div>
@@ -3384,7 +3384,7 @@
           <span class="mobile-drawer-icon"><i class="fas fa-magic"></i></span>
           <span class="mobile-drawer-text">一鍵生成</span>
         </a>
-        <a href="index.html#forum" class="mobile-drawer-item" onclick="window.location.href='index.html#forum'; closeMobileDrawer(); return false;">
+        <a href="forum.html" class="mobile-drawer-item" onclick="if(typeof closeMobileDrawer === 'function') { closeMobileDrawer(); } return false;">
           <span class="mobile-drawer-icon"><i class="fas fa-comments"></i></span>
           <span class="mobile-drawer-text">論壇介紹</span>
         </a>

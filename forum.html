@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>論壇介紹 | AIJob 學院 Discord 社群 | ReelMind</title>
+    <meta name="title" content="論壇介紹 | AIJob 學院 Discord 社群 | ReelMind" />
+    <meta name="description" content="加入 AIJob 學院 Discord 社群，與其他創作者交流使用經驗、分享成功案例。一鍵生成分享、AI 顧問問答、IP 人設規劃、創作者資料庫整合，一起把短影音做成「可複製的系統」。" />
+    <meta name="keywords" content="Discord社群,AIJob學院,短影音社群,創作者社群,短影音交流,AI短影音討論,ReelMind社群" />
+    <meta name="author" content="ReelMind AI" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="zh-Hant" />
+    <meta name="revisit-after" content="7 days" />
+    <link rel="canonical" href="https://reelmind.aijob.com.tw/forum.html" />
+    
+    <!-- GEO / Location Meta Tags -->
+    <meta name="geo.region" content="TW" />
+    <meta name="geo.placename" content="台灣" />
+    <meta name="geo.position" content="25.0330;121.5654" />
+    <meta name="ICBM" content="25.0330, 121.5654" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://reelmind.aijob.com.tw/forum.html" />
+    <meta property="og:title" content="論壇介紹 | AIJob 學院 Discord 社群 | ReelMind" />
+    <meta property="og:description" content="加入 AIJob 學院 Discord 社群，與其他創作者交流使用經驗、分享成功案例。一起把短影音做成「可複製的系統」。" />
+    <meta property="og:image" content="https://reelmind.aijob.com.tw/assets/images/reelmind-logo-og.jpg" />
+    <meta property="og:site_name" content="ReelMind AI 短影音智能體" />
+    <meta property="og:locale" content="zh_TW" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="論壇介紹 | AIJob 學院 Discord 社群 | ReelMind" />
+    <meta name="twitter:description" content="加入 AIJob 學院 Discord 社群，與其他創作者交流使用經驗、分享成功案例。" />
+    <meta name="twitter:image" content="https://reelmind.aijob.com.tw/assets/images/reelmind-logo-og.jpg" />
+    
+    <!-- HTTP 快取標頭 -->
+    <meta http-equiv="Cache-Control" content="public, max-age=3600">
+    <meta http-equiv="Expires" content="3600">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/android-chrome-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/android-chrome-512x512.png" />
+    <link rel="shortcut icon" href="assets/images/favicon.ico" />
+    
+    <!-- Font Awesome 圖標庫 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- CSS 文件 -->
+    <link rel="stylesheet" href="assets/css/variables.css" />
+    <link rel="stylesheet" href="assets/css/animations.css" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    
+    <!-- Forum 專用樣式 -->
+    <style>
+      /* ===== 導航欄樣式 ===== */
+      .top-navbar {
+        background: var(--navbar-bg);
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 1px 3px var(--shadow);
+        padding-top: calc(16px + var(--safe-area-inset-top, 0px));
+        min-height: 60px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      
+      .navbar-left {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        justify-content: flex-start;
+        flex: 1;
+        min-width: 0;
+      }
+      
+      .navbar-title {
+        font-size: 30px;
+        font-weight: 600;
+        color: var(--text-primary);
+        text-align: center;
+        cursor: pointer;
+        transition: color 0.2s ease;
+      }
+      
+      .navbar-title:hover {
+        color: #3b82f6;
+      }
+      
+      .navbar-tabs {
+        display: flex;
+        gap: 8px;
+      }
+      
+      .navbar-tab {
+        padding: 8px 16px;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+      }
+      
+      .navbar-tab.active {
+        background: var(--button-bg);
+        color: var(--button-text);
+      }
+      
+      .navbar-tab:hover:not(.active) {
+        background: var(--bg-tertiary);
+      }
+      
+      .navbar-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        justify-content: flex-end;
+      }
+      
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: background 0.2s;
+      }
+      
+      .user-info:hover {
+        background: var(--bg-tertiary);
+      }
+      
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+      
+      .user-name {
+        font-size: 14px;
+        color: var(--text-primary);
+      }
+      
+      .login-btn {
+        padding: 8px 16px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.2s;
+      }
+      
+      .login-btn:hover {
+        background: #2563eb;
+      }
+      
+      .mobile-drawer-toggle {
+        display: none;
+        background: transparent;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-primary);
+      }
+      
+      /* ===== Mobile Drawer 樣式 ===== */
+      .mobile-drawer-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none;
+      }
+
+      .mobile-drawer-overlay.active {
+        display: block;
+      }
+
+      .mobile-drawer {
+        position: fixed;
+        top: 0;
+        left: -300px;
+        width: 280px;
+        height: 100%;
+        background: white;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+      }
+
+      .mobile-drawer.open {
+        left: 0;
+      }
+
+      .mobile-drawer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f8fafc;
+      }
+
+      .mobile-drawer-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .mobile-drawer-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+
+      .mobile-drawer-close:hover {
+        background-color: #e5e7eb;
+      }
+
+      .mobile-drawer-content {
+        padding: 20px 0;
+      }
+
+      .mobile-drawer-item {
+        display: flex;
+        align-items: center;
+        padding: 16px 20px;
+        color: #374151;
+        text-decoration: none;
+        transition: background-color 0.2s;
+        border-left: 3px solid transparent;
+      }
+
+      .mobile-drawer-item:hover {
+        background-color: #f8fafc;
+        color: #1f2937;
+      }
+
+      .mobile-drawer-item.active {
+        background-color: #eff6ff;
+        color: #3b82f6;
+        border-left-color: #3b82f6;
+      }
+
+      .mobile-drawer-icon {
+        margin-right: 12px;
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+      }
+
+      .mobile-drawer-text {
+        flex: 1;
+      }
+      
+      /* ===== Forum 頁面主內容樣式 ===== */
+      .forum-page {
+        min-height: 100vh;
+        background: #ffffff;
+        padding: 0;
+        padding-top: 60px;
+      }
+      
+      .forum-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0;
+      }
+      
+      /* 手機版樣式 */
+      @media (max-width: 768px) {
+        .mobile-drawer-toggle {
+          display: block;
+        }
+        
+        .navbar-tabs {
+          display: none;
+        }
+        
+        .navbar-title {
+          font-size: 25px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-align: center;
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          max-width: calc(100% - 80px);
+          z-index: 1;
+        }
+        
+        .navbar-left {
+          position: relative;
+        }
+      }
+    </style>
+    
+    <!-- Common JS -->
+    <script defer src="assets/js/config.js?v=20251127"></script>
+    <script defer src="assets/js/security.js?v=20251127"></script>
+    <script defer src="assets/js/auth.js?v=20251127"></script>
+    <script defer src="assets/js/api.js?v=20251127"></script>
+    <script defer src="assets/js/common.js?v=20251127"></script>
+  </head>
+  <body>
+    <!-- 導航欄 -->
+    <div class="top-navbar">
+      <div class="navbar-left">
+        <button class="mobile-drawer-toggle" onclick="if(typeof toggleMobileDrawer === 'function') { toggleMobileDrawer(); }">
+          <span class="hamburger-icon">☰</span>
+        </button>
+        <div class="navbar-title" onclick="window.location.href='index.html'">ReelMind</div>
+        <div class="navbar-tabs">
+          <a href="index.html" class="navbar-tab">首頁</a>
+          <a href="mode1.html" class="navbar-tab" onclick="if(typeof handleModeNavigation === 'function') { handleModeNavigation(event, 'mode1'); } return false;">IP人設規劃</a>
+          <a href="mode3.html" class="navbar-tab" onclick="if(typeof handleModeNavigation === 'function') { handleModeNavigation(event, 'mode3'); } return false;">一鍵生成</a>
+          <a href="index.html#forum" class="navbar-tab" onclick="event.preventDefault(); window.location.href='index.html#forum'; return false;">論壇介紹</a>
+          <a href="guide.html" class="navbar-tab">實戰指南</a>
+          <a href="userDB.html" id="userDBTab" class="navbar-tab" style="display:none;">創作者資料庫</a>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <div class="user-info" id="userInfo" style="display: none;" onclick="window.location.href='userDB.html'">
+          <img id="userAvatar" class="user-avatar" src="" alt="用戶頭像" loading="lazy">
+          <span id="userName" class="user-name"></span>
+        </div>
+        <div class="auth-buttons" id="authButtons" style="display: none;">
+          <button id="loginBtn" class="login-btn" onclick="if(typeof goToLogin === 'function') { goToLogin(); }">🔐 登入</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 手機版抽屜 -->
+    <div class="mobile-drawer-overlay" id="mobileDrawerOverlay" onclick="if(typeof closeMobileDrawer === 'function') { closeMobileDrawer(); }"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+      <div class="mobile-drawer-header">
+        <h3>選單</h3>
+        <button class="mobile-drawer-close" onclick="if(typeof closeMobileDrawer === 'function') { closeMobileDrawer(); }">✕</button>
+      </div>
+      <div class="mobile-drawer-content">
+        <a href="index.html" class="mobile-drawer-item">
+          <span class="mobile-drawer-icon"><i class="fas fa-home"></i></span>
+          <span class="mobile-drawer-text">首頁</span>
+        </a>
+        <a href="mode1.html" class="mobile-drawer-item" onclick="if(typeof handleModeNavigation === 'function') { handleModeNavigation(event, 'mode1'); } if(typeof closeMobileDrawer === 'function') { closeMobileDrawer(); } return false;">
+          <span class="mobile-drawer-icon"><i class="fas fa-user-tie"></i></span>
+          <span class="mobile-drawer-text">IP人設規劃</span>
+        </a>
+        <a href="mode3.html" class="mobile-drawer-item" onclick="if(typeof handleModeNavigation === 'function') { handleModeNavigation(event, 'mode3'); } if(typeof closeMobileDrawer === 'function') { closeMobileDrawer(); } return false;">
+          <span class="mobile-drawer-icon"><i class="fas fa-magic"></i></span>
+          <span class="mobile-drawer-text">一鍵生成</span>
+        </a>
+        <a href="forum.html" class="mobile-drawer-item active" onclick="if(typeof closeMobileDrawer === 'function') { closeMobileDrawer(); } return false;">
+          <span class="mobile-drawer-icon"><i class="fas fa-comments"></i></span>
+          <span class="mobile-drawer-text">論壇介紹</span>
+        </a>
+        <a href="guide.html" class="mobile-drawer-item" onclick="if(typeof closeMobileDrawer === 'function') { closeMobileDrawer(); } return false;">
+          <span class="mobile-drawer-icon"><i class="fas fa-book-open"></i></span>
+          <span class="mobile-drawer-text">實戰指南</span>
+        </a>
+        <a href="userDB.html" id="userDBMobileTab" class="mobile-drawer-item" style="display:none;">
+          <span class="mobile-drawer-icon"><i class="fas fa-database"></i></span>
+          <span class="mobile-drawer-text">創作者資料庫</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Forum 頁面主內容 -->
+    <div class="forum-page">
+      <div class="forum-container">
+        <!-- Hero 區塊 -->
+        <div style="position: relative; overflow: hidden; padding: 60px 20px 40px; background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 50%, #fef3c7 100%); text-align: center;">
+          <div style="display: inline-block; background: #e0f2fe; color: #075985; padding: 8px 16px; border-radius: 9999px; font-weight: 700; font-size: 14px; margin-bottom: 20px;">
+            🚀 AIJob 學院 · Discord 社群
+          </div>
+          <h1 style="font-size: 2.8rem; font-weight: 800; color: #0f172a; margin: 12px 0; line-height: 1.2;">
+            一起把短影音做成「可複製的系統」
+          </h1>
+          <p style="font-size: 1.25rem; color: #475569; max-width: 800px; margin: 0 auto 24px;">
+            一鍵生成分享｜AI 顧問問答｜IP 人設規劃｜創作者資料庫整合。加入 Discord，邊做邊學邊上片。
+          </p>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 30px;">
+            <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; padding: 14px 28px; background: #0ea5e9; color: white; border-radius: 9999px; font-weight: 800; text-decoration: none; transition: all 0.3s;">
+              立即加入 Discord
+            </a>
+            <a href="#channels" style="display: inline-flex; align-items: center; justify-content: center; padding: 14px 28px; background: white; border: 1px solid #cbd5e1; color: #334155; border-radius: 9999px; font-weight: 800; text-decoration: none;">
+              熱門頻道
+            </a>
+          </div>
+          
+          <!-- 跑馬燈 -->
+          <div style="display: flex; gap: 32px; overflow: auto; white-space: nowrap; padding: 12px 0; color: #0ea5e9; font-weight: 800; border-top: 1px solid #cbd5e1;">
+            <span>🔥 #一鍵生成工作區 每天新貼文 30+</span>
+            <span>🧭 #IP人設規劃 真實案例交流</span>
+            <span>🤖 #AI顧問問答 節奏 / Hook / CTA</span>
+            <span>📦 你的成果可存回「創作者資料庫」</span>
+          </div>
+        </div>
+
+        <!-- 社群日常時間軸 -->
+        <div style="padding: 60px 20px;">
+          <h2 style="font-size: 1.75rem; font-weight: 900; margin: 0 0 32px; color: #0f172a;">社群日常｜今天在討論什麼？</h2>
+          
+          <div style="position: relative; padding-left: 28px; max-width: 800px;">
+            <!-- Timeline 線 -->
+            <div style="position: absolute; left: 12px; top: 8px; bottom: 8px; width: 2px; background: #cbd5e1;"></div>
+            
+            <!-- Timeline Item 1 -->
+            <div style="position: relative; padding: 14px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 14px; margin: 10px 0; box-shadow: 0 12px 26px rgba(2,6,23,.06);">
+              <div style="position: absolute; left: -18px; top: 18px; width: 12px; height: 12px; border-radius: 50%; background: #0ea5e9; border: 3px solid white;"></div>
+              <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">09:32 · #一鍵生成工作區</div>
+              <h3 style="font-weight: 900; margin: 0 0 4px; color: #0f172a;">美股盤後速報：如何做 20 秒短評？</h3>
+              <p style="color: #475569; margin: 0;">用 3 句話框，Hook→數據→CTA，並附上下一支預告。</p>
+            </div>
+            
+            <!-- Timeline Item 2 -->
+            <div style="position: relative; padding: 14px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 14px; margin: 10px 0; box-shadow: 0 12px 26px rgba(2,6,23,.06);">
+              <div style="position: absolute; left: -18px; top: 18px; width: 12px; height: 12px; border-radius: 50%; background: #0ea5e9; border: 3px solid white;"></div>
+              <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">13:15 · #AI顧問問答</div>
+              <h3 style="font-weight: 900; margin: 0 0 4px; color: #0f172a;">台灣女性受眾語氣，哪些詞更自然？</h3>
+              <p style="color: #475569; margin: 0;">把口氣從「教導」改為「陪伴」，並加入在地口語轉場。</p>
+            </div>
+            
+            <!-- Timeline Item 3 -->
+            <div style="position: relative; padding: 14px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 14px; margin: 10px 0; box-shadow: 0 12px 26px rgba(2,6,23,.06);">
+              <div style="position: absolute; left: -18px; top: 18px; width: 12px; height: 12px; border-radius: 50%; background: #0ea5e9; border: 3px solid white;"></div>
+              <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">20:41 · #IP人設規劃</div>
+              <h3 style="font-weight: 900; margin: 0 0 4px; color: #0f172a;">14 天上片節奏：週一腳本、週三錄影、週末輪播</h3>
+              <p style="color: #475569; margin: 0;">建立固定節點，資料庫版本管理更好找。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 頻道地圖 -->
+        <div id="channels" style="padding: 40px 20px 60px;">
+          <h2 style="font-size: 1.75rem; font-weight: 900; margin: 0 0 32px; color: #0f172a;">頻道地圖｜先從這三個開始</h2>
+          
+          <div style="display: grid; gap: 20px; max-width: 900px;">
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; box-shadow: 0 10px 24px rgba(2,6,23,.06);">
+              <div style="display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px; border: 1px dashed #93c5fd; padding: 12px; border-radius: 12px;">
+                  <span>📌</span>
+                  <div>
+                    <div style="font-weight: 700; color: #1e293b;">#歡迎與規則</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 2px;">貼文格式、友善交流</div>
+                  </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 10px; border: 1px dashed #93c5fd; padding: 12px; border-radius: 12px;">
+                  <span>⚡</span>
+                  <div>
+                    <div style="font-weight: 700; color: #1e293b;">#一鍵生成工作區</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 2px;">貼成果拿回饋</div>
+                  </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 10px; border: 1px dashed #93c5fd; padding: 12px; border-radius: 12px;">
+                  <span>🤖</span>
+                  <div>
+                    <div style="font-weight: 700; color: #1e293b;">#AI顧問問答</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 2px;">定位/節奏/變現</div>
+                  </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 10px; border: 1px dashed #93c5fd; padding: 12px; border-radius: 12px;">
+                  <span>🧭</span>
+                  <div>
+                    <div style="font-weight: 700; color: #1e293b;">#IP人設規劃</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Profile＋14天</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="font-size: 12px; color: #64748b; margin-bottom: 12px;">
+                ✅ 建議順序：#歡迎與規則 → #IP人設規劃 → #一鍵生成工作區
+              </div>
+              
+              <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-block; padding: 12px 24px; background: #0ea5e9; color: white; border-radius: 9999px; font-weight: 800; text-decoration: none;">
+                加入 Discord
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 聯絡方式 -->
+        <div style="padding: 60px 20px; background: #f8fafc;">
+          <h2 style="font-size: 1.75rem; font-weight: 900; margin: 0 0 32px; color: #0f172a; text-align: center;">聯絡方式</h2>
+          
+          <div style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); max-width: 1000px; margin: 0 auto;">
+            <!-- LINE 官方帳號 -->
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 10px 24px rgba(2,6,23,.06);">
+              <div style="font-weight: 700; margin-bottom: 8px; color: #0f172a;">LINE 官方帳號</div>
+              <a href="https://AIJobschool.short.gy/E49kA8" target="_blank" style="display: inline-block; padding: 8px 16px; background: #06c755; color: white; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: background 0.2s;">
+                加入 LINE 好友
+              </a>
+            </div>
+            
+            <!-- Discord -->
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 10px 24px rgba(2,6,23,.06);">
+              <div style="font-weight: 700; margin-bottom: 8px; color: #0f172a;">Discord</div>
+              <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-block; padding: 8px 16px; background: #0ea5e9; color: white; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: background 0.2s;">
+                AIJob 學院
+              </a>
+            </div>
+            
+            <!-- LINE 社群 -->
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 10px 24px rgba(2,6,23,.06);">
+              <div style="font-weight: 700; margin-bottom: 8px; color: #0f172a;">LINE 社群</div>
+              <a href="https://line.me/ti/g2/xaKhtD6TG78lZ8tOLP2T4Lz0zD-edf8GJF8x5w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" style="display: inline-block; padding: 8px 16px; background: #06c755; color: white; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: background 0.2s;">
+                加入 LINE 社群
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="padding: 28px 20px; text-align: center; color: #64748b; border-top: 1px solid #e2e8f0; font-size: 14px;">
+          © 2025 ReelMind · AI 短影音｜AI 腳本生成｜AI 顧問｜IP 人設規劃 · 台灣 / 香港 / 新加坡
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+

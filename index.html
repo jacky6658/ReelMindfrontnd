@@ -3,6 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    
+    <!-- Favicon 引用 -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
+    <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
+    <!-- Web Manifest (for Android Chrome) -->
+    <link rel="manifest" href="assets/images/site.webmanifest">
+    <!-- Mask Icon (for Safari pinned tabs) - 如果存在此文件 -->
+    <!-- <link rel="mask-icon" href="assets/images/safari-pinned-tab.svg" color="#5bbad5"> -->
+    <!-- Windows Tile Color -->
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="msapplication-TileImage" content="assets/images/android-chrome-192x192.png">
+    <!-- Theme Color (for browser UI, e.g., Android Chrome) -->
+    <meta name="theme-color" content="#ffffff">
+    
     <style>
       /* 防止頁面載入時顯示內容，等 JavaScript 載入完成後再顯示 */
       body:not(.page-loaded) {
@@ -11289,7 +11306,7 @@
               <a href="#homepage" class="navbar-tab" onclick="switchPage('homepage'); return false;">首頁</a>
               <a href="mode1.html" class="navbar-tab" onclick="event.preventDefault(); (async function() { try { if(window.ReelMindCommon && typeof window.ReelMindCommon.checkFeatureAccess === 'function') { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode1.html'; } } else { window.location.href = 'mode1.html'; } } catch(error) { console.error('檢查功能訪問失敗:', error); } })(); return false;">IP人設規劃</a>
               <a href="mode3.html" class="navbar-tab" onclick="event.preventDefault(); (async function() { try { if(window.ReelMindCommon && typeof window.ReelMindCommon.checkFeatureAccess === 'function') { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode3.html'; } } else { window.location.href = 'mode3.html'; } } catch(error) { console.error('檢查功能訪問失敗:', error); } })(); return false;">一鍵生成</a>
-              <a href="#forum" class="navbar-tab" onclick="switchPage('forum'); return false;">論壇介紹</a>
+              <a href="forum.html" class="navbar-tab">論壇介紹</a>
               <a href="guide.html" class="navbar-tab">實戰指南</a>
               <a href="#" id="userDBTab" class="navbar-tab" style="display:none;" onclick="handleUserDBClick(); return false;">創作者資料庫</a>
             </div>
@@ -11381,7 +11398,7 @@
                     
                     <!-- 副標題 -->
                     <p class="text-lg md:text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed px-4">
-                      以 <strong class="text-emerald-600">一鍵生成</strong>與 <strong class="text-purple-600">IP 人設規劃</strong>，協助台灣創作者建立高效率的短影音內容系統。讓每次創作都有策略、每次發布都有轉換。
+                      以 <strong class="text-emerald-600">一鍵生成</strong>與 <strong class="text-purple-600">IP 人設規劃</strong>，協助創作者建立高效率的短影音內容系統。讓每次創作都有策略、每次發布都有轉換。
                     </p>
                     
                     <!-- 裝飾線 -->
@@ -11394,8 +11411,8 @@
                     </div>
                   </div>
                   
-                  <!-- 三張功能卡 - 全新網格設計 -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-16">
+                  <!-- 四張功能卡 - 全新網格設計 -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-16">
                     
                     <!-- 卡片 1: 一鍵生成 -->
                     <div class="group relative bg-white border-2 border-transparent hover:border-emerald-200 rounded-3xl p-8 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 transform overflow-hidden">
@@ -11439,7 +11456,7 @@
                         </ul>
                         
                         <!-- 底部連結 -->
-                        <div class="flex items-center gap-2 text-xs font-semibold text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <div class="flex items-center gap-2 text-xs font-semibold text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="window.location.href='mode3.html';">
                           <span>了解更多</span>
                           <span class="text-lg">→</span>
                         </div>
@@ -11488,7 +11505,7 @@
                         </ul>
                         
                         <!-- 底部連結 -->
-                        <div class="flex items-center gap-2 text-xs font-semibold text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <div class="flex items-center gap-2 text-xs font-semibold text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="window.location.href='mode1.html';">
                           <span>了解更多</span>
                           <span class="text-lg">→</span>
                         </div>
@@ -11537,7 +11554,56 @@
                         </ul>
                         
                         <!-- 底部連結 -->
-                        <div class="flex items-center gap-2 text-xs font-semibold text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <div class="flex items-center gap-2 text-xs font-semibold text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="window.location.href='userDB.html';">
+                          <span>了解更多</span>
+                          <span class="text-lg">→</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- 卡片 4: 實戰指南 -->
+                    <div class="group relative bg-white border-2 border-transparent hover:border-orange-200 rounded-3xl p-8 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 transform overflow-hidden">
+                      <!-- 背景光效 -->
+                      <div class="absolute inset-0 bg-gradient-to-br from-orange-50/0 to-orange-50/100 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      
+                      <!-- 圖標區 -->
+                      <div class="relative z-10 flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl group-hover:scale-110 transition-transform duration-500">
+                        <i class="fas fa-book-open text-4xl text-orange-600"></i>
+                      </div>
+                      
+                      <!-- 內容區 -->
+                      <div class="relative z-10">
+                        <!-- 小標籤 -->
+                        <div class="inline-block px-3 py-1 mb-4 bg-orange-100 text-orange-700 text-xs font-bold rounded-full">
+                          實戰指南
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-gray-900 mb-3 leading-tight group-hover:text-orange-600 transition-colors">
+                          學習 AI 短影音技巧
+                        </h3>
+                        
+                        <p class="text-sm text-gray-600 mb-6 leading-relaxed">
+                          從基礎到進階，完整教學如何用 AI 打造爆款短影音內容。包含腳本生成技巧、平台差異、結構選擇指南。
+                        </p>
+                        
+                        <!-- 列表 -->
+                        <ul class="space-y-3 mb-6">
+                          <li class="flex items-start gap-3 text-sm">
+                            <span class="text-orange-500 text-lg mt-0 flex-shrink-0">✓</span>
+                            <span class="text-gray-700">基礎教學：三步生成腳本</span>
+                          </li>
+                          <li class="flex items-start gap-3 text-sm">
+                            <span class="text-orange-500 text-lg mt-0 flex-shrink-0">✓</span>
+                            <span class="text-gray-700">進階技巧：IP 人設規劃</span>
+                          </li>
+                          <li class="flex items-start gap-3 text-sm">
+                            <span class="text-orange-500 text-lg mt-0 flex-shrink-0">✓</span>
+                            <span class="text-gray-700">平台差異與結構選擇</span>
+                          </li>
+                        </ul>
+                        
+                        <!-- 底部連結 -->
+                        <div class="flex items-center gap-2 text-xs font-semibold text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="window.location.href='guide.html';">
                           <span>了解更多</span>
                           <span class="text-lg">→</span>
                         </div>
@@ -11671,7 +11737,7 @@
                       <i class="fas fa-sparkles" style="margin-right: 10px; color: #3B82F6; animation: sparkleRotate 3s ease-in-out infinite;"></i>立即體驗 AI 短影音生成
                     </h2>
                     <p style="font-size: 1.1rem; color: #64748B; max-width: 700px; margin: 0 auto 24px; line-height: 1.7; animation: fadeInUp 0.8s ease-out 0.2s both;">
-                      無需登入，立即體驗 ReelMind 的一鍵生成功能。填寫你的需求，AI 將為你生成帳號定位、選題建議和完整腳本。
+                      立即登入，體驗 ReelMind 的一鍵生成功能。填寫你的需求，AI 將為你生成帳號定位、選題建議和完整腳本。
                     </p>
                     <!-- FOMO 統計：增加緊迫感 -->
                     <div style="display: inline-flex; align-items: center; gap: 16px; padding: 12px 24px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); border-radius: 12px; border: 1px solid rgba(59,130,246,0.2); margin-bottom: 24px; animation: fadeInUp 0.8s ease-out 0.4s both;">
@@ -11748,7 +11814,7 @@
                         <div style="margin-top: 32px; padding: 20px; background: #FEF3C7; border-radius: 12px; border: 1px solid #FCD34D; text-align: center;">
                           <p style="font-size: 0.9rem; color: #92400E; margin: 0; line-height: 1.6;">
                             <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
-                            <strong>體驗版說明：</strong>此為免費體驗功能，生成結果可複製使用。升級完整版可解鎖 AI 顧問對話、IP 人設規劃、創作者資料庫等更多功能。
+                            <strong>體驗版說明：</strong>此為免費體驗功能，生成結果可複製使用。升級完整版可解鎖 IP 人設規劃、創作者資料庫等更多功能。
                           </p>
                         </div>
                       </div>
@@ -12326,7 +12392,7 @@
                   <!-- LINE 官方帳號 -->
                   <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 10px 24px rgba(2,6,23,.06);">
                     <div style="font-weight: 700; margin-bottom: 8px; color: #0f172a;">LINE 官方帳號</div>
-                    <a href="https://AIJobschool.short.gy/E49kA8" target="_blank" style="font-size: 14px; color: #06c755; text-decoration: none;">
+                    <a href="https://AIJobschool.short.gy/E49kA8" target="_blank" style="display: inline-block; padding: 8px 16px; background: #06c755; color: white; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: background 0.2s;">
                       加入 LINE 好友
                     </a>
                   </div>
@@ -12334,15 +12400,17 @@
                   <!-- Discord -->
                   <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 10px 24px rgba(2,6,23,.06);">
                     <div style="font-weight: 700; margin-bottom: 8px; color: #0f172a;">Discord</div>
-                    <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="font-size: 14px; color: #0ea5e9; text-decoration: none;">
+                    <a href="https://AIJobschool.short.gy/UUwpEG" target="_blank" style="display: inline-block; padding: 8px 16px; background: #0ea5e9; color: white; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: background 0.2s;">
                       AIJob 學院
                     </a>
                   </div>
                   
-                  <!-- 社群 -->
+                  <!-- LINE 社群 -->
                   <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 10px 24px rgba(2,6,23,.06);">
-                    <div style="font-weight: 700; margin-bottom: 8px; color: #0f172a;">社群</div>
-                    <div style="font-size: 14px; color: #64748b;">IG / YouTube 搜尋「ReelMind」</div>
+                    <div style="font-weight: 700; margin-bottom: 8px; color: #0f172a;">LINE 社群</div>
+                    <a href="https://line.me/ti/g2/xaKhtD6TG78lZ8tOLP2T4Lz0zD-edf8GJF8x5w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" style="display: inline-block; padding: 8px 16px; background: #06c755; color: white; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: background 0.2s;">
+                      加入 LINE 社群
+                    </a>
                   </div>
                 </div>
               </div>
@@ -25836,7 +25904,7 @@ Hook：上班族午休 30 分鐘，三步做出高蛋白便當？
           <span class="mobile-drawer-icon"><i class="fas fa-magic"></i></span>
           <span class="mobile-drawer-text">一鍵生成</span>
         </a>
-        <a href="#forum" class="mobile-drawer-item" onclick="switchPage('forum'); closeMobileDrawer(); return false;">
+        <a href="forum.html" class="mobile-drawer-item" onclick="if(typeof closeMobileDrawer === 'function') { closeMobileDrawer(); } return false;">
           <span class="mobile-drawer-icon"><i class="fas fa-comments"></i></span>
           <span class="mobile-drawer-text">論壇介紹</span>
         </a>

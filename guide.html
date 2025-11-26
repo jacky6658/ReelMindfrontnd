@@ -45,7 +45,7 @@
       "inLanguage": "zh-Hant",
       "mainEntity": {
         "@type": "ItemList",
-        "numberOfItems": 9,
+        "numberOfItems": 12,
         "itemListElement": [
           {
             "@type": "ListItem",
@@ -144,6 +144,39 @@
               "url": "https://reelmind.aijob.com.tw/guide/article-9-ai-efficiency-boost.html",
               "description": "學習如何利用 AI 智能工具，從選題、腳本、剪輯到發佈，全面提升短影音內容生產效率。ReelMind 助你快速產出爆款內容！",
               "timeRequired": "PT10M"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 10,
+            "item": {
+              "@type": "Article",
+              "headline": "ReelMind AI 帳號定位：學會這三招，打造你的個人品牌 IP",
+              "url": "https://reelmind.aijob.com.tw/guide/article-10-ai-account-positioning-prompts.html",
+              "description": "學習如何使用 ReelMind AI 的帳號定位提示詞，定義獨特風格、分析競爭者，並挖掘變現潛力，打造高價值的個人品牌 IP。",
+              "timeRequired": "PT8M"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 11,
+            "item": {
+              "@type": "Article",
+              "headline": "ReelMind AI 選題方向：掌握這三類提示詞，內容靈感源源不絕",
+              "url": "https://reelmind.aijob.com.tw/guide/article-11-ai-topic-selection-prompts.html",
+              "description": "學習如何使用 ReelMind AI 的選題方向提示詞，結合趨勢、挖掘痛點、發掘長尾，讓你的短影音內容靈感不間斷。",
+              "timeRequired": "PT8M"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 12,
+            "item": {
+              "@type": "Article",
+              "headline": "ReelMind AI 腳本生成：精準提示詞，讓你的短影音完播率暴增",
+              "url": "https://reelmind.aijob.com.tw/guide/article-12-ai-script-generation-prompts.html",
+              "description": "學習如何使用 ReelMind AI 的腳本生成提示詞，精確控制 Hook、語速、畫面與 CTA，打造高完播率、高互動的爆款短影音腳本。",
+              "timeRequired": "PT8M"
             }
           }
         ]
@@ -756,7 +789,7 @@
     <script defer src="assets/js/security.js?v=20251120"></script>
     <script defer src="assets/js/auth.js?v=20251120"></script>
     <script defer src="assets/js/api.js?v=20251120"></script>
-    <script defer src="assets/js/common.js?v=20251126"></script>
+    <script defer src="assets/js/common.js?v=20251127"></script>
   </head>
   <body>
     <!-- 導航欄 -->
@@ -771,7 +804,7 @@
           <a href="index.html" class="navbar-tab">首頁</a>
           <a href="mode1.html" class="navbar-tab" onclick="handleModeNavigation(event, 'mode1'); return false;">IP人設規劃</a>
           <a href="mode3.html" class="navbar-tab" onclick="handleModeNavigation(event, 'mode3'); return false;">一鍵生成</a>
-          <a href="index.html#forum" class="navbar-tab" onclick="event.preventDefault(); window.location.href='index.html#forum'; return false;">論壇介紹</a>
+          <a href="forum.html" class="navbar-tab">論壇介紹</a>
           <a href="guide.html" class="navbar-tab active">實戰指南</a>
           <a href="userDB.html" id="userDBTab" class="navbar-tab" style="display:none;">創作者資料庫</a>
         </div>
@@ -807,7 +840,7 @@
           <span class="mobile-drawer-icon"><i class="fas fa-magic"></i></span>
           <span class="mobile-drawer-text">一鍵生成</span>
         </a>
-        <a href="index.html#forum" class="mobile-drawer-item" onclick="window.location.href='index.html#forum'; closeMobileDrawer(); return false;">
+        <a href="forum.html" class="mobile-drawer-item" onclick="if(typeof closeMobileDrawer === 'function') { closeMobileDrawer(); } return false;">
           <span class="mobile-drawer-icon"><i class="fas fa-comments"></i></span>
           <span class="mobile-drawer-text">論壇介紹</span>
         </a>
@@ -901,6 +934,45 @@
               <div class="guide-article-card-title">如何拿到自己的LLM金鑰</div>
               <div class="guide-article-card-description">
                 詳細教學如何取得 Gemini、GPT 等 LLM API 金鑰，並在 ReelMind 中設定使用。使用自己的金鑰可以節省成本，並獲得更好的使用體驗...
+              </div>
+            </div>
+            <div class="guide-article-card-footer">
+              <span>閱讀更多 →</span>
+            </div>
+          </a>
+          
+          <!-- 文章 10：ReelMind AI 帳號定位提示詞 -->
+          <a href="guide/article-10-ai-account-positioning-prompts.html" class="guide-article-card" style="text-decoration: none; color: inherit; display: block;">
+            <div class="guide-article-card-content">
+              <div class="guide-article-card-title">ReelMind AI 帳號定位：學會這三招，打造你的個人品牌 IP</div>
+              <div class="guide-article-card-description">
+                學習如何使用 ReelMind AI 的帳號定位提示詞，定義獨特風格、分析競爭者，並挖掘變現潛力，打造高價值的個人品牌 IP...
+              </div>
+            </div>
+            <div class="guide-article-card-footer">
+              <span>閱讀更多 →</span>
+            </div>
+          </a>
+          
+          <!-- 文章 11：ReelMind AI 選題方向提示詞 -->
+          <a href="guide/article-11-ai-topic-selection-prompts.html" class="guide-article-card" style="text-decoration: none; color: inherit; display: block;">
+            <div class="guide-article-card-content">
+              <div class="guide-article-card-title">ReelMind AI 選題方向：掌握這三類提示詞，內容靈感源源不絕</div>
+              <div class="guide-article-card-description">
+                學習如何使用 ReelMind AI 的選題方向提示詞，結合趨勢、挖掘痛點、發掘長尾，讓你的短影音內容靈感不間斷...
+              </div>
+            </div>
+            <div class="guide-article-card-footer">
+              <span>閱讀更多 →</span>
+            </div>
+          </a>
+          
+          <!-- 文章 12：ReelMind AI 腳本生成提示詞 -->
+          <a href="guide/article-12-ai-script-generation-prompts.html" class="guide-article-card" style="text-decoration: none; color: inherit; display: block;">
+            <div class="guide-article-card-content">
+              <div class="guide-article-card-title">ReelMind AI 腳本生成：精準提示詞，讓你的短影音完播率暴增</div>
+              <div class="guide-article-card-description">
+                學習如何使用 ReelMind AI 的腳本生成提示詞，精確控制 Hook、語速、畫面與 CTA，打造高完播率、高互動的爆款短影音腳本...
               </div>
             </div>
             <div class="guide-article-card-footer">
