@@ -4070,55 +4070,87 @@ window.exportOneClickGenerationResults = function() {
 
 // 檢查 IP 人設規劃權限並顯示/隱藏選單
 async function checkIpPlanningPermission() {
+  console.log('[checkIpPlanningPermission] 函數開始執行');
+  console.log('[checkIpPlanningPermission] ipPlanningUser:', ipPlanningUser);
+  console.log('[checkIpPlanningPermission] ipPlanningToken:', ipPlanningToken ? '已設定' : '未設定');
+  
   if (!ipPlanningUser?.user_id) {
+    console.log('[checkIpPlanningPermission] 未獲取到用戶ID，隱藏 IP人設規劃');
     // 未登入，隱藏 IP 人設規劃選單
     const menuItem = document.getElementById('menu-ipPlanning');
     const section = document.getElementById('db-ipPlanning');
+    console.log('[checkIpPlanningPermission] menuItem 元素:', menuItem ? '找到' : '未找到');
+    console.log('[checkIpPlanningPermission] section 元素:', section ? '找到' : '未找到');
     if (menuItem) menuItem.style.display = 'none';
     if (section) section.style.display = 'none';
     return;
   }
   
+  console.log('[checkIpPlanningPermission] 用戶ID:', ipPlanningUser.user_id);
+  
   try {
     const API_URL = window.APP_CONFIG?.API_BASE || 'https://api.aijob.com.tw';
-    const response = await fetch(`${API_URL}/api/user/ip-planning/permission`, {
+    const permissionUrl = `${API_URL}/api/user/ip-planning/permission`;
+    console.log('[checkIpPlanningPermission] 發送權限檢查請求:', permissionUrl);
+    
+    const response = await fetch(permissionUrl, {
       headers: {
         'Authorization': `Bearer ${ipPlanningToken}`,
         'Content-Type': 'application/json'
       }
     });
     
+    console.log('[checkIpPlanningPermission] 響應狀態:', response.status, response.statusText);
+    
     if (response.ok) {
       const data = await response.json();
+      console.log('[checkIpPlanningPermission] 響應數據:', data);
       const hasPermission = data.has_permission || false;
+      console.log('[checkIpPlanningPermission] has_permission:', hasPermission);
       
       const menuItem = document.getElementById('menu-ipPlanning');
       const section = document.getElementById('db-ipPlanning');
+      console.log('[checkIpPlanningPermission] menuItem 元素:', menuItem ? '找到' : '未找到');
+      console.log('[checkIpPlanningPermission] section 元素:', section ? '找到' : '未找到');
       
       if (hasPermission) {
         // 有權限，顯示選單
-        if (menuItem) menuItem.style.display = '';
-        if (section) section.style.display = '';
+        console.log('[checkIpPlanningPermission] 用戶具有權限，顯示 IP人設規劃');
+        if (menuItem) {
+          menuItem.style.display = '';
+          console.log('[checkIpPlanningPermission] menuItem.style.display 已設為:', menuItem.style.display);
+        }
+        if (section) {
+          section.style.display = '';
+          console.log('[checkIpPlanningPermission] section.style.display 已設為:', section.style.display);
+        }
       } else {
         // 無權限，隱藏選單
+        console.log('[checkIpPlanningPermission] 用戶沒有權限，隱藏 IP人設規劃');
         if (menuItem) menuItem.style.display = 'none';
         if (section) section.style.display = 'none';
       }
     } else {
       // API 錯誤，隱藏選單
+      console.error('[checkIpPlanningPermission] API 響應錯誤，狀態碼:', response.status);
+      const errorText = await response.text();
+      console.error('[checkIpPlanningPermission] 錯誤響應內容:', errorText);
       const menuItem = document.getElementById('menu-ipPlanning');
       const section = document.getElementById('db-ipPlanning');
       if (menuItem) menuItem.style.display = 'none';
       if (section) section.style.display = 'none';
     }
   } catch (error) {
-    console.error('檢查 IP 人設規劃權限錯誤:', error);
+    console.error('[checkIpPlanningPermission] 檢查 IP 人設規劃權限錯誤:', error);
+    console.error('[checkIpPlanningPermission] 錯誤詳情:', error.message, error.stack);
     // 錯誤時隱藏選單
     const menuItem = document.getElementById('menu-ipPlanning');
     const section = document.getElementById('db-ipPlanning');
     if (menuItem) menuItem.style.display = 'none';
     if (section) section.style.display = 'none';
   }
+  
+  console.log('[checkIpPlanningPermission] 函數執行完成');
 }
 
 // 確保函數在全局作用域中可用
