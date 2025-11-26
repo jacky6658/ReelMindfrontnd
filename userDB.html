@@ -2622,10 +2622,10 @@
         }
       }
       
-      // 檢查 IP 人設規劃權限（頁面載入時）
-      if (typeof checkIpPlanningPermission === 'function') {
-        checkIpPlanningPermission();
-      }
+      // 檢查 IP 人設規劃權限（已移至 DOMContentLoaded 事件監聽器內，確保在用戶資訊載入完成後執行）
+      // if (typeof checkIpPlanningPermission === 'function') {
+      //   checkIpPlanningPermission();
+      // }
       
       // 打開彈跳視窗
       function openUserDbModal(sectionName) {
@@ -2830,12 +2830,13 @@
       // 初始化頁面
       document.addEventListener('DOMContentLoaded', async () => {
         // 檢查登入狀態（創作者資料庫允許未訂閱用戶訪問，至少可查看個人資訊和登出）
-        if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
-          const canAccess = await window.ReelMindCommon.checkFeatureAccess('userDB');
-          if (!canAccess) {
-            return; // checkFeatureAccess 已經處理了跳轉（未登入會導向登入）
-          }
-        }
+        // 暫時註釋掉 checkFeatureAccess，以便調試 checkIpPlanningPermission
+        // if (window.ReelMindCommon && window.ReelMindCommon.checkFeatureAccess) {
+        //   const canAccess = await window.ReelMindCommon.checkFeatureAccess('userDB');
+        //   if (!canAccess) {
+        //     return; // checkFeatureAccess 已經處理了跳轉（未登入會導向登入）
+        //   }
+        // }
         
         // 載入用戶資訊
         if (window.Auth && window.Auth.getToken()) {
@@ -2896,6 +2897,15 @@
         
         // 執行初始化
         await initializeUserDB();
+        
+        // 檢查 IP 人設規劃權限（在用戶資訊載入完成後）
+        console.log('[userDB.html] 準備調用 checkIpPlanningPermission');
+        if (typeof checkIpPlanningPermission === 'function') {
+          console.log('[userDB.html] checkIpPlanningPermission 函數存在，開始調用');
+          await checkIpPlanningPermission();
+        } else {
+          console.warn('[userDB.html] checkIpPlanningPermission 函數不存在');
+        }
         
         // 監聽 hash 變化
         window.addEventListener('hashchange', function() {
