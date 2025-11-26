@@ -3,166 +3,131 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-  
-  <!-- 首頁 - 最高優先級 -->
+
+  <!-- 🏠 首頁 - 最高優先級 -->
   <url>
     <loc>https://reelmind.aijob.com.tw/</loc>
     <lastmod>2025-10-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
-  
-  <!-- 實戰指南 - 高優先級（內容豐富，適合 SEO） -->
+
+  <!-- 📘 實戰指南主頁 - 分類頁 -->
   <url>
     <loc>https://reelmind.aijob.com.tw/guide.html</loc>
     <lastmod>2025-10-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  
-  <!-- 文章 1：三步生成 30 秒短影音腳本 - 高優先級 -->
+
+  <!-- 📄 文章們（統一 priority = 0.8，最佳實務） -->
+
   <url>
     <loc>https://reelmind.aijob.com.tw/guide/article-1-three-steps-to-generate-30-second-script.html</loc>
     <lastmod>2025-10-26</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
+    <priority>0.8</priority>
   </url>
-  
-  <!-- 文章 2：AI 帳號定位：內容支柱與 14 天計畫 - 高優先級 -->
+
   <url>
     <loc>https://reelmind.aijob.com.tw/guide/article-2-ai-account-positioning-14-day-plan.html</loc>
     <lastmod>2025-10-28</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
+    <priority>0.8</priority>
   </url>
-  
-  <!-- 文章 3：Reels / Shorts / TikTok 腳本差異 - 高優先級 -->
+
   <url>
     <loc>https://reelmind.aijob.com.tw/guide/article-3-reels-shorts-tiktok-script-differences.html</loc>
     <lastmod>2025-11-03</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
+    <priority>0.8</priority>
   </url>
-  
-  <!-- 文章 4：腳本結構選擇指南 - 高優先級 -->
+
   <url>
     <loc>https://reelmind.aijob.com.tw/guide/article-4-script-structure-selection-guide.html</loc>
     <lastmod>2025-11-04</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
+    <priority>0.8</priority>
   </url>
-  
-  <!-- 文章 5：如何拿到自己的LLM金鑰 - 中高優先級 -->
+
   <url>
     <loc>https://reelmind.aijob.com.tw/guide/article-5-how-to-get-llm-api-key.html</loc>
     <lastmod>2025-11-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  
-  <!-- 文章 6：什麼是人生曲線？用故事曲線打造爆款短影音 - 高優先級（進階教學） -->
+
   <url>
     <loc>https://reelmind.aijob.com.tw/guide/article-6-what-is-life-curve.html</loc>
     <lastmod>2025-11-08</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
+    <priority>0.8</priority>
   </url>
-  
-  <!-- 文章 7：AI 短影音 IP 人設規劃：數據驅動x社群互動，精準定位你的個人品牌 - 高優先級（進階教學） -->
+
   <url>
     <loc>https://reelmind.aijob.com.tw/guide/article-7-advanced-ip-planning.html</loc>
     <lastmod>2025-11-12</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
+    <priority>0.8</priority>
   </url>
 
-  <!-- 文章 8：短影音變現策略：從內容到收益的多元路徑 - 高優先級（進階教學） -->
   <url>
     <loc>https://reelmind.aijob.com.tw/guide/article-8-short-video-monetization.html</loc>
     <lastmod>2025-11-15</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
-  
-  <!-- 文章 9：AI 短影音內容策略：效率倍增術與智能工具應用 - 高優先級（進階教學） -->
+
   <url>
     <loc>https://reelmind.aijob.com.tw/guide/article-9-ai-efficiency-boost.html</loc>
     <lastmod>2025-11-19</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
 
-  <!-- 文章 10：ReelMind AI 帳號定位：學會這三招，打造你的個人品牌 IP | 實戰指南 - 高優先級 -->
   <url>
     <loc>https://reelmind.aijob.com.tw/guide/article-10-ai-account-positioning-prompts.html</loc>
     <lastmod>2025-11-20</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
+    <priority>0.8</priority>
   </url>
 
-  <!-- 文章 11：ReelMind AI 選題方向：掌握這三類提示詞，內容靈感源源不絕 | 實戰指南 - 高優先級 -->
   <url>
     <loc>https://reelmind.aijob.com.tw/guide/article-11-ai-topic-selection-prompts.html</loc>
     <lastmod>2025-11-21</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
+    <priority>0.8</priority>
   </url>
-  
-  <!-- 文章 12：ReelMind AI 腳本生成：精準提示詞，讓你的短影音完播率暴增 | 實戰指南 - 高優先級 -->
+
   <url>
     <loc>https://reelmind.aijob.com.tw/guide/article-12-ai-script-generation-prompts.html</loc>
     <lastmod>2025-11-25</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
-  </url> 
-        
-  <!-- 免費體驗頁面 - 高優先級（吸引新用戶） -->
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 🎁 免費體驗頁面 -->
   <url>
     <loc>https://reelmind.aijob.com.tw/experience.html</loc>
     <lastmod>2025-11-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  
-  <!-- 訂閱頁面 - 中高優先級（轉換頁面） -->
+
+  <!-- 💳 訂閱頁面 -->
   <url>
     <loc>https://reelmind.aijob.com.tw/subscription.html</loc>
     <lastmod>2025-11-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  
-  <!-- IP人設規劃功能頁面 - 中優先級（需要登入，但允許索引） -->
-  <url>
-    <loc>https://reelmind.aijob.com.tw/mode1.html</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <!-- AI顧問功能頁面 - 中優先級 -->
-  <url>
-    <loc>https://reelmind.aijob.com.tw/mode2.html</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <!-- 一鍵生成功能頁面 - 中優先級 -->
-  <url>
-    <loc>https://reelmind.aijob.com.tw/mode3.html</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <!-- 聯絡頁面 - 低優先級 -->
+
+  <!-- 📞 聯絡頁（低權重） -->
   <url>
     <loc>https://reelmind.aijob.com.tw/contact.html</loc>
     <lastmod>2025-11-24</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
-  
-</urlset>
 
+</urlset>
