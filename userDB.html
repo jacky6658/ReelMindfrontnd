@@ -2959,6 +2959,64 @@
     </script>
     
     <!-- 所有 userDB 相關函數已移至 assets/js/userDB.js -->
+    
+    <!-- 強制執行 IP 人設規劃權限檢查（在所有腳本載入後） -->
+    <script>
+      // 使用多種方式確保 checkIpPlanningPermission 被調用
+      (function() {
+        console.log('[userDB.html] 頁面底部腳本開始執行');
+        
+        // 方法1: 等待 window.load 事件
+        const tryCheckPermission = async () => {
+          console.log('[userDB.html] 嘗試調用 checkIpPlanningPermission');
+          console.log('[userDB.html] window.checkIpPlanningPermission 類型:', typeof window.checkIpPlanningPermission);
+          console.log('[userDB.html] window.ipPlanningToken:', window.ipPlanningToken ? '已設定' : '未設定');
+          console.log('[userDB.html] window.ipPlanningUser:', window.ipPlanningUser);
+          
+          if (typeof window.checkIpPlanningPermission === 'function') {
+            console.log('[userDB.html] 找到 checkIpPlanningPermission 函數，開始調用');
+            try {
+              await window.checkIpPlanningPermission();
+              console.log('[userDB.html] checkIpPlanningPermission 調用完成');
+            } catch (error) {
+              console.error('[userDB.html] checkIpPlanningPermission 調用失敗:', error);
+              console.error('[userDB.html] 錯誤堆疊:', error.stack);
+            }
+          } else {
+            console.warn('[userDB.html] checkIpPlanningPermission 函數尚未載入');
+          }
+        };
+        
+        // 如果頁面已經載入完成，立即執行
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          console.log('[userDB.html] 頁面已載入，立即嘗試檢查權限');
+          setTimeout(tryCheckPermission, 100);
+        } else {
+          // 否則等待 window.load 事件
+          console.log('[userDB.html] 等待 window.load 事件');
+          window.addEventListener('load', () => {
+            console.log('[userDB.html] window.load 事件觸發');
+            setTimeout(tryCheckPermission, 100);
+          });
+        }
+        
+        // 額外：使用 MutationObserver 監聽 window 對象的變化
+        let retryCount = 0;
+        const maxRetries = 20;
+        const retryInterval = setInterval(() => {
+          retryCount++;
+          if (typeof window.checkIpPlanningPermission === 'function') {
+            clearInterval(retryInterval);
+            console.log('[userDB.html] 通過輪詢找到 checkIpPlanningPermission 函數（嘗試次數:', retryCount, '）');
+            tryCheckPermission();
+          } else if (retryCount >= maxRetries) {
+            clearInterval(retryInterval);
+            console.error('[userDB.html] 輪詢超時，checkIpPlanningPermission 函數仍未載入');
+            console.error('[userDB.html] 已載入的 window 對象屬性:', Object.keys(window).filter(k => k.includes('check') || k.includes('Ip') || k.includes('Planning')));
+          }
+        }, 200);
+      })();
+    </script>
   </body>
 </html>
 
