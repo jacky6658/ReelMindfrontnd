@@ -454,10 +454,10 @@ window.editScriptNameForUserDB = function(scriptId, event) {
   
   // 使用自定義輸入框代替 prompt()
   showEditTitleModal('腳本名稱', currentName, (newName) => {
-    if (newName && newName.trim() !== '' && newName !== currentName) {
+  if (newName && newName.trim() !== '' && newName !== currentName) {
       console.log('💾 更新標題為:', newName.trim());
-      updateScriptNameForUserDB(scriptId, newName.trim());
-    }
+    updateScriptNameForUserDB(scriptId, newName.trim());
+  }
   });
 }
 
@@ -725,10 +725,10 @@ window.viewScriptDetailForUserDB = function(scriptId) {
   
   if (script) {
     // 如果本地有，直接使用
-    if (window.viewFullScriptForUserDB) {
-      window.viewFullScriptForUserDB(scriptId);
+  if (window.viewFullScriptForUserDB) {
+    window.viewFullScriptForUserDB(scriptId);
       return;
-    }
+  }
   }
   
   // 如果本地沒有，從 API 獲取
@@ -778,7 +778,7 @@ async function viewScriptDetailFromAPI(scriptId) {
       }
     }
     
-    if (script) {
+      if (script) {
       console.log('📝 處理腳本數據:', script);
       // 轉換格式
       let scriptData = {};
@@ -791,31 +791,31 @@ async function viewScriptDetailFromAPI(scriptId) {
         scriptData = {};
       }
       
-      const formattedScript = {
-        id: script.id,
+        const formattedScript = {
+          id: script.id,
         name: script.script_name || script.name || script.title || DEFAULT_SCRIPT_TITLE,
         created_at: script.created_at || '',
         script_data: scriptData,
         content: script.content || ''
-      };
+        };
       
       console.log('✅ 格式化後的腳本:', formattedScript);
       
-      // 臨時添加到本地儲存以便 viewFullScriptForUserDB 可以找到
-      const localScripts = getLocalScripts();
+          // 臨時添加到本地儲存以便 viewFullScriptForUserDB 可以找到
+          const localScripts = getLocalScripts();
       const existingIndex = localScripts.findIndex(s => String(s.id) === String(scriptId));
-      if (existingIndex !== -1) {
-        localScripts[existingIndex] = formattedScript;
-      } else {
-        localScripts.push(formattedScript);
-      }
-      localStorage.setItem('user_scripts', JSON.stringify(localScripts));
+          if (existingIndex !== -1) {
+            localScripts[existingIndex] = formattedScript;
+          } else {
+            localScripts.push(formattedScript);
+          }
+          localStorage.setItem('user_scripts', JSON.stringify(localScripts));
       console.log('💾 已保存到本地儲存');
       
       // 顯示腳本詳細
       if (window.viewFullScriptForUserDB) {
         console.log('📖 調用 viewFullScriptForUserDB');
-        window.viewFullScriptForUserDB(scriptId);
+          window.viewFullScriptForUserDB(scriptId);
       } else {
         console.error('❌ viewFullScriptForUserDB 函數不存在');
         if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
@@ -1834,7 +1834,7 @@ function showDbSection(sectionName) {
         const defaultType = window.currentOneClickType || 'profile';
         window.currentOneClickType = defaultType;
         setOneClickTabActive(defaultType);
-        loadOneClickGenerationForUserDB();
+      loadOneClickGenerationForUserDB();
       }
       break;
     case 'myOrders':
@@ -2632,7 +2632,7 @@ async function loadIpPlanningResultsForUserDB() {
   
   // 先檢查是否有快取數據，如果有就先顯示（提升響應速度）
   if (window.currentIpPlanningResults && window.currentIpPlanningResults.length > 0) {
-    if (content) {
+  if (content) {
       displayIpPlanningResultsForUserDB(window.currentIpPlanningResults);
     }
   } else if (content) {
@@ -3136,7 +3136,7 @@ window.editIpPlanningItemTitle = function(resultId, event) {
     return;
   }
   
-  const currentTitle = titleElement.textContent.trim();
+    const currentTitle = titleElement.textContent.trim();
   
   // 使用 showEditTitleModal 顯示編輯彈窗
   showEditTitleModal('標題', currentTitle, (newTitle) => {
@@ -3730,7 +3730,7 @@ async function loadOneClickGenerationForUserDB() {
   
   // 先檢查是否有快取數據，如果有就先顯示（提升響應速度）
   if (window.cachedOneClickResults && window.cachedOneClickScripts) {
-    if (content) {
+  if (content) {
       displayOneClickGenerationResults(window.cachedOneClickResults, window.cachedOneClickScripts);
     }
   } else if (content) {
@@ -3743,10 +3743,10 @@ async function loadOneClickGenerationForUserDB() {
     // 並行執行兩個 API 請求，而不是順序執行（減少等待時間）
     const [response, scriptsResponse] = await Promise.all([
       fetch(`${API_URL}/api/ip-planning/my`, {
-        headers: {
-          'Authorization': `Bearer ${ipPlanningToken}`,
-          'Content-Type': 'application/json'
-        }
+      headers: {
+        'Authorization': `Bearer ${ipPlanningToken}`,
+        'Content-Type': 'application/json'
+      }
       }),
       fetch(`${API_URL}/api/scripts/my`, {
         headers: {
@@ -4043,8 +4043,8 @@ function setOneClickTabActive(type) {
     targetTab.style.color = '#3B82F6';
     targetTab.style.fontWeight = '600';
   }
-}
-
+  }
+  
 // 切換一鍵生成類型
 window.showOneClickType = function(type) {
   window.currentOneClickType = type;
@@ -4055,7 +4055,7 @@ window.showOneClickType = function(type) {
     displayOneClickGenerationResults(window.cachedOneClickResults, window.cachedOneClickScripts);
   } else {
     // 沒有快取時才載入
-    loadOneClickGenerationForUserDB();
+  loadOneClickGenerationForUserDB();
   }
 };
 

@@ -1078,16 +1078,18 @@
       }
     }
     
-    // 檢查頁面權限（首頁 index.html、體驗頁面 experience.html 和指南頁面 guide.html 不需要檢查，允許未登入用戶訪問）
+    // 檢查頁面權限（首頁 index.html、體驗頁面 experience.html、指南頁面 guide.html、論壇頁面 forum.html 不需要檢查，允許未登入用戶訪問）
     const isHomePage = window.location.pathname === '/' || 
                        window.location.pathname.endsWith('/index.html') ||
                        window.location.pathname.endsWith('/');
     const isExperiencePage = window.location.pathname.endsWith('/experience.html') ||
                              window.location.pathname.includes('experience.html');
     const isGuidePage = window.location.pathname.includes('/guide');
+    const isForumPage = window.location.pathname.endsWith('/forum.html') ||
+                        window.location.pathname.includes('/forum/');
     
-    if (!isHomePage && !isExperiencePage && !isGuidePage) {
-      // 非首頁、非體驗頁面、非指南頁面才需要檢查權限
+    if (!isHomePage && !isExperiencePage && !isGuidePage && !isForumPage) {
+      // 非首頁、非體驗頁面、非指南頁面、非論壇頁面才需要檢查權限
       const hasPermission = await checkPagePermission();
       
       if (!hasPermission) {
@@ -1378,4 +1380,50 @@
   }
 
 })();
+
+// ===== 複製提示詞功能 =====
+/**
+ * 將指定提示詞複製到剪貼簿。
+ * @param {HTMLElement} buttonElement 觸發複製操作的按鈕元素。
+ */
+function copyPrompt(buttonElement) {
+  const promptExampleDiv = buttonElement.closest('.prompt-example');
+  if (!promptExampleDiv) {
+    console.error('找不到 .prompt-example 元素');
+    return;
+  }
+  
+  const promptTextElement = promptExampleDiv.querySelector('.prompt-text');
+  if (!promptTextElement) {
+    console.error('找不到 .prompt-text 元素');
+    return;
+  }
+  
+  const promptText = promptTextElement.textContent || promptTextElement.innerText;
+
+  navigator.clipboard.writeText(promptText).then(() => {
+    // 複製成功後，改變按鈕文本和樣式
+    const originalText = buttonElement.textContent;
+    buttonElement.textContent = '已複製！';
+    buttonElement.classList.add('copied');
+
+    setTimeout(() => {
+      buttonElement.textContent = originalText;
+      buttonElement.classList.remove('copied');
+    }, 2000); // 2 秒後恢復原狀
+    
+    // 顯示 toast 提示 (如果 common.js 中有 toast 函數)
+    if (typeof showToast === 'function') {
+      showToast('提示詞已複製到剪貼簿！');
+    }
+  }).catch(err => {
+    console.error('複製失敗:', err);
+    if (typeof showToast === 'function') {
+      showToast('複製失敗，請手動複製。', 'error');
+    }
+  });
+}
+
+// 確保全局可訪問
+window.copyPrompt = copyPrompt;
 
