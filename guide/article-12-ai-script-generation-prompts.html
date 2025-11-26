@@ -836,7 +836,7 @@
             <p>這個提示詞能一次性給出詳細指令，讓 AI 生成包含所有必要元素的完整腳本。</p>
             <div class="prompt-example">
               <p class="prompt-text">「請為選題 [輸入選題標題] 生成一個不超過 60 秒的完整腳本。腳本必須包含： 1. 嚴格 3.0 秒內的 Hook 臺詞與音效標籤。2. 主持人語氣/語速（必須快 30%）。3. 詳細的 B-roll 畫面與轉場建議。」</p>
-              <button class="copy-prompt-btn" onclick="copyPrompt(this)">複製提示詞</button>
+              <button class="copy-prompt-btn" onclick="if(typeof window.copyPrompt === 'function') { window.copyPrompt(this); } else { console.error('copyPrompt 函數未載入'); }">複製提示詞</button>
             </div>
             <p><strong>核心價值：</strong>透過「成效保證」策略，獲得包含 3.0 秒 Hook、高強度音效、快語速指導的腳本，極大提升完播率。</p>
             <p><strong>實戰應用：</strong>將提示詞中的「[輸入選題標題]」替換為你的實際選題，例如：「請為選題『AI 工具如何提升工作效率？』生成一個不超過 60 秒的完整腳本。腳本必須包含： 1. 嚴格 3.0 秒內的 Hook 臺詞與音效標籤。2. 主持人語氣/語速（必須快 30%）。3. 詳細的 B-roll 畫面與轉場建議。」AI 會根據這些詳細指令，生成一個高品質的完整腳本。</p>
@@ -845,7 +845,7 @@
             <p>Hook 是短影音成功的一半。這個提示詞能幫助你精確控制 Hook 的時長和音效，確保前 3 秒抓住觀眾。</p>
             <div class="prompt-example">
               <p class="prompt-text">「在 Hook (開頭鉤子) 部分，必須將核心價值句的時間控制在 3.0 秒內完成，並新增一個 [音訊標籤]，註明開場音效必須是 [高頻、吸引聽覺的尖銳提示音]。」</p>
-              <button class="copy-prompt-btn" onclick="copyPrompt(this)">複製提示詞</button>
+              <button class="copy-prompt-btn" onclick="if(typeof window.copyPrompt === 'function') { window.copyPrompt(this); } else { console.error('copyPrompt 函數未載入'); }">複製提示詞</button>
             </div>
             <p><strong>核心價值：</strong>透過「點擊留存」策略，將核心鉤子精確壓縮到 3 秒內，防止觀眾在影片開頭流失。</p>
             <p><strong>實戰應用：</strong>這個提示詞可以與其他腳本生成提示詞結合使用。例如，在生成完整腳本後，你可以追加這個提示詞，要求 AI 重新優化 Hook 部分，確保時長和音效符合要求。</p>
@@ -854,7 +854,7 @@
             <p>一個好的 CTA 不僅能引導觀眾關注，還能促進社群互動，提升粉絲忠誠度。這個提示詞能幫助你設計引導互動的 CTA。</p>
             <div class="prompt-example">
               <p class="prompt-text">「在腳本的 CTA 結尾，除了要求觀眾『關注』外，必須設計一個問題，引導觀眾在評論區分享一個 [具體問題/痛點]。」</p>
-              <button class="copy-prompt-btn" onclick="copyPrompt(this)">複製提示詞</button>
+              <button class="copy-prompt-btn" onclick="if(typeof window.copyPrompt === 'function') { window.copyPrompt(this); } else { console.error('copyPrompt 函數未載入'); }">複製提示詞</button>
             </div>
             <p><strong>核心價值：</strong>透過「社群成長」策略，將腳本與社群互動策略掛鉤，大幅提高評論數和粉絲忠誠度。</p>
             <p><strong>實戰應用：</strong>將提示詞中的「[具體問題/痛點]」替換為與你內容相關的問題。例如：「在腳本的 CTA 結尾，除了要求觀眾『關注』外，必須設計一個問題，引導觀眾在評論區分享『你在使用 AI 工具時遇到的最大困難是什麼？』」AI 會根據你的要求，生成一個既能引導關注，又能促進互動的 CTA。</p>
