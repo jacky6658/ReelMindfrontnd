@@ -1643,12 +1643,12 @@
       }
     </style>
     
-    <!-- 共享 JavaScript（必須按順序載入） -->
-    <script src="assets/js/config.js?v=20251126"></script>
-    <script src="assets/js/security.js?v=20251120"></script>
-    <script src="assets/js/auth.js?v=20251120"></script>
-    <script src="assets/js/api.js?v=20251120"></script>
-    <script src="assets/js/common.js?v=20251126"></script>
+    <!-- 共享 JavaScript（必須按順序載入，統一使用 defer 屬性） -->
+    <script defer src="assets/js/config.js?v=20251126"></script>
+    <script defer src="assets/js/security.js?v=20251120"></script>
+    <script defer src="assets/js/auth.js?v=20251120"></script>
+    <script defer src="assets/js/api.js?v=20251120"></script>
+    <script defer src="assets/js/common.js?v=20251126"></script>
   </head>
   <body>
     <!-- 導航欄 -->
@@ -1987,7 +1987,7 @@
 
     <!-- Mode3 專用 JavaScript（一鍵生成） -->
     <!-- 載入共用 JavaScript 檔案（config.js、auth.js、api.js、common.js 已在 head 中載入，這裡不再重複） -->
-    <script src="assets/js/mode3.js?v=20251120"></script>
+    <script defer src="assets/js/mode3.js?v=20251120"></script>
   </body>
 </html>
 

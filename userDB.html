@@ -2114,12 +2114,12 @@
       </div>
     </div>
 
-    <!-- 載入共用 JavaScript 檔案 -->
-    <script src="assets/js/config.js?v=20251126"></script>
-    <script src="assets/js/auth.js?v=20251125"></script>
-    <script src="assets/js/api.js?v=20251125"></script>
-    <script src="assets/js/common.js?v=20251126"></script>
-    <script src="assets/js/userDB.js?v=20251130"></script>
+    <!-- 載入共用 JavaScript 檔案（統一使用 defer 屬性，確保按順序執行且不阻塞 HTML 解析） -->
+    <script defer src="assets/js/config.js?v=20251126"></script>
+    <script defer src="assets/js/auth.js?v=20251125"></script>
+    <script defer src="assets/js/api.js?v=20251125"></script>
+    <script defer src="assets/js/common.js?v=20251126"></script>
+    <script defer src="assets/js/userDB.js?v=20251130"></script>
     
     <script>
       // API_BASE_URL 已在 config.js 中定義為全局變數
