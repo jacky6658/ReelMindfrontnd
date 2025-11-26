@@ -1,27 +1,25 @@
-# ReelMind AI 短影音智能體 - robots.txt
-# 允許所有搜尋引擎爬蟲訪問公開頁面
+# ReelMind AI - robots.txt
+# 適用：公開內容開放、登入功能頁不索引、API 禁止抓取
 
 User-agent: *
 Allow: /
-Allow: /guide.html
 Allow: /guide/
-Allow: /guide/*.html
+Allow: /guide.html
 Allow: /experience.html
 Allow: /subscription.html
-Allow: /mode1.html
-Allow: /mode2.html
-Allow: /mode3.html
 Allow: /contact.html
 
-# 禁止索引敏感頁面（需要登入或包含個人資訊）
+# 不要索引需登入或對 SEO 無意義的功能頁
+Disallow: /mode1.html
+Disallow: /mode2.html
+Disallow: /mode3.html
+
+# 禁止後台、付款、敏感資料
+Disallow: /auth/
+Disallow: /api/
 Disallow: /userDB.html
 Disallow: /checkout.html
 Disallow: /payment-result.html
-Disallow: /auth/
-
-# 禁止索引 API 端點和後端資源
-Disallow: /api/
 
 # Sitemap 位置
 Sitemap: https://reelmind.aijob.com.tw/sitemap.xml
-
