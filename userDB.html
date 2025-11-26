@@ -2906,12 +2906,37 @@
         await initializeUserDB();
         
         // 檢查 IP 人設規劃權限（在用戶資訊載入完成後）
-        console.log('[userDB.html] 準備調用 checkIpPlanningPermission');
-        if (typeof checkIpPlanningPermission === 'function') {
-          console.log('[userDB.html] checkIpPlanningPermission 函數存在，開始調用');
-          await checkIpPlanningPermission();
-        } else {
-          console.warn('[userDB.html] checkIpPlanningPermission 函數不存在');
+        // 定義一個統一的權限檢查函數
+        const executePermissionCheck = async () => {
+          console.log('[userDB.html] 準備調用 checkIpPlanningPermission');
+          
+          // 嘗試從 window 對象獲取函數（userDB.js 會將函數掛載到 window）
+          const permissionCheckFn = window.checkIpPlanningPermission;
+          
+          if (typeof permissionCheckFn === 'function') {
+            console.log('[userDB.html] checkIpPlanningPermission 函數存在，開始調用');
+            try {
+              await permissionCheckFn();
+            } catch (error) {
+              console.error('[userDB.html] 調用 checkIpPlanningPermission 時發生錯誤:', error);
+              console.error('[userDB.html] 錯誤詳情:', error.message, error.stack);
+            }
+          } else {
+            console.warn('[userDB.html] checkIpPlanningPermission 函數不存在');
+            console.warn('[userDB.html] window.checkIpPlanningPermission:', typeof window.checkIpPlanningPermission);
+            console.warn('[userDB.html] 嘗試等待函數載入...');
+          }
+        };
+        
+        // 立即嘗試執行（如果函數已載入）
+        await executePermissionCheck();
+        
+        // 如果函數還未載入，使用 window.load 事件作為備選（確保所有資源都已載入）
+        if (typeof window.checkIpPlanningPermission !== 'function') {
+          window.addEventListener('load', async () => {
+            console.log('[userDB.html] window.load 事件觸發，再次嘗試調用 checkIpPlanningPermission');
+            await executePermissionCheck();
+          });
         }
         
         // 監聽 hash 變化
