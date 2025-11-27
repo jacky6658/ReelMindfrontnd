@@ -393,7 +393,7 @@
             if (userResponse.ok) {
               const userInfo = await userResponse.json();
               // 可以從用戶資訊中獲取方案類型（如果有）
-              console.log('用戶資訊:', userInfo);
+              // console.log('用戶資訊:', userInfo); // 已隱藏主控台 log
             }
           } catch (e) {
             console.warn('無法獲取用戶資訊，使用預設值');
