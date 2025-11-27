@@ -118,14 +118,16 @@
    * 自動登出（清除所有登入資訊）
    */
   function autoLogout(reason = '登入已過期，請重新登入') {
-    console.log('自動登出:', reason);
+    console.log('[AUTH] 自動登出:', reason);
     
-    // 清除所有登入相關的 localStorage
+    // 清除所有登入相關的 localStorage 和 sessionStorage
     localStorage.removeItem('ipPlanningToken');
     localStorage.removeItem('ipPlanningRefreshToken');
     localStorage.removeItem('ipPlanningUser');
     localStorage.removeItem('ipPlanningTokenUpdated');
     localStorage.removeItem('subscriptionStatus');
+    sessionStorage.removeItem('ipPlanningToken');
+    sessionStorage.removeItem('ipPlanningUser');
     
     // 清除全局變數
     ipPlanningToken = null;
@@ -137,7 +139,9 @@
     }
     
     // 更新頁面狀態
-    document.body.dataset.subscribed = 'false';
+    if (document.body) {
+      document.body.dataset.subscribed = 'false';
+    }
     
     // 觸發登出事件
     try {
@@ -149,16 +153,29 @@
     // 顯示提示（如果 showToast 可用）
     try {
       if (typeof showToast === 'function') {
-        showToast('登入已過期，請重新登入', 3000);
+        showToast(reason, 5000);
       }
     } catch (e) {
       console.warn('無法顯示登出提示:', e);
     }
     
-    // 重新載入頁面以更新 UI
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
+    // 更新 UI（如果 updateAuthUI 可用）
+    try {
+      if (typeof updateAuthUI === 'function') {
+        updateAuthUI(false);
+      }
+    } catch (e) {
+      console.warn('無法更新認證 UI:', e);
+    }
+    
+    // 如果不在首頁，導向首頁；否則重新載入頁面以更新 UI
+    if (window.location.pathname !== '/' && !window.location.pathname.endsWith('/index.html')) {
+      window.location.href = '/';
+    } else {
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
   }
 
   /**
