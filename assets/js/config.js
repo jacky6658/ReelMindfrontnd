@@ -23,10 +23,10 @@ if (!window.APP_CONFIG) {
   };
 }
 
-// 調試：確認設定（已隱藏主控台 log）
-// if (typeof console !== 'undefined' && console.log) {
-//   console.log('[Config.js] window.API_BASE_URL:', window.API_BASE_URL);
-//   console.log('[Config.js] window.APP_CONFIG.API_BASE:', window.APP_CONFIG.API_BASE);
-// }
+// 調試：確認設定
+if (typeof console !== 'undefined' && console.log) {
+  console.log('[Config.js] window.API_BASE_URL:', window.API_BASE_URL);
+  console.log('[Config.js] window.APP_CONFIG.API_BASE:', window.APP_CONFIG.API_BASE);
+}
 
 

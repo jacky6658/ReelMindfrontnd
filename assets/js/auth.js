@@ -51,30 +51,18 @@
           // 嘗試立即以新 token 驗證一次，失敗則嘗試以舊 access token 呼叫 refresh
           const BASE = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || '';
           try {
-            const meRes = await fetch(`${BASE}/api/auth/me`, { 
-              method: 'GET',
-              credentials: 'include' // 重要：包含 Cookie
-            });
+            const meRes = await fetch(`${BASE}/api/auth/me`, { method: 'GET' });
             if (!meRes.ok) throw new Error('me not ok');
             // 可在此更新 UI 狀態，如有需要
           } catch(_) {
             // 觸發一次 refresh（用舊 access token），再嘗試 me
             try {
               const oldAccess = (window.Auth && window.Auth.getToken && window.Auth.getToken()) || token || '';
-              await fetch(`${BASE}/api/auth/refresh`, { 
-                method: 'POST', 
-                credentials: 'include', // 重要：包含 Cookie
-                headers: oldAccess ? { 'Authorization': `Bearer ${oldAccess}` } : {}
-              });
-              await fetch(`${BASE}/api/auth/me`, { 
-                method: 'GET',
-                credentials: 'include' // 重要：包含 Cookie
-              });
+              await fetch(`${BASE}/api/auth/refresh`, { method: 'POST', headers: { 'Authorization': `Bearer ${oldAccess}` } });
+              await fetch(`${BASE}/api/auth/me`, { method: 'GET' });
             } catch(__) {
-              // 不執行 reload，避免無限刷新
-              // 只派發登入事件，讓頁面邏輯處理
-              console.warn('[AUTH] OAuth 驗證失敗，但不執行頁面重新載入');
-              try { window.dispatchEvent(new CustomEvent('auth:logged-in')); } catch(_) {}
+              // 最終退回 reload，確保狀態同步
+              window.location.reload();
               return;
             }
           }
@@ -98,26 +86,9 @@
         // 開始同步 me
         const BASE = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || '';
         if (BASE){
-          try { 
-            await fetch(`${BASE}/api/auth/me`, { 
-              method: 'GET',
-              credentials: 'include' // 重要：包含 Cookie
-            }); 
-          } catch(_){
+          try { await fetch(`${BASE}/api/auth/me`, { method: 'GET' }); } catch(_){
             const oldAccess = (window.Auth && window.Auth.getToken && window.Auth.getToken()) || '';
-            if(oldAccess){ 
-              try { 
-                await fetch(`${BASE}/api/auth/refresh`, { 
-                  method: 'POST', 
-                  credentials: 'include', // 重要：包含 Cookie
-                  headers: { 'Authorization': `Bearer ${oldAccess}` } 
-                }); 
-                await fetch(`${BASE}/api/auth/me`, { 
-                  method:'GET',
-                  credentials: 'include' // 重要：包含 Cookie
-                }); 
-              } catch(__){} 
-            }
+            if(oldAccess){ try { await fetch(`${BASE}/api/auth/refresh`, { method: 'POST', headers: { 'Authorization': `Bearer ${oldAccess}` } }); await fetch(`${BASE}/api/auth/me`, { method:'GET' }); } catch(__){} }
           }
         }
       }catch(_){}
@@ -136,14 +107,10 @@
             console.log('me after popup:', me);
             return;
           }
-          // 若沒有 Api.getMe 可用，不執行 reload，避免無限刷新
-          // 只派發登入事件，讓頁面邏輯處理
-          console.warn('[AUTH] 無法獲取用戶資訊，但不執行頁面重新載入');
-          try { window.dispatchEvent(new CustomEvent('auth:logged-in')); } catch(_) {}
+          // 若沒有 Api.getMe 可用，退回 reload
+          location.reload();
         } catch (_) {
-          // 發生錯誤時，也不執行 reload
-          console.warn('[AUTH] 處理登入訊息時發生錯誤，但不執行頁面重新載入');
-          try { window.dispatchEvent(new CustomEvent('auth:logged-in')); } catch(_) {}
+          location.reload();
         }
       }
     });

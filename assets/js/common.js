@@ -21,11 +21,11 @@
     ? window.APP_CONFIG.API_BASE 
     : (window.API_BASE_URL || 'https://api.aijob.com.tw');
   
-  // 調試：確認 API_BASE_URL 設定（已隱藏主控台 log）
-  // if (typeof console !== 'undefined' && console.log) {
-  //   console.log('[Common.js] API_BASE_URL:', API_BASE_URL);
-  //   console.log('[Common.js] window.APP_CONFIG:', window.APP_CONFIG);
-  // }
+  // 調試：確認 API_BASE_URL 設定
+  if (typeof console !== 'undefined' && console.log) {
+    console.log('[Common.js] API_BASE_URL:', API_BASE_URL);
+    console.log('[Common.js] window.APP_CONFIG:', window.APP_CONFIG);
+  }
 
   // ===== 初始化：從 localStorage 載入狀態 =====
   function initGlobalState() {
@@ -48,25 +48,43 @@
   // ===== 認證相關函數 =====
 
   /**
-   * 檢查用戶是否已登入（基於 ipPlanningUser.user_id 的存在）
-   * 這個函數不執行 API 呼叫，僅判斷當前內存狀態
-   * 真正的登入狀態驗證應該通過 checkLoginStatus() 來完成
+   * 檢查是否已登入
    */
   function isLoggedIn() {
-    // 登入狀態應基於 ipPlanningUser.user_id 是否存在
-    // ipPlanningUser 應該是由 checkLoginStatus() 或 fetchUserInfo() 從 /api/auth/me 獲取後更新的
-    return !!(ipPlanningUser && ipPlanningUser.user_id);
+    return !!(ipPlanningToken && ipPlanningUser);
   }
 
   /**
-   * 檢查是否已訂閱（基於 ipPlanningUser.is_subscribed 的存在）
-   * 這個函數不執行 API 呼叫，僅判斷當前內存狀態
-   * 真正的訂閱狀態驗證應該通過 checkSubscriptionStatus() 來完成
+   * 檢查是否已訂閱
    */
   function isSubscribed() {
-    // 訂閱狀態應基於 ipPlanningUser.is_subscribed 是否為 true
-    // ipPlanningUser 應該是由 checkLoginStatus() 或 checkSubscriptionStatus() 從 /api/auth/me 獲取後更新的
-    return !!(ipPlanningUser && ipPlanningUser.is_subscribed === true);
+    try {
+      // 優先檢查 document.body.dataset.subscribed（從後端 API 獲取的狀態，最準確）
+      const backendSubscribed = document.body.dataset.subscribed === 'true';
+      if (backendSubscribed) {
+        return true;
+      }
+      
+      // 檢查 localStorage 中的 subscriptionStatus
+      const subscriptionStatus = localStorage.getItem('subscriptionStatus');
+      if (subscriptionStatus === 'active') {
+        return true;
+      }
+      
+      // 最後檢查 localStorage 中的用戶資料
+      const userStr = localStorage.getItem('ipPlanningUser');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        const userSubscribed = !!(user && (user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1'));
+        if (userSubscribed) {
+          return true;
+        }
+      }
+      
+      return false;
+    } catch (_) {
+      return false;
+    }
   }
 
   /**
@@ -100,16 +118,14 @@
    * 自動登出（清除所有登入資訊）
    */
   function autoLogout(reason = '登入已過期，請重新登入') {
-    console.log('[AUTH] 自動登出:', reason);
+    console.log('自動登出:', reason);
     
-    // 清除所有登入相關的 localStorage 和 sessionStorage
+    // 清除所有登入相關的 localStorage
     localStorage.removeItem('ipPlanningToken');
     localStorage.removeItem('ipPlanningRefreshToken');
     localStorage.removeItem('ipPlanningUser');
     localStorage.removeItem('ipPlanningTokenUpdated');
     localStorage.removeItem('subscriptionStatus');
-    sessionStorage.removeItem('ipPlanningToken');
-    sessionStorage.removeItem('ipPlanningUser');
     
     // 清除全局變數
     ipPlanningToken = null;
@@ -121,9 +137,7 @@
     }
     
     // 更新頁面狀態
-    if (document.body) {
-      document.body.dataset.subscribed = 'false';
-    }
+    document.body.dataset.subscribed = 'false';
     
     // 觸發登出事件
     try {
@@ -135,157 +149,92 @@
     // 顯示提示（如果 showToast 可用）
     try {
       if (typeof showToast === 'function') {
-        showToast(reason, 5000);
+        showToast('登入已過期，請重新登入', 3000);
       }
     } catch (e) {
       console.warn('無法顯示登出提示:', e);
     }
     
-    // 更新 UI（如果 updateAuthUI 可用）
-    try {
-      if (typeof updateAuthUI === 'function') {
-        updateAuthUI(false);
-      }
-    } catch (e) {
-      console.warn('無法更新認證 UI:', e);
-    }
-    
-    // 避免無限刷新：完全移除頁面跳轉和重新載入邏輯
-    // 只更新 UI 狀態，不執行任何頁面跳轉或重新載入
-    console.log('[AUTH] 已登出，更新 UI 狀態，不執行頁面跳轉或重新載入');
-    // 不執行 window.location.reload() 或 window.location.href，避免無限刷新循環
+    // 重新載入頁面以更新 UI
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   }
 
   /**
    * 檢查登入狀態（從後端 API 獲取最新狀態）
-   * 新的判斷規則：呼叫 /api/auth/me 成功 (status 200) 且回傳的 data.user_id 存在，就視為登入成功
    */
   async function checkLoginStatus() {
-    try {
-      // 先檢查本地是否有登入資訊（避免不必要的 API 呼叫）
-      const localUserStr = localStorage.getItem('ipPlanningUser') || sessionStorage.getItem('ipPlanningUser');
-      if (localUserStr) {
-        try {
-          const localUser = JSON.parse(localUserStr);
-          // 如果本地有 user_id，先使用本地狀態（避免在 API 暫時失敗時清除狀態）
-          if (localUser && localUser.user_id) {
-            // 更新全局變數（但不立即清除，等待 API 驗證結果）
-            ipPlanningUser = localUser;
-            ipPlanningToken = localStorage.getItem('ipPlanningToken') || sessionStorage.getItem('ipPlanningToken') || "cookie-auth";
-          }
-        } catch (e) {
-          // 解析失敗，繼續 API 驗證
-        }
-      }
-      
-      // 直接呼叫 /api/auth/me 驗證登入狀態（使用 Cookie 認證）
-      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-        method: 'GET',
-        credentials: 'include', // 重要：包含 Cookie
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-
-      // 如果 response 是 200 且 data.user_id 存在，視為登入成功
-      if (response.ok) {
-        const data = await response.json();
-        
-        // 判斷規則：user_id 存在就視為登入成功
-        if (data && data.user_id) {
-          // 更新全局變數（同時更新 localStorage 和 sessionStorage 以保持一致性）
-          ipPlanningUser = {
-            user_id: data.user_id,
-            google_id: data.google_id,
-            email: data.email,
-            name: data.name,
-            picture: data.picture,
-            is_subscribed: data.is_subscribed,
-            created_at: data.created_at
-          };
-          ipPlanningToken = "cookie-auth"; // Cookie flow 下用固定字串表示「已登入」
-          
-          // 同時更新 localStorage 和 sessionStorage 以保持一致性
-          localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
-          localStorage.setItem('ipPlanningToken', "cookie-auth");
-          sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
-          sessionStorage.setItem('ipPlanningToken', "cookie-auth");
-          
-          // 更新訂閱狀態
-          if (data.is_subscribed) {
-            document.body.dataset.subscribed = 'true';
-            localStorage.setItem('subscriptionStatus', 'active');
-          } else {
-            document.body.dataset.subscribed = 'false';
-            localStorage.setItem('subscriptionStatus', 'inactive');
-          }
-          
-          return true;
-        }
-      }
-      
-      // 如果不是 200 或 user_id 不存在
-      // 只有在明確收到 401 時，才清除本地登入資訊
-      // 如果是網路錯誤或其他錯誤，保留本地狀態（避免誤判）
-      if (response.status === 401) {
-        // 明確的 401 表示未登入，清除本地登入資訊
-        ipPlanningUser = null;
-        ipPlanningToken = null;
-        localStorage.removeItem('ipPlanningUser');
-        localStorage.removeItem('ipPlanningToken');
-        sessionStorage.removeItem('ipPlanningUser');
-        sessionStorage.removeItem('ipPlanningToken');
-        return false;
-      } else {
-        // 其他錯誤（網路錯誤、500 等），保留本地狀態，返回當前狀態
-        // 如果本地有 user_id，返回 true；否則返回 false
-        return !!(ipPlanningUser && ipPlanningUser.user_id);
-      }
-    } catch (error) {
-      // 網路錯誤等異常，保留本地狀態，返回當前狀態
-      // 如果本地有 user_id，返回 true；否則返回 false
-      console.warn('檢查登入狀態時發生錯誤:', error);
-      return !!(ipPlanningUser && ipPlanningUser.user_id);
+    // 從 localStorage 獲取最新的 token 和用戶資訊
+    const storedToken = localStorage.getItem('ipPlanningToken');
+    const storedUserStr = localStorage.getItem('ipPlanningUser');
+    
+    // 更新全局變數
+    if (storedToken) {
+      ipPlanningToken = storedToken;
     }
+    if (storedUserStr) {
+      try {
+        ipPlanningUser = JSON.parse(storedUserStr);
+      } catch (e) {
+        console.warn('無法解析用戶資料:', e);
+        ipPlanningUser = null;
+      }
+    }
+
+    // 檢查 token 是否過期
+    if (ipPlanningToken) {
+      if (isTokenExpired(ipPlanningToken)) {
+        console.warn('Token 已過期，自動登出');
+        autoLogout('登入已過期，請重新登入');
+        return false;
+      }
+    }
+
+    return isLoggedIn();
   }
 
   /**
    * 檢查訂閱狀態（從後端 API 獲取最新狀態）
-   * 新的判斷規則：呼叫 /api/auth/me 成功 (status 200) 且回傳的 data.user_id 存在，就更新訂閱狀態
    */
   async function checkSubscriptionStatus() {
-    try {
-      // 直接呼叫 /api/auth/me 獲取最新訂閱狀態（使用 Cookie 認證）
-      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-        method: 'GET',
-        credentials: 'include', // 重要：包含 Cookie
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
+    // 如果有登入資訊，從後端 API 獲取訂閱狀態
+    if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
+      try {
+        let response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+          headers: {
+            'Authorization': `Bearer ${ipPlanningToken}`
+          }
+        });
         
-        // 判斷規則：user_id 存在就視為登入成功，並更新訂閱狀態
-        if (data && data.user_id) {
-          // 更新全局變數
-          ipPlanningUser = {
-            user_id: data.user_id,
-            google_id: data.google_id,
-            email: data.email,
-            name: data.name,
-            picture: data.picture,
-            is_subscribed: data.is_subscribed,
-            created_at: data.created_at
-          };
-          localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+        // 如果收到 401，嘗試刷新 token 後重試
+        if (response.status === 401) {
+          // 嘗試刷新 token（如果 window.Api.refreshToken 存在）
+          if (window.Api && window.Api.refreshToken) {
+            try {
+              await window.Api.refreshToken();
+              // 重新獲取 token
+              ipPlanningToken = localStorage.getItem('ipPlanningToken');
+              // 重試
+              response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                headers: {
+                  'Authorization': `Bearer ${ipPlanningToken}`
+                }
+              });
+            } catch (e) {
+              console.warn('Token 刷新失敗:', e);
+            }
+          }
+        }
+        
+        if (response.ok) {
+          const userInfo = await response.json();
           
           // 更新訂閱狀態
-          const isSubscribedValue = data.is_subscribed === true || 
-                                  data.is_subscribed === 1 || 
-                                  data.is_subscribed === 'true' ||
-                                  data.is_subscribed === '1';
+          const isSubscribedValue = userInfo.is_subscribed === true || 
+                                  userInfo.is_subscribed === 1 || 
+                                  userInfo.is_subscribed === 'true' ||
+                                  userInfo.is_subscribed === '1';
           
           if (isSubscribedValue) {
             document.body.dataset.subscribed = 'true';
@@ -295,12 +244,16 @@
             localStorage.setItem('subscriptionStatus', 'inactive');
           }
         } else {
-          // user_id 不存在，視為未登入
-          document.body.dataset.subscribed = 'false';
-          localStorage.setItem('subscriptionStatus', 'inactive');
+          // API 失敗，使用本地儲存
+          const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
+          if (localSubscriptionStatus === 'active') {
+            document.body.dataset.subscribed = 'true';
+          } else {
+            document.body.dataset.subscribed = 'false';
+          }
         }
-      } else {
-        // API 失敗，使用本地儲存
+      } catch (error) {
+        // 網路錯誤等異常，使用本地儲存
         const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
         if (localSubscriptionStatus === 'active') {
           document.body.dataset.subscribed = 'true';
@@ -308,18 +261,9 @@
           document.body.dataset.subscribed = 'false';
         }
       }
-    } catch (error) {
-      // 網路錯誤等異常，使用本地儲存
-      const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
-      if (localSubscriptionStatus === 'active') {
-        document.body.dataset.subscribed = 'true';
-      } else {
-        document.body.dataset.subscribed = 'false';
-      }
-    }
-    
-    // 如果未登入，從本地存儲檢查訂閱狀態
-    const subscriptionStatus = localStorage.getItem('subscriptionStatus');
+    } else {
+      // 未登入，從本地存儲檢查訂閱狀態
+      const subscriptionStatus = localStorage.getItem('subscriptionStatus');
       if (subscriptionStatus === 'active') {
         document.body.dataset.subscribed = 'true';
       } else {
@@ -353,9 +297,9 @@
         redirect: 'manual'
       });
       
-      // 記錄響應狀態以便調試（已隱藏主控台 log）
-      // console.log('授權驗證響應狀態:', response.status, response.statusText);
-      // console.log('授權驗證響應 headers:', Object.fromEntries(response.headers.entries()));
+      // 記錄響應狀態以便調試
+      console.log('授權驗證響應狀態:', response.status, response.statusText);
+      console.log('授權驗證響應 headers:', Object.fromEntries(response.headers.entries()));
       
       // 檢查響應類型
       const contentType = response.headers.get('content-type') || '';
@@ -369,7 +313,7 @@
         if (isJson && response.ok) {
           try {
             responseData = await response.json();
-            // console.log('授權驗證成功響應數據:', responseData); // 已隱藏主控台 log
+            console.log('授權驗證成功響應數據:', responseData);
           } catch (e) {
             console.warn('無法解析 JSON 響應:', e);
           }
@@ -449,7 +393,7 @@
             if (userResponse.ok) {
               const userInfo = await userResponse.json();
               // 可以從用戶資訊中獲取方案類型（如果有）
-              // console.log('用戶資訊:', userInfo); // 已隱藏主控台 log
+              console.log('用戶資訊:', userInfo);
             }
           } catch (e) {
             console.warn('無法獲取用戶資訊，使用預設值');
@@ -808,9 +752,8 @@
     const loggedIn = await checkLoginStatus();
     
     if (!loggedIn) {
-      // 未登入，但不執行頁面跳轉（避免無限刷新）
-      // 只返回 false，讓呼叫者決定如何處理
-      console.log('[AUTH] checkPagePermission: 未登入，但不執行頁面跳轉');
+      // 未登入，導向首頁
+      window.location.href = '/';
       return false;
     }
     
@@ -819,9 +762,8 @@
     const subscribed = isSubscribed();
     
     if (!subscribed) {
-      // 未訂閱，但不執行頁面跳轉（避免無限刷新）
-      // 只返回 false，讓呼叫者決定如何處理
-      console.log('[AUTH] checkPagePermission: 未訂閱，但不執行頁面跳轉');
+      // 未訂閱，導向訂閱頁
+      window.location.href = '/subscription.html';
       return false;
     }
     
@@ -835,30 +777,6 @@
    * 返回：true = 可以訪問，false = 需要登入/訂閱
    */
   async function checkFeatureAccess(featureType = null) {
-    // 先檢查本地狀態，避免不必要的 API 呼叫
-    const localLoggedIn = !!(ipPlanningUser && ipPlanningUser.user_id);
-    
-    // 如果本地狀態顯示已登入，直接使用本地狀態（避免 API 延遲導致的誤判）
-    if (localLoggedIn) {
-      // 本地狀態顯示已登入，繼續檢查訂閱狀態
-      await checkSubscriptionStatus();
-      const subscribed = isSubscribed();
-      
-      // 創作者資料庫允許未訂閱用戶訪問
-      if (featureType === 'userDB') {
-        return true;
-      }
-      
-      if (!subscribed) {
-        // 已登入但未訂閱，導向訂閱頁
-        window.location.href = '/subscription.html';
-        return false;
-      }
-      
-      return true;
-    }
-    
-    // 本地狀態顯示未登入，執行 API 驗證
     const loggedIn = await checkLoginStatus();
     
     if (!loggedIn) {
@@ -889,9 +807,8 @@
     }
     
     if (!subscribed) {
-      // 已登入但未訂閱，但不執行頁面跳轉（避免無限刷新）
-      // 只返回 false，讓呼叫者決定如何處理
-      console.log('[AUTH] checkFeatureAccess: 未訂閱，但不執行頁面跳轉');
+      // 已登入但未訂閱，導向訂閱頁
+      window.location.href = '/subscription.html';
       return false;
     }
     
@@ -1176,26 +1093,13 @@
       const hasPermission = await checkPagePermission();
       
       if (!hasPermission) {
-        // 沒有權限，但不執行頁面跳轉（避免無限刷新）
-        // 只停止執行，讓頁面保持當前狀態
-        console.log('[AUTH] initPage: 沒有權限，但不執行頁面跳轉');
+        // 沒有權限，已經導向到其他頁面，停止執行
         return;
       }
     } else {
       // 首頁、體驗頁面或指南頁面：只檢查登入和訂閱狀態（不強制要求），用於更新 UI
-      // 暫時停用自動檢查，避免在 Cookie 失效時不斷觸發 API 呼叫
-      // 如果需要檢查登入狀態，應該由用戶主動操作觸發，而不是自動執行
-      console.log('[AUTH] initPage: 首頁自動登入檢查已停用，避免無限刷新');
-      // 以下代碼暫時停用
-      /*
-      try {
-        await checkLoginStatus();
-        await checkSubscriptionStatus();
-      } catch (error) {
-        console.error('[AUTH] initPage: 檢查登入狀態時發生錯誤:', error);
-        // 發生錯誤時，不執行任何操作，避免觸發刷新
-      }
-      */
+      await checkLoginStatus();
+      await checkSubscriptionStatus();
     }
     
     // 觸發頁面載入完成事件
@@ -1212,7 +1116,7 @@
         ? window.APP_CONFIG.API_BASE 
         : (window.API_BASE_URL || 'https://api.aijob.com.tw');
       
-      // console.log('[goToLogin] 使用的 API_BASE_URL:', currentApiBase); // 已隱藏主控台 log
+      console.log('[goToLogin] 使用的 API_BASE_URL:', currentApiBase);
       
       // 獲取當前頁面的 origin（用於 OAuth callback）
       const fbParam = encodeURIComponent(window.location.origin);
@@ -1221,7 +1125,7 @@
       let authUrl = null;
       try {
         const apiUrl = `${currentApiBase}/api/auth/google?fb=${fbParam}`;
-        // console.log('[goToLogin] 請求 URL:', apiUrl); // 已隱藏主控台 log
+        console.log('[goToLogin] 請求 URL:', apiUrl);
         
         const response = await fetch(apiUrl, {
           method: 'GET',
@@ -1241,7 +1145,7 @@
           throw new Error('auth_url not found in response');
         }
         
-        // console.log('[goToLogin] 獲取到 auth_url:', authUrl); // 已隱藏主控台 log
+        console.log('[goToLogin] 獲取到 auth_url:', authUrl);
       } catch (fetchErr) {
         console.error('[goToLogin] Fetch 失敗:', fetchErr);
         console.error('[goToLogin] 錯誤詳情:', {
@@ -1260,7 +1164,7 @@
       
       if (authUrl && authUrl.startsWith('http')) {
         // 跳轉到 Google OAuth 頁面
-        // console.log('[goToLogin] 跳轉到 Google OAuth:', authUrl); // 已隱藏主控台 log
+        console.log('[goToLogin] 跳轉到 Google OAuth:', authUrl);
         window.location.href = authUrl;
       } else {
         console.error('[goToLogin] auth_url 格式錯誤:', authUrl);
