@@ -511,14 +511,16 @@
     // 獲取 API 基礎 URL
     var apiBaseUrl = window.API_BASE_URL || 'https://api.aijob.com.tw';
     
-    // 向後端發送請求驗證 Cookie 中的 token
-    fetch(apiBaseUrl + '/api/auth/me', {
-      method: 'GET',
-      credentials: 'include', // 重要：包含 Cookie
-      headers: {
-        'Accept': 'application/json'
-      }
-    })
+    // 延遲一小段時間，確保 Cookie 已經被瀏覽器保存（重定向後可能需要一點時間）
+    setTimeout(function() {
+      // 向後端發送請求驗證 Cookie 中的 token
+      fetch(apiBaseUrl + '/api/auth/me', {
+        method: 'GET',
+        credentials: 'include', // 重要：包含 Cookie
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
       .then(function(response) {
         if (!response.ok) {
           throw new Error('驗證失敗: ' + response.status);
@@ -569,6 +571,7 @@
           window.location.href = window.location.origin + '/';
         }, 3000);
       });
+    }, 500); // 延遲 500ms，確保 Cookie 已經被瀏覽器保存
     
     return; // 等待 API 響應後再繼續
   }
