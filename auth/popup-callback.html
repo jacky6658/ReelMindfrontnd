@@ -511,67 +511,91 @@
     // 獲取 API 基礎 URL
     var apiBaseUrl = window.API_BASE_URL || 'https://api.aijob.com.tw';
     
-    // 延遲一小段時間，確保 Cookie 已經被瀏覽器保存（重定向後可能需要一點時間）
-    setTimeout(function() {
-      // 向後端發送請求驗證 Cookie 中的 token
-      fetch(apiBaseUrl + '/api/auth/me', {
-        method: 'GET',
-        credentials: 'include', // 重要：包含 Cookie
-        headers: {
-          'Accept': 'application/json'
-        }
-      })
-      .then(function(response) {
-        if (!response.ok) {
-          throw new Error('驗證失敗: ' + response.status);
-        }
-        return response.json();
-      })
-      .then(function(data) {
-        console.log('DEBUG: ✅ API 驗證成功，獲取到用戶資訊:', data);
-        
-        // 從 API 響應中獲取用戶資訊
-        var apiUser = data.user || data;
-        var apiUserId = apiUser.user_id || apiUser.id || user_id;
-        var apiEmail = apiUser.email || email || '';
-        var apiName = apiUser.name || name || '';
-        var apiPicture = apiUser.picture || picture || '';
-        
-        // 保存用戶資訊到 localStorage（token 在 Cookie 中，不需要保存）
-        try {
-          localStorage.setItem('ipPlanningUser', JSON.stringify({
-            user_id: apiUserId,
-            email: apiEmail,
-            name: apiName,
-            picture: apiPicture
-          }));
-          localStorage.setItem('ipPlanningTokenUpdated', Date.now().toString());
-          console.log('DEBUG: ✅ 用戶資訊已保存到 localStorage');
-          
-          // 更新變數以便後續處理
-          user_id = apiUserId;
-          email = apiEmail;
-          name = apiName;
-          picture = apiPicture;
-          token = 'cookie'; // 標記 token 在 Cookie 中
-          
-          // 繼續後續處理流程
-          handleAuthSuccess();
-        } catch (e) {
-          console.error('DEBUG: ❌ Failed to save to localStorage:', e);
-          updateStatus('⚠️ 保存失敗，請重試', false, true);
-        }
-      })
-      .catch(function(error) {
-        console.error('DEBUG: ❌ API 驗證失敗:', error);
-        updateStatus('⚠️ 登入驗證失敗，請重新登入', false, true);
-        
-        // 3 秒後跳轉到首頁
-        setTimeout(function() {
-          window.location.href = window.location.origin + '/';
-        }, 3000);
-      });
-    }, 500); // 延遲 500ms，確保 Cookie 已經被瀏覽器保存
+    // 定義重試邏輯
+    var maxRetries = 3; // 最大重試次數
+    var retryDelay = 1000; // 每次重試的延遲時間 (毫秒)
+    var currentRetry = 0;
+
+    function fetchWithRetry() {
+      // 延遲一小段時間，確保 Cookie 已經被瀏覽器保存（重定向後可能需要一點時間）
+      setTimeout(function() {
+        // 向後端發送請求驗證 Cookie 中的 token
+        fetch(apiBaseUrl + '/api/auth/me', {
+          method: 'GET',
+          credentials: 'include', // 重要：包含 Cookie
+          headers: {
+            'Accept': 'application/json'
+          }
+        })
+          .then(function(response) {
+            if (!response.ok) {
+              if (response.status === 401 && currentRetry < maxRetries) {
+                console.warn('DEBUG: API 驗證失敗: ' + response.status + ' Unauthorized. 嘗試重試 ' + (currentRetry + 1) + '/' + maxRetries);
+                currentRetry++;
+                updateStatus('驗證失敗，正在重試... (' + currentRetry + '/' + maxRetries + ')', false);
+                setTimeout(fetchWithRetry, retryDelay); // 延遲後重試
+                return; // 不繼續 .then 鏈
+              }
+              throw new Error('驗證失敗: ' + response.status);
+            }
+            return response.json();
+          })
+          .then(function(data) {
+            // 如果 data 是 undefined，表示是重試流程中的中間響應，不處理
+            if (!data) {
+              return;
+            }
+            
+            console.log('DEBUG: ✅ API 驗證成功，獲取到用戶資訊:', data);
+            
+            // 從 API 響應中獲取用戶資訊
+            var apiUser = data.user || data;
+            var apiUserId = apiUser.user_id || apiUser.id || user_id;
+            var apiEmail = apiUser.email || email || '';
+            var apiName = apiUser.name || name || '';
+            var apiPicture = apiUser.picture || picture || '';
+            
+            // 保存用戶資訊到 localStorage（token 在 Cookie 中，不需要保存）
+            try {
+              localStorage.setItem('ipPlanningUser', JSON.stringify({
+                user_id: apiUserId,
+                email: apiEmail,
+                name: apiName,
+                picture: apiPicture
+              }));
+              localStorage.setItem('ipPlanningTokenUpdated', Date.now().toString());
+              console.log('DEBUG: ✅ 用戶資訊已保存到 localStorage');
+              
+              // 更新變數以便後續處理
+              user_id = apiUserId;
+              email = apiEmail;
+              name = apiName;
+              picture = apiPicture;
+              token = 'cookie'; // 標記 token 在 Cookie 中
+              
+              // 繼續後續處理流程
+              handleAuthSuccess();
+            } catch (e) {
+              console.error('DEBUG: ❌ Failed to save to localStorage:', e);
+              updateStatus('⚠️ 保存失敗，請重試', false, true);
+            }
+          })
+          .catch(function(error) {
+            // 只有在不是重試流程中的錯誤時才處理
+            if (currentRetry >= maxRetries) {
+              console.error('DEBUG: ❌ API 驗證失敗（已重試 ' + maxRetries + ' 次）:', error);
+              updateStatus('⚠️ 登入驗證失敗，請重新登入', false, true);
+              
+              // 3 秒後跳轉到首頁
+              setTimeout(function() {
+                window.location.href = window.location.origin + '/';
+              }, 3000);
+            }
+          });
+      }, currentRetry === 0 ? 500 : retryDelay); // 第一次延遲 500ms，之後使用 retryDelay
+    }
+
+    fetchWithRetry(); // 啟動重試流程
     
     return; // 等待 API 響應後再繼續
   }
