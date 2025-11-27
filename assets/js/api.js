@@ -212,22 +212,13 @@
         return originalFetch(input, retryOptions2);
       } else {
         // Token 刷新失敗，可能是 token 已過期
-        // 但不要立即觸發 autoLogout，因為這可能只是暫時的網路問題
+        // 完全移除 autoLogout 的觸發，避免無限刷新
         // 設置標記，防止後續請求繼續重試
         if (!isLoggingOut) {
           isLoggingOut = true;
-          console.warn('[AUTH] Token 刷新失敗，但不觸發自動登出（避免無限刷新）');
-          // 不觸發 autoLogout，只清除標記，讓用戶手動重新登入
-          // 如果 window.ReelMindCommon 和 showToast 可用，顯示提示
-          try {
-            if (typeof showToast === 'function') {
-              showToast('登入狀態已失效，請重新登入', 5000);
-            } else if (window.ReelMindCommon && typeof window.ReelMindCommon.showToast === 'function') {
-              window.ReelMindCommon.showToast('登入狀態已失效，請重新登入', 5000);
-            }
-          } catch (e) {
-            console.warn('無法顯示提示:', e);
-          }
+          console.warn('[AUTH] Token 刷新失敗，但不觸發任何操作（避免無限刷新）');
+          // 不觸發 autoLogout，不顯示提示，不執行任何操作
+          // 只設置標記，讓後續請求直接返回 401
         }
         // 直接返回 401 響應，不再重試
         return new Response(JSON.stringify({detail: "Not authenticated"}), {

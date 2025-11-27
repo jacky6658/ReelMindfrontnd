@@ -14385,6 +14385,11 @@
         }
         
         // 檢查是否已經登入（使用防抖，避免重複呼叫）
+        // 暫時停用頁面載入時的自動登入檢查，避免在 Cookie 失效時不斷觸發 API 呼叫
+        // 如果需要檢查登入狀態，應該由用戶主動操作觸發，而不是自動執行
+        console.log('[AUTH] 頁面載入時的自動登入檢查已停用，避免無限刷新');
+        // 以下代碼暫時停用
+        /*
         let checkLoginStatusTimeout = null;
         const checkLoginStatusDebounced = () => {
           if (checkLoginStatusTimeout) {
@@ -14409,6 +14414,7 @@
         };
         
         checkLoginStatusDebounced();
+        */
         
         // 確保 Highlight.js 載入後初始化（因為使用了 defer）
         function initializeHighlightJS() {

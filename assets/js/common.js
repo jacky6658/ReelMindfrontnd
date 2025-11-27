@@ -1183,7 +1183,11 @@
       }
     } else {
       // 首頁、體驗頁面或指南頁面：只檢查登入和訂閱狀態（不強制要求），用於更新 UI
-      // 使用防抖，避免重複執行
+      // 暫時停用自動檢查，避免在 Cookie 失效時不斷觸發 API 呼叫
+      // 如果需要檢查登入狀態，應該由用戶主動操作觸發，而不是自動執行
+      console.log('[AUTH] initPage: 首頁自動登入檢查已停用，避免無限刷新');
+      // 以下代碼暫時停用
+      /*
       try {
         await checkLoginStatus();
         await checkSubscriptionStatus();
@@ -1191,6 +1195,7 @@
         console.error('[AUTH] initPage: 檢查登入狀態時發生錯誤:', error);
         // 發生錯誤時，不執行任何操作，避免觸發刷新
       }
+      */
     }
     
     // 觸發頁面載入完成事件
