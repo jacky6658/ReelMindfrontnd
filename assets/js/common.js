@@ -182,7 +182,7 @@
         
         // 判斷規則：user_id 存在就視為登入成功
         if (data && data.user_id) {
-          // 更新全局變數和 localStorage
+          // 更新全局變數（同時更新 localStorage 和 sessionStorage 以保持一致性）
           ipPlanningUser = {
             user_id: data.user_id,
             google_id: data.google_id,
@@ -192,7 +192,13 @@
             is_subscribed: data.is_subscribed,
             created_at: data.created_at
           };
+          ipPlanningToken = "cookie-auth"; // Cookie flow 下用固定字串表示「已登入」
+          
+          // 同時更新 localStorage 和 sessionStorage 以保持一致性
           localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+          localStorage.setItem('ipPlanningToken', "cookie-auth");
+          sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+          sessionStorage.setItem('ipPlanningToken', "cookie-auth");
           
           // 更新訂閱狀態
           if (data.is_subscribed) {
@@ -208,11 +214,13 @@
       }
       
       // 如果不是 200 或 user_id 不存在，視為未登入
-      // 清除本地登入資訊
+      // 清除本地登入資訊（同時清除 localStorage 和 sessionStorage）
       ipPlanningUser = null;
       ipPlanningToken = null;
       localStorage.removeItem('ipPlanningUser');
       localStorage.removeItem('ipPlanningToken');
+      sessionStorage.removeItem('ipPlanningUser');
+      sessionStorage.removeItem('ipPlanningToken');
       return false;
     } catch (error) {
       // 網路錯誤等異常，視為未登入

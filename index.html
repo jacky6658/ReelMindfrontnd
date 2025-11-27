@@ -14734,51 +14734,16 @@
       
       // 檢查登入狀態
       async function checkLoginStatus() {
-        // 從 localStorage 獲取最新的 token 和用戶資訊
-        const storedToken = sessionStorage.getItem('ipPlanningToken');
-        const storedUserStr = sessionStorage.getItem('ipPlanningUser');
-        
-        // 更新全局變數（確保使用最新的資料）
-        if (storedToken) {
-          ipPlanningToken = storedToken;
-        }
-        if (storedUserStr) {
-          try {
-            ipPlanningUser = JSON.parse(storedUserStr);
-          } catch (e) {
-            console.warn('無法解析用戶資料:', e);
-            ipPlanningUser = null;
-          }
-        }
+        // 直接呼叫 fetchUserInfo 驗證登入狀態（會實際呼叫 /api/auth/me）
+        const userData = await fetchUserInfo();
         
         // 無論是否登入，都先顯示首頁
         showMainApp();
         
         // 根據登入狀態更新 UI
-        if (ipPlanningToken && ipPlanningUser) {
-          // 檢查 token 是否已過期
-          if (isTokenExpired(ipPlanningToken)) {
-            // Token 已過期，嘗試刷新
-            const refreshed = await tryRefreshTokenSafe();
-            if (!refreshed) {
-              // 刷新失敗，已自動登出（在 tryRefreshTokenSafe 中處理）
-              return;
-            }
-            // 刷新成功後，重新從 localStorage 獲取最新的 token
-            const newToken = sessionStorage.getItem('ipPlanningToken');
-            if (newToken) {
-              ipPlanningToken = newToken;
-            }
-          } else if (isTokenExpiringSoon(ipPlanningToken)) {
-            // Token 即將過期，主動刷新
-            await proactiveRefreshToken();
-            // 刷新後重新獲取最新的 token
-            const newToken = sessionStorage.getItem('ipPlanningToken');
-            if (newToken) {
-              ipPlanningToken = newToken;
-            }
-          }
-          await updateUserInfo(); // 修復：添加 await 確保異步操作完成
+        if (userData && userData.user_id) {
+          // 已登入：更新用戶資訊
+          await updateUserInfo();
         } else {
           // 未登入時顯示登入按鈕
           showLoginButton();
@@ -14815,8 +14780,8 @@
         const userInfo = document.getElementById('userInfo');
         const loginBtn = document.getElementById('loginBtn');
         
-        // 檢查登入狀態
-        const isLoggedIn = !!(ipPlanningToken && ipPlanningUser);
+        // 檢查登入狀態（使用實際的 user_id 判斷，不依賴 token 格式）
+        const isLoggedIn = !!(ipPlanningUser && ipPlanningUser.user_id);
         
         if (isLoggedIn) {
           // 已登入：顯示用戶資訊，隱藏登入按鈕
@@ -14885,36 +14850,16 @@
       async function checkSubscriptionStatus() {
         
         // 如果有登入資訊，從後端 API 獲取訂閱狀態
-        if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
+        if (ipPlanningUser && ipPlanningUser.user_id) {
           try {
+            // 使用 Cookie 認證，不需要 Authorization header
             let response = await fetch('https://api.aijob.com.tw/api/auth/me', {
               method: 'GET',
               credentials: 'include', // 重要：包含 Cookie
               headers: {
-                'Authorization': `Bearer ${ipPlanningToken}`
+                'Accept': 'application/json'
               }
             });
-            
-            
-            // 如果收到 401，嘗試刷新 token 後重試
-            if (response.status === 401) {
-              const refreshed = await tryRefreshTokenSafe();
-              if (refreshed) {
-                // Token 刷新成功，使用新 token 重試
-                // 重新獲取最新的 token（刷新後可能已更新）
-                const refreshedToken = sessionStorage.getItem('ipPlanningToken');
-                if (refreshedToken) {
-                  ipPlanningToken = refreshedToken;
-                }
-                response = await fetch('https://api.aijob.com.tw/api/auth/me', {
-                  method: 'GET',
-                  credentials: 'include', // 重要：包含 Cookie
-                  headers: {
-                    'Authorization': `Bearer ${ipPlanningToken}`
-                  }
-                });
-              }
-            }
             
             if (response.ok) {
               const userInfo = await response.json();
@@ -15760,7 +15705,10 @@
         const userNameEl = document.getElementById('userName');
         const userAvatarEl = document.getElementById('userAvatar');
         
-        if (isLoggedIn && ipPlanningToken && ipPlanningUser) {
+        // 檢查登入狀態：使用 user_id 判斷，不依賴 token 格式
+        const actuallyLoggedIn = isLoggedIn && ipPlanningUser && ipPlanningUser.user_id;
+        
+        if (actuallyLoggedIn) {
           // 已登入：顯示用戶資訊，隱藏登入按鈕
           if (authButtons) authButtons.style.display = 'none';
           if (loginBtnEl) loginBtnEl.style.display = 'none';
@@ -22103,6 +22051,7 @@
       }
 
       async function fetchUserInfo() {
+        console.log("[AUTH] 呼叫 /api/auth/me...");
         try {
           // 呼叫 /api/auth/me 驗證登入狀態（使用 Cookie 認證）
           const response = await fetch('https://api.aijob.com.tw/api/auth/me', {
@@ -22113,27 +22062,71 @@
             }
           });
           
-          // 判斷規則：只要 response.ok 且 data.user_id 存在，就視為已登入
-          if (response.ok) {
-            const data = await response.json();
-            
-            // 檢查 data 和 data.user_id 是否存在
-            if (data && data.user_id) {
-              // 已登入：直接使用後端回傳的整包資料
-              ipPlanningUser = data;
-              sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
-              updateAuthUI(true);
-              updatePersonalInfo();
-              return;
-            }
+          if (!response.ok) {
+            console.warn("[AUTH] /api/auth/me 回傳非 200", response.status);
+            ipPlanningUser = null;
+            ipPlanningToken = null;
+            // 同時清除 localStorage 和 sessionStorage
+            sessionStorage.removeItem('ipPlanningUser');
+            sessionStorage.removeItem('ipPlanningToken');
+            localStorage.removeItem('ipPlanningUser');
+            localStorage.removeItem('ipPlanningToken');
+            updateAuthUI(false);
+            return null;
           }
           
-          // 未登入：跳轉回首頁
-          window.location.href = '/';
+          const data = await response.json();
+          
+          // 判斷規則：只要 data 存在且 data.user_id 存在，就視為已登入
+          if (!data || !data.user_id) {
+            console.warn("[AUTH] /api/auth/me 回傳格式錯誤，缺少 user_id");
+            ipPlanningUser = null;
+            ipPlanningToken = null;
+            // 同時清除 localStorage 和 sessionStorage
+            sessionStorage.removeItem('ipPlanningUser');
+            sessionStorage.removeItem('ipPlanningToken');
+            localStorage.removeItem('ipPlanningUser');
+            localStorage.removeItem('ipPlanningToken');
+            updateAuthUI(false);
+            return null;
+          }
+          
+          console.log("[AUTH] 成功登入 user:", data);
+          
+          // Cookie flow 下前端拿不到 JWT，用固定字串表示「已登入」
+          ipPlanningUser = data;
+          ipPlanningToken = "cookie-auth";
+          
+          // 同時更新 localStorage 和 sessionStorage 以保持一致性
+          sessionStorage.setItem('ipPlanningUser', JSON.stringify(data));
+          sessionStorage.setItem('ipPlanningToken', "cookie-auth");
+          localStorage.setItem('ipPlanningUser', JSON.stringify(data));
+          localStorage.setItem('ipPlanningToken', "cookie-auth");
+          
+          // 更新訂閱狀態
+          if (data.is_subscribed) {
+            document.body.dataset.subscribed = 'true';
+            localStorage.setItem('subscriptionStatus', 'active');
+          } else {
+            document.body.dataset.subscribed = 'false';
+            localStorage.setItem('subscriptionStatus', 'inactive');
+          }
+          
+          updateAuthUI(true);
+          updatePersonalInfo();
+          
+          return data;
         } catch (error) {
-          // 網路錯誤等異常，視為未登入，跳轉回首頁
-          console.warn('獲取用戶資訊時發生錯誤:', error);
-          window.location.href = '/';
+          console.error("[AUTH] fetchUserInfo() ERROR:", error);
+          ipPlanningUser = null;
+          ipPlanningToken = null;
+          // 同時清除 localStorage 和 sessionStorage
+          sessionStorage.removeItem('ipPlanningUser');
+          sessionStorage.removeItem('ipPlanningToken');
+          localStorage.removeItem('ipPlanningUser');
+          localStorage.removeItem('ipPlanningToken');
+          updateAuthUI(false);
+          return null;
         }
       }
 
@@ -23123,6 +23116,12 @@
       // 檢查 token 是否已過期
       function isTokenExpired(token) {
         if (!token) return true;
+        
+        // Cookie 認證模式下，使用固定字串 "cookie-auth"，不會過期
+        if (token === "cookie-auth") {
+          return false;
+        }
+        
         try {
           // 解析 JWT token（簡單格式：header.payload.signature）
           const parts = token.split('.');
@@ -23146,6 +23145,12 @@
       // 檢查 token 是否即將過期或已過期
       function isTokenExpiringSoon(token) {
         if (!token) return true;
+        
+        // Cookie 認證模式下，使用固定字串 "cookie-auth"，不會過期
+        if (token === "cookie-auth") {
+          return false;
+        }
+        
         try {
           // 解析 JWT token（簡單格式：header.payload.signature）
           const parts = token.split('.');
