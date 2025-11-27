@@ -118,16 +118,14 @@
    * 自動登出（清除所有登入資訊）
    */
   function autoLogout(reason = '登入已過期，請重新登入') {
-    console.log('[AUTH] 自動登出:', reason);
+    console.log('自動登出:', reason);
     
-    // 清除所有登入相關的 localStorage 和 sessionStorage
+    // 清除所有登入相關的 localStorage
     localStorage.removeItem('ipPlanningToken');
     localStorage.removeItem('ipPlanningRefreshToken');
     localStorage.removeItem('ipPlanningUser');
     localStorage.removeItem('ipPlanningTokenUpdated');
     localStorage.removeItem('subscriptionStatus');
-    sessionStorage.removeItem('ipPlanningToken');
-    sessionStorage.removeItem('ipPlanningUser');
     
     // 清除全局變數
     ipPlanningToken = null;
@@ -139,9 +137,7 @@
     }
     
     // 更新頁面狀態
-    if (document.body) {
-      document.body.dataset.subscribed = 'false';
-    }
+    document.body.dataset.subscribed = 'false';
     
     // 觸發登出事件
     try {
@@ -153,29 +149,16 @@
     // 顯示提示（如果 showToast 可用）
     try {
       if (typeof showToast === 'function') {
-        showToast(reason, 5000);
+        showToast('登入已過期，請重新登入', 3000);
       }
     } catch (e) {
       console.warn('無法顯示登出提示:', e);
     }
     
-    // 更新 UI（如果 updateAuthUI 可用）
-    try {
-      if (typeof updateAuthUI === 'function') {
-        updateAuthUI(false);
-      }
-    } catch (e) {
-      console.warn('無法更新認證 UI:', e);
-    }
-    
-    // 如果不在首頁，導向首頁；否則重新載入頁面以更新 UI
-    if (window.location.pathname !== '/' && !window.location.pathname.endsWith('/index.html')) {
-      window.location.href = '/';
-    } else {
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    }
+    // 重新載入頁面以更新 UI
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   }
 
   /**
@@ -199,7 +182,7 @@
         
         // 判斷規則：user_id 存在就視為登入成功
         if (data && data.user_id) {
-          // 更新全局變數（同時更新 localStorage 和 sessionStorage 以保持一致性）
+          // 更新全局變數和 localStorage
           ipPlanningUser = {
             user_id: data.user_id,
             google_id: data.google_id,
@@ -209,13 +192,7 @@
             is_subscribed: data.is_subscribed,
             created_at: data.created_at
           };
-          ipPlanningToken = "cookie-auth"; // Cookie flow 下用固定字串表示「已登入」
-          
-          // 同時更新 localStorage 和 sessionStorage 以保持一致性
           localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
-          localStorage.setItem('ipPlanningToken', "cookie-auth");
-          sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
-          sessionStorage.setItem('ipPlanningToken', "cookie-auth");
           
           // 更新訂閱狀態
           if (data.is_subscribed) {
@@ -231,13 +208,11 @@
       }
       
       // 如果不是 200 或 user_id 不存在，視為未登入
-      // 清除本地登入資訊（同時清除 localStorage 和 sessionStorage）
+      // 清除本地登入資訊
       ipPlanningUser = null;
       ipPlanningToken = null;
       localStorage.removeItem('ipPlanningUser');
       localStorage.removeItem('ipPlanningToken');
-      sessionStorage.removeItem('ipPlanningUser');
-      sessionStorage.removeItem('ipPlanningToken');
       return false;
     } catch (error) {
       // 網路錯誤等異常，視為未登入
