@@ -61,7 +61,7 @@
           
           if (token) {
             // 檢查是否已登入
-            const currentToken = localStorage.getItem('ipPlanningToken');
+            const currentToken = sessionStorage.getItem('ipPlanningToken');
             
             if (!currentToken) {
               // 未登入，先顯示 popup-callback.html 動畫，然後跳轉到 Google 登入
@@ -12474,7 +12474,7 @@
           } else if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
             isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
           } else {
-            const token = localStorage.getItem('ipPlanningToken');
+            const token = sessionStorage.getItem('ipPlanningToken');
             isLoggedIn = !!token;
           }
           
@@ -12486,7 +12486,7 @@
             const backendSubscribed = document.body.dataset.subscribed === 'true';
             const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
             const localSubscribed = localSubscriptionStatus === 'active';
-            const userStr = localStorage.getItem('ipPlanningUser');
+            const userStr = sessionStorage.getItem('ipPlanningUser');
             let userSubscribed = false;
             if (userStr) {
               try {
@@ -12533,7 +12533,7 @@
             isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
           } else {
             // 降級處理：直接檢查 localStorage
-            const token = localStorage.getItem('ipPlanningToken');
+            const token = sessionStorage.getItem('ipPlanningToken');
             isLoggedIn = !!token;
           }
           
@@ -12605,7 +12605,7 @@
           if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
             isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
           } else {
-            const token = localStorage.getItem('ipPlanningToken');
+            const token = sessionStorage.getItem('ipPlanningToken');
             isLoggedIn = !!token;
           }
           
@@ -13109,6 +13109,9 @@
         const profileDate = escapeHtml(registrationTime);
         const scriptCount = getLocalScripts().length;
         
+        const safeProfileName = escapeHtml(profileName || '');
+        const safeProfileEmail = escapeHtml(profileEmail || '');
+        const safeProfileDate = escapeHtml(profileDate || '');
         container.innerHTML = `
           <div class="profile-content">
             <div class="profile-section">
@@ -13116,15 +13119,15 @@
               <div class="user-details">
                 <div class="detail-item">
                   <label>姓名：</label>
-                  <span id="profileName">${profileName}</span>
+                  <span id="profileName">${safeProfileName}</span>
                 </div>
                 <div class="detail-item">
                   <label>Email：</label>
-                  <span id="profileEmail">${profileEmail}</span>
+                  <span id="profileEmail">${safeProfileEmail}</span>
                 </div>
                 <div class="detail-item">
                   <label>註冊時間：</label>
-                  <span id="profileDate">${profileDate}</span>
+                  <span id="profileDate">${safeProfileDate}</span>
                 </div>
               </div>
             </div>
@@ -13160,13 +13163,15 @@
         let html = '<div class="scripts-list">';
         scripts.forEach(script => {
           const date = formatTaiwanTime(script.created_at).split(' ')[0]; // 只取日期部分
+          const safeName = escapeHtml(script.name || '未命名腳本');
+          const safeContent = script.content ? escapeHtml(script.content.substring(0, 100) + '...') : '無內容';
           html += `
             <div class="script-item">
               <div class="script-header">
-                <h4>${script.name || '未命名腳本'}</h4>
+                <h4>${safeName}</h4>
                 <span class="script-date">${date}</span>
               </div>
-              <div class="script-preview">${script.content ? script.content.substring(0, 100) + '...' : '無內容'}</div>
+              <div class="script-preview">${safeContent}</div>
               <div class="script-actions">
                 <button onclick="viewScript(${script.id})" class="btn-primary">查看</button>
                 <button onclick="deleteScript(${script.id})" class="btn-danger">刪除</button>
@@ -13230,7 +13235,7 @@
       // 定期檢查 token 狀態（每分鐘檢查一次）
       function startTokenMonitor() {
         setInterval(() => {
-          const token = localStorage.getItem('ipPlanningToken');
+          const token = sessionStorage.getItem('ipPlanningToken');
           if (token) {
             // 檢查是否過期
             if (isTokenExpired(token)) {
@@ -13245,7 +13250,7 @@
 
       // 統一的安全 fetch 函數（用於需要認證的 API 呼叫）
       async function safeFetch(url, options = {}) {
-        const token = localStorage.getItem('ipPlanningToken');
+        const token = sessionStorage.getItem('ipPlanningToken');
         
         // 檢查 token 是否存在
         if (!token) {
@@ -13269,7 +13274,7 @@
         // 準備 headers
         const headers = {
           ...options.headers,
-          'Authorization': `Bearer ${localStorage.getItem('ipPlanningToken')}`
+          'Authorization': `Bearer ${sessionStorage.getItem('ipPlanningToken')}`
         };
         
         try {
@@ -13280,7 +13285,7 @@
             const refreshed = await tryRefreshTokenSafe();
             if (refreshed) {
               // 刷新成功，使用新 token 重試
-              headers['Authorization'] = `Bearer ${localStorage.getItem('ipPlanningToken')}`;
+              headers['Authorization'] = `Bearer ${sessionStorage.getItem('ipPlanningToken')}`;
               return await fetch(url, { ...options, headers });
             }
             // 刷新失敗，已自動登出
@@ -13317,7 +13322,7 @@
       async function handleActivationToken(token) {
         if (!token) return;
         
-        const currentToken = localStorage.getItem('ipPlanningToken');
+        const currentToken = sessionStorage.getItem('ipPlanningToken');
         
         if (!currentToken) {
           // 未登入，導向登入頁（帶上 activation_token）
@@ -13401,7 +13406,7 @@
             }
             
             // 強制刷新用戶資訊（確保獲取最新的訂閱狀態）
-            const currentToken = localStorage.getItem('ipPlanningToken');
+            const currentToken = sessionStorage.getItem('ipPlanningToken');
             if (currentToken) {
               try {
                 const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
@@ -13418,7 +13423,7 @@
                     // 更新全局用戶資訊
                     if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
                       ipPlanningUser.is_subscribed = userInfo.is_subscribed;
-                      localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                      sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                     }
                   }
                 }
@@ -13454,7 +13459,7 @@
                   localStorage.setItem('subscriptionStatus', 'active');
                   if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
                     ipPlanningUser.is_subscribed = finalUserInfo.is_subscribed;
-                    localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                    sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                   }
                 }
               }
@@ -13490,7 +13495,7 @@
                       localStorage.setItem('subscriptionStatus', 'active');
                       if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
                         ipPlanningUser.is_subscribed = latestUserInfo.is_subscribed;
-                        localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                        sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                       }
                       const planName = planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'lifetime' ? '永久使用' : '年費'));
                       const planDays = planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'lifetime' ? '永久' : '1年'));
@@ -13534,7 +13539,7 @@
                 localStorage.setItem('subscriptionStatus', 'active');
                 if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
                   ipPlanningUser.is_subscribed = true;
-                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                 }
                 // 顯示友好訊息
                 // 使用台灣時區格式化時間
@@ -13576,7 +13581,7 @@
                 
                 // 如果連結已使用，檢查用戶當前的訂閱狀態
                 // 如果用戶已經有訂閱，這可能是成功的（用戶之前已經啟用過）
-                const currentToken = localStorage.getItem('ipPlanningToken');
+                const currentToken = sessionStorage.getItem('ipPlanningToken');
                 if (currentToken) {
                   try {
                     const userResponse = await fetch(`https://api.aijob.com.tw/api/auth/me`, {
@@ -13593,7 +13598,7 @@
                         localStorage.setItem('subscriptionStatus', 'active');
                         if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
                           ipPlanningUser.is_subscribed = userInfo.is_subscribed;
-                          localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                          sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                         }
                         // 顯示成功訊息而不是錯誤
                         // 使用台灣時區格式化時間
@@ -13644,7 +13649,7 @@
             // 不僅檢查 is_subscribed，還要檢查 licenses 表中的有效授權（包括 trial）
             let hasSubscription = false;
             let planType = null;
-            const currentToken = localStorage.getItem('ipPlanningToken');
+            const currentToken = sessionStorage.getItem('ipPlanningToken');
             if (currentToken) {
               // 先檢查訂閱狀態 API（會返回 tier 資訊，包括 trial）
               try {
@@ -13664,7 +13669,7 @@
                     localStorage.setItem('subscriptionStatus', 'active');
                     if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
                       ipPlanningUser.is_subscribed = true; // 即使 trial 也視為已授權
-                      localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                      sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                     }
                     const planName = planType === 'lifetime' ? '永久使用' : (planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'trial' ? '7天體驗' : '年費')));
                     const planDays = planType === 'lifetime' ? '永久' : (planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'trial' ? '7天' : '1年')));
@@ -13692,7 +13697,7 @@
                     localStorage.setItem('subscriptionStatus', 'active');
                     if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
                       ipPlanningUser.is_subscribed = userInfo.is_subscribed;
-                      localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                      sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                     }
                     // 再次嘗試獲取方案類型
                     if (!planType) {
@@ -13738,7 +13743,7 @@
           
           // 即使發生錯誤，也檢查一下用戶的訂閱狀態（可能後端已經授權成功）
           // 不僅檢查 is_subscribed，還要檢查 licenses 表中的有效授權（包括 trial）
-          const currentToken = localStorage.getItem('ipPlanningToken');
+          const currentToken = sessionStorage.getItem('ipPlanningToken');
           if (currentToken) {
             // 先檢查訂閱狀態 API（會返回 tier 資訊，包括 trial）
             let planType = null;
@@ -13758,7 +13763,7 @@
                   localStorage.setItem('subscriptionStatus', 'active');
                   if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
                     ipPlanningUser.is_subscribed = true; // 即使 trial 也視為已授權
-                    localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                    sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                   }
                   const planName = planType === 'lifetime' ? '永久使用' : (planType === 'two_year' ? 'Creator Pro 雙年' : (planType === 'yearly' ? 'Script Lite 入門' : (planType === 'trial' ? '7天體驗' : '年費')));
                   const planDays = planType === 'lifetime' ? '永久' : (planType === 'two_year' ? '2年' : (planType === 'yearly' ? '1年' : (planType === 'trial' ? '7天' : '1年')));
@@ -13785,7 +13790,7 @@
                   localStorage.setItem('subscriptionStatus', 'active');
                   if (typeof ipPlanningUser !== 'undefined' && ipPlanningUser) {
                     ipPlanningUser.is_subscribed = userInfo.is_subscribed;
-                    localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                    sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                   }
                   // 再次嘗試獲取方案類型
                   if (!planType) {
@@ -13872,7 +13877,7 @@
           // 如果是授權連結，立即處理（優先於其他初始化邏輯）
           if (isActivatePath) {
             // 檢查是否已登入
-            const currentToken = localStorage.getItem('ipPlanningToken');
+            const currentToken = sessionStorage.getItem('ipPlanningToken');
             if (!currentToken) {
               // 未登入，立即跳轉到登入頁（不執行其他初始化）
               // 使用 replace 而不是 href，避免歷史記錄問題
@@ -13922,8 +13927,8 @@
         window.addEventListener('auth:logged-in', async function() {
           
           // 重新載入用戶資訊
-          const storedToken = localStorage.getItem('ipPlanningToken');
-          const storedUserStr = localStorage.getItem('ipPlanningUser');
+          const storedToken = sessionStorage.getItem('ipPlanningToken');
+          const storedUserStr = sessionStorage.getItem('ipPlanningUser');
           
           
           if (storedToken) {
@@ -14066,7 +14071,7 @@
         // 檢查並顯示 LLM Key 綁定通知
         async function checkAndShowLlmKeyNotification() {
           try {
-            const token = localStorage.getItem('ipPlanningToken');
+            const token = sessionStorage.getItem('ipPlanningToken');
             if (!token) {
               return; // 未登入，不顯示通知
             }
@@ -14206,8 +14211,8 @@
               name: name || '',
               picture: picture || ''
             };
-            localStorage.setItem('ipPlanningToken', ipPlanningToken);
-            localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+            sessionStorage.setItem('ipPlanningToken', ipPlanningToken);
+            sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
             
             // 清除 URL 參數
             window.history.replaceState({}, document.title, window.location.pathname);
@@ -14224,14 +14229,14 @@
         // 檢查 localStorage 中是否有新的 token（手機版跳轉回來後的處理）
         // 如果發現 ipPlanningTokenUpdated 標記，表示剛剛完成登入
         const tokenUpdatedFlag = localStorage.getItem('ipPlanningTokenUpdated');
-        const storedToken = localStorage.getItem('ipPlanningToken');
-        const storedUserStr = localStorage.getItem('ipPlanningUser');
+        const storedToken = sessionStorage.getItem('ipPlanningToken');
+        const storedUserStr = sessionStorage.getItem('ipPlanningUser');
         
         if (tokenUpdatedFlag && storedToken) {
           // 檢查這個 token 是否是新的（與當前全域變數不同）
           // 注意：此時全域變數可能還沒從 localStorage 載入（checkLoginStatus 尚未執行）
           // 所以只要有 tokenUpdatedFlag，就表示是新的登入
-          const currentToken = ipPlanningToken || localStorage.getItem('ipPlanningToken');
+          const currentToken = ipPlanningToken || sessionStorage.getItem('ipPlanningToken');
           const isNewToken = !currentToken || storedToken !== currentToken;
           
           if (isNewToken) {
@@ -14332,7 +14337,7 @@
           }
           
           // 最後檢查 localStorage 中的用戶資料
-          const userStr = localStorage.getItem('ipPlanningUser');
+          const userStr = sessionStorage.getItem('ipPlanningUser');
           if (userStr) {
           const user = JSON.parse(userStr);
           // 後端/前端一率以 falsy 視為未訂閱
@@ -14467,8 +14472,8 @@
           }
         } else {
           // 降級處理：直接檢查 localStorage
-          const token = localStorage.getItem('ipPlanningToken');
-          const userStr = localStorage.getItem('ipPlanningUser');
+          const token = sessionStorage.getItem('ipPlanningToken');
+          const userStr = sessionStorage.getItem('ipPlanningUser');
           isLoggedIn = !!(token && userStr);
           if (isLoggedIn && userStr) {
             try {
@@ -14550,7 +14555,7 @@
           loggedIn = await window.ReelMindCommon.checkLoginStatus();
         } else {
           // 備用檢查方式
-          const token = localStorage.getItem('ipPlanningToken');
+          const token = sessionStorage.getItem('ipPlanningToken');
           loggedIn = !!token;
         }
         
@@ -14576,7 +14581,7 @@
       // 在登入成功後與訂閱狀態載入時，同步本地 user.is_subscribed 欄位
       function markUnsubscribedByDefault() {
         try {
-          const userStr = localStorage.getItem('ipPlanningUser');
+          const userStr = sessionStorage.getItem('ipPlanningUser');
           if (!userStr) return;
           const user = JSON.parse(userStr);
           if (!('is_subscribed' in user)) {
@@ -14659,8 +14664,8 @@
       // 檢查登入狀態
       async function checkLoginStatus() {
         // 從 localStorage 獲取最新的 token 和用戶資訊
-        const storedToken = localStorage.getItem('ipPlanningToken');
-        const storedUserStr = localStorage.getItem('ipPlanningUser');
+        const storedToken = sessionStorage.getItem('ipPlanningToken');
+        const storedUserStr = sessionStorage.getItem('ipPlanningUser');
         
         // 更新全局變數（確保使用最新的資料）
         if (storedToken) {
@@ -14689,7 +14694,7 @@
               return;
             }
             // 刷新成功後，重新從 localStorage 獲取最新的 token
-            const newToken = localStorage.getItem('ipPlanningToken');
+            const newToken = sessionStorage.getItem('ipPlanningToken');
             if (newToken) {
               ipPlanningToken = newToken;
             }
@@ -14697,7 +14702,7 @@
             // Token 即將過期，主動刷新
             await proactiveRefreshToken();
             // 刷新後重新獲取最新的 token
-            const newToken = localStorage.getItem('ipPlanningToken');
+            const newToken = sessionStorage.getItem('ipPlanningToken');
             if (newToken) {
               ipPlanningToken = newToken;
             }
@@ -14824,7 +14829,7 @@
               if (refreshed) {
                 // Token 刷新成功，使用新 token 重試
                 // 重新獲取最新的 token（刷新後可能已更新）
-                const refreshedToken = localStorage.getItem('ipPlanningToken');
+                const refreshedToken = sessionStorage.getItem('ipPlanningToken');
                 if (refreshedToken) {
                   ipPlanningToken = refreshedToken;
                 }
@@ -14856,7 +14861,7 @@
                   email: userInfo.email || ipPlanningUser?.email,
                   is_subscribed: isSubscribed // 確保訂閱狀態被正確設置
                 };
-                localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                 
                 // 立即更新 UI 顯示（用戶頭像和名稱）
                 const userNameEl = document.getElementById('userName');
@@ -14900,7 +14905,7 @@
                 // 確保用戶資料中的訂閱狀態正確（已在上面設置，這裡再次確認）
                 if (ipPlanningUser) {
                   ipPlanningUser.is_subscribed = true;
-                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                 }
                 
                 // 立即更新首頁視圖
@@ -14912,7 +14917,7 @@
                 // 更新用戶資料中的訂閱狀態
                 if (ipPlanningUser) {
                   ipPlanningUser.is_subscribed = false;
-                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                 }
                 
                 // 立即更新首頁視圖
@@ -14930,7 +14935,7 @@
                 // 更新用戶資料中的訂閱狀態
                 if (ipPlanningUser) {
                   ipPlanningUser.is_subscribed = true;
-                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                 }
                 
                 // 立即更新首頁視圖
@@ -14942,7 +14947,7 @@
                 // 更新用戶資料中的訂閱狀態
                 if (ipPlanningUser) {
                   ipPlanningUser.is_subscribed = false;
-                  localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                  sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
                 }
                 
                 // 立即更新首頁視圖
@@ -14962,7 +14967,7 @@
               // 更新用戶資料中的訂閱狀態
               if (ipPlanningUser) {
                 ipPlanningUser.is_subscribed = true;
-                localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
               }
               
               // 立即更新首頁視圖
@@ -14974,7 +14979,7 @@
               // 更新用戶資料中的訂閱狀態
               if (ipPlanningUser) {
                 ipPlanningUser.is_subscribed = false;
-                localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
               }
               
               // 立即更新首頁視圖
@@ -15004,7 +15009,7 @@
       function updateHomepageView() {
         
         // 檢查登入狀態（優先使用全局變數，如果沒有則從 localStorage 讀取）
-        const isLoggedIn = !!(ipPlanningToken && ipPlanningUser) || !!(localStorage.getItem('ipPlanningToken') && localStorage.getItem('ipPlanningUser'));
+        const isLoggedIn = !!(ipPlanningToken && ipPlanningUser) || !!(sessionStorage.getItem('ipPlanningToken') && sessionStorage.getItem('ipPlanningUser'));
         
         // 檢查訂閱狀態（多個來源，優先使用全局變數）
         let userSubscribed = false;
@@ -15019,7 +15024,7 @@
         
         // 如果全局變數沒有，再從 localStorage 讀取
         if (!userSubscribed && isLoggedIn) {
-          const userStr = localStorage.getItem('ipPlanningUser');
+          const userStr = sessionStorage.getItem('ipPlanningUser');
           if (userStr) {
             try {
               const user = JSON.parse(userStr);
@@ -15349,7 +15354,7 @@
           console.warn('⚠️ 沒有用戶ID，嘗試生成...');
           if (ipPlanningUser) {
             ipPlanningUser.user_id = generateUserId();
-            localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+            sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
           } else {
             console.error('❌ 沒有當前用戶，跳過載入歷史');
             return;
@@ -15414,8 +15419,9 @@
         conversations.forEach(conv => {
           const item = document.createElement('div');
           item.className = 'conversation-item';
+          const safeSummary = escapeHtml(conv.summary || '');
           item.innerHTML = `
-            <div class="conversation-summary">${conv.summary}</div>
+            <div class="conversation-summary">${safeSummary}</div>
             <div class="conversation-date">${formatTaiwanTime(conv.created_at).split(' ')[0]}</div>
           `;
           conversationsList.appendChild(item);
@@ -15448,7 +15454,7 @@
         const memoryContent = document.getElementById('memoryContent');
         if (!memoryContent) return;
         
-        memoryContent.innerHTML = memory || '暫無記憶資訊';
+        memoryContent.innerHTML = memory ? escapeHtml(memory) : '暫無記憶資訊';
       }
       
       // 載入帳號定位記錄
@@ -15640,7 +15646,7 @@
           // 確保用戶有ID，如果沒有則生成一個
           if (!ipPlanningUser.user_id) {
             ipPlanningUser.user_id = generateUserId();
-            localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+            sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
           }
           
           const userNameDetail = document.getElementById('userNameDetail');
@@ -15781,7 +15787,7 @@
           if (response.ok) {
             // 更新本地狀態
             ipPlanningUser.is_subscribed = false;
-            localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+            sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
             document.body.dataset.subscribed = 'false';
             
             showToast('已取消自動續費', 3000);
@@ -15827,8 +15833,8 @@
         updateHomepageView();
         ipPlanningToken = null;
         ipPlanningUser = null;
-        localStorage.removeItem('ipPlanningToken');
-        localStorage.removeItem('ipPlanningUser');
+        sessionStorage.removeItem('ipPlanningToken');
+        sessionStorage.removeItem('ipPlanningUser');
         localStorage.removeItem('subscriptionStatus');
         localStorage.removeItem('ipPlanningTokenUpdated');
         
@@ -18637,8 +18643,46 @@
           return;
         }
         
+        // 用戶確認和警告
+        const confirmed = confirm(
+          '⚠️ 安全警告\n\n' +
+          '您即將匯出包含以下敏感信息的數據：\n' +
+          '• 腳本內容\n' +
+          '• 帳號定位分析\n' +
+          '• 選題內容\n' +
+          '• 對話記錄\n\n' +
+          '請確保：\n' +
+          '1. 在安全的地方保存此文件\n' +
+          '2. 不要分享給他人\n' +
+          '3. 妥善保管匯出的文件\n\n' +
+          '確定要匯出嗎？'
+        );
+        
+        if (!confirmed) {
+          return;
+        }
+        
         try {
           showToast('正在匯出資料...', 3000);
+          
+          // 記錄匯出操作到後端（安全審計日誌）
+          try {
+            await fetch(`https://api.aijob.com.tw/api/user/data-export-log`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${ipPlanningToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                user_id: ipPlanningUser.user_id,
+                export_type: 'user_data',
+                timestamp: new Date().toISOString()
+              })
+            });
+          } catch (logError) {
+            console.warn('記錄匯出日誌失敗:', logError);
+            // 不阻止匯出，即使日誌記錄失敗
+          }
           
           // 收集所有用戶數據
           const allData = {
@@ -18771,14 +18815,14 @@
         }
         
         // 清除本地存儲（保留登入信息）
-        const token = localStorage.getItem('ipPlanningToken');
-        const user = localStorage.getItem('ipPlanningUser');
+        const token = sessionStorage.getItem('ipPlanningToken');
+        const user = sessionStorage.getItem('ipPlanningUser');
         
         localStorage.clear();
         
         // 恢復登入信息
-        if (token) localStorage.setItem('ipPlanningToken', token);
-        if (user) localStorage.setItem('ipPlanningUser', user);
+        if (token) sessionStorage.setItem('ipPlanningToken', token);
+        if (user) sessionStorage.setItem('ipPlanningUser', user);
         
         showToast('本地快取已清除', 3000);
         
@@ -21317,8 +21361,8 @@
         await handleAuthCallback();
         
         // 檢查本地存儲的認證資訊
-        ipPlanningToken = localStorage.getItem('ipPlanningToken');
-        ipPlanningUser = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
+        ipPlanningToken = sessionStorage.getItem('ipPlanningToken');
+        ipPlanningUser = JSON.parse(sessionStorage.getItem('ipPlanningUser') || 'null');
         
         if (ipPlanningToken && ipPlanningUser) {
           updateAuthUI(true);
@@ -21576,10 +21620,10 @@
               
               // 保存到本地存儲
               if (ipPlanningToken) {
-                localStorage.setItem('ipPlanningToken', ipPlanningToken);
+                sessionStorage.setItem('ipPlanningToken', ipPlanningToken);
               }
               if (ipPlanningUser) {
-                localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+                sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
               }
               
               // 隱藏彈窗覆蓋層
@@ -21589,8 +21633,8 @@
               updateAuthUI(true);
               
               // 重新檢查登入狀態（確保全域變數同步）
-              ipPlanningToken = localStorage.getItem('ipPlanningToken');
-              ipPlanningUser = JSON.parse(localStorage.getItem('ipPlanningUser') || 'null');
+              ipPlanningToken = sessionStorage.getItem('ipPlanningToken');
+              ipPlanningUser = JSON.parse(sessionStorage.getItem('ipPlanningUser') || 'null');
               
               // 檢查並更新訂閱狀態（先更新訂閱狀態，再顯示主應用程式）
               checkSubscriptionStatus().then(async () => {
@@ -21651,8 +21695,8 @@
             if (event.key === 'ipPlanningTokenUpdated' && event.newValue) {
               
               // 從 localStorage 讀取 token 和用戶資訊
-              const newToken = localStorage.getItem('ipPlanningToken');
-              const newUserStr = localStorage.getItem('ipPlanningUser');
+              const newToken = sessionStorage.getItem('ipPlanningToken');
+              const newUserStr = sessionStorage.getItem('ipPlanningUser');
               
               if (newToken && newToken !== ipPlanningToken) {
                 
@@ -21694,11 +21738,11 @@
               // 先強制 refresh 一次，確保服務端與前端 token 完全同步，再讀取 me
               (async () => {
                 try {
-                  const t0 = localStorage.getItem('ipPlanningToken') || '';
+                  const t0 = sessionStorage.getItem('ipPlanningToken') || '';
                   await fetch('https://api.aijob.com.tw/api/auth/refresh', { method: 'POST', headers: t0 ? { 'Authorization': `Bearer ${t0}` } : {} });
                 } catch (e) { console.warn('DEBUG: refresh after login failed (can ignore if CORS):', e); }
                 try {
-                  const currentToken = localStorage.getItem('ipPlanningToken') || '';
+                  const currentToken = sessionStorage.getItem('ipPlanningToken') || '';
                   const meRes = await fetch('https://api.aijob.com.tw/api/auth/me', {
                     headers: {
                       'Authorization': `Bearer ${currentToken}`
@@ -21754,14 +21798,14 @@
           
           // 額外的定期檢查機制（每 500ms 檢查一次 localStorage，作為 storage 事件的備用）
           let localStorageCheckInterval = setInterval(function() {
-            const checkToken = localStorage.getItem('ipPlanningToken');
+            const checkToken = sessionStorage.getItem('ipPlanningToken');
             const checkUpdatedFlag = localStorage.getItem('ipPlanningTokenUpdated');
             
             if (checkToken && checkUpdatedFlag && checkToken !== ipPlanningToken) {
               clearInterval(localStorageCheckInterval);
               
               // 觸發與 storageHandler 相同的處理邏輯
-              const checkUserStr = localStorage.getItem('ipPlanningUser');
+              const checkUserStr = sessionStorage.getItem('ipPlanningUser');
               
               if (popupTimeout) {
                 clearTimeout(popupTimeout);
@@ -21804,8 +21848,8 @@
             clearInterval(localStorageCheckInterval);
             
             // 檢查 localStorage 中是否有 token（最後的備用檢查）
-            const finalToken = localStorage.getItem('ipPlanningToken');
-            const finalUserStr = localStorage.getItem('ipPlanningUser');
+            const finalToken = sessionStorage.getItem('ipPlanningToken');
+            const finalUserStr = sessionStorage.getItem('ipPlanningUser');
             
             if (finalToken && finalToken !== ipPlanningToken) {
               
@@ -21901,8 +21945,8 @@
       
       async function checkAuthResult() {
         // 檢查本地存儲中是否有新的認證資訊
-        const storedToken = localStorage.getItem('ipPlanningToken');
-        const storedUser = localStorage.getItem('ipPlanningUser');
+        const storedToken = sessionStorage.getItem('ipPlanningToken');
+        const storedUser = sessionStorage.getItem('ipPlanningUser');
         
         if (storedToken && storedUser && storedToken !== ipPlanningToken) {
           ipPlanningToken = storedToken;
@@ -21911,7 +21955,7 @@
           // 為用戶生成隨機ID（如果沒有）
           if (!ipPlanningUser.user_id) {
             ipPlanningUser.user_id = generateUserId();
-            localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+            sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
           }
           
           updateAuthUI(true);
@@ -21951,8 +21995,8 @@
           ipPlanningToken = token;
           
           // 保存到本地存儲
-          localStorage.setItem('ipPlanningToken', ipPlanningToken);
-          localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+          sessionStorage.setItem('ipPlanningToken', ipPlanningToken);
+          sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
           
           updateAuthUI(true);
           
@@ -22027,7 +22071,7 @@
             ipPlanningUser.user_id = generateUserId();
           }
           
-          localStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
+          sessionStorage.setItem('ipPlanningUser', JSON.stringify(ipPlanningUser));
           updateAuthUI(true);
           
           // 立即更新個人資料顯示
@@ -22871,7 +22915,7 @@
           }
           
           // 優先從 localStorage 獲取最新的 token（確保使用當前登入用戶的 token）
-          let token = localStorage.getItem('ipPlanningToken');
+          let token = sessionStorage.getItem('ipPlanningToken');
           
           // 如果 localStorage 沒有，嘗試從 window.Auth 獲取
           if (!token && typeof window.Auth !== 'undefined' && window.Auth.getToken) {
@@ -22890,7 +22934,7 @@
               conversationType,
               role,
               contentLength: content.length,
-              localStorageToken: !!localStorage.getItem('ipPlanningToken'),
+              localStorageToken: !!sessionStorage.getItem('ipPlanningToken'),
               windowAuth: typeof window.Auth !== 'undefined',
               globalToken: !!ipPlanningToken
             });
@@ -22907,7 +22951,7 @@
           // 獲取用戶資訊（優先從 localStorage 獲取最新資料）
           let user = null;
           try {
-            const userStr = localStorage.getItem('ipPlanningUser');
+            const userStr = sessionStorage.getItem('ipPlanningUser');
             if (userStr) {
               user = JSON.parse(userStr);
             }
@@ -22998,7 +23042,7 @@
               const ok = await tryRefreshTokenSafe();
               if (ok) {
                 // 刷新成功後重新獲取最新的 token 並重試
-                const newToken = localStorage.getItem('ipPlanningToken') || 
+                const newToken = sessionStorage.getItem('ipPlanningToken') || 
                                (window.Auth && window.Auth.getToken ? window.Auth.getToken() : null);
                 if (newToken) {
                   return recordConversationMessage(conversationType, role, content);
@@ -23080,8 +23124,8 @@
         // 清除 token 和用戶資料
         ipPlanningToken = null;
         ipPlanningUser = null;
-        localStorage.removeItem('ipPlanningToken');
-        localStorage.removeItem('ipPlanningUser');
+        sessionStorage.removeItem('ipPlanningToken');
+        sessionStorage.removeItem('ipPlanningUser');
         localStorage.removeItem('subscriptionStatus');
         
         // 更新 UI
@@ -23157,7 +23201,7 @@
           const data = await r.json();
           if (data?.access_token) {
             ipPlanningToken = data.access_token;
-            localStorage.setItem('ipPlanningToken', ipPlanningToken);
+            sessionStorage.setItem('ipPlanningToken', ipPlanningToken);
             isRefreshingToken = false;
             lastRefreshAttempt = 0; // 成功後重置
             return true;
@@ -24468,8 +24512,8 @@
 
       // 儲存結果
       window.saveMode3Result = async function() {
-        const token = localStorage.getItem('ipPlanningToken');
-        const userStr = localStorage.getItem('ipPlanningUser');
+        const token = sessionStorage.getItem('ipPlanningToken');
+        const userStr = sessionStorage.getItem('ipPlanningUser');
         
         if (!token || !userStr) {
           showToast('請先登入', 3000);
@@ -25116,9 +25160,9 @@
       if (!chatMessages || !messageInput || !sendBtn) return;
       
       // 獲取用戶 token
-      const token = localStorage.getItem('ipPlanningToken') || 
+      const token = sessionStorage.getItem('ipPlanningToken') || 
                    (window.Auth && window.Auth.getToken ? window.Auth.getToken() : null);
-      const userStr = localStorage.getItem('ipPlanningUser');
+      const userStr = sessionStorage.getItem('ipPlanningUser');
       const user = userStr ? JSON.parse(userStr) : null;
       
       // 添加用戶訊息
@@ -25264,7 +25308,7 @@
       
       // 獲取用戶頭像（從 Google 登入）
       if (role === 'user') {
-        const userStr = localStorage.getItem('ipPlanningUser');
+        const userStr = sessionStorage.getItem('ipPlanningUser');
         const user = userStr ? JSON.parse(userStr) : null;
         if (user && user.picture) {
           // 使用圖片作為頭像
@@ -25510,8 +25554,8 @@
         }
       } else {
         // 降級處理：直接檢查 localStorage
-        const token = localStorage.getItem('ipPlanningToken') || localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('ipPlanningUser') || localStorage.getItem('user') || 'null');
+        const token = sessionStorage.getItem('ipPlanningToken') || localStorage.getItem('token');
+        const user = JSON.parse(sessionStorage.getItem('ipPlanningUser') || localStorage.getItem('user') || 'null');
         isLoggedIn = !!(token && user);
         if (isLoggedIn && user) {
           isSubscribed = user.is_subscribed === true || user.is_subscribed === 1 || user.is_subscribed === '1' || user.is_subscribed === 'true';
