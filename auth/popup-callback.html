@@ -548,20 +548,33 @@
             
             console.log('DEBUG: ✅ API 驗證成功，獲取到用戶資訊:', data);
             
-            // 從 API 響應中獲取用戶資訊
-            var apiUser = data.user || data;
-            var apiUserId = apiUser.user_id || apiUser.id || user_id;
-            var apiEmail = apiUser.email || email || '';
-            var apiName = apiUser.name || name || '';
-            var apiPicture = apiUser.picture || picture || '';
+            // 新的判斷規則：檢查 data.user_id 是否存在
+            if (!data.user_id) {
+              console.error('DEBUG: ❌ API 返回的資料中沒有 user_id');
+              updateStatus('⚠️ 登入驗證失敗：未找到用戶 ID', false, true);
+              setTimeout(function() {
+                window.location.href = window.location.origin + '/';
+              }, 3000);
+              return;
+            }
             
-            // 保存用戶資訊到 localStorage（token 在 Cookie 中，不需要保存）
+            // 後端直接返回用戶物件，不需要 data.user 包裝
+            // 使用後端返回的完整用戶資訊
+            var apiUserId = data.user_id;
+            var apiEmail = data.email || '';
+            var apiName = data.name || '';
+            var apiPicture = data.picture || '';
+            
+            // 保存完整的用戶資訊到 localStorage（對應後端返回的格式）
             try {
               localStorage.setItem('ipPlanningUser', JSON.stringify({
                 user_id: apiUserId,
+                google_id: data.google_id,
                 email: apiEmail,
                 name: apiName,
-                picture: apiPicture
+                picture: apiPicture,
+                is_subscribed: data.is_subscribed,
+                created_at: data.created_at
               }));
               localStorage.setItem('ipPlanningTokenUpdated', Date.now().toString());
               console.log('DEBUG: ✅ 用戶資訊已保存到 localStorage');

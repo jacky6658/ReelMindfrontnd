@@ -12537,8 +12537,23 @@
             isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
           } else {
             // 降級處理：直接檢查 localStorage
-            const token = sessionStorage.getItem('ipPlanningToken');
-            isLoggedIn = !!token;
+            // 使用 checkLoginStatus 實際驗證登入狀態（會呼叫 /api/auth/me）
+            if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+              isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
+            } else {
+              // 降級處理：檢查 localStorage 中的 user_id
+              const userStr = localStorage.getItem('ipPlanningUser');
+              if (userStr) {
+                try {
+                  const user = JSON.parse(userStr);
+                  isLoggedIn = !!(user && user.user_id);
+                } catch (e) {
+                  isLoggedIn = false;
+                }
+              } else {
+                isLoggedIn = false;
+              }
+            }
           }
           
           if (!isLoggedIn) {
@@ -14420,8 +14435,22 @@
       // 處理 mode-card 點擊
       async function handleModeCardClick(modeId) {
         
-        // 先檢查登入狀態
-        const isLoggedIn = ipPlanningToken && ipPlanningUser;
+        // 先檢查登入狀態（使用實際 API 驗證）
+        let isLoggedIn = false;
+        if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+          isLoggedIn = await window.ReelMindCommon.checkLoginStatus();
+        } else {
+          // 降級處理：檢查 localStorage 中的 user_id
+          const userStr = localStorage.getItem('ipPlanningUser');
+          if (userStr) {
+            try {
+              const user = JSON.parse(userStr);
+              isLoggedIn = !!(user && user.user_id);
+            } catch (e) {
+              isLoggedIn = false;
+            }
+          }
+        }
         
         if (!isLoggedIn) {
           // 未登入，先顯示提示訊息，再跳轉登入
@@ -14582,8 +14611,23 @@
           loggedIn = await window.ReelMindCommon.checkLoginStatus();
         } else {
           // 備用檢查方式
-          const token = sessionStorage.getItem('ipPlanningToken');
-          loggedIn = !!token;
+          // 使用 checkLoginStatus 實際驗證登入狀態（會呼叫 /api/auth/me）
+          if (window.ReelMindCommon && typeof window.ReelMindCommon.checkLoginStatus === 'function') {
+            loggedIn = await window.ReelMindCommon.checkLoginStatus();
+          } else {
+            // 降級處理：檢查 localStorage 中的 user_id
+            const userStr = localStorage.getItem('ipPlanningUser');
+            if (userStr) {
+              try {
+                const user = JSON.parse(userStr);
+                loggedIn = !!(user && user.user_id);
+              } catch (e) {
+                loggedIn = false;
+              }
+            } else {
+              loggedIn = false;
+            }
+          }
         }
         
         if (!loggedIn) {
