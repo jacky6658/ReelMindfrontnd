@@ -13273,8 +13273,17 @@
       // 定期檢查 token 狀態（每分鐘檢查一次）
       // 在 HttpOnly Cookie 模式下，不再需要前端主動檢查 token 過期
       // 改為定期呼叫 /api/auth/me 來驗證登入狀態
+      let tokenMonitorInterval = null;
+      let consecutiveFailures = 0; // 連續失敗次數
+      const MAX_CONSECUTIVE_FAILURES = 3; // 最多允許連續失敗 3 次
+      
       function startTokenMonitor() {
-        setInterval(async () => {
+        // 如果已經有監控在運行，先清除
+        if (tokenMonitorInterval) {
+          clearInterval(tokenMonitorInterval);
+        }
+        
+        tokenMonitorInterval = setInterval(async () => {
           // 如果有登入標記，定期驗證登入狀態
           const token = sessionStorage.getItem('ipPlanningToken') || localStorage.getItem('ipPlanningToken');
           if (token && token === "cookie-auth") {
@@ -13286,17 +13295,44 @@
                 headers: { 'Accept': 'application/json' }
               });
               if (!response.ok || response.status === 401) {
-                // 登入狀態失效，清除本地狀態
-                ipPlanningUser = null;
-                ipPlanningToken = null;
-                sessionStorage.removeItem('ipPlanningToken');
-                sessionStorage.removeItem('ipPlanningUser');
-                localStorage.removeItem('ipPlanningToken');
-                localStorage.removeItem('ipPlanningUser');
-                updateAuthUI(false);
+                consecutiveFailures++;
+                // 如果連續失敗次數超過限制，停止監控並清除狀態
+                if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                  console.warn('[AUTH] 連續多次驗證失敗，停止定期檢查');
+                  clearInterval(tokenMonitorInterval);
+                  tokenMonitorInterval = null;
+                  consecutiveFailures = 0;
+                  
+                  // 清除本地狀態
+                  ipPlanningUser = null;
+                  ipPlanningToken = null;
+                  sessionStorage.removeItem('ipPlanningToken');
+                  sessionStorage.removeItem('ipPlanningUser');
+                  localStorage.removeItem('ipPlanningToken');
+                  localStorage.removeItem('ipPlanningUser');
+                  updateAuthUI(false);
+                }
+              } else {
+                // 成功時重置失敗計數
+                consecutiveFailures = 0;
               }
             } catch (err) {
+              consecutiveFailures++;
               console.warn('定期檢查登入狀態失敗:', err);
+              // 如果連續失敗次數超過限制，停止監控
+              if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                console.warn('[AUTH] 連續多次驗證失敗，停止定期檢查');
+                clearInterval(tokenMonitorInterval);
+                tokenMonitorInterval = null;
+                consecutiveFailures = 0;
+              }
+            }
+          } else {
+            // 如果沒有 token，停止監控
+            if (tokenMonitorInterval) {
+              clearInterval(tokenMonitorInterval);
+              tokenMonitorInterval = null;
+              consecutiveFailures = 0;
             }
           }
         }, 60000); // 每分鐘檢查一次
@@ -14965,7 +15001,22 @@
                 updateHomepageView();
               }
             } else {
-              // API 失敗（包括 401 刷新失敗），使用本地儲存或預設已訂閱
+              // API 失敗（包括 401），表示登入狀態失效
+              if (response.status === 401) {
+                // 收到 401，表示 Cookie 已失效，清除本地狀態
+                console.warn('[AUTH] checkSubscriptionStatus 收到 401，登入狀態失效');
+                ipPlanningUser = null;
+                ipPlanningToken = null;
+                sessionStorage.removeItem('ipPlanningToken');
+                sessionStorage.removeItem('ipPlanningUser');
+                localStorage.removeItem('ipPlanningToken');
+                localStorage.removeItem('ipPlanningUser');
+                updateAuthUI(false);
+                // 不更新訂閱狀態，因為用戶已登出
+                return;
+              }
+              
+              // 其他錯誤（非 401），使用本地儲存或預設已訂閱
               const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
               const localIsSubscribed = ipPlanningUser && ipPlanningUser.is_subscribed !== false; // 預設為已訂閱
               
