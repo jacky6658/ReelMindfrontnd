@@ -211,13 +211,22 @@
         }
         return originalFetch(input, retryOptions2);
       } else {
-        // Token 刷新失敗，可能是 token 已過期，觸發自動登出
+        // Token 刷新失敗，可能是 token 已過期
+        // 但不要立即觸發 autoLogout，因為這可能只是暫時的網路問題
         // 設置標記，防止後續請求繼續重試
         if (!isLoggingOut) {
           isLoggingOut = true;
-          console.warn('[AUTH] Token 刷新失敗，觸發自動登出');
-          if (window.ReelMindCommon && window.ReelMindCommon.autoLogout) {
-            window.ReelMindCommon.autoLogout('登入已過期，請重新登入');
+          console.warn('[AUTH] Token 刷新失敗，但不觸發自動登出（避免無限刷新）');
+          // 不觸發 autoLogout，只清除標記，讓用戶手動重新登入
+          // 如果 window.ReelMindCommon 和 showToast 可用，顯示提示
+          try {
+            if (typeof showToast === 'function') {
+              showToast('登入狀態已失效，請重新登入', 5000);
+            } else if (window.ReelMindCommon && typeof window.ReelMindCommon.showToast === 'function') {
+              window.ReelMindCommon.showToast('登入狀態已失效，請重新登入', 5000);
+            }
+          } catch (e) {
+            console.warn('無法顯示提示:', e);
           }
         }
         // 直接返回 401 響應，不再重試

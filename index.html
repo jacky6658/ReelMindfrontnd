@@ -13283,6 +13283,13 @@
           clearInterval(tokenMonitorInterval);
         }
         
+        // 暫時停用定期監控，避免在 Cookie 失效時不斷觸發 API 呼叫
+        // 如果需要定期檢查，應該由用戶主動操作觸發，而不是自動執行
+        console.log('[AUTH] Token 監控已停用，避免無限刷新');
+        return;
+        
+        // 以下代碼暫時停用
+        /*
         tokenMonitorInterval = setInterval(async () => {
           // 如果有登入標記，定期驗證登入狀態
           const token = sessionStorage.getItem('ipPlanningToken') || localStorage.getItem('ipPlanningToken');
@@ -13336,6 +13343,7 @@
             }
           }
         }, 60000); // 每分鐘檢查一次
+        */
       }
 
       // 統一的安全 fetch 函數（用於需要認證的 API 呼叫）
@@ -14801,8 +14809,11 @@
       let lastRefreshAttempt = 0; // 上次刷新嘗試的時間
       let handleAuthMessage = null; // 認證訊息處理函數（在 login() 中動態創建）
       
-      // 檢查登入狀態（添加防重複執行標記）
+      // 檢查登入狀態（添加防重複執行標記和防抖）
       let isCheckingLoginStatus = false;
+      let lastCheckLoginStatusTime = 0;
+      const CHECK_LOGIN_STATUS_INTERVAL = 2000; // 2 秒內不重複執行
+      
       async function checkLoginStatus() {
         // 防止重複執行
         if (isCheckingLoginStatus) {
@@ -14810,8 +14821,40 @@
           return;
         }
         
+        // 防抖：如果 2 秒內已經執行過，跳過
+        const now = Date.now();
+        if (now - lastCheckLoginStatusTime < CHECK_LOGIN_STATUS_INTERVAL) {
+          console.log('[AUTH] checkLoginStatus 在短時間內被重複呼叫，跳過');
+          return;
+        }
+        
         isCheckingLoginStatus = true;
+        lastCheckLoginStatusTime = now;
+        
         try {
+          // 先檢查本地狀態，如果本地有 user_id，先使用本地狀態
+          const localUserStr = localStorage.getItem('ipPlanningUser') || sessionStorage.getItem('ipPlanningUser');
+          if (localUserStr) {
+            try {
+              const localUser = JSON.parse(localUserStr);
+              if (localUser && localUser.user_id) {
+                // 本地有 user_id，先更新全局變數
+                ipPlanningUser = localUser;
+                ipPlanningToken = localStorage.getItem('ipPlanningToken') || sessionStorage.getItem('ipPlanningToken') || "cookie-auth";
+                // 顯示主應用程式
+                showMainApp();
+                // 更新 UI（使用本地狀態）
+                if (ipPlanningUser && ipPlanningUser.user_id) {
+                  await updateUserInfo();
+                } else {
+                  showLoginButton();
+                }
+              }
+            } catch (e) {
+              // 解析失敗，繼續 API 驗證
+            }
+          }
+          
           // 直接呼叫 fetchUserInfo 驗證登入狀態（會實際呼叫 /api/auth/me）
           const userData = await fetchUserInfo();
           
@@ -14823,7 +14866,7 @@
             // 已登入：更新用戶資訊
             await updateUserInfo();
           } else {
-            // 未登入時顯示登入按鈕
+            // 未登入時顯示登入按鈕（但不執行任何跳轉或刷新）
             showLoginButton();
           }
         } catch (error) {
@@ -22150,7 +22193,18 @@
         }
       }
 
+      // 防止重複呼叫 fetchUserInfo 的標記
+      let isFetchingUserInfo = false;
+      
       async function fetchUserInfo() {
+        // 防止重複呼叫
+        if (isFetchingUserInfo) {
+          console.log("[AUTH] fetchUserInfo 正在執行中，跳過重複呼叫");
+          // 如果正在執行，返回當前的 ipPlanningUser（如果存在）
+          return ipPlanningUser && ipPlanningUser.user_id ? ipPlanningUser : null;
+        }
+        
+        isFetchingUserInfo = true;
         console.log("[AUTH] 呼叫 /api/auth/me...");
         try {
           // 呼叫 /api/auth/me 驗證登入狀態（使用 Cookie 認證）
@@ -22163,15 +22217,23 @@
           });
           
           if (!response.ok) {
-            console.warn("[AUTH] /api/auth/me 回傳非 200", response.status);
-            ipPlanningUser = null;
-            ipPlanningToken = null;
-            // 同時清除 localStorage 和 sessionStorage
-            sessionStorage.removeItem('ipPlanningUser');
-            sessionStorage.removeItem('ipPlanningToken');
-            localStorage.removeItem('ipPlanningUser');
-            localStorage.removeItem('ipPlanningToken');
-            updateAuthUI(false);
+            // 只有在明確收到 401 時，才清除本地狀態
+            // 其他錯誤（500、503 等）保留本地狀態，避免誤判
+            if (response.status === 401) {
+              console.warn("[AUTH] /api/auth/me 回傳 401，清除本地登入狀態");
+              ipPlanningUser = null;
+              ipPlanningToken = null;
+              // 同時清除 localStorage 和 sessionStorage
+              sessionStorage.removeItem('ipPlanningUser');
+              sessionStorage.removeItem('ipPlanningToken');
+              localStorage.removeItem('ipPlanningUser');
+              localStorage.removeItem('ipPlanningToken');
+              updateAuthUI(false);
+            } else {
+              // 其他錯誤，保留本地狀態，返回當前狀態
+              console.warn("[AUTH] /api/auth/me 回傳非 200", response.status, "保留本地狀態");
+              return ipPlanningUser && ipPlanningUser.user_id ? ipPlanningUser : null;
+            }
             return null;
           }
           
@@ -22218,15 +22280,12 @@
           return data;
         } catch (error) {
           console.error("[AUTH] fetchUserInfo() ERROR:", error);
-          ipPlanningUser = null;
-          ipPlanningToken = null;
-          // 同時清除 localStorage 和 sessionStorage
-          sessionStorage.removeItem('ipPlanningUser');
-          sessionStorage.removeItem('ipPlanningToken');
-          localStorage.removeItem('ipPlanningUser');
-          localStorage.removeItem('ipPlanningToken');
-          updateAuthUI(false);
-          return null;
+          // 網路錯誤時，保留本地狀態，返回當前狀態（避免誤判導致清除登入狀態）
+          // 只有在明確知道是認證錯誤時，才清除狀態
+          console.warn("[AUTH] fetchUserInfo 發生網路錯誤，保留本地狀態");
+          return ipPlanningUser && ipPlanningUser.user_id ? ipPlanningUser : null;
+        } finally {
+          isFetchingUserInfo = false;
         }
       }
 

@@ -808,8 +808,9 @@
     const loggedIn = await checkLoginStatus();
     
     if (!loggedIn) {
-      // 未登入，導向首頁
-      window.location.href = '/';
+      // 未登入，但不執行頁面跳轉（避免無限刷新）
+      // 只返回 false，讓呼叫者決定如何處理
+      console.log('[AUTH] checkPagePermission: 未登入，但不執行頁面跳轉');
       return false;
     }
     
@@ -818,8 +819,9 @@
     const subscribed = isSubscribed();
     
     if (!subscribed) {
-      // 未訂閱，導向訂閱頁
-      window.location.href = '/subscription.html';
+      // 未訂閱，但不執行頁面跳轉（避免無限刷新）
+      // 只返回 false，讓呼叫者決定如何處理
+      console.log('[AUTH] checkPagePermission: 未訂閱，但不執行頁面跳轉');
       return false;
     }
     
@@ -887,8 +889,9 @@
     }
     
     if (!subscribed) {
-      // 已登入但未訂閱，導向訂閱頁
-      window.location.href = '/subscription.html';
+      // 已登入但未訂閱，但不執行頁面跳轉（避免無限刷新）
+      // 只返回 false，讓呼叫者決定如何處理
+      console.log('[AUTH] checkFeatureAccess: 未訂閱，但不執行頁面跳轉');
       return false;
     }
     
@@ -1173,13 +1176,21 @@
       const hasPermission = await checkPagePermission();
       
       if (!hasPermission) {
-        // 沒有權限，已經導向到其他頁面，停止執行
+        // 沒有權限，但不執行頁面跳轉（避免無限刷新）
+        // 只停止執行，讓頁面保持當前狀態
+        console.log('[AUTH] initPage: 沒有權限，但不執行頁面跳轉');
         return;
       }
     } else {
       // 首頁、體驗頁面或指南頁面：只檢查登入和訂閱狀態（不強制要求），用於更新 UI
-      await checkLoginStatus();
-      await checkSubscriptionStatus();
+      // 使用防抖，避免重複執行
+      try {
+        await checkLoginStatus();
+        await checkSubscriptionStatus();
+      } catch (error) {
+        console.error('[AUTH] initPage: 檢查登入狀態時發生錯誤:', error);
+        // 發生錯誤時，不執行任何操作，避免觸發刷新
+      }
     }
     
     // 觸發頁面載入完成事件
