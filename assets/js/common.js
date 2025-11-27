@@ -150,18 +150,10 @@
       console.warn('無法更新認證 UI:', e);
     }
     
-    // 避免無限刷新：只有在明確需要時才重新載入頁面
-    // 如果不在首頁，導向首頁；否則只更新 UI，不重新載入頁面
-    if (window.location.pathname !== '/' && !window.location.pathname.endsWith('/index.html')) {
-      // 使用 replace 而不是 href，避免在歷史記錄中留下記錄
-      window.location.replace('/');
-    } else {
-      // 在首頁時，只更新 UI，不重新載入頁面（避免無限刷新）
-      // 如果 updateAuthUI 可用，使用它來更新 UI
-      // 否則，只清除狀態，不重新載入
-      console.log('[AUTH] 已登出，但保持在當前頁面以避免無限刷新');
-      // 不執行 window.location.reload()，避免無限刷新循環
-    }
+    // 避免無限刷新：完全移除頁面跳轉和重新載入邏輯
+    // 只更新 UI 狀態，不執行任何頁面跳轉或重新載入
+    console.log('[AUTH] 已登出，更新 UI 狀態，不執行頁面跳轉或重新載入');
+    // 不執行 window.location.reload() 或 window.location.href，避免無限刷新循環
   }
 
   /**

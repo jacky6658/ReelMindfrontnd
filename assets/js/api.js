@@ -85,8 +85,20 @@
     }
   }
 
+  // 防止重複觸發 autoLogout 的標記
+  let isLoggingOut = false;
+  
   // 全域 fetch 攔截：自動帶 token、401 → refresh → 重試一次
   window.fetch = async function(input, init){
+    // 如果正在登出，直接返回 401 響應，避免繼續重試
+    if (isLoggingOut) {
+      return new Response(JSON.stringify({detail: "Not authenticated"}), {
+        status: 401,
+        statusText: 'Unauthorized',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
     const initObj = init || {};
     const url = typeof input === 'string' ? input : (input && input.url) || '';
     const isBackendApi = (typeof url === 'string') && (url.startsWith(`${BASE}/api`) || url.startsWith('/api/'));
@@ -165,7 +177,10 @@
       }
     }
     
-    if(isBackendApi && first.status === 401 && !isRefreshCall){
+    // 處理 401 錯誤（但排除 /api/auth/me 和 /api/auth/refresh，這些端點本身就是用來檢查登入狀態的）
+    const isAuthMeCall = (typeof url === 'string') && url.includes('/api/auth/me');
+    if(isBackendApi && first.status === 401 && !isRefreshCall && !isAuthMeCall){
+      // 只有在非登入檢查的 API 請求收到 401 時，才嘗試刷新 token
       const ok = await refreshTokenIfNeeded();
       if(ok){
         // Token 刷新成功，清除 CSRF Token 緩存（需要重新獲取）
@@ -197,11 +212,28 @@
         return originalFetch(input, retryOptions2);
       } else {
         // Token 刷新失敗，可能是 token 已過期，觸發自動登出
-        console.warn('Token 刷新失敗，可能已過期');
-        if (window.ReelMindCommon && window.ReelMindCommon.autoLogout) {
-          window.ReelMindCommon.autoLogout('登入已過期，請重新登入');
+        // 設置標記，防止後續請求繼續重試
+        if (!isLoggingOut) {
+          isLoggingOut = true;
+          console.warn('[AUTH] Token 刷新失敗，觸發自動登出');
+          if (window.ReelMindCommon && window.ReelMindCommon.autoLogout) {
+            window.ReelMindCommon.autoLogout('登入已過期，請重新登入');
+          }
         }
+        // 直接返回 401 響應，不再重試
+        return new Response(JSON.stringify({detail: "Not authenticated"}), {
+          status: 401,
+          statusText: 'Unauthorized',
+          headers: { 'Content-Type': 'application/json' }
+        });
       }
+    }
+    
+    // 對於 /api/auth/me 的 401，不觸發 refresh，直接返回（這是正常的，表示用戶未登入）
+    if(isBackendApi && first.status === 401 && isAuthMeCall){
+      // 如果 /api/auth/me 返回 401，表示用戶未登入，這是正常情況
+      // 不需要觸發 refresh 或 autoLogout，直接返回 401 響應
+      return first;
     }
     return first;
   };

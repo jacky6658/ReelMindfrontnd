@@ -14376,19 +14376,31 @@
           }
         }
         
-        // 檢查是否已經登入
-        checkLoginStatus().then(() => {
-          
-          // 注意：updateUserInfo() 中已經調用了 checkSubscriptionStatus() 和 updateHomepageView()
-          // 這裡不需要重複調用，避免重複執行
-          // 如果已登入，確保載入用戶歷史資訊（updateUserInfo 中已有，但這裡作為備用）
-          if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
-            // 延遲執行，確保訂閱狀態已更新
-            setTimeout(() => {
-              loadUserHistory();
-            }, 1000);
+        // 檢查是否已經登入（使用防抖，避免重複呼叫）
+        let checkLoginStatusTimeout = null;
+        const checkLoginStatusDebounced = () => {
+          if (checkLoginStatusTimeout) {
+            clearTimeout(checkLoginStatusTimeout);
           }
-        });
+          checkLoginStatusTimeout = setTimeout(async () => {
+            try {
+              await checkLoginStatus();
+              // 注意：updateUserInfo() 中已經調用了 checkSubscriptionStatus() 和 updateHomepageView()
+              // 這裡不需要重複調用，避免重複執行
+              // 如果已登入，確保載入用戶歷史資訊（updateUserInfo 中已有，但這裡作為備用）
+              if (ipPlanningToken && ipPlanningUser && ipPlanningUser.user_id) {
+                // 延遲執行，確保訂閱狀態已更新
+                setTimeout(() => {
+                  loadUserHistory();
+                }, 1000);
+              }
+            } catch (error) {
+              console.error('檢查登入狀態時發生錯誤:', error);
+            }
+          }, 100); // 100ms 防抖
+        };
+        
+        checkLoginStatusDebounced();
         
         // 確保 Highlight.js 載入後初始化（因為使用了 defer）
         function initializeHighlightJS() {
@@ -14789,21 +14801,37 @@
       let lastRefreshAttempt = 0; // 上次刷新嘗試的時間
       let handleAuthMessage = null; // 認證訊息處理函數（在 login() 中動態創建）
       
-      // 檢查登入狀態
+      // 檢查登入狀態（添加防重複執行標記）
+      let isCheckingLoginStatus = false;
       async function checkLoginStatus() {
-        // 直接呼叫 fetchUserInfo 驗證登入狀態（會實際呼叫 /api/auth/me）
-        const userData = await fetchUserInfo();
+        // 防止重複執行
+        if (isCheckingLoginStatus) {
+          console.log('[AUTH] checkLoginStatus 正在執行中，跳過重複呼叫');
+          return;
+        }
         
-        // 無論是否登入，都先顯示首頁
-        showMainApp();
-        
-        // 根據登入狀態更新 UI
-        if (userData && userData.user_id) {
-          // 已登入：更新用戶資訊
-          await updateUserInfo();
-        } else {
-          // 未登入時顯示登入按鈕
+        isCheckingLoginStatus = true;
+        try {
+          // 直接呼叫 fetchUserInfo 驗證登入狀態（會實際呼叫 /api/auth/me）
+          const userData = await fetchUserInfo();
+          
+          // 無論是否登入，都先顯示首頁
+          showMainApp();
+          
+          // 根據登入狀態更新 UI
+          if (userData && userData.user_id) {
+            // 已登入：更新用戶資訊
+            await updateUserInfo();
+          } else {
+            // 未登入時顯示登入按鈕
+            showLoginButton();
+          }
+        } catch (error) {
+          console.error('[AUTH] checkLoginStatus 發生錯誤:', error);
+          // 發生錯誤時，只顯示登入按鈕，不執行任何跳轉
           showLoginButton();
+        } finally {
+          isCheckingLoginStatus = false;
         }
       }
       
