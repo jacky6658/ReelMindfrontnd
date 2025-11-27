@@ -1,14 +1,27 @@
+# ReelMind AI 短影音智能體 - robots.txt
+# 允許所有搜尋引擎爬蟲訪問公開頁面
+
 User-agent: *
 Allow: /
+Allow: /guide.html
+Allow: /guide/
+Allow: /guide/*.html
+Allow: /experience.html
+Allow: /subscription.html
+Allow: /mode1.html
+Allow: /mode2.html
+Allow: /mode3.html
+Allow: /contact.html
 
-Disallow: /mode1.html
-Disallow: /mode2.html
-Disallow: /mode3.html
-
-Disallow: /auth/
-Disallow: /api/
+# 禁止索引敏感頁面（需要登入或包含個人資訊）
 Disallow: /userDB.html
 Disallow: /checkout.html
 Disallow: /payment-result.html
+Disallow: /auth/
 
+# 禁止索引 API 端點和後端資源
+Disallow: /api/
+
+# Sitemap 位置
 Sitemap: https://reelmind.aijob.com.tw/sitemap.xml
+
