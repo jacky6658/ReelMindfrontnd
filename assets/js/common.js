@@ -21,11 +21,11 @@
     ? window.APP_CONFIG.API_BASE 
     : (window.API_BASE_URL || 'https://api.aijob.com.tw');
   
-  // 調試：確認 API_BASE_URL 設定
-  if (typeof console !== 'undefined' && console.log) {
-    console.log('[Common.js] API_BASE_URL:', API_BASE_URL);
-    console.log('[Common.js] window.APP_CONFIG:', window.APP_CONFIG);
-  }
+  // 調試：確認 API_BASE_URL 設定（已隱藏主控台 log）
+  // if (typeof console !== 'undefined' && console.log) {
+  //   console.log('[Common.js] API_BASE_URL:', API_BASE_URL);
+  //   console.log('[Common.js] window.APP_CONFIG:', window.APP_CONFIG);
+  // }
 
   // ===== 初始化：從 localStorage 載入狀態 =====
   function initGlobalState() {
@@ -297,9 +297,9 @@
         redirect: 'manual'
       });
       
-      // 記錄響應狀態以便調試
-      console.log('授權驗證響應狀態:', response.status, response.statusText);
-      console.log('授權驗證響應 headers:', Object.fromEntries(response.headers.entries()));
+      // 記錄響應狀態以便調試（已隱藏主控台 log）
+      // console.log('授權驗證響應狀態:', response.status, response.statusText);
+      // console.log('授權驗證響應 headers:', Object.fromEntries(response.headers.entries()));
       
       // 檢查響應類型
       const contentType = response.headers.get('content-type') || '';
@@ -313,7 +313,7 @@
         if (isJson && response.ok) {
           try {
             responseData = await response.json();
-            console.log('授權驗證成功響應數據:', responseData);
+            // console.log('授權驗證成功響應數據:', responseData); // 已隱藏主控台 log
           } catch (e) {
             console.warn('無法解析 JSON 響應:', e);
           }
@@ -1116,7 +1116,7 @@
         ? window.APP_CONFIG.API_BASE 
         : (window.API_BASE_URL || 'https://api.aijob.com.tw');
       
-      console.log('[goToLogin] 使用的 API_BASE_URL:', currentApiBase);
+      // console.log('[goToLogin] 使用的 API_BASE_URL:', currentApiBase); // 已隱藏主控台 log
       
       // 獲取當前頁面的 origin（用於 OAuth callback）
       const fbParam = encodeURIComponent(window.location.origin);
@@ -1125,7 +1125,7 @@
       let authUrl = null;
       try {
         const apiUrl = `${currentApiBase}/api/auth/google?fb=${fbParam}`;
-        console.log('[goToLogin] 請求 URL:', apiUrl);
+        // console.log('[goToLogin] 請求 URL:', apiUrl); // 已隱藏主控台 log
         
         const response = await fetch(apiUrl, {
           method: 'GET',
@@ -1145,7 +1145,7 @@
           throw new Error('auth_url not found in response');
         }
         
-        console.log('[goToLogin] 獲取到 auth_url:', authUrl);
+        // console.log('[goToLogin] 獲取到 auth_url:', authUrl); // 已隱藏主控台 log
       } catch (fetchErr) {
         console.error('[goToLogin] Fetch 失敗:', fetchErr);
         console.error('[goToLogin] 錯誤詳情:', {
@@ -1164,7 +1164,7 @@
       
       if (authUrl && authUrl.startsWith('http')) {
         // 跳轉到 Google OAuth 頁面
-        console.log('[goToLogin] 跳轉到 Google OAuth:', authUrl);
+        // console.log('[goToLogin] 跳轉到 Google OAuth:', authUrl); // 已隱藏主控台 log
         window.location.href = authUrl;
       } else {
         console.error('[goToLogin] auth_url 格式錯誤:', authUrl);

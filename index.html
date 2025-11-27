@@ -128,12 +128,13 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://reelmind.aijob.com.tw/" />
-    <meta property="og:title" content="ReelMind | AI 短影音智能體 - AI 生成腳本 × AI 帳號定位" />
-    <meta property="og:description" content="AI 短影音智能體：每天不到 NT$66，全年 AI 幫你帳號定位、生成靈感選題與爆款腳本。支援 IG、TikTok、YouTube Shorts。" />
-    <meta property="og:image" content="https://reelmind.aijob.com.tw/assets/images/android-chrome-512x512.png" />
-    <meta property="og:image:width" content="512" />
-    <meta property="og:image:height" content="512" />
-    <meta property="og:image:alt" content="ReelMind AI 短影音智能體 - 相機與AI智能結合的標誌" />
+    <meta property="og:title" content="ReelMind | AI 短影音智能體 - AI 生成腳本 × AI 帳號定位 × 爆款短影音" />
+    <meta property="og:description" content="ReelMind AI 短影音智能體：專為 IG、TikTok、Shorts 打造。AI 生成爆款腳本、精準帳號定位，從靈感枯竭到內容量產，效率提升 70%。每天不到 NT$66，立即開始您的台灣在地化短影音行銷！" />
+    <meta property="og:image" content="https://reelmind.aijob.com.tw/assets/images/ReelMind.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="ReelMind AI 短影音智能體 - AI 生成腳本 × AI 帳號定位 × 爆款短影音" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:locale" content="zh_TW" />
     <meta property="og:site_name" content="ReelMind" />
     <meta property="og:video" content="https://www.youtube.com/embed/Pw1_MRIJ9GA" />
@@ -145,10 +146,12 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://reelmind.aijob.com.tw/" />
-    <meta name="twitter:title" content="ReelMind | AI 短影音智能體 - AI 生成腳本 × AI 帳號定位" />
-    <meta name="twitter:description" content="AI 短影音智能體：每天不到 NT$66，全年 AI 幫你帳號定位、生成靈感選題與爆款腳本。" />
-    <meta name="twitter:image" content="https://reelmind.aijob.com.tw/assets/images/reelmind-logo-og.jpg" />
-    <meta name="twitter:image:alt" content="ReelMind AI 短影音智能體 - 相機與AI智能結合的標誌" />
+    <meta name="twitter:title" content="ReelMind | AI 短影音智能體 - AI 生成腳本 × AI 帳號定位 × 爆款短影音" />
+    <meta name="twitter:description" content="ReelMind AI 短影音智能體：專為 IG、TikTok、Shorts 打造。AI 生成爆款腳本、精準帳號定位，從靈感枯竭到內容量產，效率提升 70%。" />
+    <meta name="twitter:image" content="https://reelmind.aijob.com.tw/assets/images/ReelMind.png" />
+    <meta name="twitter:image:alt" content="ReelMind AI 短影音智能體 - AI 生成腳本 × AI 帳號定位 × 爆款短影音" />
+    <meta name="twitter:site" content="@ReelMind" />
+    <meta name="twitter:creator" content="@ReelMind" />
     
     <!-- Additional SEO -->
     <meta name="theme-color" content="#2563EB" />
@@ -11308,6 +11311,7 @@
               <a href="mode3.html" class="navbar-tab" onclick="event.preventDefault(); (async function() { try { if(window.ReelMindCommon && typeof window.ReelMindCommon.checkFeatureAccess === 'function') { const canAccess = await window.ReelMindCommon.checkFeatureAccess(); if(canAccess) { window.location.href = 'mode3.html'; } } else { window.location.href = 'mode3.html'; } } catch(error) { console.error('檢查功能訪問失敗:', error); } })(); return false;">一鍵生成</a>
               <a href="forum.html" class="navbar-tab">論壇介紹</a>
               <a href="guide.html" class="navbar-tab">實戰指南</a>
+              <a href="about.html" class="navbar-tab">關於我們</a>
               <a href="#" id="userDBTab" class="navbar-tab" style="display:none;" onclick="handleUserDBClick(); return false;">創作者資料庫</a>
             </div>
           </div>
@@ -12708,6 +12712,25 @@
       window.closeMobileDrawer = closeMobileDrawer;
       
       // 頁面控制函數
+      // ===== Cookie 和認證輔助函數 =====
+      /**
+       * 從 Cookie 中讀取指定名稱的值（用於讀取非 HttpOnly 的 Cookie，如 csrf_token）
+       */
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+      }
+      
+      /**
+       * 檢查是否已登入（通過檢查 csrf_token Cookie，因為 access_token 是 HttpOnly 無法讀取）
+       */
+      function checkLoggedInFromCookie() {
+        const csrfToken = getCookie('csrf_token');
+        return !!csrfToken; // 如果有 csrf_token，通常表示已登入
+      }
+      
       // ===== XSS 防護函數 =====
       /**
        * 安全的 HTML 轉義函數
@@ -25032,10 +25055,14 @@
           <span class="mobile-drawer-icon"><i class="fas fa-book-open"></i></span>
           <span class="mobile-drawer-text">實戰指南</span>
         </a>
+        <a href="about.html" class="mobile-drawer-item" onclick="window.location.href='about.html'; closeMobileDrawer(); return false;">
+          <span class="mobile-drawer-icon"><i class="fas fa-info-circle"></i></span>
+          <span class="mobile-drawer-text">關於我們</span>
+        </a>
         <a href="#" id="mobileUserDBTab" class="mobile-drawer-item" onclick="handleUserDBClick(); closeMobileDrawer(); return false;" style="display:none;">
           <span class="mobile-drawer-icon"><i class="fas fa-database"></i></span>
           <span class="mobile-drawer-text">創作者資料庫</span>
-      </a>
+        </a>
     </div>
     </div>
 
