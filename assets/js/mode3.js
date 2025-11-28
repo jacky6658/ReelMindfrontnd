@@ -846,21 +846,34 @@ async function generateAll() {
       updateResultBlock('positioningContent', positioningResult.value, true);
       document.getElementById('positioningActions').style.display = 'flex';
     } else {
-      updateResultBlock('positioningContent', '生成失敗，請稍後再試', false);
+      if (positioningResult.reason?.message === 'PERMISSION_DENIED') {
+        // 權限錯誤已在 generatePositioningStream 中處理
+        updateResultBlock('positioningContent', '請輸入 API Key 或訂閱以繼續使用', false);
+      } else {
+        updateResultBlock('positioningContent', '生成失敗，請稍後再試', false);
+      }
     }
     
     if (topicsResult.status === 'fulfilled') {
       updateResultBlock('topicContent', topicsResult.value, true);
       document.getElementById('topicActions').style.display = 'flex';
     } else {
-      updateResultBlock('topicContent', '生成失敗，請稍後再試', false);
+      if (topicsResult.reason?.message === 'PERMISSION_DENIED') {
+        updateResultBlock('topicContent', '請輸入 API Key 或訂閱以繼續使用', false);
+      } else {
+        updateResultBlock('topicContent', '生成失敗，請稍後再試', false);
+      }
     }
     
     if (scriptResult.status === 'fulfilled') {
       updateResultBlock('scriptContent', scriptResult.value, true);
       document.getElementById('scriptActions').style.display = 'flex';
     } else {
-      updateResultBlock('scriptContent', '生成失敗，請稍後再試', false);
+      if (scriptResult.reason?.message === 'PERMISSION_DENIED') {
+        updateResultBlock('scriptContent', '請輸入 API Key 或訂閱以繼續使用', false);
+      } else {
+        updateResultBlock('scriptContent', '生成失敗，請稍後再試', false);
+      }
     }
     
     // 切換到結果頁面
@@ -872,8 +885,11 @@ async function generateAll() {
       resultStep.classList.add('active');
     }
     
-    // 顯示成功通知
-    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    // 顯示成功通知（如果至少有一個成功）
+    const hasSuccess = positioningResult.status === 'fulfilled' || 
+                      topicsResult.status === 'fulfilled' || 
+                      scriptResult.status === 'fulfilled';
+    if (hasSuccess && window.ReelMindCommon && window.ReelMindCommon.showToast) {
       window.ReelMindCommon.showToast('✅ 生成完成！', 3000);
     }
     
@@ -901,7 +917,7 @@ async function generateAll() {
 async function generatePositioningStream(platform, topic, positioning, style) {
   return new Promise(async (resolve, reject) => {
     try {
-      const response = await fetch(`${API_URL}/api/generate/positioning`, {
+      const response = await fetch(`${API_URL}/api/mode3/generate/positioning`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -921,6 +937,11 @@ async function generatePositioningStream(platform, topic, positioning, style) {
       });
       
       if (!response.ok) {
+        if (response.status === 403) {
+          // 權限錯誤，顯示 API Key 輸入 Dialog
+          showApiKeyDialog('positioning');
+          throw new Error('PERMISSION_DENIED');
+        }
         throw new Error('生成失敗');
       }
       
@@ -977,7 +998,7 @@ async function generatePositioningStream(platform, topic, positioning, style) {
 async function generateTopicsStream(platform, topic, positioning, style) {
   return new Promise(async (resolve, reject) => {
     try {
-      const response = await fetch(`${API_URL}/api/generate/topics`, {
+      const response = await fetch(`${API_URL}/api/mode3/generate/topics`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -997,6 +1018,11 @@ async function generateTopicsStream(platform, topic, positioning, style) {
       });
       
       if (!response.ok) {
+        if (response.status === 403) {
+          // 權限錯誤，顯示 API Key 輸入 Dialog
+          showApiKeyDialog('topics');
+          throw new Error('PERMISSION_DENIED');
+        }
         throw new Error('生成失敗');
       }
       
@@ -1063,7 +1089,7 @@ async function generateScriptStream(platform, topic, positioning, duration, stru
       
       const durationNum = duration.toString().replace('秒', '');
       
-      const response = await fetch(`${API_URL}/api/generate/script`, {
+      const response = await fetch(`${API_URL}/api/mode3/generate/script`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1084,6 +1110,11 @@ async function generateScriptStream(platform, topic, positioning, duration, stru
       });
       
       if (!response.ok) {
+        if (response.status === 403) {
+          // 權限錯誤，顯示 API Key 輸入 Dialog
+          showApiKeyDialog('script');
+          throw new Error('PERMISSION_DENIED');
+        }
         throw new Error('生成失敗');
       }
       
@@ -1175,7 +1206,7 @@ async function generatePositioning() {
   }
   
   try {
-    const response = await fetch(`${API_URL}/api/generate/positioning`, {
+    const response = await fetch(`${API_URL}/api/mode3/generate/positioning`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1195,6 +1226,11 @@ async function generatePositioning() {
     });
     
     if (!response.ok) {
+      if (response.status === 403) {
+        // 權限錯誤，顯示 API Key 輸入 Dialog
+        showApiKeyDialog('positioning');
+        throw new Error('PERMISSION_DENIED');
+      }
       throw new Error('生成失敗');
     }
     
@@ -1293,7 +1329,7 @@ async function generateTopics() {
   }
   
   try {
-    const response = await fetch(`${API_URL}/api/generate/topics`, {
+    const response = await fetch(`${API_URL}/api/mode3/generate/topics`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1313,6 +1349,11 @@ async function generateTopics() {
     });
     
     if (!response.ok) {
+      if (response.status === 403) {
+        // 權限錯誤，顯示 API Key 輸入 Dialog
+        showApiKeyDialog('topics');
+        throw new Error('PERMISSION_DENIED');
+      }
       throw new Error('生成失敗');
     }
     
@@ -1435,7 +1476,7 @@ async function generateScript() {
       'E': '請使用故事敘事型（起 → 承 → 轉 → 合）結構生成完整腳本'
     };
     
-    const response = await fetch(`${API_URL}/api/generate/script`, {
+    const response = await fetch(`${API_URL}/api/mode3/generate/script`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1456,6 +1497,11 @@ async function generateScript() {
     });
     
     if (!response.ok) {
+      if (response.status === 403) {
+        // 權限錯誤，顯示 API Key 輸入 Dialog
+        showApiKeyDialog('script');
+        throw new Error('PERMISSION_DENIED');
+      }
       throw new Error('生成失敗');
     }
     
@@ -2004,4 +2050,133 @@ async function handleModeNavigation(event, targetMode) {
 }
 
 // goToLogin, toggleMobileDrawer, openMobileDrawer, closeMobileDrawer 現在都在 common.js 中統一管理
+
+// API Key Dialog 相關函數
+let pendingGenerationType = null; // 記錄待執行的生成類型
+
+function showApiKeyDialog(type) {
+  pendingGenerationType = type;
+  const dialog = document.getElementById('apiKeyDialog');
+  if (dialog) {
+    dialog.style.display = 'flex';
+    // 清空輸入框和錯誤訊息
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const apiKeyError = document.getElementById('apiKeyError');
+    if (apiKeyInput) apiKeyInput.value = '';
+    if (apiKeyError) {
+      apiKeyError.textContent = '';
+      apiKeyError.style.display = 'none';
+    }
+    // 聚焦到輸入框
+    setTimeout(() => {
+      if (apiKeyInput) apiKeyInput.focus();
+    }, 100);
+    
+    // 點擊背景關閉 Dialog
+    dialog.addEventListener('click', function(e) {
+      if (e.target === dialog) {
+        closeApiKeyDialog();
+      }
+    });
+  }
+}
+
+function closeApiKeyDialog() {
+  const dialog = document.getElementById('apiKeyDialog');
+  if (dialog) {
+    dialog.style.display = 'none';
+  }
+  pendingGenerationType = null;
+}
+
+async function handleSaveApiKey() {
+  const apiKeyInput = document.getElementById('apiKeyInput');
+  const apiKeyError = document.getElementById('apiKeyError');
+  
+  if (!apiKeyInput || !ipPlanningUser || !ipPlanningToken) {
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('請先登入', 3000);
+    }
+    return;
+  }
+  
+  const apiKey = apiKeyInput.value.trim();
+  
+  if (!apiKey) {
+    if (apiKeyError) {
+      apiKeyError.textContent = '請輸入 API Key';
+      apiKeyError.style.display = 'block';
+    }
+    return;
+  }
+  
+  // 顯示保存中提示
+  if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+    window.ReelMindCommon.showToast('正在保存 API Key...', 2000);
+  }
+  
+  try {
+    // 調用後端 API 保存 Key
+    const response = await fetch(`${API_URL}/api/user/llm-keys`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ipPlanningToken}`
+      },
+      body: JSON.stringify({
+        user_id: ipPlanningUser.user_id,
+        provider: 'gemini',
+        api_key: apiKey
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || '保存失敗');
+    }
+    
+    // 保存成功
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('✅ API Key 保存成功！', 3000);
+    }
+    
+    // 關閉 Dialog
+    closeApiKeyDialog();
+    
+    // 如果有待執行的生成，重新執行
+    if (pendingGenerationType) {
+      const type = pendingGenerationType;
+      pendingGenerationType = null;
+      
+      // 根據類型重新生成
+      if (type === 'positioning') {
+        await generatePositioning();
+      } else if (type === 'topics') {
+        await generateTopics();
+      } else if (type === 'script') {
+        await generateScript();
+      } else if (type === 'all') {
+        // 重新執行 generateAll
+        const generateAllBtn = document.getElementById('generateAll');
+        if (generateAllBtn) {
+          generateAllBtn.click();
+        }
+      }
+    }
+  } catch (error) {
+    console.error('保存 API Key 錯誤:', error);
+    if (apiKeyError) {
+      apiKeyError.textContent = error.message || '保存失敗，請稍後再試';
+      apiKeyError.style.display = 'block';
+    }
+    if (window.ReelMindCommon && window.ReelMindCommon.showToast) {
+      window.ReelMindCommon.showToast('❌ ' + (error.message || '保存失敗'), 3000);
+    }
+  }
+}
+
+function goToSubscription() {
+  window.location.href = '/subscription.html';
+}
+
 

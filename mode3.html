@@ -1641,6 +1641,94 @@
           font-size: 13px;
         }
       }
+      
+      /* API Key Dialog 樣式 */
+      .api-key-dialog-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      
+      .api-key-dialog {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        max-width: 500px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      
+      .api-key-dialog-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      
+      .api-key-dialog-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+      
+      .api-key-dialog-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+      }
+      
+      .api-key-dialog-close:hover {
+        background: #f3f4f6;
+      }
+      
+      .api-key-dialog-body {
+        padding: 24px;
+      }
+      
+      .api-key-dialog-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 20px 24px;
+        border-top: 1px solid #e5e7eb;
+      }
+      
+      @media (max-width: 768px) {
+        .api-key-dialog {
+          max-width: 100%;
+          margin: 0;
+        }
+        
+        .api-key-dialog-footer {
+          flex-direction: column;
+        }
+        
+        .api-key-dialog-footer button {
+          width: 100% !important;
+          margin-left: 0 !important;
+        }
+      }
     </style>
     
     <!-- 共享 JavaScript（必須按順序載入，統一使用 defer 屬性） -->
@@ -1985,9 +2073,39 @@
     <!-- 彈出提示框 -->
     <div id="toast" class="toast" style="display: none;"></div>
 
+    <!-- API Key 輸入 Dialog -->
+    <div id="apiKeyDialog" class="api-key-dialog-overlay" style="display: none;">
+      <div class="api-key-dialog">
+        <div class="api-key-dialog-header">
+          <h3>輸入 Gemini API Key</h3>
+          <button class="api-key-dialog-close" onclick="closeApiKeyDialog()">✕</button>
+        </div>
+        <div class="api-key-dialog-body">
+          <p style="color: #6b7280; margin-bottom: 16px; font-size: 14px;">
+            您的試用期已過，請訂閱或輸入您的 Gemini API Key 以繼續使用一鍵生成功能。
+          </p>
+          <div class="form-group">
+            <label class="form-label" for="apiKeyInput">Gemini API Key *</label>
+            <input type="password" id="apiKeyInput" class="form-input" placeholder="請輸入您的 Gemini API Key">
+            <p style="font-size: 12px; color: #9ca3af; margin-top: 8px;">
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #3b82f6; text-decoration: underline;">
+                如何取得 Gemini API Key？
+              </a>
+            </p>
+          </div>
+          <div id="apiKeyError" style="color: #ef4444; font-size: 14px; margin-top: 8px; display: none;"></div>
+        </div>
+        <div class="api-key-dialog-footer">
+          <button class="btn-outline" onclick="closeApiKeyDialog()" style="width: auto; padding: 10px 20px;">取消</button>
+          <button class="btn-primary" onclick="handleSaveApiKey()" style="width: auto; padding: 10px 20px;">保存並繼續</button>
+          <button class="btn-primary" onclick="goToSubscription()" style="width: auto; padding: 10px 20px; background: #10b981; margin-left: 8px;">前往訂閱</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Mode3 專用 JavaScript（一鍵生成） -->
     <!-- 載入共用 JavaScript 檔案（config.js、auth.js、api.js、common.js 已在 head 中載入，這裡不再重複） -->
-    <script defer src="assets/js/mode3.js?v=20251120"></script>
+    <script defer src="assets/js/mode3.js?v=20251128"></script>
   </body>
 </html>
 
