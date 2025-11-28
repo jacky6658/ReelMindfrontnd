@@ -14568,9 +14568,12 @@
           return;
         }
         
-        // 已登入：先跳轉到訂閱頁面，讓用戶選擇方案
-        // subscription.html 會處理後續的 checkout 流程
-        window.location.href = `subscription.html?plan=${plan}`;
+        // 已登入：跳轉至綠界付款連結
+        if (plan === 'monthly') {
+          window.location.href = 'https://p.ecpay.com.tw/6E3EB9B';
+        } else if (plan === 'yearly' || plan === 'two_year') {
+          window.location.href = 'https://p.ecpay.com.tw/C1B5B25';
+        }
       }
       
       // 在登入成功後與訂閱狀態載入時，同步本地 user.is_subscribed 欄位

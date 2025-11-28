@@ -1080,7 +1080,7 @@ a{text-decoration:none;color:inherit}
         e.stopPropagation();
         e.stopImmediatePropagation();
         // 調用 handleSubscriptionClick 進行登入檢查
-        handleSubscriptionClick('two_year');
+        handleSubscriptionClick('yearly');
         return false;
       }, true);
       
@@ -1139,9 +1139,13 @@ a{text-decoration:none;color:inherit}
       return;
     }
     
-    // 已登入：使用 API 動態建立訂單（自動授權）
-    // 導向到 checkout.html 填寫付款資訊
-    window.location.href = `checkout.html?plan=${plan}`;
+    // 已登入：跳轉至綠界付款連結
+    // 注意：使用此方式，付款後系統不會自動開通權限，需手動對帳
+    if (plan === 'monthly') {
+      window.location.href = 'https://p.ecpay.com.tw/6E3EB9B';
+    } else if (plan === 'yearly') {
+      window.location.href = 'https://p.ecpay.com.tw/C1B5B25';
+    }
   }
   
   // 處理登出
