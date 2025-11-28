@@ -113,11 +113,13 @@
 
     const first = await originalFetch(input, { ...initObj, headers: mergedHeaders });
     
-    // 處理 403 錯誤（可能是 CSRF Token 驗證失敗）
+    // 處理 403 錯誤（可能是 CSRF Token 驗證失敗或權限不足）
     if(isBackendApi && first.status === 403 && !isRefreshCall){
       const responseText = await first.clone().text();
       try {
         const errorData = JSON.parse(responseText);
+        
+        // 1. 優先檢查 CSRF
         if (errorData.error && (errorData.error.includes('CSRF') || errorData.error.includes('csrf'))) {
           // CSRF Token 驗證失敗，清除緩存並重新獲取
           clearCsrfToken();
@@ -128,7 +130,36 @@
             return originalFetch(input, { ...initObj, headers: retryHeaders });
           }
         }
+        
+        // 2. 檢查權限不足 (試用期結束或未訂閱)
+        // 後端通常返回 { "detail": "Permission denied..." } 或 { "error": "..." }
+        const errorMsg = errorData.detail || errorData.error || '';
+        if (typeof errorMsg === 'string' && (
+            errorMsg.includes('Permission denied') || 
+            errorMsg.includes('Subscription required') || 
+            errorMsg.includes('trial expired') ||
+            errorMsg.includes('Trial expired') ||
+            errorMsg.includes('Mode1 requires subscription')
+        )) {
+           // 避免短時間重複彈窗
+           if (!window._hasShownSubscriptionAlert) {
+             window._hasShownSubscriptionAlert = true;
+             // 使用 common.js 的 showToast 如果可用的話，否則 alert
+             const msg = '您的試用期已結束，或未訂閱此功能。\n請升級訂閱以繼續使用完整服務。';
+             alert(msg);
+             // 延遲跳轉讓用戶看清楚
+             setTimeout(() => {
+                 window.location.href = 'subscription.html';
+                 // 重置 flag 以便下次還能彈窗（如果用戶返回上一頁）
+                 setTimeout(() => { window._hasShownSubscriptionAlert = false; }, 1000);
+             }, 500);
+           }
+           // 拋出錯誤中斷後續處理
+           throw new Error('SUBSCRIPTION_REQUIRED');
+        }
+
       } catch (e) {
+        if (e.message === 'SUBSCRIPTION_REQUIRED') throw e;
         // 無法解析錯誤信息，繼續返回原響應
       }
     }

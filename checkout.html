@@ -479,8 +479,8 @@ a{text-decoration:none;color:inherit}
 
 <script>
   // 價格設定
-  const price = { yearly: 8280, two_year: 9900 };
-  let currentPlan = 'two_year';
+  const price = { monthly: 399, yearly: 3990 };
+  let currentPlan = 'yearly';
   let testMode = false;  // 測試模式標記
   let testAmount = null;  // 測試金額
 
@@ -510,7 +510,7 @@ a{text-decoration:none;color:inherit}
       }
     }
     
-    if (plan === 'yearly' || plan === 'two_year') {
+    if (plan === 'monthly' || plan === 'yearly') {
       currentPlan = plan;
       console.log('✅ 方案設定為:', currentPlan, '測試模式:', testMode, '測試金額:', testAmount);
       updatePlanDisplay();
@@ -522,19 +522,19 @@ a{text-decoration:none;color:inherit}
 
   // 更新方案顯示
   function updatePlanDisplay() {
-    const isYearly = currentPlan === 'yearly';
+    const isMonthly = currentPlan === 'monthly';
     
     // 計算實際金額（測試模式使用測試金額）
     const actualAmount = testMode && testAmount ? testAmount : price[currentPlan];
     
     // 更新方案摘要
     let planName, planDesc;
-    if (currentPlan === 'two_year') {
-      planName = 'Creator Pro 雙年方案';
-      planDesc = '一次購買，兩年使用';
-    } else {  // yearly
-      planName = 'Script Lite 入門版';
-      planDesc = '以年計費（一次付清）';
+    if (currentPlan === 'yearly') {
+      planName = 'Creator Pro 年度方案';
+      planDesc = '一次付款，全年使用';
+    } else {  // monthly
+      planName = 'Script Lite 月租版';
+      planDesc = '彈性訂閱（每月扣款）';
     }
     
     document.getElementById('summaryPlanName').textContent = testMode 
@@ -546,7 +546,7 @@ a{text-decoration:none;color:inherit}
       : planDesc;
 
     // 更新訂單摘要
-    const displayPlanName = currentPlan === 'two_year' ? 'Creator Pro 雙年方案' : 'Script Lite 入門版';
+    const displayPlanName = currentPlan === 'yearly' ? 'Creator Pro 年度方案' : 'Script Lite 月租版';
     document.getElementById('sumPlan').textContent = testMode 
       ? `${displayPlanName} (測試)` 
       : displayPlanName;
@@ -568,22 +568,22 @@ a{text-decoration:none;color:inherit}
     // 動態更新方案內容列表
     const planFeaturesList = document.getElementById('planFeatures');
     if (planFeaturesList) {
-      if (currentPlan === 'yearly') {
-        // Script Lite 入門版的功能
+      if (currentPlan === 'monthly') {
+        // Script Lite 月租版的功能
         planFeaturesList.innerHTML = `
           <li>AI 一鍵生成：Hook、口播、分鏡、CTA</li>
-          <li>創作者資料庫：PDF / CSV 下載、版本重生</li>
-          <li>實戰指南：腳本生成技巧、平台差異、結構選擇指南</li>
+          <li>創作者資料庫：PDF / CSV 下載</li>
+          <li>實戰指南：腳本生成技巧</li>
           <li>客服支援</li>
         `;
       } else {
-        // Creator Pro 雙年方案的功能
+        // Creator Pro 年度方案的功能
         planFeaturesList.innerHTML = `
+          <li>包含月租版所有功能</li>
           <li>IP 人設規劃：Profile + 14 天內容規劃</li>
-          <li>AI 一鍵生成：Hook、口播、分鏡、CTA</li>
-          <li>創作者資料庫：PDF / CSV 下載、版本重生</li>
-          <li>實戰指南：腳本生成技巧、平台差異、結構選擇指南</li>
-          <li>客服支援</li>
+          <li>多平台腳本優化</li>
+          <li>長期記憶庫保存</li>
+          <li><strong>年度專屬優惠</strong></li>
         `;
       }
     }
@@ -654,7 +654,8 @@ a{text-decoration:none;color:inherit}
       phone: document.getElementById('phone').value.trim(),
       invoiceType: document.getElementById('invoiceType').value,
       vat: document.getElementById('vat').value.trim(),
-      note: document.getElementById('note').value.trim()
+      note: document.getElementById('note').value.trim(),
+      frontend_return_url: window.location.origin + '/payment-result.html'
     };
     
     // 前端驗證
