@@ -76,43 +76,39 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
   
-  // 檢查權限（需要登入和訂閱）- 使用 checkPagePermission 會直接重定向
-  if (window.ReelMindCommon && typeof window.ReelMindCommon.checkPagePermission === 'function') {
-    const hasPermission = await window.ReelMindCommon.checkPagePermission();
-    if (!hasPermission) {
-      // checkPagePermission 會自動重定向，這裡不需要額外處理
-      return;
-    }
-    console.log('✅ 權限檢查通過，可以訪問此功能');
-  } else {
-    // 降級處理：如果 common.js 未載入，手動檢查
-    if (!isLoggedIn) {
-      console.warn('⚠️ 未登入，導向首頁');
-      window.location.href = '/';
-      return;
-    }
-    // 檢查訂閱狀態
-    let isSubscribed = false;
-    if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
-      isSubscribed = window.ReelMindCommon.isSubscribed();
-    } else {
-      const backendSubscribed = document.body.dataset.subscribed === 'true';
-      const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
-      const localSubscribed = localSubscriptionStatus === 'active';
-      const userSubscribed = !!(ipPlanningUser && (
-        ipPlanningUser.is_subscribed === true || 
-        ipPlanningUser.is_subscribed === 1 || 
-        ipPlanningUser.is_subscribed === '1' ||
-        ipPlanningUser.is_subscribed === 'true'
-      ));
-      isSubscribed = backendSubscribed || localSubscribed || userSubscribed;
-    }
-    if (!isSubscribed) {
-      console.warn('⚠️ 未訂閱，導向訂閱頁');
-      window.location.href = '/subscription.html';
-      return;
-    }
+  // 檢查權限（只需要登入，不需要訂閱）
+  // Mode3 允許未訂閱用戶使用，但需要使用自己的 API Key
+  // 如果未訂閱且沒有 API Key，會在調用 API 時收到 403 錯誤，然後顯示 API Key 輸入 Dialog
+  if (!isLoggedIn) {
+    console.warn('⚠️ 未登入，導向首頁');
+    window.location.href = '/';
+    return;
   }
+  
+  // 檢查訂閱狀態（僅用於顯示提示，不阻止訪問）
+  let isSubscribed = false;
+  if (window.ReelMindCommon && typeof window.ReelMindCommon.isSubscribed === 'function') {
+    isSubscribed = window.ReelMindCommon.isSubscribed();
+  } else {
+    const backendSubscribed = document.body.dataset.subscribed === 'true';
+    const localSubscriptionStatus = localStorage.getItem('subscriptionStatus');
+    const localSubscribed = localSubscriptionStatus === 'active';
+    const userSubscribed = !!(ipPlanningUser && (
+      ipPlanningUser.is_subscribed === true || 
+      ipPlanningUser.is_subscribed === 1 || 
+      ipPlanningUser.is_subscribed === '1' ||
+      ipPlanningUser.is_subscribed === 'true'
+    ));
+    isSubscribed = backendSubscribed || localSubscribed || userSubscribed;
+  }
+  
+  if (!isSubscribed) {
+    console.log('ℹ️ 未訂閱用戶，可以使用自己的 API Key 繼續使用');
+  } else {
+    console.log('✅ 已訂閱用戶，可以使用系統 API Key');
+  }
+  
+  console.log('✅ 權限檢查通過，可以訪問此功能');
 
   // 更新用戶資訊顯示
   updateUserInfo();
